@@ -1,0 +1,714 @@
+/* ── Live Section Visual Editor Studio Styles ── */
+.lse-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(10, 15, 29, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  animation: lseFadeIn 0.25s ease;
+}
+
+@keyframes lseFadeIn {
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── Top Header Bar ── */
+.lse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.75rem;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.lse-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lse-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lse-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lse-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lse-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: lsePulse 1.8s infinite;
+}
+
+@keyframes lsePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.lse-header-center {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lse-device-toggle {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.lse-device-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lse-device-btn:hover {
+  color: #ffffff;
+}
+
+.lse-device-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.lse-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lse-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.lse-save-indicator.saving {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.lse-save-indicator.saved {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.lse-save-indicator.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.lse-spin {
+  animation: lseSpin 1s linear infinite;
+}
+
+@keyframes lseSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.lse-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lse-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.lse-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.4);
+  transition: all 0.2s ease;
+}
+
+.lse-btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.55);
+}
+
+/* ── Workspace & Canvas ── */
+.lse-workspace {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 20%, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.98) 100%);
+}
+
+.lse-canvas-wrapper {
+  width: 100%;
+  max-width: 1420px;
+  transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.lse-canvas-wrapper.mobile-view {
+  max-width: 480px;
+}
+
+/* ── Tip / Guidance Toolbar ── */
+.lse-tip-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.lse-tip-text {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+}
+
+.lse-tip-text strong {
+  color: #ffffff;
+}
+
+.lse-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lse-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 750;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lse-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.lse-toolbar-btn.primary {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+}
+
+.lse-toolbar-btn.primary:hover {
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);
+}
+
+.lse-toolbar-btn.green {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.lse-toolbar-btn.blue {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+.lse-select {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.lse-select:focus {
+  border-color: #ea580c;
+}
+
+/* ── Real Frontend Page Browser Frame ── */
+.lse-browser-frame {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.lse-browser-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.lse-browser-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lse-browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.lse-browser-dot.red { background: #ef4444; }
+.lse-browser-dot.yellow { background: #f59e0b; }
+.lse-browser-dot.green { background: #10b981; }
+
+.lse-browser-url-pill {
+  flex: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  color: #475569;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Real Frontend Sheet */
+.lse-real-frontend-sheet {
+  background: #ffffff;
+  color: #0f172a;
+  min-height: 800px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Simulated Frontend Site Header */
+.lse-simulated-site-header {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 14px 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.lse-simulated-brand-logo {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.lse-simulated-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.lse-simulated-nav-link {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.lse-simulated-nav-link.active {
+  color: #ea580c;
+}
+
+/* Active Section Halo on the Real Frontend */
+.lse-active-section-wrapper {
+  position: relative;
+  padding: 1.75rem 1.5rem;
+  margin: 1rem 0;
+  border: 2px dashed #ea580c;
+  border-radius: 14px;
+  background: rgba(254, 242, 242, 0.25);
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.08);
+  transition: all 0.2s ease;
+}
+
+.lse-active-section-tag {
+  position: absolute;
+  top: -14px;
+  left: 20px;
+  background: #ea580c;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+  letter-spacing: 0.04em;
+  z-index: 25;
+}
+
+/* Simulated Real Frontend Footer */
+.lse-simulated-site-footer {
+  border-top: 1px solid #e2e8f0;
+  padding: 2rem;
+  background: #f8fafc;
+  margin-top: 3rem;
+}
+
+/* ── Interactive Inline Edit Elements ── */
+.lse-inline-edit-hint {
+  cursor: pointer !important;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 6px;
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+}
+
+.lse-inline-edit-hint:hover {
+  outline-color: #ea580c;
+  background: rgba(234, 88, 12, 0.12);
+}
+
+.lse-inline-edit-hint:hover::after {
+  content: "✎ Click to edit";
+  position: absolute;
+  top: -24px;
+  left: 0;
+  background: #ea580c;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 50;
+  letter-spacing: 0.02em;
+}
+
+/* ── Article Card Rank Badge ── */
+.lse-card-rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(234, 88, 12, 0.7);
+  color: #fb923c;
+  font-size: 0.75rem;
+  font-weight: 850;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 15;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.03em;
+}
+
+/* ── Article Card Dock for Live Reordering & Replace ── */
+.lse-card-dock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 3px;
+  z-index: 20;
+  opacity: 0.88;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.mhp-blog-card:hover .lse-card-dock,
+.lse-hover-item:hover .lse-card-dock {
+  opacity: 1;
+  border-color: rgba(234, 88, 12, 0.6);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.lse-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lse-dock-btn:hover {
+  background: #ea580c;
+  color: #ffffff;
+  border-color: #ea580c;
+}
+
+.lse-dock-btn.danger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+/* ── Add Article Card in Grid ── */
+.lse-add-article-card {
+  min-height: 280px;
+  border: 2px dashed rgba(234, 88, 12, 0.45) !important;
+  background: rgba(234, 88, 12, 0.04) !important;
+  border-radius: 14px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.lse-add-article-card:hover {
+  background: rgba(234, 88, 12, 0.12) !important;
+  border-color: #ea580c !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.25);
+}
+
+.lse-add-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.lse-add-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+}
+
+.lse-add-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.lse-add-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ── Section Quick Edit Drawer / Modal ── */
+.lse-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(10, 15, 29, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: lseFadeIn 0.2s ease;
+}
+
+.lse-modal {
+  width: 100%;
+  max-width: 620px;
+  background: #0f172a;
+  border: 1.5px solid rgba(234, 88, 12, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.lse-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lse-modal-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lse-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.lse-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lse-input-group label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lse-input-group input,
+.lse-input-group textarea,
+.lse-input-group select {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.lse-input-group input:focus,
+.lse-input-group textarea:focus,
+.lse-input-group select:focus {
+  border-color: #ea580c;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+
+.lse-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

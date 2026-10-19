@@ -1,0 +1,340 @@
+[
+  {
+    "id": "home",
+    "title": "Homepage - Live Portal",
+    "slug": "",
+    "brand": "GoReadPost",
+    "description": "Main portal covering startup dispatches, fundraises, playbooks, and leadership features.",
+    "heroHeadline": "Stories That Matter in Indian & Global Startups",
+    "heroSubhead": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+    "heroBanner": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 1,
+    "seo": {
+      "title": "GoReadPost | Stories of Founders, Technology & Capital",
+      "description": "Leading media platform delivering unfiltered reporting on startups, funding, and deep tech.",
+      "keywords": [
+        "startups",
+        "venture capital",
+        "deeptech",
+        "entrepreneurship"
+      ]
+    },
+    "sections": [
+      {
+        "id": "hero_popular",
+        "type": "hero",
+        "title": "Lead Stories & Popular Posts",
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "latest_blogs",
+        "type": "stories_feed",
+        "title": "Latest from the Blog",
+        "enabled": true,
+        "order": 2
+      },
+      {
+        "id": "trending",
+        "type": "stories_feed",
+        "title": "Trending Now",
+        "enabled": true,
+        "order": 3
+      },
+      {
+        "id": "popular_editors",
+        "type": "stories_feed",
+        "title": "Most Popular & Editor's Picks",
+        "enabled": true,
+        "order": 4
+      },
+      {
+        "id": "spotlight",
+        "type": "stories_feed",
+        "title": "Tech & Startup Spotlight",
+        "enabled": true,
+        "order": 5
+      },
+      {
+        "id": "newsletter",
+        "type": "cta",
+        "title": "Newsletter Subscription Banner",
+        "enabled": true,
+        "order": 6
+      }
+    ]
+  },
+  {
+    "id": "latest",
+    "title": "Latest Stories",
+    "slug": "latest",
+    "brand": "GoReadPost",
+    "description": "Real-time dispatches, breaking news, and latest stories across the ecosystem.",
+    "heroHeadline": "Latest Dispatches & Breaking News",
+    "heroSubhead": "Unfiltered minute-by-minute reporting from startup newsrooms and global bureaus.",
+    "heroBanner": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 2,
+    "seo": {
+      "title": "Latest Stories | GoReadPost",
+      "description": "Discover the latest articles, startup developments, and venture capital updates.",
+      "keywords": [
+        "latest news",
+        "breaking news",
+        "startups"
+      ]
+    },
+    "sections": []
+  },
+  {
+    "id": "trending",
+    "title": "Trending Stories",
+    "slug": "trending",
+    "brand": "GoReadPost",
+    "description": "Most read, viral, and trending startup stories.",
+    "heroHeadline": "Trending in Technology & Business",
+    "heroSubhead": "Stories capturing the attention of founders, engineers, and market leaders today.",
+    "heroBanner": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 3,
+    "seo": {
+      "title": "Trending Stories | GoReadPost",
+      "description": "Explore the most read and viral startup dispatches.",
+      "keywords": [
+        "trending",
+        "viral stories",
+        "startup trends"
+      ]
+    },
+    "sections": []
+  },
+  {
+    "id": "videos",
+    "title": "Video Shows (YSTV)",
+    "slug": "videos",
+    "brand": "GoReadPost",
+    "description": "Original studio video shows, founder interviews, and video dispatches.",
+    "heroHeadline": "Studio Broadcasts & Founder Interviews",
+    "heroSubhead": "High-impact visual journalism with visionary founders and investors.",
+    "heroBanner": "https://images.unsplash.com/photo-1579208575657-c595a05383b7?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 4,
+    "seo": {
+      "title": "Video Shows & Studio Broadcasts | GoReadPost",
+      "description": "Watch exclusive founder interviews and studio sessions.",
+      "keywords": [
+        "videos",
+        "interviews",
+        "shows"
+      ]
+    },
+    "sections": []
+  },
+  {
+    "id": "newsletter",
+    "title": "Newsletter & Dispatches",
+    "slug": "newsletter",
+    "brand": "GoReadPost",
+    "description": "Curated weekly and daily dispatches delivered directly to founders and investors.",
+    "heroHeadline": "The Executive Morning Briefing",
+    "heroSubhead": "The smartest 5-minute daily breakdown of capital movements and startup strategies.",
+    "heroBanner": "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 5,
+    "seo": {
+      "title": "Newsletter Subscription | GoReadPost",
+      "description": "Subscribe to GoReadPost daily dispatches and intelligence briefs.",
+      "keywords": [
+        "newsletter",
+        "daily brief",
+        "subscriptions"
+      ]
+    },
+    "sections": []
+  },
+  {
+    "id": "about",
+    "title": "About Us",
+    "slug": "about",
+    "brand": "GoReadPost",
+    "description": "Learn about GoReadPost's mission, editorial charter, and global bureaus.",
+    "heroHeadline": "Powering the Stories That Build Tomorrow",
+    "heroSubhead": "GoReadPost is India's leading digital publication for startup stories, venture capital news, and emerging technology. We bring you insights, analysis, and real stories from the people shaping Bharat's innovation economy.",
+    "heroBanner": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 6,
+    "seo": {
+      "title": "About Us | GoReadPost Media",
+      "description": "GoReadPost is the premier digital journalism network chronicling breakthrough founders, deep technology, AI revolutions, and venture capital.",
+      "keywords": [
+        "about us",
+        "GoReadPost",
+        "editorial",
+        "tech media",
+        "startup journalism"
+      ]
+    },
+    "sections": [
+      {
+        "id": "about_mission",
+        "type": "text",
+        "order": 1,
+        "enabled": true,
+        "data": {
+          "title": "Our Mission & Journalistic Manifesto",
+          "alignment": "left",
+          "maxWidth": "860px",
+          "content": "<p style='font-size: 1.15rem; line-height: 1.7; color: var(--text-primary); margin-bottom: 1.25rem;'>We believe that entrepreneurs, engineers, and risk-takers are the foundational architects of the future. Our newsroom exists to report their triumphs, audits, pivots, and operational breakthroughs with uncompromising independence and technical rigor.</p><h3 style='font-size: 1.25rem; font-weight: 750; margin: 1.75rem 0 0.75rem; color: var(--text-primary);'>The Pillars of GoReadPost Reporting</h3><ul style='padding-left: 1.25rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--text-secondary);'><li><strong>Zero Pay-to-Play Coverage:</strong> Editorial coverage is 100% earned. Our newsroom maintains an impenetrable wall between editorial judgment and commercial partnerships.</li><li><strong>First-Principles Technical Depth:</strong> We go beyond surface press releases to inspect unit economics, infrastructure architecture, and compute bottlenecks.</li><li><strong>Radical Transparency & Empathy:</strong> We document the brutal realities of venture capital, down-rounds, and turnaround journeys alongside hypergrowth triumphs.</li></ul>"
+        }
+      },
+      {
+        "id": "about_beats",
+        "type": "services",
+        "order": 2,
+        "enabled": true,
+        "data": {
+          "badge": "OUR BEATS",
+          "heading": "Core Newsroom Desks",
+          "subheading": "Dedicated bureaus delivering daily investigations, market analyses, and founder access.",
+          "items": [
+            {
+              "icon": "Zap",
+              "title": "AI & Sovereign DeepTech",
+              "description": "Tracking frontier foundation models, GPU compute sovereignty, robotics, and semiconductor supply chains."
+            },
+            {
+              "icon": "Shield",
+              "title": "The CapTable & Venture Capital",
+              "description": "Seed-to-IPO cap table movements, term sheet diligence, LP-GP dynamics, and private market audits."
+            },
+            {
+              "icon": "Award",
+              "title": "Founders Unfiltered",
+              "description": "Behind-the-scenes long-form journalism chronicling the operational pivots, failures, and triumphs of company builders."
+            },
+            {
+              "icon": "Layers",
+              "title": "Enterprise & Cloud Resilience",
+              "description": "Enterprise software, cybersecurity, GCCs, and high-stakes digital transformations shaping global corporate stacks."
+            },
+            {
+              "icon": "Globe",
+              "title": "HerStory & Inclusivity",
+              "description": "Amplifying trailblazing women founders, corporate innovators, and researchers breaking industry barriers."
+            },
+            {
+              "icon": "Sparkles",
+              "title": "SMBStory & Manufacturing",
+              "description": "The heartbeat of Indian manufacturing hubs, direct-to-consumer (D2C) brands, and scaling MSME powerhouses."
+            }
+          ]
+        }
+      },
+      {
+        "id": "about_cta",
+        "type": "cta",
+        "order": 3,
+        "enabled": true,
+        "data": {
+          "badge": "GET IN TOUCH",
+          "heading": "Have a Breaking Story or Whistleblower Tip?",
+          "description": "Our investigative desk reviews tips, funding announcements, and exclusive data on a continuous basis.",
+          "primaryBtnText": "Pitch Your Story to the Bureau",
+          "primaryBtnUrl": "/pitch",
+          "secondaryBtnText": "Meet the Editorial Team",
+          "secondaryBtnUrl": "/editorial-team"
+        }
+      }
+    ]
+  },
+  {
+    "id": "page_advertise",
+    "title": "Advertise With Us",
+    "slug": "advertise",
+    "brand": "GoReadPost",
+    "description": "Partner with India’s leading technology, founders, and capital intelligence publication.",
+    "heroHeadline": "Amplify Your Brand to 5M+ Founders, Decision Makers & Investors",
+    "heroSubhead": "High-impact sponsored stories, native brand integration, newsletter takeovers, and executive events.",
+    "heroBanner": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&auto=format&fit=crop&q=80",
+    "status": "published",
+    "showInNav": true,
+    "order": 7,
+    "seo": {
+      "title": "Advertise & Partner with GoReadPost | Media Kit 2026",
+      "description": "Reach high-net-worth founders, venture capitalists, and technology leaders through GoReadPost native advertising.",
+      "keywords": [
+        "advertise",
+        "sponsorship",
+        "partner",
+        "media kit"
+      ]
+    },
+    "sections": [
+      {
+        "id": "sec_adv_hero",
+        "type": "hero",
+        "order": 1,
+        "enabled": true,
+        "data": {
+          "badge": "BRAND PARTNERSHIPS & MEDIA KIT",
+          "headline": "Reach Founders, VCs, and High-Intent Leaders",
+          "subheadline": "GoReadPost delivers premium native content, high-open newsletter sponsorships, and executive events tailored to high-growth tech brands.",
+          "ctaPrimaryText": "Request Media Kit",
+          "ctaPrimaryLink": "#contact"
+        }
+      },
+      {
+        "id": "sec_adv_services",
+        "type": "services",
+        "order": 2,
+        "enabled": true,
+        "data": {
+          "title": "Advertising Formats & Programs",
+          "subtitle": "Choose from multi-channel editorial packages designed for maximum market impact.",
+          "services": [
+            {
+              "title": "Sponsored Editorial Stories",
+              "description": "Deep-dive founder feature stories produced by award-winning business journalists.",
+              "icon": "FileText"
+            },
+            {
+              "title": "Daily Newsletter Takeovers",
+              "description": "Direct placement in morning executive briefing with 42% average open rate.",
+              "icon": "Mail"
+            },
+            {
+              "title": "Video & YSTV Features",
+              "description": "Broadcast-quality founder interviews distributed across YouTube and social channels.",
+              "icon": "Tv"
+            },
+            {
+              "title": "Custom Research Reports",
+              "description": "White-labeled industry sector benchmarks and data reports co-branded with GoReadPost.",
+              "icon": "BarChart"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sec_adv_contact",
+        "type": "contact",
+        "order": 3,
+        "enabled": true,
+        "data": {
+          "title": "Contact Advertising & Sponsorships Desk",
+          "subtitle": "Request our 2026 Rate Card, Audience Demographics, and Case Studies.",
+          "email": "advertise@goreadpost.com",
+          "phone": "+91 (080) 4123-5680",
+          "address": "Ad Sales Bureau, Indiranagar, Bengaluru 560038"
+        }
+      }
+    ]
+  }
+]
