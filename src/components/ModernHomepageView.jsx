@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ChevronLeft, ChevronRight, ArrowRight,
-  Mail, CheckCircle2, Sparkles, Zap, Bookmark
+  Mail, CheckCircle2, Sparkles, Zap, Bookmark, Heart
 } from 'lucide-react';
 import './ModernHomepage.css';
 import LiveHomepageStudio from './admin/LiveHomepageStudio';
@@ -114,9 +114,18 @@ export default function ModernHomepageView({
   onCategoryClick, 
   onShowToast,
   isSaved,
-  onToggleSave
+  onToggleSave,
+  onClapStory
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [likedStories, setLikedStories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grp_liked_stories');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
@@ -390,6 +399,35 @@ export default function ModernHomepageView({
     }
   };
 
+  const handleToggleLike = (blog, e) => {
+    if (e) e.stopPropagation();
+    const blogId = getStoryId(blog);
+    const wasLiked = Boolean(likedStories[blogId]);
+    const newLiked = !wasLiked;
+
+    const updated = { ...likedStories, [blogId]: newLiked };
+    setLikedStories(updated);
+    try {
+      localStorage.setItem('grp_liked_stories', JSON.stringify(updated));
+    } catch (err) {}
+
+    if (onClapStory) {
+      onClapStory(blog.id || blog._id || blogId);
+    }
+    if (onShowToast) {
+      onShowToast(newLiked ? 'Liked story!' : 'Removed like');
+    }
+  };
+
+  const getStoryLikesCount = (blog) => {
+    const blogId = getStoryId(blog);
+    const baseLikes = typeof blog?.claps === 'number' ? blog.claps : 
+                      (typeof blog?.likes === 'number' ? blog.likes : 
+                      (typeof blog?.likes === 'string' ? parseInt(blog.likes) || 0 : 0));
+    const isLiked = Boolean(likedStories[blogId]);
+    return baseLikes + (isLiked ? 1 : 0);
+  };
+
   const renderStoryCard = (blog, idx, badgeNode = null) => {
     const blogId = getStoryId(blog, idx);
     const blogImg = getStoryImage(blog);
@@ -399,7 +437,10 @@ export default function ModernHomepageView({
     const blogAuthor = getStoryAuthor(blog);
     const blogAvatar = getStoryAvatar(blog);
     const blogDate = getStoryDate(blog);
+    const blogReadTime = getStoryReadTime(blog);
     const isCardSaved = isSaved ? Boolean(isSaved(blog.id || blog._id || blog.slug)) : false;
+    const isCardLiked = Boolean(likedStories[blogId]);
+    const likesCount = getStoryLikesCount(blog);
 
     return (
       <article key={blogId} className="mhp-blog-card">
@@ -446,44 +487,54 @@ export default function ModernHomepageView({
               {blogExcerpt}
             </p>
           )}
+
+          <div className="mhp-blog-author-row">
+            <img 
+              src={blogAvatar} 
+              alt={blogAuthor} 
+              className="mhp-blog-author-avatar"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+              }}
+            />
+            <span className="mhp-blog-author-name">{blogAuthor}</span>
+            <span className="mhp-meta-sep">•</span>
+            <span>{blogDate}</span>
+            {blogReadTime && (
+              <>
+                <span className="mhp-meta-sep mhp-meta-readtime">•</span>
+                <span className="mhp-meta-readtime">{blogReadTime}</span>
+              </>
+            )}
+          </div>
+
           <div className="mhp-blog-footer-row">
+            <button 
+              type="button" 
+              className="mhp-blog-readmore-btn"
+              onClick={() => onSelectStory && onSelectStory(blog)}
+              aria-label={`Read more about ${blogTitle}`}
+            >
+              <span>READ MORE</span>
+              <ArrowRight size={13} className="readmore-arrow" />
+            </button>
             <div className="mhp-blog-footer-actions">
               <button 
                 type="button" 
-                className="mhp-blog-readmore-btn"
-                onClick={() => onSelectStory && onSelectStory(blog)}
-                aria-label={`Read more about ${blogTitle}`}
+                className={`mhp-blog-footer-like-btn ${isCardLiked ? 'active' : ''}`}
+                onClick={(e) => handleToggleLike(blog, e)}
+                title={isCardLiked ? 'Unlike story' : 'Like story'}
+                aria-label="Like story"
               >
-                <span>READ MORE</span>
-                <ArrowRight size={14} className="readmore-arrow" />
+                <Heart 
+                  size={14} 
+                  className="mhp-like-icon"
+                  fill={isCardLiked ? '#f43f5e' : 'none'} 
+                  color={isCardLiked ? '#f43f5e' : 'currentColor'} 
+                />
+                {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
               </button>
-              <button 
-                type="button" 
-                className={`mhp-blog-footer-save-btn ${isCardSaved ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onToggleSave) onToggleSave(blog);
-                }}
-                title={isCardSaved ? 'Remove from reading list' : 'Save to read later'}
-                aria-label="Save story"
-              >
-                <Bookmark size={14} fill={isCardSaved ? 'currentColor' : 'none'} />
-                <span>{isCardSaved ? 'Saved' : 'Save'}</span>
-              </button>
-            </div>
-            <div className="mhp-blog-author-row">
-              <img 
-                src={blogAvatar} 
-                alt={blogAuthor} 
-                className="mhp-blog-author-avatar"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-                }}
-              />
-              <span className="mhp-blog-author-name">{blogAuthor}</span>
-              <span className="mhp-meta-sep">•</span>
-              <span>{blogDate}</span>
             </div>
           </div>
         </div>
@@ -664,11 +715,6 @@ export default function ModernHomepageView({
             >
               {currentHeroTitle}
             </h1>
-            {currentHeroExcerpt && (
-              <p className="mhp-hero-desc">
-                {currentHeroExcerpt}
-              </p>
-            )}
             <div className="mhp-author-meta">
               <img 
                 src={currentHeroAvatar} 

@@ -482,7 +482,7 @@
 .lbe-item-reorder-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: auto;
 }
 
@@ -490,31 +490,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .lbe-reorder-btn:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.25);
-  border-color: #3b82f6;
-  color: #ffffff;
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .lbe-reorder-btn:disabled {
   opacity: 0.25;
   cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+.lbe-reorder-btn.danger {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
 }
 
 .lbe-reorder-btn.danger:hover {
-  background: rgba(239, 68, 68, 0.25);
+  background: #fecaca;
   border-color: #ef4444;
-  color: #fca5a5;
+  color: #991b1b;
 }
 
 .lbe-btn-add-mini {
@@ -1060,17 +1069,7 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
-.lbe-inline-edit-hint {
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-}
 
-.lbe-inline-edit-hint:hover {
-  outline: 2px dashed rgba(249, 115, 22, 0.6);
-  outline-offset: 4px;
-}
 
 
 

@@ -276,6 +276,18 @@ export const AuthService = {
     }
   },
 
+  handleUnauthorized(isFromAdmin = false) {
+    try {
+      const inAdmin = isFromAdmin || (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin'));
+      if (inAdmin) {
+        this.logoutAdmin();
+      } else {
+        this.logoutUser();
+      }
+      this.notifyAuthChange();
+    } catch (e) {}
+  },
+
   async checkAuth() {
     try {
       const inAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');

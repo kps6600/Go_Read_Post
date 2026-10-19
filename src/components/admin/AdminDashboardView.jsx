@@ -178,7 +178,6 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
                 <div className="adv-brand-meta">
                   <span className="adv-brand-name">
                     {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
-                    {siteSettings?.brandSuffix ? <span>{siteSettings.brandSuffix}</span> : null}
                   </span>
                   <span className="adv-brand-sub">EDITORIAL CMS</span>
                 </div>
@@ -190,7 +189,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
                 </div>
                 <div className="adv-brand-meta">
                   <span className="adv-brand-name">
-                    {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
+                    {siteSettings?.brandPrefix || (siteSettings?.brandSuffix && siteSettings?.siteName?.endsWith(siteSettings.brandSuffix) ? siteSettings.siteName.slice(0, -siteSettings.brandSuffix.length) : siteSettings?.siteName) || 'GoRead'}
                     {siteSettings?.brandSuffix ? <span>{siteSettings.brandSuffix}</span> : null}
                   </span>
                   <span className="adv-brand-sub">EDITORIAL CMS</span>

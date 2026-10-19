@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import Comment from '../models/Comment.js';
 import Article from '../models/Article.js';
 import { isDbConnected } from '../db.js';
-import { protectAuth } from '../middleware/auth.js';
+import { protectAuth, verifyJwtToken } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -406,7 +406,7 @@ router.post('/:id/like', async (req, res) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       try {
         const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = verifyJwtToken(token);
         if (decoded && decoded.id) {
           userId = String(decoded.id);
         }

@@ -40,7 +40,7 @@ export const SettingService = {
         headers: AuthService.getAuthHeaders(),
         body: JSON.stringify(settingsData)
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (res.ok && json.success) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data));
@@ -49,6 +49,9 @@ export const SettingService = {
           window.dispatchEvent(new CustomEvent('settings:change', { detail: json.data }));
         }
         return json.data;
+      }
+      if (res.status === 401) {
+        AuthService.handleUnauthorized?.(true);
       }
       throw new Error(json.message || 'Failed to update settings');
     } catch (e) {

@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Role, { DEFAULT_ROLES } from '../models/Role.js';
 import Admin from '../models/Admin.js';
@@ -352,12 +354,27 @@ router.post('/login', async (req, res) => {
 router.get('/me', protectAuth, async (req, res) => {
   try {
     if (isDbConnected()) {
-      let user = await User.findById(req.user.id || req.user._id).select('-passwordHash');
-      if (!user) {
-        user = await Admin.findById(req.user.id || req.user._id).select('-passwordHash');
+      const targetId = req.user.id || req.user._id;
+      let user = null;
+      if (targetId && mongoose.Types.ObjectId.isValid(targetId)) {
+        user = await User.findById(targetId).select('-passwordHash');
+        if (!user) {
+          user = await Admin.findById(targetId).select('-passwordHash');
+        }
+      }
+      if (!user && (req.user.username || req.user.email)) {
+        const orConditions = [];
+        if (req.user.username) orConditions.push({ username: req.user.username });
+        if (req.user.email) orConditions.push({ email: req.user.email });
+        if (orConditions.length > 0) {
+          user = await User.findOne({ $or: orConditions }).select('-passwordHash');
+          if (!user) {
+            user = await Admin.findOne({ $or: orConditions }).select('-passwordHash');
+          }
+        }
       }
       if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        user = req.user;
       }
       const role = (user.role || 'READER').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
       const isAssignedAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(role);

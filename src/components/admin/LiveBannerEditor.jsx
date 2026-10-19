@@ -98,21 +98,7 @@ export default function LiveBannerEditor({
   const [pickerSearch, setPickerSearch] = useState('');
   const [pickerCategory, setPickerCategory] = useState('All');
 
-  // Slide Content Edit Modal State
-  const [isSlideEditOpen, setIsSlideEditOpen] = useState(false);
-  const [slideFormData, setSlideFormData] = useState({
-    title: '',
-    excerpt: '',
-    category: '',
-    image: '',
-    primaryBtnText: 'Read More',
-    link: '',
-    author: ''
-  });
 
-  // Popular Title Inline Edit State
-  const [isEditingPopularTitle, setIsEditingPopularTitle] = useState(false);
-  const [popularTitleValue, setPopularTitleValue] = useState(() => data.popularTitle || 'Popular Posts');
 
   // Load published articles from database on mount
   useEffect(() => {
@@ -266,78 +252,7 @@ export default function LiveBannerEditor({
   // ─────────────────────────────────────────────────────────
   // HERO SLIDE ACTIONS & REORDERING
   // ─────────────────────────────────────────────────────────
-  const handleOpenSlideEditor = () => {
-    const s = slides[activeSlideIdx] || {};
-    setSlideFormData({
-      title: s.title || '',
-      excerpt: s.excerpt || '',
-      category: s.category || '',
-      image: s.image || '',
-      primaryBtnText: s.primaryBtnText || 'Read More',
-      link: s.link || '',
-      author: s.author || 'Editorial Bureau'
-    });
-    setIsSlideEditOpen(true);
-  };
 
-  const handleCreateCustomSlide = () => {
-    const newCustomSlide = {
-      id: `custom-slide-${Date.now()}`,
-      title: 'New Custom Headline',
-      excerpt: 'Add your summary or excerpt here...',
-      category: 'FEATURED',
-      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80',
-      author: 'Editorial Bureau',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-      date: 'Today',
-      readTime: '3 min read',
-      primaryBtnText: 'Read More',
-      link: '/latest',
-      isCustom: true
-    };
-    const nextSlides = [...slides, newCustomSlide];
-    const newIdx = nextSlides.length - 1;
-    updateSlidesState(nextSlides, newIdx);
-    persistToDatabase(nextSlides, popularArticles);
-    setSlideFormData({
-      title: newCustomSlide.title,
-      excerpt: newCustomSlide.excerpt,
-      category: newCustomSlide.category,
-      image: newCustomSlide.image,
-      primaryBtnText: newCustomSlide.primaryBtnText,
-      link: newCustomSlide.link,
-      author: newCustomSlide.author
-    });
-    setIsSlideEditOpen(true);
-  };
-
-  const handleSaveSlideEditor = () => {
-    const nextSlides = [...slides];
-    nextSlides[activeSlideIdx] = {
-      ...nextSlides[activeSlideIdx],
-      ...slideFormData,
-      title: slideFormData.title.trim() || 'Headline Story',
-      headline: slideFormData.title.trim() || 'Headline Story',
-      excerpt: slideFormData.excerpt,
-      subheadline: slideFormData.excerpt,
-      category: slideFormData.category,
-      badge: slideFormData.category,
-      image: slideFormData.image,
-      bgImage: slideFormData.image,
-      isCustom: true
-    };
-    updateSlidesState(nextSlides, activeSlideIdx);
-    persistToDatabase(nextSlides, popularArticles);
-    setIsSlideEditOpen(false);
-  };
-
-  const handleSavePopularTitle = () => {
-    const trimmed = (popularTitleValue || '').trim() || 'Popular Posts';
-    setData(prev => ({ ...prev, popularTitle: trimmed }));
-    setIsEditingPopularTitle(false);
-    const finalData = { ...data, popularTitle: trimmed, slides, popularArticles };
-    if (onAutoSave) onAutoSave(finalData);
-  };
 
   const updateSlidesState = (newSlides, newActiveIdx = null) => {
     setData(prev => ({
@@ -439,6 +354,11 @@ export default function LiveBannerEditor({
     if (!pickerTarget) return;
 
     if (pickerTarget.type === 'hero-add') {
+      if (slides.length >= 5) {
+        alert('Maximum of 5 articles allowed in the hero banner.');
+        setIsPickerOpen(false);
+        return;
+      }
       const newSlide = formatForHeroSlide(article);
       const nextSlides = [...slides, newSlide];
       updateSlidesState(nextSlides, nextSlides.length - 1);
@@ -450,6 +370,11 @@ export default function LiveBannerEditor({
       updateSlidesState(nextSlides, targetIdx);
       persistToDatabase(nextSlides, popularArticles);
     } else if (pickerTarget.type === 'popular-add') {
+      if (popularArticles.length >= 5) {
+        alert('Maximum of 5 articles allowed in popular posts.');
+        setIsPickerOpen(false);
+        return;
+      }
       const newPop = formatForPopularPost(article);
       const nextPop = [...popularArticles, newPop];
       updatePopularState(nextPop);
@@ -487,59 +412,10 @@ export default function LiveBannerEditor({
     <div className="lbe-overlay">
       {/* ── Top Studio Header Bar ── */}
       <header className="lbe-header">
-        <div className="lbe-header-left">
-          <div className="lbe-title-wrap">
-            <h3 className="lbe-title">
-              <Sparkles size={18} color="#f59e0b" />
-              <span>Banner Articles & Positions Manager</span>
-            </h3>
-            <span className="lbe-live-pill">
-              <span className="lbe-live-dot" />
-              <span>Live Article Curate</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Viewport and Sidebar Controls */}
-        <div className="lbe-header-center">
-          <div className="lbe-device-toggle">
-            <button
-              type="button"
-              className={`lbe-device-btn ${deviceView === 'desktop' ? 'active' : ''}`}
-              onClick={() => setDeviceView('desktop')}
-              title="Desktop viewport preview"
-            >
-              <Monitor size={14} />
-              <span>Desktop</span>
-            </button>
-            <button
-              type="button"
-              className={`lbe-device-btn ${deviceView === 'mobile' ? 'active' : ''}`}
-              onClick={() => setDeviceView('mobile')}
-              title="Mobile viewport preview"
-            >
-              <Smartphone size={14} />
-              <span>Mobile</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className={`lbe-toolbar-btn ${showPopular ? 'active' : ''}`}
-            onClick={() => {
-              const nextShow = !showPopular;
-              setData(prev => ({ ...prev, showPopular: nextShow }));
-              persistToDatabase(slides, popularArticles);
-            }}
-            title="Toggle Popular Posts sidebar on homepage"
-          >
-            {showPopular ? <Eye size={14} /> : <EyeOff size={14} />}
-            <span>{showPopular ? 'Popular Sidebar: Visible' : 'Sidebar: Full-Width Hero'}</span>
-          </button>
-        </div>
+        <div className="lbe-header-left" />
 
         {/* Action Controls */}
-        <div className="lbe-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="lbe-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
           {/* Real-time Persistence Indicator */}
           {saveStatus === 'saving' && (
             <span className="lbe-save-indicator saving">
@@ -560,14 +436,7 @@ export default function LiveBannerEditor({
             </span>
           )}
 
-          <button
-            type="button"
-            className="lbe-btn-cancel"
-            onClick={onClose}
-          >
-            <X size={15} />
-            <span>Discard</span>
-          </button>
+
           <button
             type="button"
             className="lbe-btn-save"
@@ -583,97 +452,8 @@ export default function LiveBannerEditor({
       <main className="lbe-workspace">
         <div className={`lbe-canvas-wrapper ${deviceView === 'mobile' ? 'mobile-view' : ''}`}>
           
-          {/* Quick Guidance Bar */}
-          <div className="lbe-tip-bar" style={{ justifyContent: 'space-between' }}>
-            <div className="lbe-tip-text">
-              <Sparkles size={16} color="#fbbf24" />
-              <span>
-                <strong>Article Curation Mode:</strong> Easily add published articles and use the <strong>↑ Move Position</strong> buttons to change their order on the banner.
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="lbe-toolbar-btn"
-                style={{ background: 'rgba(234, 88, 12, 0.2)', borderColor: 'rgba(234, 88, 12, 0.45)', color: '#fb923c' }}
-                onClick={handleCreateCustomSlide}
-                title="Create a brand new hero slide with custom headline, photo, and buttons"
-              >
-                <Sparkles size={14} />
-                <span>+ Custom Slide</span>
-              </button>
-              <button
-                type="button"
-                className="lbe-toolbar-btn"
-                style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.4)', color: '#4ade80' }}
-                onClick={() => handleOpenPicker({ type: 'hero-add' })}
-              >
-                <Plus size={14} />
-                <span>+ Pick From Articles</span>
-              </button>
-              {showPopular && (
-                <button
-                  type="button"
-                  className="lbe-toolbar-btn"
-                  style={{ background: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 0.4)', color: '#60a5fa' }}
-                  onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                >
-                  <Plus size={14} />
-                  <span>+ Add to Popular</span>
-                </button>
-              )}
-            </div>
-          </div>
 
-          {/* ── Real Frontend Page Browser Window ── */}
-          <div className="lse-browser-frame">
-            {/* Browser Window Top Address Bar */}
-            <div className="lse-browser-topbar">
-              <div className="lse-browser-dots">
-                <span className="lse-browser-dot red" />
-                <span className="lse-browser-dot yellow" />
-                <span className="lse-browser-dot green" />
-              </div>
-              <div className="lse-browser-url-pill">
-                <span style={{ color: '#10b981', fontSize: '0.85rem' }}>🔒</span>
-                <span>https://goreadpost.com{pageId === 'latest' ? '/latest' : ''}</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
-                {deviceView === 'mobile' ? 'Mobile View' : 'Desktop View'}
-              </div>
-            </div>
 
-            {/* Real Frontend Website Body */}
-            <div className="lse-real-frontend-sheet">
-              {/* Simulated Real Header */}
-              <div className="lse-simulated-site-header">
-                <div className="lse-simulated-brand-logo">
-                  <span style={{ color: '#e11d48' }}>Go</span>Read<span style={{ color: '#e11d48' }}>Post</span>
-                </div>
-                <nav className="lse-simulated-nav-links">
-                  <span className={`lse-simulated-nav-link ${pageId !== 'latest' ? 'active' : ''}`}>Home</span>
-                  <span className={`lse-simulated-nav-link ${pageId === 'latest' ? 'active' : ''}`}>Latest</span>
-                  <span className="lse-simulated-nav-link">Trending</span>
-                  <span className="lse-simulated-nav-link">AI Story</span>
-                  <span className="lse-simulated-nav-link">Enterprise</span>
-                  <span className="lse-simulated-nav-link">Videos</span>
-                </nav>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ background: '#f1f5f9', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Search size={14} />
-                    <span>Search stories…</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Real Frontend Content Container */}
-              <div className="mhp-container" style={{ padding: '1.5rem clamp(1rem, 2.5vw, 2.5rem) 2.5rem' }}>
-                {/* Active Section Halo on the Real Frontend */}
-                <div className="lse-active-section-wrapper" style={{ padding: '0.75rem', margin: 0 }}>
-                  <div className="lse-active-section-tag">
-                    <Sparkles size={12} fill="#ffffff" />
-                    <span>Editing Live Hero: {pageId === 'latest' ? 'Latest Page Hero' : 'Homepage Hero Banner'}</span>
-                  </div>
 
                   {/* ── Live Banner Section ── */}
                   <section className={`mhp-hero-popular-grid ${!showPopular ? 'full-width' : ''}`}>
@@ -688,77 +468,11 @@ export default function LiveBannerEditor({
             >
               <div className="mhp-hero-overlay" />
 
-              {/* Floating Hero Position & Action Bar */}
-              <div className="lbe-hero-control-dock">
-                <span className="lbe-position-badge">
-                  ★ HERO POSITION #{activeSlideIdx + 1} OF {slides.length}
-                </span>
-
-                <div className="lbe-dock-actions">
-                  <button
-                    type="button"
-                    className="lbe-dock-btn"
-                    disabled={activeSlideIdx === 0}
-                    onClick={() => handleMoveSlideEarlier(activeSlideIdx)}
-                    title="Move this article earlier in the carousel (Left/Up)"
-                  >
-                    <ArrowUp size={13} />
-                    <span>Move Up (#{(activeSlideIdx + 1) - 1})</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="lbe-dock-btn"
-                    disabled={activeSlideIdx === slides.length - 1}
-                    onClick={() => handleMoveSlideLater(activeSlideIdx)}
-                    title="Move this article later in the carousel (Right/Down)"
-                  >
-                    <ArrowDown size={13} />
-                    <span>Move Down (#{(activeSlideIdx + 1) + 1})</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="lbe-dock-btn"
-                    style={{ background: 'rgba(234, 88, 12, 0.25)', borderColor: 'rgba(234, 88, 12, 0.55)', color: '#fb923c' }}
-                    onClick={handleOpenSlideEditor}
-                    title="Live edit headline, excerpt, badge, background photo, and buttons"
-                  >
-                    <Edit3 size={13} />
-                    <span>Edit Text & Photo</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="lbe-dock-btn highlight"
-                    onClick={() => handleOpenPicker({ type: 'hero-replace', index: activeSlideIdx })}
-                    title="Replace this hero slide with another published article"
-                  >
-                    <RefreshCw size={13} />
-                    <span>Change Article</span>
-                  </button>
-
-                  {slides.length > 1 && (
-                    <button
-                      type="button"
-                      className="lbe-dock-btn danger"
-                      onClick={(e) => handleDeleteSlide(activeSlideIdx, e)}
-                      title="Remove this article from hero banner"
-                    >
-                      <Trash2 size={13} />
-                      <span>Remove</span>
-                    </button>
-                  )}
-                </div>
-              </div>
 
               {/* Real Article Content on Hero Slide */}
               <div className="mhp-hero-content">
                 <div style={{ marginBottom: '0.65rem' }}>
                   <span 
-                    className="lbe-inline-edit-hint"
-                    onClick={handleOpenSlideEditor}
-                    title="Click to live edit category / badge"
                     style={{
                       background: 'rgba(234, 88, 12, 0.3)',
                       border: '1px solid rgba(234, 88, 12, 0.6)',
@@ -770,19 +484,15 @@ export default function LiveBannerEditor({
                       padding: '4px 12px',
                       borderRadius: '20px',
                       display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
+                      alignItems: 'center'
                     }}
                   >
                     <span>{currentSlide.category}</span>
-                    <Edit2 size={11} />
                   </span>
                 </div>
 
                 <h1 
-                  className="mhp-hero-title lbe-inline-edit-hint" 
-                  onClick={handleOpenSlideEditor}
-                  title="Click to live edit headline"
+                  className="mhp-hero-title" 
                   style={{ margin: '0 0 1rem', lineHeight: 1.2 }}
                 >
                   {currentSlide.title}
@@ -790,9 +500,7 @@ export default function LiveBannerEditor({
 
                 {currentSlide.excerpt && (
                   <p 
-                    className="mhp-hero-desc lbe-inline-edit-hint" 
-                    onClick={handleOpenSlideEditor}
-                    title="Click to live edit subheadline / excerpt"
+                    className="mhp-hero-desc" 
                     style={{ margin: '0 0 1.25rem' }}
                   >
                     {currentSlide.excerpt}
@@ -813,11 +521,7 @@ export default function LiveBannerEditor({
                 </div>
 
                 <div className="mhp-hero-bottom-actions">
-                  <div 
-                    className="mhp-hero-read-btn lbe-inline-edit-hint"
-                    onClick={handleOpenSlideEditor}
-                    title="Click to live edit button text and destination link"
-                  >
+                  <div className="mhp-hero-read-btn">
                     <span>{currentSlide.primaryBtnText || 'Read More'}</span>
                     <ArrowRight size={15} color="#0f172a" />
                   </div>
@@ -864,56 +568,30 @@ export default function LiveBannerEditor({
               <div className="mhp-popular-card">
                 <div className="mhp-section-header" style={{ marginBottom: '1rem' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {isEditingPopularTitle ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <input
-                          type="text"
-                          value={popularTitleValue}
-                          onChange={(e) => setPopularTitleValue(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') handleSavePopularTitle(); }}
-                          style={{
-                            background: '#0f172a',
-                            color: '#ffffff',
-                            border: '1px solid #38bdf8',
-                            borderRadius: '4px',
-                            padding: '2px 8px',
-                            fontSize: '0.95rem',
-                            fontWeight: 750,
-                            outline: 'none'
-                          }}
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSavePopularTitle}
-                          style={{ background: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '4px', padding: '3px 7px', cursor: 'pointer', fontWeight: 750 }}
-                        >
-                          <Check size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div 
-                        onClick={() => setIsEditingPopularTitle(true)}
-                        className="lbe-inline-edit-hint"
-                        title="Click to edit Popular Posts title"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                      >
-                        <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{data.popularTitle || 'Popular Posts'}</span>
-                        <Edit2 size={12} color="#94a3b8" />
-                      </div>
-                    )}
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '6px' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>
+                      {data.popularTitle || 'Popular Posts'}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '6px' }}>
                       ({popularArticles.length} Slots)
                     </span>
                   </div>
                   <button
                     type="button"
                     className="lbe-btn-add-mini"
-                    onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                    title="Add an article to popular posts"
+                    disabled={popularArticles.length >= 5}
+                    style={{
+                      cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer',
+                      opacity: popularArticles.length >= 5 ? 0.6 : 1
+                    }}
+                    onClick={() => {
+                      if (popularArticles.length < 5) {
+                        handleOpenPicker({ type: 'popular-add' });
+                      }
+                    }}
+                    title={popularArticles.length >= 5 ? 'Maximum 5 popular articles reached' : 'Add an article to popular posts (max 5)'}
                   >
                     <Plus size={13} />
-                    <span>Add Article</span>
+                    <span>{popularArticles.length >= 5 ? 'Max 5 Reached' : `Add Article (${popularArticles.length}/5)`}</span>
                   </button>
                 </div>
 
@@ -951,7 +629,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleMovePopularUp(idx)}
                           title={`Move Up to Position #${idx}`}
                         >
-                          <ArrowUp size={13} />
+                          <ArrowUp size={14} />
                         </button>
                         <button
                           type="button"
@@ -960,7 +638,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleMovePopularDown(idx)}
                           title={`Move Down to Position #${idx + 2}`}
                         >
-                          <ArrowDown size={13} />
+                          <ArrowDown size={14} />
                         </button>
                         <button
                           type="button"
@@ -968,7 +646,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
                           title="Change / Replace this article"
                         >
-                          <RefreshCw size={12} />
+                          <RefreshCw size={13} />
                         </button>
                         <button
                           type="button"
@@ -976,99 +654,17 @@ export default function LiveBannerEditor({
                           onClick={() => handleDeletePopular(idx)}
                           title="Remove from popular posts"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Bottom Add to Popular Button */}
-                <button
-                  type="button"
-                  className="lbe-btn-add-popular-full"
-                  onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                >
-                  <Plus size={15} />
-                  <span>+ Add Article to Position #{popularArticles.length + 1}</span>
-                </button>
               </div>
             )}
           </section>
-        </div>
-      </div>
 
-              {/* Simulated Real Frontend Footer */}
-              <div className="lse-simulated-site-footer">
-                <div style={{ maxWidth: '1420px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', color: '#64748b' }}>
-                  <span>© {new Date().getFullYear()} GoReadPost Media Inc. All rights reserved.</span>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <span>Privacy Policy</span>
-                    <span>Terms of Service</span>
-                    <span>Editorial Guidelines</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Hero Slides Position Strip Under Canvas ── */}
-          <div className="lbe-slides-strip">
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Hero Slides ({slides.length}):
-            </span>
-
-            {slides.map((s, idx) => (
-              <div
-                key={s.id || idx}
-                className={`lbe-slide-chip ${idx === activeSlideIdx ? 'active' : ''}`}
-                onClick={() => setActiveSlideIdx(idx)}
-              >
-                <span className="lbe-chip-rank">#{idx + 1}</span>
-                <span className="lbe-chip-title">{s.title?.slice(0, 22) || 'Untitled'}...</span>
-                
-                {/* Micro Position Arrows */}
-                <div className="lbe-chip-arrows" onClick={e => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    disabled={idx === 0}
-                    onClick={() => handleMoveSlideEarlier(idx)}
-                    title="Move position earlier (Up/Left)"
-                  >
-                    <ArrowUp size={11} />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={idx === slides.length - 1}
-                    onClick={() => handleMoveSlideLater(idx)}
-                    title="Move position later (Down/Right)"
-                  >
-                    <ArrowDown size={11} />
-                  </button>
-                </div>
-
-                {slides.length > 1 && (
-                  <button
-                    type="button"
-                    className="lbe-btn-delete-slide"
-                    onClick={(e) => handleDeleteSlide(idx, e)}
-                    title="Delete this slide"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                )}
-              </div>
-            ))}
-
-            <button
-              type="button"
-              className="lbe-btn-add-slide"
-              onClick={() => handleOpenPicker({ type: 'hero-add' })}
-            >
-              <Plus size={14} />
-              <span>+ Add Article as Slide #{slides.length + 1}</span>
-            </button>
-          </div>
 
         </div>
       </main>
@@ -1197,122 +793,7 @@ export default function LiveBannerEditor({
         </div>
       )}
 
-      {/* ── Slide Content & Photo Editor Modal ── */}
-      {isSlideEditOpen && (
-        <div className="lbe-slide-edit-overlay" onClick={() => setIsSlideEditOpen(false)}>
-          <div className="lbe-slide-edit-modal" onClick={e => e.stopPropagation()}>
-            <div className="lbe-slide-edit-header">
-              <h4>
-                <Edit3 size={17} color="#fb923c" />
-                <span>Edit Hero Slide #{activeSlideIdx + 1} Content</span>
-              </h4>
-              <button
-                type="button"
-                onClick={() => setIsSlideEditOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            <div className="lbe-slide-edit-body">
-              <div className="lbe-input-group">
-                <label>Badge / Category Tag</label>
-                <input
-                  type="text"
-                  value={slideFormData.category}
-                  onChange={e => setSlideFormData(p => ({ ...p, category: e.target.value }))}
-                  placeholder="e.g. STARTUPS, DEEPTECH FOCUS, BREAKING"
-                />
-              </div>
-
-              <div className="lbe-input-group">
-                <label>Main Headline *</label>
-                <input
-                  type="text"
-                  value={slideFormData.title}
-                  onChange={e => setSlideFormData(p => ({ ...p, title: e.target.value }))}
-                  placeholder="Compelling story headline"
-                />
-              </div>
-
-              <div className="lbe-input-group">
-                <label>Subheadline / Lead Excerpt</label>
-                <textarea
-                  rows={3}
-                  value={slideFormData.excerpt}
-                  onChange={e => setSlideFormData(p => ({ ...p, excerpt: e.target.value }))}
-                  placeholder="Lead paragraph or executive summary"
-                />
-              </div>
-
-              <div className="lbe-input-group">
-                <label>Hero Background Image URL</label>
-                <input
-                  type="text"
-                  value={slideFormData.image}
-                  onChange={e => setSlideFormData(p => ({ ...p, image: e.target.value }))}
-                  placeholder="https://images.unsplash.com/..."
-                />
-                {slideFormData.image && (
-                  <div style={{ marginTop: '8px', maxHeight: '140px', overflow: 'hidden', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <img src={slideFormData.image} alt="Slide Preview" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
-                  </div>
-                )}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="lbe-input-group">
-                  <label>Primary Button Text</label>
-                  <input
-                    type="text"
-                    value={slideFormData.primaryBtnText}
-                    onChange={e => setSlideFormData(p => ({ ...p, primaryBtnText: e.target.value }))}
-                    placeholder="e.g. Read More"
-                  />
-                </div>
-                <div className="lbe-input-group">
-                  <label>Story Link / Destination URL</label>
-                  <input
-                    type="text"
-                    value={slideFormData.link}
-                    onChange={e => setSlideFormData(p => ({ ...p, link: e.target.value }))}
-                    placeholder="e.g. /stories/slug or /latest"
-                  />
-                </div>
-              </div>
-
-              <div className="lbe-input-group">
-                <label>Author Byline</label>
-                <input
-                  type="text"
-                  value={slideFormData.author}
-                  onChange={e => setSlideFormData(p => ({ ...p, author: e.target.value }))}
-                  placeholder="e.g. Editorial Bureau"
-                />
-              </div>
-            </div>
-
-            <div className="lbe-slide-edit-footer">
-              <button
-                type="button"
-                className="lbe-btn-cancel"
-                onClick={() => setIsSlideEditOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="lbe-btn-save"
-                onClick={handleSaveSlideEditor}
-              >
-                <Check size={15} />
-                <span>Update Slide & Save</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

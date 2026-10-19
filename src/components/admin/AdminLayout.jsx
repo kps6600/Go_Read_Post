@@ -64,8 +64,29 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       setIsAuthenticated(AuthService.isAdminAuthenticated());
       setAdminUser(AuthService.getAdminUser());
     };
+    const handleAuthChange = () => {
+      setIsAuthenticated(AuthService.isAdminAuthenticated());
+      setAdminUser(AuthService.getAdminUser());
+    };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('auth:change', handleAuthChange);
+
+    // Verify token validity against backend to prevent stale session lockouts
+    if (AuthService.isAdminAuthenticated()) {
+      AuthService.checkAuth().then(verifiedUser => {
+        if (!verifiedUser || !AuthService.isAdmin(verifiedUser)) {
+          setIsAuthenticated(false);
+          setAdminUser(null);
+        } else {
+          setAdminUser(verifiedUser);
+        }
+      }).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('auth:change', handleAuthChange);
+    };
   }, []);
 
   const handleNavigate = (path) => {
@@ -162,13 +183,12 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       return <AdminAuthorsView onShowToast={onShowToast} />;
     }
 
-    // 6. Homepage CMS: /admin/homepage
-    if (currentPath === '/admin/homepage') {
+    // 6. Homepage CMS & Live Studio: /admin/homepage
+    if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) {
       return (
-        <AdminPageEditor 
-          pageId="home" 
-          onNavigate={handleNavigate} 
+        <AdminHomepageView 
           onShowToast={onShowToast} 
+          onNavigate={handleNavigate} 
         />
       );
     }
@@ -224,7 +244,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
     // 14. Pages Editor: /admin/pages/:id/edit
     if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
-      const parts = currentPath.split('/');
+      const cleanPath = currentPath.split('?')[0];
+      const parts = cleanPath.split('/');
       const editIndex = parts.indexOf('edit');
       const pageId = editIndex > 0 ? parts[editIndex - 1] : null;
       return (

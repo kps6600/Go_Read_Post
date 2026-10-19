@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Page from '../models/Page.js';
 import { isDbConnected } from '../db.js';
-import { protectAdmin } from '../middleware/auth.js';
+import { protectAdmin, verifyJwtToken } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
@@ -401,7 +401,7 @@ router.get('/slug/:slug', async (req, res) => {
       try {
         const token = req.headers.authorization.split(' ')[1];
         if (token) {
-          jwt.verify(token, JWT_SECRET);
+          verifyJwtToken(token);
           isAuthorizedPreview = true;
         }
       } catch (e) {}

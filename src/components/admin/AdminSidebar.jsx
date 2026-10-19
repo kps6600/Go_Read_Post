@@ -45,7 +45,7 @@ export const ADMIN_NAV_GROUPS = [
   {
     group: 'SITE ARCHITECTURE & CMS',
     items: [
-      { id: 'homepage', path: '/admin/homepage', label: 'Homepage & Hero Banner', icon: Sparkles },
+      { id: 'homepage', path: '/admin/homepage', label: 'Homepage Live Studio', icon: Sparkles, badge: 'LIVE' },
       { id: 'pages', path: '/admin/pages', label: 'Pages & Legal CMS', icon: FileText },
       { id: 'navigation', path: '/admin/navigation', label: 'Navigation CMS', icon: MenuIcon },
       { id: 'footer', path: '/admin/footer', label: 'Footer CMS', icon: PanelBottom },
@@ -140,7 +140,7 @@ export default function AdminSidebar({
                 </div>
                 <div className="sidebar-brand-text" style={{ minWidth: 0, overflow: 'hidden' }}>
                   <h3 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
+                    {siteSettings?.brandPrefix || (siteSettings?.brandSuffix && siteSettings?.siteName?.endsWith(siteSettings.brandSuffix) ? siteSettings.siteName.slice(0, -siteSettings.brandSuffix.length) : siteSettings?.siteName) || 'GoRead'}
                     {siteSettings?.brandSuffix ? (
                       <span style={{ color: 'var(--brand-primary)' }}>
                         {siteSettings.brandSuffix}
@@ -167,10 +167,11 @@ export default function AdminSidebar({
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPath === item.path || 
+                  (item.id === 'homepage' && (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage'))) ||
                   (item.id === 'drafts' && (currentPath === '/admin/drafts' || currentPath.startsWith('/admin/drafts') || currentPath.includes('/draft'))) ||
                   (item.id === 'archived' && (currentPath === '/admin/archived' || currentPath.startsWith('/admin/archived') || currentPath.includes('/archived'))) ||
                   (item.id === 'articles' && (currentPath === '/admin/articles' || currentPath.startsWith('/admin/articles') || currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs')) && !currentPath.includes('/draft') && !currentPath.includes('/archived')) ||
-                  (item.id === 'pages' && (currentPath === '/admin/pages' || currentPath.startsWith('/admin/pages'))) ||
+                  (item.id === 'pages' && (currentPath === '/admin/pages' || (currentPath.startsWith('/admin/pages') && !currentPath.startsWith('/admin/homepage')))) ||
                   (item.id === 'users' && (currentPath === '/admin/users' || currentPath === '/admin/roles'));
 
                 return (
@@ -187,6 +188,21 @@ export default function AdminSidebar({
                       <Icon size={17} />
                     </div>
                     <span className="nav-item-label">{item.label}</span>
+                    {item.badge && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        marginRight: '6px',
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                        color: '#fff',
+                        letterSpacing: '0.04em'
+                      }}>
+                        {item.badge}
+                      </span>
+                    )}
                     {isActive && <ChevronRight size={14} className="active-arrow" />}
                   </button>
                 );

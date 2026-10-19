@@ -1378,6 +1378,7 @@ export default function App() {
             onShowToast={showToast}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
+            onClapStory={handleClapStory}
           />
         ) : (
           <div className="container" style={{ padding: '2rem 1rem' }}>

@@ -77,9 +77,6 @@ export default function HeroLeadSection({
 
               {/* Majestic Headline */}
               <h1 className="hero-banner-title">{currentLead.title}</h1>
-              
-              {/* Excerpt */}
-              <p className="hero-banner-subtitle">{currentLead.subtitle || currentLead.summary || currentLead.excerpt}</p>
 
               {/* Hero Footer: Author Chip & Action Controls */}
               <div className="hero-banner-footer" onClick={(e) => e.stopPropagation()}>

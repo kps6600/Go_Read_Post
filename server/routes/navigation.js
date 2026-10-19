@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import NavigationItem from '../models/NavigationItem.js';
 import NavigationAuditLog from '../models/NavigationAuditLog.js';
 import { isDbConnected } from '../db.js';
-import { protectAdmin, requireRoles } from '../middleware/auth.js';
+import { protectAdmin, requireRoles, verifyJwtToken } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -447,7 +447,7 @@ adminNavigationRouter.use((req, res, next) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = verifyJwtToken(token);
       req.user = decoded;
       req.admin = decoded;
     } catch (e) {}
@@ -706,10 +706,28 @@ adminNavigationRouter.delete('/:id', requireRoles('SUPER_ADMIN', 'ADMIN'), async
     const { cascade, reparent } = req.query; // 'true' or undefined
 
     if (isDbConnected()) {
-      const target = await NavigationItem.findById(id);
-      if (!target) return res.status(404).json({ success: false, message: 'Menu item not found' });
+      let target = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        target = await NavigationItem.findById(id);
+      }
+      if (!target) {
+        target = await NavigationItem.findOne({ $or: [{ slug: id }, { id: id }] }).catch(() => null);
+      }
 
-      const children = await NavigationItem.find({ parentId: id });
+      if (!target) {
+        // Check fallback store
+        let list = readFallbackNav();
+        const fallbackTarget = list.find(i => String(i._id) === String(id) || String(i.slug) === String(id));
+        if (fallbackTarget) {
+          list = list.filter(i => String(i._id) !== String(fallbackTarget._id));
+          writeFallbackNav(list);
+        }
+        invalidateNavCache();
+        return res.json({ success: true, message: 'Menu item deleted successfully' });
+      }
+
+      const actualId = target._id;
+      const children = await NavigationItem.find({ $or: [{ parentId: actualId }, { parentId: String(actualId) }] });
       const childCount = children.length;
 
       if (childCount > 0 && cascade !== 'true' && reparent !== 'true') {
@@ -726,24 +744,38 @@ adminNavigationRouter.delete('/:id', requireRoles('SUPER_ADMIN', 'ADMIN'), async
         const newParentId = target.parentId;
         const newLevel = newParentId ? await getMenuLevel(newParentId) : 0;
         await NavigationItem.updateMany(
-          { parentId: id },
+          { $or: [{ parentId: actualId }, { parentId: String(actualId) }] },
           { parentId: newParentId, level: newLevel }
         );
-        await NavigationItem.findByIdAndDelete(id);
+        await NavigationItem.findByIdAndDelete(actualId);
       } else {
         // Cascade delete item and all descendants recursively
-        const toDelete = [id];
-        let queue = [id];
+        const toDelete = [actualId];
+        let queue = [actualId];
+        const visited = new Set([String(actualId)]);
         while (queue.length > 0) {
           const cur = queue.shift();
-          const curChildren = await NavigationItem.find({ parentId: cur });
+          const curChildren = await NavigationItem.find({ $or: [{ parentId: cur }, { parentId: String(cur) }] });
           for (const ch of curChildren) {
-            toDelete.push(ch._id);
-            queue.push(ch._id);
+            if (!visited.has(String(ch._id))) {
+              visited.add(String(ch._id));
+              toDelete.push(ch._id);
+              queue.push(ch._id);
+            }
           }
         }
         await NavigationItem.deleteMany({ _id: { $in: toDelete } });
       }
+
+      // Also clean from fallback store if present
+      try {
+        let list = readFallbackNav();
+        const initialLen = list.length;
+        list = list.filter(i => String(i._id) !== String(id) && String(i._id) !== String(actualId));
+        if (list.length !== initialLen) {
+          writeFallbackNav(list);
+        }
+      } catch (e) {}
 
       // Audit Log
       await NavigationAuditLog.create({
@@ -751,14 +783,17 @@ adminNavigationRouter.delete('/:id', requireRoles('SUPER_ADMIN', 'ADMIN'), async
         adminId: req.user?.id || req.user?._id || 'admin',
         adminName: req.user?.name || req.user?.username || 'Admin',
         adminEmail: req.user?.email || '',
-        menuId: String(id),
+        menuId: String(actualId),
         menuTitle: target.title,
         details: `Deleted menu "${target.title}" (mode: ${reparent === 'true' ? 'reparent children' : 'cascade delete'})`
       }).catch(() => {});
     } else {
       let list = readFallbackNav();
-      const target = list.find(i => String(i._id) === String(id));
-      if (!target) return res.status(404).json({ success: false, message: 'Menu item not found' });
+      const target = list.find(i => String(i._id) === String(id) || String(i.slug) === String(id));
+      if (!target) {
+        invalidateNavCache();
+        return res.json({ success: true, message: 'Menu item deleted successfully' });
+      }
 
       const children = list.filter(i => String(i.parentId) === String(id));
       const childCount = children.length;

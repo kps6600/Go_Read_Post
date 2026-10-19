@@ -4,7 +4,7 @@ import {
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight,
   Monitor, Smartphone, Search, RefreshCw, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type, Mail, Zap, Flame, LayoutGrid,
-  ExternalLink, CheckCircle2, ChevronDown
+  ExternalLink, CheckCircle2, ChevronDown, Heart, Bookmark
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { PageService } from '../../services/pageService';
@@ -926,10 +926,10 @@ export default function LiveHomepageStudio({
                               <span className="mhp-badge">
                                 {activeSlide.category || 'FEATURED'}
                               </span>
-                              <h1 className="mhp-hero-title lse-inline-edit-hint" onClick={() => handleOpenSlideModal(activeSlide, heroSlideIdx)}>
+                              <h1 className="mhp-hero-title">
                                 {activeSlide.title}
                               </h1>
-                              <p className="mhp-hero-subtitle lse-inline-edit-hint" onClick={() => handleOpenSlideModal(activeSlide, heroSlideIdx)}>
+                              <p className="mhp-hero-subtitle">
                                 {activeSlide.excerpt}
                               </p>
                               <div className="mhp-hero-meta">
@@ -1143,15 +1143,21 @@ export default function LiveHomepageStudio({
                                   <div className="mhp-blog-body">
                                     <h3 className="mhp-blog-card-title">{artTitle}</h3>
                                     {art.excerpt && <p className="mhp-blog-excerpt">{art.excerpt}</p>}
+                                    <div className="mhp-blog-author-row">
+                                      <span className="mhp-blog-author-name">{artAuthor}</span>
+                                      <span className="mhp-meta-sep">•</span>
+                                      <span>{artDate}</span>
+                                    </div>
                                     <div className="mhp-blog-footer-row">
                                       <span className="mhp-blog-readmore-btn">
                                         <span>READ MORE</span>
-                                        <ArrowRight size={13} />
+                                        <ArrowRight size={13} className="readmore-arrow" />
                                       </span>
-                                      <div className="mhp-blog-author-row">
-                                        <span className="mhp-blog-author-name">{artAuthor}</span>
-                                        <span className="mhp-meta-sep">•</span>
-                                        <span>{artDate}</span>
+                                      <div className="mhp-blog-footer-actions">
+                                        <span className="mhp-blog-footer-like-btn">
+                                          <Heart size={14} className="mhp-like-icon" />
+                                          <span className="mhp-like-count">{art.claps || art.likes || 14}</span>
+                                        </span>
                                       </div>
                                     </div>
                                   </div>

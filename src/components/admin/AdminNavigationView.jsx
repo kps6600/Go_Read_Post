@@ -505,13 +505,21 @@ export default function AdminNavigationView({ onShowToast }) {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await NavigationService.deleteNavigationItem(deleteTarget._id, { cascade: true });
+      const targetId = deleteTarget._id || deleteTarget.id;
+      await NavigationService.deleteNavigationItem(targetId, { cascade: true });
       if (onShowToast) onShowToast(`Deleted "${deleteTarget.title}"`);
       setDeleteTarget(null);
       await loadNavigation();
       refreshNavigation();
     } catch (err) {
-      alert('Error deleting item: ' + err.message);
+      if (onShowToast) {
+        onShowToast('Error deleting item: ' + err.message, 'error');
+      } else {
+        alert('Error deleting item: ' + err.message);
+      }
+      setDeleteTarget(null);
+      await loadNavigation();
+      refreshNavigation();
     } finally {
       setDeleting(false);
     }

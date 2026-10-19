@@ -5,7 +5,7 @@ import {
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type,
-  Mail, Bookmark, Zap, CheckCircle, LayoutGrid
+  Mail, Bookmark, Zap, CheckCircle, LayoutGrid, Heart
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { ALL_STORIES, TOP_PICKS, SPOTLIGHT_STORIES } from '../../data/storiesData';
@@ -802,15 +802,21 @@ function LiveGenericSectionStudio({
                               {blog.excerpt}
                             </p>
                           )}
+                          <div className="mhp-blog-author-row">
+                            <span className="mhp-blog-author-name">{artAuthor}</span>
+                            <span className="mhp-meta-sep">•</span>
+                            <span>{artDate}</span>
+                          </div>
                           <div className="mhp-blog-footer-row">
                             <span className="mhp-blog-readmore-btn" style={{ cursor: 'pointer' }}>
                               <span>READ MORE</span>
-                              <ArrowRight size={13} />
+                              <ArrowRight size={13} className="readmore-arrow" />
                             </span>
-                            <div className="mhp-blog-author-row">
-                              <span className="mhp-blog-author-name">{artAuthor}</span>
-                              <span className="mhp-meta-sep">•</span>
-                              <span>{artDate}</span>
+                            <div className="mhp-blog-footer-actions">
+                              <span className="mhp-blog-footer-like-btn">
+                                <Heart size={14} className="mhp-like-icon" />
+                                <span className="mhp-like-count">{blog.claps || blog.likes || 12}</span>
+                              </span>
                             </div>
                           </div>
                         </div>

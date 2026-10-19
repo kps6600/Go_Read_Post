@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Plus, Search, Edit2, Trash2, Eye, RefreshCw,
-  Layers, FileText, Globe, Clock, X, ArrowUpRight,
-  LayoutGrid, List, ChevronDown, Sparkles, FilePlus2
+  Plus, Search, Edit2, Trash2, Eye,
+  Layers, X, Filter, Check,
+  ChevronDown, Sparkles
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
 const COMPANY_SLUGS = ['about', 'advertise'];
 const PORTAL_SLUGS = ['latest', 'trending', 'videos', 'newsletter'];
 
-export const getPageGroup = (page) => {
+const getPageGroup = (page) => {
   const s = (page.slug || page.id || '').toLowerCase().replace(/^\/+/, '');
   if (COMPANY_SLUGS.includes(s)) return { key: 'company', label: 'Company & Connect', color: '#2563eb', bg: 'rgba(37, 99, 235, 0.12)' };
   if (PORTAL_SLUGS.includes(s)) return { key: 'feeds', label: 'Editorial Feeds', color: '#059669', bg: 'rgba(5, 150, 105, 0.12)' };
@@ -20,11 +20,23 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [groupFilter, setGroupFilter] = useState('all'); // 'all' | 'company' | 'legal' | 'desks'
   const [statusFilter, setStatusFilter] = useState('all');
   const [actionLoadingId, setActionLoadingId] = useState(null);
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setFilterDropdownOpen(false);
+      }
+    }
+    if (filterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [filterDropdownOpen]);
 
   const fetchPages = async () => {
     setLoading(true);
@@ -88,17 +100,12 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     const matchStatus = statusFilter === 'all' ||
       (statusFilter === 'published' && isLive) ||
       (statusFilter === 'draft' && !isLive);
-    const pageGroup = getPageGroup(page).key;
-    const matchGroup = groupFilter === 'all' || pageGroup === groupFilter;
     const matchCategory = !filterCategory || page.category === filterCategory;
-    return matchSearch && matchStatus && matchGroup && matchCategory;
+    return matchSearch && matchStatus && matchCategory;
   });
 
   const publishedCount = pages.filter(p => p.status === 'published' || p.status === 'active').length;
   const draftCount = pages.length - publishedCount;
-  const portalCount = pages.filter(p => getPageGroup(p).key === 'portal').length;
-  const companyCount = pages.filter(p => getPageGroup(p).key === 'company').length;
-  const feedsCount = pages.filter(p => getPageGroup(p).key === 'feeds').length;
   const totalSections = pages.reduce((acc, p) => acc + (p.sections?.length || 0), 0);
 
   // Delete confirm modal
@@ -167,95 +174,114 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
             </div>
           </div>
         </div>
-
-        <div className="apv-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <button className="apv-btn-ghost" onClick={fetchPages} title="Refresh">
-            <RefreshCw size={15} className={loading ? 'apv-spin' : ''} />
-            <span>Refresh</span>
-          </button>
-          <button className="apv-btn-primary" onClick={() => onNavigate('/admin/pages/create')}>
-            <FilePlus2 size={16} />
-            <span>New Page</span>
-          </button>
-        </div>
       </div>
 
       {/* ── Filters & Search Bar ── */}
-      <div className="apv-toolbar" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'stretch' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          {/* Group Category Filters */}
-          <div className="apv-filter-pills" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {[
-              { key: 'all', label: 'All Pages', count: pages.length },
-              { key: 'portal', label: 'Site Architecture', count: portalCount, color: '#7c3aed' },
-              { key: 'company', label: 'Company & Connect', count: companyCount, color: '#2563eb' },
-              { key: 'feeds', label: 'Editorial Feeds', count: feedsCount, color: '#059669' },
-            ].map(g => (
-              <button
-                key={g.key}
-                className={`apv-pill ${groupFilter === g.key ? 'active' : ''}`}
-                onClick={() => setGroupFilter(g.key)}
-                style={groupFilter === g.key && g.color ? { borderColor: g.color } : {}}
-              >
-                {g.label}
-                <span className="apv-pill-count">{g.count}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="apv-view-toggle">
-            <button
-              className={`apv-view-btn ${viewMode === 'table' ? 'active' : ''}`}
-              onClick={() => setViewMode('table')}
-              title="Table view"
-            >
-              <List size={15} />
+      <div className="apv-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div className="apv-search-wrap" style={{ flex: '1', minWidth: '260px' }}>
+          <Search size={15} className="apv-search-icon" />
+          <input
+            type="text"
+            className="apv-search-input"
+            placeholder="Search by title, description, or slug…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="apv-search-clear" onClick={() => setSearchQuery('')}>
+              <X size={14} />
             </button>
-            <button
-              className={`apv-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid view"
-            >
-              <LayoutGrid size={15} />
-            </button>
-          </div>
+          )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div className="apv-search-wrap" style={{ flex: '1', minWidth: '260px' }}>
-            <Search size={15} className="apv-search-icon" />
-            <input
-              type="text"
-              className="apv-search-input"
-              placeholder="Search by title, description, or slug…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+        <div className="apv-filter-wrap" ref={filterRef}>
+          <button
+            type="button"
+            className={`apv-filter-btn ${statusFilter !== 'all' ? 'active' : ''}`}
+            onClick={() => setFilterDropdownOpen(prev => !prev)}
+            aria-expanded={filterDropdownOpen}
+          >
+            <Filter size={15} />
+            <span>
+              {statusFilter === 'all'
+                ? 'Filter'
+                : statusFilter === 'published'
+                ? 'Filter: Live'
+                : 'Filter: Draft'}
+            </span>
+            <span className="apv-filter-count-badge">
+              {statusFilter === 'all' ? pages.length : statusFilter === 'published' ? publishedCount : draftCount}
+            </span>
+            <ChevronDown
+              size={13}
+              style={{
+                transform: filterDropdownOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.18s ease'
+              }}
             />
-            {searchQuery && (
-              <button className="apv-search-clear" onClick={() => setSearchQuery('')}>
-                <X size={14} />
-              </button>
-            )}
-          </div>
+          </button>
 
-          <div className="apv-filter-pills">
-            {[
-              { key: 'all', label: 'All Status', count: pages.length },
-              { key: 'published', label: 'Live', count: publishedCount },
-              { key: 'draft', label: 'Draft', count: draftCount },
-            ].map(f => (
-              <button
-                key={f.key}
-                className={`apv-pill ${statusFilter === f.key ? 'active' : ''}`}
-                onClick={() => setStatusFilter(f.key)}
-              >
-                {f.key === 'published' && <span className="apv-pill-dot green" />}
-                {f.key === 'draft' && <span className="apv-pill-dot amber" />}
-                {f.label}
-                <span className="apv-pill-count">{f.count}</span>
-              </button>
-            ))}
-          </div>
+          {filterDropdownOpen && (
+            <div className="apv-filter-popover">
+              <div className="apv-filter-popover-header">Filter by Status</div>
+
+              {[
+                { key: 'all', label: 'All Status', count: pages.length },
+                { key: 'published', label: 'Live / Published', count: publishedCount, dot: '#10b981' },
+                { key: 'draft', label: 'Draft', count: draftCount, dot: '#f59e0b' },
+              ].map(opt => {
+                const isSelected = statusFilter === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={`apv-filter-option ${isSelected ? 'selected' : ''}`}
+                    onClick={() => {
+                      setStatusFilter(opt.key);
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {opt.dot ? (
+                        <span
+                          style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: opt.dot,
+                            flexShrink: 0
+                          }}
+                        />
+                      ) : (
+                        <span style={{ width: '8px' }} />
+                      )}
+                      <span>{opt.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span className="apv-filter-option-count">{opt.count}</span>
+                      {isSelected && <Check size={14} className="apv-filter-check" />}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {statusFilter !== 'all' && (
+                <>
+                  <div className="apv-filter-popover-divider" />
+                  <button
+                    type="button"
+                    className="apv-filter-reset-btn"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    Reset to All Status
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -284,7 +310,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
               </button>
             )}
           </div>
-        ) : viewMode === 'table' ? (
+        ) : (
           /* TABLE VIEW */
           <div className="apv-table-wrap">
             <table className="apv-table">
@@ -303,10 +329,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                   const sections = page.sections?.length || 0;
                   const isActing = actionLoadingId === page.id;
                   const grp = getPageGroup(page);
-                  const isCore = ['home', 'about', 'editorial-team', 'careers', 'pitch', 'privacy', 'terms', 'disclaimer'].includes((page.slug || page.id || '').toLowerCase());
                   const targetSlug = page.slug || page.id || '';
                   const previewUrl = (!targetSlug || targetSlug === 'home' || targetSlug === '/') ? '/' : `/${targetSlug.replace(/^\/+/, '')}`;
-                  const hasHero = page.sections?.some(s => s.type === 'hero' || s.type === 'hero_popular' || s.id === 'hero_popular' || (s.type || '').toLowerCase().includes('hero')) || page.id === 'home' || page.slug === '' || page.slug === 'home';
 
                   return (
                     <tr key={page.id || page._id || targetSlug} className="apv-tr">
@@ -364,51 +388,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                       <td className="apv-td" style={{ textAlign: 'right' }}>
                         <div className="apv-actions">
                           <button
-                            className="apv-action-btn live-studio"
-                            onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveStudio=true`)}
-                            style={{
-                              background: (targetSlug === 'home' || page.id === 'home' || !targetSlug) ? 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)' : 'linear-gradient(135deg, rgba(234, 88, 12, 0.16) 0%, rgba(249, 115, 22, 0.1) 100%)',
-                              color: (targetSlug === 'home' || page.id === 'home' || !targetSlug) ? '#ffffff' : '#ea580c',
-                              border: '1px solid rgba(234, 88, 12, 0.38)',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              fontWeight: 800,
-                              fontSize: '0.75rem',
-                              cursor: 'pointer',
-                              boxShadow: (targetSlug === 'home' || page.id === 'home' || !targetSlug) ? '0 2px 8px rgba(234, 88, 12, 0.35)' : 'none'
-                            }}
-                            title={(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? "Open Whole Homepage Visual Live Studio" : "Open Visual Live Studio for this page"}
-                          >
-                            <Sparkles size={12} fill={(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? "#ffffff" : "none"} />
-                            <span>{(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? '⚡ Whole Home Studio' : 'Live Edit'}</span>
-                          </button>
-                          {hasHero && (
-                            <button
-                              className="apv-action-btn live-hero"
-                              onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveHero=true`)}
-                              style={{
-                                background: 'rgba(234, 88, 12, 0.12)',
-                                color: '#ea580c',
-                                border: '1px solid rgba(234, 88, 12, 0.35)',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                fontWeight: 700,
-                                fontSize: '0.75rem',
-                                cursor: 'pointer'
-                              }}
-                              title="Open Live WYSIWYG Banner Studio for this page"
-                            >
-                              <Sparkles size={12} />
-                              <span>Hero Banner</span>
-                            </button>
-                          )}
-                          <button
                             className="apv-action-btn preview"
                             onClick={() => window.open(previewUrl, '_blank')}
                             title="Preview public page"
@@ -423,16 +402,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                             <Edit2 size={14} />
                             <span>Edit</span>
                           </button>
-                          {!isCore && (
-                            <button
-                              className="apv-action-btn delete"
-                              onClick={() => setDeleteConfirmId(page.id)}
-                              disabled={isActing}
-                              title="Delete page"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -440,132 +409,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                 })}
               </tbody>
             </table>
-          </div>
-        ) : (
-          /* GRID VIEW */
-          <div className="apv-grid">
-            {filteredPages.map((page) => {
-              const isLive = page.status === 'published' || page.status === 'active';
-              const sections = page.sections?.length || 0;
-              const isActing = actionLoadingId === page.id;
-              const grp = getPageGroup(page);
-              const isCore = ['home', 'about', 'editorial-team', 'careers', 'pitch', 'privacy', 'terms', 'disclaimer'].includes((page.slug || page.id || '').toLowerCase());
-              const targetSlug = page.slug || page.id || '';
-              const previewUrl = (!targetSlug || targetSlug === 'home' || targetSlug === '/') ? '/' : `/${targetSlug.replace(/^\/+/, '')}`;
-              const hasHero = page.sections?.some(s => s.type === 'hero' || s.type === 'hero_popular' || s.id === 'hero_popular' || (s.type || '').toLowerCase().includes('hero')) || page.id === 'home' || page.slug === '' || page.slug === 'home';
-
-              return (
-                <div key={page.id || page._id || targetSlug} className="apv-grid-card">
-                  <div className="apv-grid-card-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span className={`apv-status-btn ${isLive ? 'live' : 'draft'}`} style={{ pointerEvents: 'none' }}>
-                        <span className="apv-status-dot" />
-                        {isLive ? 'Live' : 'Draft'}
-                      </span>
-                      <span 
-                        style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 750,
-                          padding: '0.12rem 0.45rem',
-                          borderRadius: '6px',
-                          color: grp.color,
-                          background: grp.bg,
-                          textTransform: 'uppercase'
-                        }}
-                      >
-                        {grp.label}
-                      </span>
-                    </div>
-                    <button
-                      className="apv-action-btn preview"
-                      onClick={() => window.open(previewUrl, '_blank')}
-                      title="Preview"
-                    >
-                      <ArrowUpRight size={14} />
-                    </button>
-                  </div>
-
-                  <div className="apv-grid-card-body">
-                    <h4 className="apv-grid-title">{page.title}</h4>
-                    {page.description && (
-                      <p className="apv-grid-desc">{page.description}</p>
-                    )}
-                    <code className="apv-slug" style={{ marginTop: '0.5rem', display: 'inline-block' }}>{previewUrl}</code>
-                  </div>
-
-                  <div className="apv-grid-card-footer">
-                    <span className="apv-sections-badge">
-                      <Layers size={12} />
-                      {sections} section{sections !== 1 ? 's' : ''}
-                    </span>
-                    <div className="apv-actions">
-                      <button
-                        className="apv-action-btn live-studio"
-                        onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveStudio=true`)}
-                        style={{
-                          background: (targetSlug === 'home' || page.id === 'home' || !targetSlug) ? 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)' : 'linear-gradient(135deg, rgba(234, 88, 12, 0.16) 0%, rgba(249, 115, 22, 0.1) 100%)',
-                          color: (targetSlug === 'home' || page.id === 'home' || !targetSlug) ? '#ffffff' : '#ea580c',
-                          border: '1px solid rgba(234, 88, 12, 0.38)',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontWeight: 800,
-                          fontSize: '0.73rem',
-                          cursor: 'pointer'
-                        }}
-                        title={(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? "Open Whole Homepage Visual Live Studio" : "Open Visual Live Studio for this page"}
-                      >
-                        <Sparkles size={11} fill={(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? "#ffffff" : "none"} />
-                        <span>{(targetSlug === 'home' || page.id === 'home' || !targetSlug) ? '⚡ Whole Home Studio' : 'Live Edit'}</span>
-                      </button>
-                      {hasHero && (
-                        <button
-                          className="apv-action-btn live-hero"
-                          onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveHero=true`)}
-                          style={{
-                            background: 'rgba(234, 88, 12, 0.12)',
-                            color: '#ea580c',
-                            border: '1px solid rgba(234, 88, 12, 0.35)',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            fontWeight: 700,
-                            fontSize: '0.73rem',
-                            cursor: 'pointer'
-                          }}
-                          title="Open Live WYSIWYG Banner Studio"
-                        >
-                          <Sparkles size={11} />
-                          <span>Hero</span>
-                        </button>
-                      )}
-                      <button
-                        className="apv-action-btn edit"
-                        onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`)}
-                        title="Edit page & sections"
-                      >
-                        <Edit2 size={13} />
-                        <span>Edit</span>
-                      </button>
-                      {!isCore && (
-                        <button
-                          className="apv-action-btn delete"
-                          onClick={() => setDeleteConfirmId(page.id)}
-                          disabled={isActing}
-                          title="Delete"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         )}
 

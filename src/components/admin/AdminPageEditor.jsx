@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Globe, Eye, Plus, Edit2, Trash2, 
+  Globe, Eye, Plus, Trash2, 
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
   Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles
 } from 'lucide-react';
@@ -370,11 +370,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
   };
 
-  const handlePreview = () => {
-    const previewSlug = (!slug || slug === 'home' || slug === '/') ? '' : slug.replace(/^\/+/, '');
-    window.open(`/${previewSlug}?preview=true`, '_blank');
-  };
-
   if (loading) {
     return (
       <div className="admin-view-container">
@@ -409,40 +404,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
   return (
     <div className="admin-view-container">
-      {/* Top Bar with Global Actions */}
-      <div className="admin-view-header" style={{ justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
-        <div className="header-actions-group">
-          <button
-            type="button"
-            className="btn-admin-secondary"
-            onClick={handlePreview}
-            title="Preview Page"
-          >
-            <Eye size={15} />
-            <span>Preview</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn-admin-secondary"
-            onClick={() => handleSavePage('draft')}
-            disabled={saving}
-          >
-            <span>Save Draft</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn-admin-primary"
-            onClick={() => handleSavePage('published')}
-            disabled={saving}
-          >
-            <CheckCircle2 size={16} />
-            <span>{isLive ? 'Update Published' : 'Publish Live'}</span>
-          </button>
-        </div>
-      </div>
-
       {/* Segmented Editor Tabs */}
       <div className="admin-segmented-tabs-bar">
         <button
@@ -472,46 +433,26 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         <div className="section-builder-wrapper">
           <div className="section-builder-top">
             <div>
-              <h3>Page Sections Layout</h3>
-              <p>Reorder, configure, and enable/disable sections. Sections are rendered dynamically in this exact sequence.</p>
+              <h3 style={{ margin: 0 }}>Page Sections Layout</h3>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className="btn-admin-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.12) 0%, rgba(249, 115, 22, 0.08) 100%)',
-                  border: '1.5px solid rgba(234, 88, 12, 0.35)',
-                  color: '#ea580c',
-                  fontWeight: 750,
-                  padding: '7px 14px',
-                  borderRadius: '8px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => {
-                  if (pageId === 'home') {
-                    setIsWholeHomeStudioOpen(true);
-                  } else if (sections.length > 0) {
-                    setLiveEditingSection(sections[0]);
-                  } else {
-                    onShowToast?.('Please add a section first.');
-                  }
-                }}
-                title={pageId === 'home' ? 'Launch Whole Homepage Live Visual Studio' : 'Launch Live Visual Editor Studio for Sections'}
+                onClick={() => handleSavePage('draft')}
+                disabled={saving}
               >
-                <Sparkles size={16} />
-                <span>{pageId === 'home' ? '⚡ Whole Homepage Live Studio' : 'Live Visual Builder'}</span>
+                <span>Save Draft</span>
               </button>
+
               <button
                 type="button"
                 className="btn-admin-primary"
-                onClick={() => setIsAddSectionOpen(true)}
+                onClick={() => handleSavePage('published')}
+                disabled={saving}
               >
-                <Plus size={16} />
-                <span>+ Add Section</span>
+                <CheckCircle2 size={16} />
+                <span>{isLive ? 'Update Published' : 'Publish Live'}</span>
               </button>
             </div>
           </div>
@@ -612,16 +553,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       >
                         <Sparkles size={15} />
                         <span>Live Edit</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn-section-action edit"
-                        onClick={() => setEditingSection(sec)}
-                        title="Edit Section Settings & Form"
-                      >
-                        <Edit2 size={15} />
-                        <span>Edit Form</span>
                       </button>
 
                       <button
@@ -744,6 +675,26 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                   onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid var(--border-light, #e2e8f0)' }}>
+              <button
+                type="button"
+                className="btn-admin-primary"
+                onClick={() => handleSavePage()}
+                disabled={saving}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 650,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>{saving ? 'Saving...' : 'Save Page & SEO Settings'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -953,7 +904,12 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           isOpen={isWholeHomeStudioOpen}
           initialSections={sections}
           stories={ALL_STORIES}
-          onClose={() => setIsWholeHomeStudioOpen(false)}
+          onClose={() => {
+            setIsWholeHomeStudioOpen(false);
+            if (typeof window !== 'undefined' && window.location.search.includes('liveStudio=true')) {
+              window.history.replaceState(null, '', `/admin/pages/${pageId}/edit`);
+            }
+          }}
           onSaveSuccess={(updatedSections) => {
             setSections(updatedSections);
             onShowToast?.('Whole homepage layout and articles permanently saved live!');

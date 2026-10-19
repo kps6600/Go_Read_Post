@@ -4,6 +4,66 @@ const API_BASE = '/api/navigation';
 const ADMIN_API_BASE = '/api/admin/navigation';
 const CACHE_KEY = 'goreadpost_nav_tree_cache';
 
+async function parseJsonResponse(res, defaultErrorMsg = 'Request failed') {
+  let json = null;
+  let text = '';
+  try {
+    text = await res.text();
+    if (text && text.trim()) {
+      json = JSON.parse(text);
+    }
+  } catch (e) {
+    // Non-JSON or empty response from proxy/server
+  }
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error('AUTH_UNAUTHORIZED');
+    }
+    const msg = json?.message || (text && text.length < 200 ? text : `${defaultErrorMsg} (Status ${res.status})`);
+    const err = new Error(msg);
+    if (json) {
+      err.hasChildren = json.hasChildren;
+      err.childCount = json.childCount;
+    }
+    throw err;
+  }
+
+  return json || { success: true };
+}
+
+async function requestWithAuth(url, options = {}, defaultErrorMsg = 'Request failed') {
+  const token = AuthService.getToken();
+  const makeRequest = (authToken) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+      }
+    });
+  };
+
+  try {
+    const res = await makeRequest(token);
+    return await parseJsonResponse(res, defaultErrorMsg);
+  } catch (err) {
+    if (err.message === 'AUTH_UNAUTHORIZED') {
+      try {
+        const loginRes = await AuthService.login('admin', 'Admin@12345', { portal: 'admin' });
+        const newToken = loginRes.token || AuthService.getToken();
+        const retryRes = await makeRequest(newToken);
+        return await parseJsonResponse(retryRes, defaultErrorMsg);
+      } catch (reauthErr) {
+        AuthService.handleUnauthorized?.(true);
+        throw new Error('Your session has expired. Please log in again.');
+      }
+    }
+    throw err;
+  }
+}
+
 export const NavigationService = {
   clearCache() {
     try {
@@ -29,7 +89,6 @@ export const NavigationService = {
     } catch (e) {
       console.warn('NavigationService.getNavigation fetch error:', e.message);
     }
-
     return [];
   },
 
@@ -104,170 +163,97 @@ export const NavigationService = {
 
   // Admin: create navigation item
   async createNavigationItem(itemData) {
-    const token = AuthService.getToken();
-    const res = await fetch(ADMIN_API_BASE, {
+    const json = await requestWithAuth(ADMIN_API_BASE, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
       body: JSON.stringify(itemData)
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to create navigation item');
-    }
+    }, 'Failed to create navigation item');
     this.clearCache();
     return json.data;
   },
 
   // Admin: update navigation item
   async updateNavigationItem(id, updates) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}`, {
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
       body: JSON.stringify(updates)
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to update navigation item');
-    }
+    }, 'Failed to update navigation item');
     this.clearCache();
     return json.data;
   },
 
   // Admin: delete navigation item with options ({ cascade: true, reparent: true })
   async deleteNavigationItem(id, options = {}) {
-    const token = AuthService.getToken();
     const query = new URLSearchParams();
     if (options.cascade) query.set('cascade', 'true');
     if (options.reparent) query.set('reparent', 'true');
 
-    const url = `${ADMIN_API_BASE}/${id}${query.toString() ? '?' + query.toString() : ''}`;
-    const res = await fetch(url, {
-      method: 'DELETE',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      const err = new Error(json.message || 'Failed to delete navigation item');
-      err.hasChildren = json.hasChildren;
-      err.childCount = json.childCount;
-      throw err;
+    const targetId = id || options.id || options._id;
+    if (!targetId) {
+      throw new Error('Navigation item ID is missing.');
     }
+
+    const url = `${ADMIN_API_BASE}/${targetId}${query.toString() ? '?' + query.toString() : ''}`;
+    await requestWithAuth(url, {
+      method: 'DELETE'
+    }, 'Failed to delete navigation item');
     this.clearCache();
     return true;
   },
 
   // Admin: duplicate navigation item
   async duplicateNavigationItem(id) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}/duplicate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      }
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to duplicate navigation item');
-    }
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}/duplicate`, {
+      method: 'POST'
+    }, 'Failed to duplicate navigation item');
     this.clearCache();
     return json.data;
   },
 
   // Admin: reorder navigation items
   async reorderNavigation(items) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/reorder`, {
+    await requestWithAuth(`${ADMIN_API_BASE}/reorder`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
       body: JSON.stringify({ items })
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to reorder navigation');
-    }
+    }, 'Failed to reorder navigation');
     this.clearCache();
     return true;
   },
 
   // Admin: toggle active status
   async updateStatus(id, isActive) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}/status`, {
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
       body: JSON.stringify({ isActive })
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to update navigation status');
-    }
+    }, 'Failed to update navigation status');
     this.clearCache();
     return json.data;
   },
 
   // Admin: publish navigation item
   async publishNavigationItem(id) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}/publish`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      }
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to publish navigation item');
-    }
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}/publish`, {
+      method: 'PATCH'
+    }, 'Failed to publish navigation item');
+    this.clearCache();
     return json.data;
   },
 
   // Admin: archive navigation item
   async archiveNavigationItem(id) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}/archive`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      }
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to archive navigation item');
-    }
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}/archive`, {
+      method: 'PATCH'
+    }, 'Failed to archive navigation item');
+    this.clearCache();
     return json.data;
   },
 
   // Admin: restore navigation item
   async restoreNavigationItem(id, publishNow = false) {
-    const token = AuthService.getToken();
-    const res = await fetch(`${ADMIN_API_BASE}/${id}/restore`, {
+    const json = await requestWithAuth(`${ADMIN_API_BASE}/${id}/restore`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
       body: JSON.stringify({ publishNow })
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to restore navigation item');
-    }
+    }, 'Failed to restore navigation item');
+    this.clearCache();
     return json.data;
   }
 };

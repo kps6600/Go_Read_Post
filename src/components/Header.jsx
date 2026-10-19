@@ -34,6 +34,7 @@ export default function Header({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isNavHidden, setIsNavHidden] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => propUser || AuthService.getUser());
   const [logoImgFailed, setLogoImgFailed] = useState(false);
   const { navigationTree, loading: navLoading } = useNavigation();
@@ -54,6 +55,7 @@ export default function Header({
     const handleLocationChange = () => {
       try {
         setCurrentPath(window.location.pathname);
+        setIsNavHidden(false);
       } catch (e) {}
     };
     window.addEventListener('popstate', handleLocationChange);
@@ -82,15 +84,25 @@ export default function Header({
     return () => window.removeEventListener('auth:change', handleAuth);
   }, []);
 
-  // Live scroll progress
+  // Live scroll progress & header sticky status
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        const progress = (window.scrollY / totalHeight) * 100;
-        setScrollProgress(Math.min(100, Math.max(0, progress)));
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = Math.max(0, window.scrollY);
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          if (totalHeight > 0) {
+            const progress = (currentScrollY / totalHeight) * 100;
+            setScrollProgress(Math.min(100, Math.max(0, progress)));
+          }
+          setIsScrolled(currentScrollY > 20);
+          setIsNavHidden(false);
+          ticking = false;
+        });
+        ticking = true;
       }
-      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -133,11 +145,9 @@ export default function Header({
   });
 
   // Derive normalized dynamic nav links directly from MongoDB navigation API
-  const sourceNav = (!navLoading && Array.isArray(navigationTree))
+  const sourceNav = (Array.isArray(navigationTree) && navigationTree.length > 0)
     ? navigationTree
-    : (navigationTree && navigationTree.length > 0
-        ? navigationTree
-        : (navLinks && navLinks.length > 0 ? navLinks : NAV_LINKS));
+    : (navLinks && navLinks.length > 0 ? navLinks : NAV_LINKS);
 
   const effectiveNavLinks = sourceNav
     .filter(link => {
@@ -816,38 +826,6 @@ export default function Header({
 
   return (
     <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''}`}>
-      {/* Optional Breaking News Top Ticker */}
-      {siteSettings?.showAnnouncement && siteSettings?.announcementText && (
-        <div style={{
-          background: 'var(--brand-primary, #ea580c)',
-          color: '#ffffff',
-          fontSize: '1.02rem',
-          fontWeight: 700,
-          padding: '8px 1.25rem',
-          textAlign: 'center',
-          letterSpacing: '0.015em',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px'
-        }}>
-          <span 
-            style={{ cursor: siteSettings.announcementLink ? 'pointer' : 'default', textDecoration: siteSettings.announcementLink ? 'underline' : 'none' }}
-            onClick={() => {
-              if (siteSettings.announcementLink) {
-                if (siteSettings.announcementLink.startsWith('http')) {
-                  window.open(siteSettings.announcementLink, '_blank', 'noopener,noreferrer');
-                } else {
-                  window.history.pushState(null, '', siteSettings.announcementLink);
-                  window.dispatchEvent(new Event('popstate'));
-                }
-              }
-            }}
-          >
-            {siteSettings.announcementText}
-          </span>
-        </div>
-      )}
 
       {/* Top Reading Progress Bar */}
       <div 
@@ -1385,14 +1363,32 @@ export default function Header({
                   {/* 2. Other Categorized Child Dropdowns (CMS submenus, Custom, Resources, Reports) */}
                   {hasDropdown && isDropdownOpen && link.id !== 'brands' && link.dropdownColumns && link.dropdownColumns.length > 0 && (
                     <div 
-                      className={`modern-mega-dropdown dropdown-align-center ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column' : ''}`}
+                      className={`modern-mega-dropdown dropdown-align-center cols-${link.dropdownColumns.length} ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column' : ''}`}
+                      style={{
+                        width: 'max-content',
+                        minWidth: link.dropdownColumns.length === 1 
+                          ? '220px' 
+                          : link.dropdownColumns.length === 2 
+                            ? '450px' 
+                            : '680px',
+                        maxWidth: 'calc(100vw - 2rem)'
+                      }}
                       onMouseEnter={() => {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setActiveDropdown(link.id);
                       }}
                       onMouseLeave={handleMouseLeave}
                     >
-                      <div className={`reports-cols-grid ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column-grid' : ''}`}>
+                      <div 
+                        className={`reports-cols-grid cols-${link.dropdownColumns.length} ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column-grid' : ''}`}
+                        style={{
+                          gridTemplateColumns: link.dropdownColumns.length === 1 
+                            ? '1fr' 
+                            : `repeat(${link.dropdownColumns.length}, minmax(180px, 230px))`,
+                          gap: '1.5rem',
+                          padding: '0'
+                        }}
+                      >
                         {link.dropdownColumns.map((col, cIdx) => (
                           <div key={cIdx} className="reports-column">
                             <div className="reports-col-title">{col.title}</div>

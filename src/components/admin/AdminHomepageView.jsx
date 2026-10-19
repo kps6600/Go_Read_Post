@@ -80,7 +80,23 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
   const [selectedSectionForArticles, setSelectedSectionForArticles] = useState(null);
   const [articleSearch, setArticleSearch] = useState('');
   const [liveEditingHomepageSec, setLiveEditingHomepageSec] = useState(null);
-  const [isWholeHomeStudioOpen, setIsWholeHomeStudioOpen] = useState(false);
+  const [isWholeHomeStudioOpen, setIsWholeHomeStudioOpen] = useState(() => {
+    return typeof window !== 'undefined' && (
+      window.location.search.includes('studio=true') || 
+      window.location.search.includes('liveStudio=true') ||
+      window.location.pathname.includes('/studio')
+    );
+  });
+
+  useEffect(() => {
+    if (
+      window.location.search.includes('studio=true') || 
+      window.location.search.includes('liveStudio=true') ||
+      window.location.pathname.includes('/studio')
+    ) {
+      setIsWholeHomeStudioOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -303,6 +319,29 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
             <ExternalLink size={14} />
             <span>Preview Live Site</span>
           </button>
+
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('/admin/pages/home/edit')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 650,
+                color: '#475569',
+                cursor: 'pointer'
+              }}
+              title="Edit homepage SEO and metadata in Page Editor"
+            >
+              <FileText size={14} />
+              <span>SEO &amp; Meta</span>
+            </button>
+          )}
 
           <button
             onClick={handleSave}
@@ -742,9 +781,15 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
           isOpen={isWholeHomeStudioOpen}
           initialSections={sections}
           stories={allArticles.length > 0 ? allArticles : ALL_STORIES}
-          onClose={() => setIsWholeHomeStudioOpen(false)}
+          onClose={() => {
+            setIsWholeHomeStudioOpen(false);
+            if (typeof window !== 'undefined' && (window.location.search.includes('studio=true') || window.location.search.includes('liveStudio=true'))) {
+              window.history.replaceState(null, '', '/admin/homepage');
+            }
+          }}
           onSaveSuccess={(updated) => {
-            setSections(updated);
+            if (updated) setSections(updated);
+            loadData();
             onShowToast?.('Whole homepage layout and articles permanently saved live!');
           }}
         />
