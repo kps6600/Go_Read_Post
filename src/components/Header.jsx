@@ -65,6 +65,16 @@ export default function Header({
   const searchInputRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
   const userMenuRef = useRef(null);
+  const searchFocusedRef = useRef(false);
+  const mobileSearchOpenRef = useRef(false);
+
+  useEffect(() => {
+    searchFocusedRef.current = searchFocused;
+  }, [searchFocused]);
+
+  useEffect(() => {
+    mobileSearchOpenRef.current = mobileSearchOpen;
+  }, [mobileSearchOpen]);
 
   useEffect(() => {
     if (propUser !== undefined) {
@@ -84,9 +94,11 @@ export default function Header({
     return () => window.removeEventListener('auth:change', handleAuth);
   }, []);
 
-  // Live scroll progress & header sticky status
+  // Live scroll progress & smart hide-on-scroll header behavior
   useEffect(() => {
     let ticking = false;
+    let lastScrollY = window.scrollY || 0;
+    const scrollThreshold = 10; // Minimum scroll delta in px to prevent micro-jitter
 
     const handleScroll = () => {
       if (!ticking) {
@@ -98,7 +110,31 @@ export default function Header({
             setScrollProgress(Math.min(100, Math.max(0, progress)));
           }
           setIsScrolled(currentScrollY > 20);
-          setIsNavHidden(false);
+
+          // If search is active/focused or mobile search drawer is open, keep navbar visible
+          if (searchFocusedRef.current || mobileSearchOpenRef.current) {
+            setIsNavHidden(false);
+            lastScrollY = currentScrollY;
+            ticking = false;
+            return;
+          }
+
+          const diff = currentScrollY - lastScrollY;
+
+          if (currentScrollY <= 60) {
+            // Near the top of the page, always show navbar
+            setIsNavHidden(false);
+          } else if (diff > scrollThreshold) {
+            // Scrolling DOWN -> hide navbar
+            setIsNavHidden(true);
+            setActiveDropdown(null);
+            setUserDropdownOpen(false);
+          } else if (diff < -scrollThreshold) {
+            // Scrolling UP -> reveal navbar
+            setIsNavHidden(false);
+          }
+
+          lastScrollY = currentScrollY;
           ticking = false;
         });
         ticking = true;
@@ -825,7 +861,7 @@ export default function Header({
   const isMoreDropdownOpen = activeDropdown === 'more';
 
   return (
-    <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''}`}>
+    <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''} ${isNavHidden ? 'header-hidden' : ''}`}>
 
       {/* Top Reading Progress Bar */}
       <div 

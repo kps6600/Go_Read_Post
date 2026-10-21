@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Check, Sparkles, Plus, Trash2, 
-  ArrowRight, ArrowLeft, ChevronLeft, ChevronRight,
+  ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type,
-  Mail, Bookmark, Zap, CheckCircle, LayoutGrid, Heart
+  Mail, Bookmark, Zap, CheckCircle, LayoutGrid, Heart,
+  Sliders, Filter, FileText, ExternalLink
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
+import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 import { ALL_STORIES, TOP_PICKS, SPOTLIGHT_STORIES } from '../../data/storiesData';
 import LiveBannerEditor from './LiveBannerEditor';
 import './LiveSectionEditor.css';
@@ -27,6 +29,67 @@ const CATEGORY_CHOICES = [
   { value: 'Hindi', label: 'YS Hindi Edition' }
 ];
 
+const getSafeString = (val, fallback = '') => {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number') return String(val);
+  if (typeof val === 'object') {
+    if (val.name) return String(val.name);
+    if (val.title) return String(val.title);
+    if (val.label) return String(val.label);
+    if (val.url) return String(val.url);
+    return fallback;
+  }
+  return String(val);
+};
+
+class SectionEditorErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Section editor error caught by boundary:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="lse-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{ background: '#0f172a', border: '1.5px solid #ea580c', borderRadius: '16px', padding: '2.5rem', maxWidth: '580px', color: '#fff', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+            <h3 style={{ color: '#ea580c', margin: '0 0 12px', fontSize: '1.3rem' }}>Section Visual Editor</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0 0 24px', lineHeight: 1.6 }}>
+              {this.state.error?.message || 'A data formatting issue occurred while rendering this section.'}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => this.setState({ hasError: false, error: null })}
+                style={{ background: '#ea580c', color: '#fff', border: 'none', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 750 }}
+              >
+                Reload Section
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  this.setState({ hasError: false, error: null });
+                  this.props.onClose?.();
+                }}
+                style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 750 }}
+              >
+                Close Editor
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function LiveSectionEditor({
   section,
   isOpen,
@@ -42,27 +105,31 @@ export default function LiveSectionEditor({
   const isHero = section.type === 'hero' || section.type === 'hero_popular' || section.id === 'hero_popular' || (section.type || '').toLowerCase().includes('hero');
   if (isHero) {
     return (
-      <LiveBannerEditor
+      <SectionEditorErrorBoundary onClose={onClose}>
+        <LiveBannerEditor
+          section={section}
+          isOpen={isOpen}
+          onClose={onClose}
+          onSave={onSave}
+          onAutoSave={onAutoSave}
+          stories={stories}
+          pageId={pageId}
+        />
+      </SectionEditorErrorBoundary>
+    );
+  }
+
+  return (
+    <SectionEditorErrorBoundary onClose={onClose}>
+      <LiveGenericSectionStudio
         section={section}
-        isOpen={isOpen}
         onClose={onClose}
         onSave={onSave}
         onAutoSave={onAutoSave}
         stories={stories}
         pageId={pageId}
       />
-    );
-  }
-
-  return (
-    <LiveGenericSectionStudio
-      section={section}
-      onClose={onClose}
-      onSave={onSave}
-      onAutoSave={onAutoSave}
-      stories={stories}
-      pageId={pageId}
-    />
+    </SectionEditorErrorBoundary>
   );
 }
 
@@ -79,8 +146,30 @@ function LiveGenericSectionStudio({
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
   const [availableArticles, setAvailableArticles] = useState(() => {
     if (stories && stories.length > 0) return stories;
-    return ALL_STORIES;
+    const defaults = getDefaultSeedStories();
+    return defaults.length ? defaults : ALL_STORIES;
   });
+
+
+
+  // Dedicated Article Edit Modal State
+  const [isArticleEditModalOpen, setIsArticleEditModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
+  const [articleFormData, setArticleFormData] = useState({
+    id: '',
+    title: '',
+    subtitle: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    authorName: '',
+    authorTitle: '',
+    authorAvatar: '',
+    image: '',
+    readTime: '',
+    status: 'published'
+  });
+  const [articleSaveStatus, setArticleSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
 
   // Modal Picker State
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -99,20 +188,48 @@ function LiveGenericSectionStudio({
     }
   }, [section]);
 
-  // Load published articles from database on mount
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (isArticleEditModalOpen) {
+          setIsArticleEditModalOpen(false);
+        } else if (isEditModalOpen) {
+          setIsEditModalOpen(false);
+        } else if (isPickerOpen) {
+          setIsPickerOpen(false);
+        } else {
+          onClose?.();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, isEditModalOpen, isPickerOpen, isArticleEditModalOpen]);
+
+  // Load published articles from database on mount (pulls all 500 articles across all desks)
   useEffect(() => {
     let isMounted = true;
     const fetchLiveArticles = async () => {
       try {
-        const res = await ArticleService.getArticles({ limit: 150 });
-        const list = Array.isArray(res?.data) ? res.data : [];
+        const [articleRes, storyRes] = await Promise.allSettled([
+          ArticleService.getArticles({ limit: 500 }),
+          StoryService.getStories({ limit: 500 })
+        ]);
+        const articlesList = articleRes.status === 'fulfilled' && Array.isArray(articleRes.value?.data) ? articleRes.value.data : [];
+        const storiesList = storyRes.status === 'fulfilled' && Array.isArray(storyRes.value?.data) ? storyRes.value.data : [];
+        const seedList = getDefaultSeedStories();
+        const merged = [...articlesList, ...storiesList, ...seedList];
         if (isMounted) {
-          if (list.length > 0) setAvailableArticles(list);
-          else setAvailableArticles(stories.length ? stories : ALL_STORIES);
+          if (merged.length > 0) {
+            setAvailableArticles(merged);
+          } else {
+            setAvailableArticles(stories.length ? stories : ALL_STORIES);
+          }
         }
       } catch (e) {
         if (isMounted && (!availableArticles || availableArticles.length === 0)) {
-          setAvailableArticles(ALL_STORIES);
+          setAvailableArticles(getDefaultSeedStories());
         }
       }
     };
@@ -121,15 +238,32 @@ function LiveGenericSectionStudio({
   }, []);
 
   const pool = useMemo(() => {
-    return availableArticles.length > 0 ? availableArticles : ALL_STORIES;
-  }, [availableArticles]);
+    const combined = [];
+    const seen = new Set();
+    const sourceList = [
+      ...(Array.isArray(availableArticles) ? availableArticles : []),
+      ...(Array.isArray(stories) ? stories : []),
+      ...getDefaultSeedStories(),
+      ...ALL_STORIES
+    ];
+    for (const item of sourceList) {
+      if (!item || typeof item !== 'object') continue;
+      const key = String(item.slug || item.id || item._id || item.title || '').trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
+    }
+    return combined;
+  }, [availableArticles, stories]);
 
   // Filtered articles in Picker
   const filteredPickerArticles = useMemo(() => {
     return pool.filter(a => {
-      const title = (a.title || '').toLowerCase();
-      const cat = (a.categoryLabel || a.category || '').toLowerCase();
-      const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || '')).toLowerCase();
+      if (!a) return false;
+      const title = getSafeString(a.title, '').toLowerCase();
+      const cat = getSafeString(a.categoryLabel || a.category, '').toLowerCase();
+      const author = getSafeString(typeof a.author === 'object' && a.author ? a.author.name : a.author, '').toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
 
       const matchesSearch = !q || title.includes(q) || cat.includes(q) || author.includes(q);
@@ -141,7 +275,8 @@ function LiveGenericSectionStudio({
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
     pool.forEach(a => {
-      const c = a.categoryLabel || a.category;
+      if (!a) return;
+      const c = getSafeString(a.categoryLabel || a.category, '');
       if (c && typeof c === 'string') cats.add(c.trim());
     });
     return Array.from(cats).slice(0, 10);
@@ -166,44 +301,228 @@ function LiveGenericSectionStudio({
     }
   };
 
-  const handleSaveAndApply = async () => {
-    if (onSave) {
-      await onSave(data);
-    }
-    onClose();
-  };
-
   // Section Type Identification
   const secType = (section.type || section.sectionKey || '').toLowerCase();
-  const isArticleFeed = ['stories_feed', 'latest_blogs', 'latest', 'trending', 'popular_editors', 'business', 'spotlight', 'technology', 'ai'].includes(secType);
+  const isArticleFeed = ['stories_feed', 'story_feed', 'article_feed', 'article_story_feed', 'latest_blogs', 'latest', 'trending', 'popular_editors', 'business', 'spotlight', 'technology', 'ai'].includes(secType) || secType.includes('feed') || secType.includes('story') || secType.includes('article') || secType.includes('blog');
   const isNewsletter = secType === 'newsletter';
   const isImageText = secType === 'image_text';
   const isText = secType === 'text';
   const isCTA = secType === 'cta';
   const isGridList = ['services', 'portfolio', 'testimonials', 'features', 'stats', 'brands', 'faq', 'contact'].includes(secType);
 
-  // Active Articles Calculation
-  const activeArticles = useMemo(() => {
-    if (data.hasCustomArticles && Array.isArray(data.articles)) {
-      return data.articles;
-    }
+  // Maximum articles that fit cleanly in the frontend grid without awkward trailing spaces:
+  // - Homepage grid (4 columns wide): 8 articles (exactly 2 complete rows of 4).
+  // - Latest articles page (4 columns wide): 16 articles (exactly 4 complete rows of 4).
+  const isLatestPage = pageId === 'latest' || section?.id === 'latest_feed';
+  const maxArticlesFit = isLatestPage ? 16 : (Number(data.limit) > 0 ? Number(data.limit) : 4);
+
+  // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
+  const frontendArticles = useMemo(() => {
+    const defaultLimit = maxArticlesFit;
+    const limit = Number(data.limit) > 0 ? Number(data.limit) : defaultLimit;
+    
+    // 1. If custom curated articles are pinned in data.articles, use them up to section limit (or custom length)
     if (Array.isArray(data.articles) && data.articles.length > 0) {
-      return data.articles;
+      return data.articles.filter(Boolean).slice(0, Math.min(maxArticlesFit, limit));
     }
-    const cat = (data.category || '').toLowerCase().trim();
-    let filtered = pool;
-    if (cat) {
-      const matching = pool.filter(s => (s.category || s.categoryLabel || '').toLowerCase().includes(cat));
-      if (matching.length > 0) filtered = matching;
+    
+    // 2. Otherwise compute default frontend pool matching ModernHomepageView
+    let sectionPool = [];
+    if (secType === 'trending') {
+      const trending = pool.filter(s => 
+        s && (s.isTrending || s.trending || s.tag === 'TRENDING' || s.tag === 'POPULAR' || s.tag === 'VIRAL')
+      );
+      const combined = [...trending];
+      for (const b of pool) {
+        if (combined.length >= limit) break;
+        if (!combined.some(c => String(c.id || c._id || c.slug) === String(b.id || b._id || b.slug))) {
+          combined.push(b);
+        }
+      }
+      sectionPool = combined;
+    } else if (secType === 'spotlight' || secType === 'technology' || secType === 'ai') {
+      const tech = pool.filter(s => {
+        if (!s) return false;
+        const cat = getSafeString(s.category || s.categoryLabel || s.categoryName, '').toLowerCase();
+        return cat.includes('tech') || cat.includes('ai') || cat.includes('startup') || cat.includes('enterprise');
+      });
+      const combined = [...tech];
+      for (const b of pool) {
+        if (combined.length >= limit) break;
+        if (!combined.some(c => String(c.id || c._id || c.slug) === String(b.id || b._id || b.slug))) {
+          combined.push(b);
+        }
+      }
+      sectionPool = combined;
+    } else if (secType === 'popular_editors' || secType === 'business') {
+      const picks = pool.filter(s => 
+        s && (s.isFeatured || s.tag === 'TOP PICK' || s.tag === 'FEATURED' || s.tag === 'EDITOR' || s.isLead)
+      );
+      const combined = [...picks];
+      for (const b of pool) {
+        if (combined.length >= limit) break;
+        if (!combined.some(c => String(c.id || c._id || c.slug) === String(b.id || b._id || b.slug))) {
+          combined.push(b);
+        }
+      }
+      sectionPool = combined;
+    } else {
+      // Default: Latest Blogs / Stories Feed
+      let base = pool;
+      const filterCat = getSafeString(data.category, '').toLowerCase().trim();
+      if (filterCat) {
+        const matched = pool.filter(s => getSafeString(s.category || s.categoryLabel || s.categoryName, '').toLowerCase().includes(filterCat));
+        if (matched.length > 0) base = matched;
+      }
+      sectionPool = [...base].sort((a, b) => {
+        const dateA = new Date(a?.publishedAt || a?.date || a?.createdAt || 0);
+        const dateB = new Date(b?.publishedAt || b?.date || b?.createdAt || 0);
+        return dateB - dateA;
+      });
     }
-    const limit = Number(data.limit) || 6;
-    return filtered.slice(0, limit);
-  }, [data.articles, data.hasCustomArticles, data.category, data.limit, pool]);
+
+    return sectionPool.slice(0, limit);
+  }, [data.articles, data.limit, data.category, secType, pool]);
+
+  const activeArticles = frontendArticles;
+
+  const handleSaveAndApply = async () => {
+    const finalData = {
+      ...data,
+      articles: frontendArticles,
+      limit: frontendArticles.length,
+      hasCustomArticles: true
+    };
+    setSaveStatus('saving');
+    try {
+      if (onAutoSave) {
+        await onAutoSave(finalData);
+      } else if (onSave) {
+        await onSave(finalData);
+      }
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Failed to save section:', err);
+      setSaveStatus('error');
+    }
+  };
+
+  // Dedicated Article Edit Handlers
+  const handleOpenArticleEditor = (article) => {
+    setEditingArticle(article);
+    setArticleFormData({
+      id: article._id || article.id || article.slug,
+      title: article.title || '',
+      subtitle: article.subtitle || article.excerpt || article.summary || '',
+      excerpt: article.excerpt || article.summary || article.subtitle || '',
+      content: article.content || article.body || article.excerpt || article.summary || '',
+      category: article.categoryLabel || article.categoryTag || article.categoryName || article.category || 'Startups',
+      authorName: typeof article.author === 'object' ? article.author?.name || '' : (article.authorName || article.author || 'Editorial Bureau'),
+      authorTitle: typeof article.author === 'object' ? article.author?.title || '' : (article.authorTitle || 'Senior Staff Reporter'),
+      authorAvatar: article.authorAvatar || (typeof article.author === 'object' && article.author?.avatar) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+      image: article.image || article.coverImage || (typeof article.featuredImage === 'string' ? article.featuredImage : article.featuredImage?.url) || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80',
+      readTime: article.readTime || (article.readingTime ? `${article.readingTime} min read` : '4 min read'),
+      status: article.status || 'published'
+    });
+    setArticleSaveStatus('idle');
+    setIsArticleEditModalOpen(true);
+  };
+
+  const handleSaveArticleContent = async () => {
+    if (!editingArticle) return;
+    setArticleSaveStatus('saving');
+    try {
+      const artId = editingArticle._id || editingArticle.id || articleFormData.id;
+      const payload = {
+        title: articleFormData.title,
+        subtitle: articleFormData.subtitle || articleFormData.excerpt,
+        excerpt: articleFormData.excerpt || articleFormData.subtitle,
+        content: articleFormData.content,
+        categoryName: articleFormData.category,
+        category: articleFormData.category,
+        authorName: articleFormData.authorName,
+        authorTitle: articleFormData.authorTitle,
+        authorAvatar: articleFormData.authorAvatar,
+        featuredImage: articleFormData.image,
+        image: articleFormData.image,
+        readingTime: parseInt(articleFormData.readTime, 10) || 5,
+        readTime: articleFormData.readTime,
+        status: articleFormData.status || 'published'
+      };
+
+      try {
+        await ArticleService.updateArticle(artId, payload);
+      } catch (e1) {
+        try {
+          await StoryService.updateStory(artId, payload);
+        } catch (e2) {}
+      }
+
+      const updatedArticleObj = {
+        ...editingArticle,
+        ...payload,
+        id: artId,
+        _id: artId,
+        categoryLabel: articleFormData.category
+      };
+
+      setAvailableArticles(prev => prev.map(a => String(a._id || a.id || a.slug) === String(artId) ? { ...a, ...updatedArticleObj } : a));
+
+      if (Array.isArray(data.articles) && data.articles.length > 0) {
+        const nextCustom = data.articles.map(a => String(a._id || a.id || a.slug) === String(artId) ? { ...a, ...updatedArticleObj } : a);
+        persistToDatabase({ ...data, articles: nextCustom });
+      }
+
+      setArticleSaveStatus('saved');
+      setTimeout(() => {
+        setArticleSaveStatus('idle');
+        setIsArticleEditModalOpen(false);
+      }, 700);
+    } catch (err) {
+      console.error('Failed to save article:', err);
+      setArticleSaveStatus('error');
+    }
+  };
 
   // ─────────────────────────────────────────────────────────
   // ARTICLE CURATION & REORDERING HANDLERS
   // ─────────────────────────────────────────────────────────
+  const handleAutoFillToMax = () => {
+    const needed = maxArticlesFit - activeArticles.length;
+    if (needed <= 0) return;
+    const existingKeys = new Set(activeArticles.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase()));
+    const candidates = pool.filter(p => {
+      if (!p) return false;
+      const key = String(p.slug || p.id || p._id || p.title || '').trim().toLowerCase();
+      return key && !existingKeys.has(key);
+    });
+    const toAdd = candidates.slice(0, needed).map(a => ({
+      id: a._id || a.id || `art-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      articleId: a._id || a.id,
+      title: a.title || 'Untitled Article',
+      excerpt: a.excerpt || a.summary || a.description || '',
+      category: a.categoryLabel || a.category || 'News',
+      categoryLabel: a.categoryLabel || a.category || 'News',
+      image: a.image || a.coverImage || a.fallbackImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80',
+      author: typeof a.author === 'object' ? a.author?.name : (a.author || 'Editorial Bureau'),
+      authorAvatar: a.authorAvatar || a.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+      date: a.publishedAt || a.date || 'Today',
+      readTime: a.readTime || '4 min read',
+      slug: a.slug || a._id || a.id,
+      link: a.slug ? `/stories/${a.slug}` : `/stories/${a._id || a.id}`,
+      isCustom: true
+    }));
+    const nextArticles = [...activeArticles, ...toAdd];
+    const nextData = { ...data, articles: nextArticles, limit: nextArticles.length, hasCustomArticles: true };
+    persistToDatabase(nextData);
+  };
+
   const handleOpenPicker = (target) => {
+    if (target?.type === 'add' && activeArticles.length >= maxArticlesFit) {
+      alert(`This section has reached the maximum capacity of ${maxArticlesFit} articles that fit on the frontend grid. Use Replace (↻) or Delete (🗑) on an existing card to change articles.`);
+      return;
+    }
     setPickerTarget(target);
     setPickerSearch('');
     setPickerCategory('All');
@@ -232,6 +551,10 @@ function LiveGenericSectionStudio({
     if (pickerTarget?.type === 'replace' && typeof pickerTarget.index === 'number') {
       nextArticles[pickerTarget.index] = formatted;
     } else {
+      if (nextArticles.length >= maxArticlesFit) {
+        setIsPickerOpen(false);
+        return;
+      }
       nextArticles.push(formatted);
     }
 
@@ -302,7 +625,10 @@ function LiveGenericSectionStudio({
   };
 
   const getSectionTitle = () => {
-    return data.title || data.heading || data.headline || section.title || `${section.type?.toUpperCase()} Section`;
+    const raw = data.title || data.heading || data.headline || section.title;
+    if (raw && !raw.includes('STORIES_FEED')) return raw;
+    if (secType === 'stories_feed' || secType.includes('feed')) return 'Article & Story Feed';
+    return 'Latest Articles';
   };
 
   const getSectionSubtitle = () => {
@@ -310,196 +636,103 @@ function LiveGenericSectionStudio({
   };
 
   return (
-    <div className="lse-overlay">
-      {/* ── Studio Top Header Bar ── */}
-      <header className="lse-header">
-        <div className="lse-header-left">
-          <div className="lse-title-wrap">
-            <span className="lse-live-pill">
-              <span className="lse-live-dot" />
-              LIVE SECTION STUDIO
-            </span>
-            <h3 className="lse-title">
-              <Sparkles size={17} color="#fb923c" />
-              <span>{getSectionTitle()}</span>
-            </h3>
-          </div>
-        </div>
-
-        {/* Viewport Device Toggle */}
-        <div className="lse-header-center">
-          <div className="lse-device-toggle">
-            <button
-              type="button"
-              className={`lse-device-btn ${deviceView === 'desktop' ? 'active' : ''}`}
-              onClick={() => setDeviceView('desktop')}
-              title="Desktop Preview"
-            >
-              <Monitor size={15} />
-              <span>Desktop</span>
-            </button>
-            <button
-              type="button"
-              className={`lse-device-btn ${deviceView === 'mobile' ? 'active' : ''}`}
-              onClick={() => setDeviceView('mobile')}
-              title="Mobile Responsive Preview"
-            >
-              <Smartphone size={15} />
-              <span>Mobile</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Header Actions */}
-        <div className="lse-header-actions">
-          {saveStatus === 'saving' && (
-            <span className="lse-save-indicator saving">
-              <RefreshCw size={13} className="lse-spin" />
-              <span>Saving to database...</span>
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="lse-save-indicator saved">
-              <Check size={13} />
-              <span>Saved permanently</span>
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="lse-save-indicator error">
-              <X size={13} />
-              <span>Save error</span>
-            </span>
-          )}
-
-          <button
-            type="button"
-            className="lse-btn-cancel"
-            onClick={onClose}
-          >
-            <X size={15} />
-            <span>Discard</span>
-          </button>
-          <button
-            type="button"
-            className="lse-btn-save"
-            onClick={handleSaveAndApply}
-          >
+    <div className="lse-overlay dedicated-page-view">
+      {/* Sleek Floating Save Button */}
+      <button
+        type="button"
+        className="lse-floating-save-btn"
+        onClick={handleSaveAndApply}
+        disabled={saveStatus === 'saving'}
+        title="Save changes live to homepage"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '60px',
+          zIndex: 99999,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '7px',
+          padding: '8px 20px',
+          background: saveStatus === 'saved' 
+            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+            : saveStatus === 'error'
+            ? '#ef4444'
+            : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '20px',
+          fontSize: '0.84rem',
+          fontWeight: 750,
+          cursor: saveStatus === 'saving' ? 'not-allowed' : 'pointer',
+          backdropFilter: 'blur(8px)',
+          boxShadow: saveStatus === 'saved'
+            ? '0 4px 14px rgba(16, 185, 129, 0.45)'
+            : '0 4px 14px rgba(234, 88, 12, 0.45)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        {saveStatus === 'saving' ? (
+          <>
+            <RefreshCw size={14} className="lbe-spin" />
+            <span>Saving...</span>
+          </>
+        ) : saveStatus === 'saved' ? (
+          <>
             <Check size={16} />
-            <span>Apply to Live Site</span>
-          </button>
-        </div>
-      </header>
+            <span>Saved Live!</span>
+          </>
+        ) : saveStatus === 'error' ? (
+          <>
+            <span>Failed (Retry)</span>
+          </>
+        ) : (
+          <>
+            <Check size={16} />
+            <span>Save</span>
+          </>
+        )}
+      </button>
+
+      <button
+        type="button"
+        className="lse-floating-close-btn"
+        onClick={onClose}
+        title="Close"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '16px',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          background: 'rgba(15, 23, 42, 0.9)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <X size={17} />
+      </button>
 
       {/* ── Main Studio Canvas ── */}
       <main className="lse-workspace">
         <div className={`lse-canvas-wrapper ${deviceView === 'mobile' ? 'mobile-view' : ''}`}>
-          
-          {/* Quick Guidance & Actions Bar */}
-          <div className="lse-tip-bar">
-            <div className="lse-tip-text">
-              <Sparkles size={16} color="#fbbf24" />
-              <span>
-                <strong>WYSIWYG Live Canvas:</strong> Click any text, button, or badge to edit directly. Hover over articles to reorder or replace them.
-              </span>
-            </div>
-
-            <div className="lse-toolbar-actions">
-              <button
-                type="button"
-                className="lse-toolbar-btn primary"
-                onClick={handleOpenEditModal}
-              >
-                <Edit3 size={14} />
-                <span>Edit Texts & Settings</span>
-              </button>
-
-              {isArticleFeed && (
-                <>
-                  <button
-                    type="button"
-                    className="lse-toolbar-btn green"
-                    onClick={() => handleOpenPicker({ type: 'add' })}
-                  >
-                    <Plus size={14} />
-                    <span>+ Add Article</span>
-                  </button>
-
-                  <select
-                    className="lse-select"
-                    value={data.category || ''}
-                    onChange={(e) => {
-                      const next = { ...data, category: e.target.value };
-                      persistToDatabase(next);
-                    }}
-                  >
-                    {CATEGORY_CHOICES.map(c => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ── Real Frontend Page Browser Window ── */}
+          {/* ── Real Frontend Page Content ── */}
           <div className="lse-browser-frame">
-            {/* Browser Window Top Address Bar */}
-            <div className="lse-browser-topbar">
-              <div className="lse-browser-dots">
-                <span className="lse-browser-dot red" />
-                <span className="lse-browser-dot yellow" />
-                <span className="lse-browser-dot green" />
-              </div>
-              <div className="lse-browser-url-pill">
-                <span style={{ color: '#10b981', fontSize: '0.85rem' }}>🔒</span>
-                <span>https://goreadpost.com{pageId === 'latest' ? '/latest' : ''}</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
-                {deviceView === 'mobile' ? 'Mobile View' : 'Desktop View'}
-              </div>
-            </div>
-
             {/* Real Frontend Website Body */}
             <div className="lse-real-frontend-sheet">
-              {/* Simulated Real Header */}
-              <div className="lse-simulated-site-header">
-                <div className="lse-simulated-brand-logo">
-                  <span style={{ color: '#e11d48' }}>Go</span>Read<span style={{ color: '#e11d48' }}>Post</span>
-                </div>
-                <nav className="lse-simulated-nav-links">
-                  <span className={`lse-simulated-nav-link ${pageId !== 'latest' ? 'active' : ''}`}>Home</span>
-                  <span className={`lse-simulated-nav-link ${pageId === 'latest' ? 'active' : ''}`}>Latest</span>
-                  <span className="lse-simulated-nav-link">Trending</span>
-                  <span className="lse-simulated-nav-link">AI Story</span>
-                  <span className="lse-simulated-nav-link">Enterprise</span>
-                  <span className="lse-simulated-nav-link">Videos</span>
-                </nav>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ background: '#f1f5f9', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Search size={14} />
-                    <span>Search stories…</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Breadcrumbs for Latest Page */}
-              {pageId === 'latest' && (
-                <div style={{ maxWidth: '1420px', margin: '0 auto', padding: '1rem 1.5rem 0', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#64748b' }}>
-                  <span style={{ cursor: 'pointer', color: '#0f172a', fontWeight: 600 }}>Home</span>
-                  <span>&gt;</span>
-                  <span style={{ color: '#ea580c', fontWeight: 700 }}>Latest Articles</span>
-                </div>
-              )}
-
               {/* Real Frontend Content Container */}
               <div className={pageId === 'latest' ? "lap-page-wrapper" : "mhp-container"} style={{ padding: '1.5rem clamp(1rem, 2.5vw, 2.5rem) 3rem' }}>
                 
-                {/* Active Section with Halo Indicator */}
+                {/* Active Section */}
                 <div className="lse-active-section-wrapper">
-                  <div className="lse-active-section-tag">
-                    <Sparkles size={12} fill="#ffffff" />
-                    <span>Editing Live Section: {getSectionTitle()}</span>
-                  </div>
 
             {/* 1. ARTICLE FEED RENDERER (Latest Blogs, Trending, Popular, Spotlight) */}
             {isArticleFeed && (pageId === 'latest' || section?.id === 'latest_feed' ? (
@@ -507,20 +740,10 @@ function LiveGenericSectionStudio({
               <div className="lap-page-wrapper" style={{ padding: '0 0 2rem' }}>
                 {/* Real Frontend Header (Title + Subtitle) */}
                 <div className="lap-header" style={{ marginBottom: '1.75rem' }}>
-                  <h1 
-                    className="lap-title lse-inline-edit-hint"
-                    onClick={handleOpenEditModal}
-                    title="Click to edit section title"
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <h1 className="lap-title">
                     {getSectionTitle()}
                   </h1>
-                  <p 
-                    className="lap-subtitle lse-inline-edit-hint"
-                    onClick={handleOpenEditModal}
-                    title="Click to edit section subtitle"
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <p className="lap-subtitle">
                     {getSectionSubtitle() || 'Discover the most recent stories, investigative reporting, and updates across technology, business, and innovation.'}
                   </p>
                 </div>
@@ -548,134 +771,499 @@ function LiveGenericSectionStudio({
                   <div className="lap-left-col">
                     <div className="lap-articles-grid">
                       {activeArticles.map((story, idx) => {
+                        if (!story) return null;
                         const artId = story.id || story._id || `lap-card-${idx}`;
-                        const artTitle = story.title || 'Featured Story';
-                        const artImg = story.image || story.coverImage || (typeof story.featuredImage === 'string' ? story.featuredImage : story.featuredImage?.url) || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
-                        const artCat = story.categoryLabel || story.category || 'Startups';
-                        const artExcerpt = story.summary || story.subtitle || story.excerpt || (typeof story.content === 'string' ? story.content.slice(0, 130) + '...' : '');
-                        const artAuthor = typeof story.author === 'object' ? story.author?.name : (story.author || 'Editorial Bureau');
-                        const artAvatar = story.authorAvatar || (typeof story.author === 'object' && story.author?.avatar) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                        const artTitle = getSafeString(story.title, 'Featured Story');
+                        const artImg = getSafeString(story.image || story.coverImage || (typeof story.featuredImage === 'string' ? story.featuredImage : story.featuredImage?.url), 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80');
+                        const artCat = getSafeString(story.categoryLabel || story.category, 'Startups');
+                        const artExcerpt = getSafeString(story.summary || story.subtitle || story.excerpt || (typeof story.content === 'string' ? story.content.slice(0, 130) + '...' : ''), '');
+                        const artAuthor = getSafeString(typeof story.author === 'object' && story.author ? story.author.name : (story.author || 'Editorial Bureau'), 'Editorial Bureau');
+                        const artAvatar = getSafeString(story.authorAvatar || (typeof story.author === 'object' && story.author ? story.author.avatar : ''), 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80');
                         const artDate = story.publishedAt || story.date || 'Today';
-                        const artReadTime = story.readTime || (story.readingTime ? `${story.readingTime} min read` : '5 min read');
+                        const artReadTime = getSafeString(story.readTime || (story.readingTime ? `${story.readingTime} min read` : '5 min read'), '5 min read');
 
                         return (
                           <article 
                             key={artId} 
                             className="lap-card lse-hover-item"
-                            style={{ position: 'relative' }}
+                            style={{ 
+                              position: 'relative',
+                              background: '#ffffff',
+                              borderRadius: '16px',
+                              overflow: 'hidden',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              transition: 'all 0.25s ease'
+                            }}
                           >
-                            {/* Position Indicator Badge */}
-                            <div className="lse-card-rank-badge" title={`Position #${idx + 1} in grid`}>
-                              <span>#{idx + 1}</span>
+                          {/* Top Control Bar: Rank Badge + Horizontal Action Buttons directly ABOVE the card image */}
+                          <div 
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '7px 10px',
+                              background: '#f8fafc',
+                              borderBottom: '1px solid #e2e8f0',
+                              gap: '8px'
+                            }}
+                          >
+                            {/* Left: Position Indicator Badge */}
+                            <div 
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 800,
+                                color: '#0f172a'
+                              }}
+                              title={`Position #${idx + 1} in grid`}
+                            >
+                              <span style={{ color: '#ea580c', fontWeight: 850 }}>#{idx + 1}</span>
                             </div>
 
-                            {/* Floating Reorder & Replace Dock */}
-                            <div className="lse-card-dock">
+                            {/* Right: Horizontal Action Buttons */}
+                            <div 
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              onClick={e => e.stopPropagation()}
+                            >
                               <button
                                 type="button"
-                                className="lse-dock-btn"
                                 disabled={idx === 0}
                                 onClick={() => handleMoveArticle(idx, 'up')}
                                 title="Move earlier (to left)"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#334155',
+                                  cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === 0 ? 0.35 : 1,
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
                               >
                                 <ArrowLeft size={13} />
                               </button>
                               <button
                                 type="button"
-                                className="lse-dock-btn"
                                 disabled={idx === activeArticles.length - 1}
                                 onClick={() => handleMoveArticle(idx, 'down')}
                                 title="Move later (to right)"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#334155',
+                                  cursor: idx === activeArticles.length - 1 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === activeArticles.length - 1 ? 0.35 : 1,
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
                               >
                                 <ArrowRight size={13} />
                               </button>
                               <button
                                 type="button"
-                                className="lse-dock-btn"
+                                onClick={() => handleOpenArticleEditor(story)}
+                                title="Edit this article's content"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#334155',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <Edit2 size={13} />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handleOpenPicker({ type: 'replace', index: idx })}
                                 title="Replace this article"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#334155',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
                               >
                                 <RefreshCw size={13} />
                               </button>
                               <button
                                 type="button"
-                                className="lse-dock-btn danger"
                                 onClick={(e) => handleRemoveArticle(idx, e)}
                                 title="Delete this article permanently"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #fecaca',
+                                  background: '#fef2f2',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
                               >
                                 <Trash2 size={13} />
                               </button>
                             </div>
+                          </div>
 
-                            <div className="lap-thumb-wrap">
-                              <img 
-                                src={artImg} 
-                                alt={artTitle} 
-                                className="lap-thumb"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
-                                }}
-                              />
-                              <span className="lap-category-on-image">
-                                {artCat}
-                              </span>
-                            </div>
+                          <div 
+                            className="lap-thumb-wrap"
+                            onClick={() => handleOpenArticleEditor(story)}
+                            style={{ 
+                              position: 'relative', 
+                              width: '100%', 
+                              height: '190px', 
+                              overflow: 'hidden', 
+                              cursor: 'pointer',
+                              background: '#0f172a'
+                            }}
+                            title="Click to edit article"
+                          >
+                            <img 
+                              src={artImg} 
+                              alt={artTitle} 
+                              className="lap-thumb"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                                transition: 'transform 0.4s ease'
+                              }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
+                              }}
+                            />
 
-                            <div className="lap-card-body">
-                              <h3 className="lap-card-title">
-                                {artTitle}
-                              </h3>
-                              {artExcerpt && (
-                                <p className="lap-card-excerpt">
-                                  {artExcerpt}
-                                </p>
-                              )}
-                              <div className="lap-card-meta">
-                                <img 
-                                  src={artAvatar} 
-                                  alt={artAuthor} 
-                                  className="lap-author-avatar"
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                            {/* Bottom Gradient for Category Tag Legibility */}
+                            <div 
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(180deg, transparent 65%, rgba(15, 23, 42, 0.75) 100%)',
+                                pointerEvents: 'none'
+                              }}
+                            />
+
+                            <span 
+                              style={{
+                                position: 'absolute',
+                                bottom: '10px',
+                                left: '10px',
+                                zIndex: 10,
+                                background: '#0f172a',
+                                color: '#ffffff',
+                                fontSize: '0.68rem',
+                                fontWeight: 850,
+                                letterSpacing: '0.06em',
+                                padding: '4px 9px',
+                                borderRadius: '5px',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
+                              }}
+                            >
+                              {artCat}
+                            </span>
+                          </div>
+
+                            <div 
+                              style={{
+                                padding: '1.15rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                flex: 1,
+                                justifyContent: 'space-between',
+                                background: '#ffffff'
+                              }}
+                            >
+                              <div>
+                                <h3 
+                                  onClick={() => handleOpenArticleEditor(story)}
+                                  style={{ 
+                                    cursor: 'pointer',
+                                    fontSize: '0.98rem',
+                                    fontWeight: 750,
+                                    lineHeight: 1.38,
+                                    color: '#0f172a',
+                                    margin: '0 0 8px',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden'
                                   }}
-                                />
-                                <span className="lap-author-name">{artAuthor}</span>
-                                <span className="lap-meta-sep">•</span>
-                                <span>{artDate}</span>
-                                <span className="lap-meta-sep">•</span>
-                                <span>{artReadTime}</span>
+                                  title="Click to edit article title"
+                                >
+                                  {artTitle}
+                                </h3>
+                                {artExcerpt && (
+                                  <p 
+                                    style={{
+                                      fontSize: '0.82rem',
+                                      color: '#64748b',
+                                      lineHeight: 1.45,
+                                      margin: '0 0 10px',
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden'
+                                    }}
+                                  >
+                                    {artExcerpt}
+                                  </p>
+                                )}
+                                <div 
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    fontSize: '0.76rem',
+                                    color: '#94a3b8',
+                                    fontWeight: 600,
+                                    marginBottom: '14px'
+                                  }}
+                                >
+                                  <span style={{ color: '#475569', fontWeight: 650 }}>{artAuthor}</span>
+                                  <span>•</span>
+                                  <span>{artDate}</span>
+                                </div>
                               </div>
+
+                              {/* Direct Quick Action to Edit Article & Content */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenArticleEditor(story)}
+                                title="Edit this article's title, summary, body content, author or image"
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 14px',
+                                  borderRadius: '9px',
+                                  background: '#f8fafc',
+                                  border: '1.5px solid #e2e8f0',
+                                  color: '#0f172a',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 750,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '7px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                              >
+                                <Edit3 size={14} color="#ea580c" />
+                                <span>Edit Article & Content</span>
+                              </button>
                             </div>
                           </article>
                         );
                       })}
 
-                      {/* Add Article to Latest Grid Card */}
-                      <div 
-                        className="lap-card lse-add-article-card"
-                        onClick={() => handleOpenPicker({ type: 'add' })}
-                        style={{ minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        title="Click to add another article to Latest Articles"
-                      >
-                        <div className="lse-add-card-inner">
-                          <div className="lse-add-icon-circle">
-                            <Plus size={26} />
+                      {/* + Plus Add Article Card (Only shown if below max fit capacity) */}
+                      {activeArticles.length < maxArticlesFit ? (
+                        <div
+                          className="lap-card lse-add-article-card"
+                          onClick={() => handleOpenPicker({ type: 'add' })}
+                          role="button"
+                          tabIndex={0}
+                          title={`Add an article to slot #${activeArticles.length + 1} of ${maxArticlesFit}`}
+                          style={{
+                            position: 'relative',
+                            minHeight: '380px',
+                            background: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)',
+                            border: '2px dashed #ea580c',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '2rem 1.5rem',
+                            textAlign: 'center',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: '#ffedd5',
+                              color: '#c2410c',
+                              padding: '4px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.75rem',
+                              fontWeight: 800,
+                              marginBottom: '1rem'
+                            }}
+                          >
+                            <span>Slot #{activeArticles.length + 1} of {maxArticlesFit} Max</span>
                           </div>
-                          <span className="lse-add-title">+ Add Article</span>
-                          <span className="lse-add-subtitle">Pick from database articles</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Real Frontend Pagination Controls */}
-                    <div className="lap-pagination" style={{ marginTop: '2.5rem' }}>
-                      <button type="button" className="lap-page-btn" disabled><ChevronLeft size={16} /></button>
-                      <button type="button" className="lap-page-btn active">1</button>
-                      <button type="button" className="lap-page-btn">2</button>
-                      <button type="button" className="lap-page-btn">3</button>
-                      <button type="button" className="lap-page-btn"><ChevronRight size={16} /></button>
+                          <div
+                            className="lse-add-plus-badge"
+                            style={{
+                              width: '60px',
+                              height: '60px',
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)',
+                              color: '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 8px 22px rgba(234, 88, 12, 0.35)',
+                              transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                              marginBottom: '1rem'
+                            }}
+                          >
+                            <Plus size={30} strokeWidth={2.6} />
+                          </div>
+
+                          <h4
+                            style={{
+                              fontSize: '1.1rem',
+                              fontWeight: 800,
+                              color: '#0f172a',
+                              margin: '0 0 0.4rem',
+                              letterSpacing: '-0.01em'
+                            }}
+                          >
+                            + Add Article Card
+                          </h4>
+
+                          <p
+                            style={{
+                              fontSize: '0.82rem',
+                              color: '#64748b',
+                              margin: '0 0 1rem',
+                              lineHeight: 1.45,
+                              maxWidth: '220px'
+                            }}
+                          >
+                            {maxArticlesFit - activeArticles.length} more card{maxArticlesFit - activeArticles.length === 1 ? '' : 's'} fit in this feed
+                          </p>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '210px' }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                padding: '8px 16px',
+                                borderRadius: '9999px',
+                                background: '#ea580c',
+                                color: '#ffffff',
+                                fontWeight: 750,
+                                fontSize: '0.82rem',
+                                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)'
+                              }}
+                            >
+                              <Plus size={15} /> Select Article
+                            </span>
+
+                            {pool.length > activeArticles.length && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAutoFillToMax();
+                                }}
+                                title="Auto-fill the remaining slots to complete the frontend grid"
+                                style={{
+                                  background: 'transparent',
+                                  border: '1.5px solid #fdba74',
+                                  borderRadius: '9999px',
+                                  padding: '6px 12px',
+                                  color: '#ea580c',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 750,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '5px',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <Sparkles size={12} />
+                                <span>Auto-fill to Max ({maxArticlesFit})</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* Full Capacity Indicator */}
+                      {activeArticles.length >= maxArticlesFit && (
+                        <div
+                          style={{
+                            gridColumn: '1 / -1',
+                            marginTop: '0.5rem',
+                            padding: '12px 18px',
+                            borderRadius: '12px',
+                            background: 'rgba(34, 197, 94, 0.08)',
+                            border: '1.5px solid rgba(34, 197, 94, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                            <CheckCircle size={17} color="#16a34a" />
+                            <span style={{ fontSize: '0.86rem', fontWeight: 750, color: '#15803d' }}>
+                              Feed Full ({activeArticles.length}/{maxArticlesFit} Articles) • Perfectly fits the frontend layout.
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                            To replace or delete cards, use the action buttons on any card above.
+                          </span>
+                        </div>
+                      )}
+
                     </div>
                   </div>
                 </div>
@@ -683,161 +1271,543 @@ function LiveGenericSectionStudio({
             ) : (
               /* HOMEPAGE SECTION VIEW */
               <section className="mhp-content-section" style={{ margin: 0, padding: 0 }}>
-                <div className="mhp-section-header" style={{ marginBottom: '1.5rem' }}>
-                  <div className="mhp-section-header-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div 
-                      className="mhp-section-title-wrap lse-inline-edit-hint"
-                      onClick={handleOpenEditModal}
-                      title="Click to edit section title"
-                    >
-                      <span style={{ fontSize: '1.35rem', fontWeight: 800 }}>{getSectionTitle()}</span>
+                {/* Real Frontend Section Header */}
+                <div className="mhp-section-header" style={{ marginBottom: '1.75rem' }}>
+                  <div className="mhp-section-header-left">
+                    <div className="mhp-section-title-wrap">
+                      <span>{getSectionTitle()}</span>
                     </div>
                     {getSectionSubtitle() && (
-                      <span 
-                        className="lse-inline-edit-hint"
-                        onClick={handleOpenEditModal}
-                        title="Click to edit subtitle"
-                        style={{ fontSize: '0.9rem', color: '#94a3b8' }}
-                      >
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)', marginLeft: '1rem' }}>
                         {getSectionSubtitle()}
                       </span>
                     )}
-                    {data.badgeText && (
-                      <span className="mhp-editor-pick-pill" style={{ marginLeft: '8px' }}>
-                        <Sparkles size={12} fill="#ffffff" color="#ffffff" />
-                        {data.badgeText}
-                      </span>
-                    )}
                   </div>
-
                   <span 
-                    className="mhp-view-all-link lse-inline-edit-hint"
-                    onClick={handleOpenEditModal}
-                    title="Click to edit view-all text and link"
-                    style={{ color: '#ea580c', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    className="mhp-view-all-link"
+                    style={{ cursor: 'default' }}
                   >
-                    {data.viewAllText || 'View All'} <ArrowRight size={14} />
+                    {data.viewAllText || (secType === 'trending' ? 'View All Trending' : secType === 'popular_editors' ? 'Explore Popular' : secType === 'spotlight' ? 'Explore Startups' : 'View All Articles')} <ArrowRight size={14} />
                   </span>
                 </div>
 
-                {/* Articles Grid */}
                 <div className="mhp-blog-cards-grid">
-                  {activeArticles.map((blog, idx) => {
-                    const artId = blog.id || blog._id || `card-${idx}`;
-                    const artTitle = blog.title || 'Featured Story';
-                    const artImg = blog.image || blog.coverImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
-                    const artCat = blog.categoryLabel || blog.category || 'News';
-                    const artAuthor = typeof blog.author === 'object' ? blog.author?.name : (blog.author || 'Editorial Bureau');
-                    const artDate = blog.publishedAt || blog.date || 'Today';
+                    {frontendArticles.map((blog, idx) => {
+                      if (!blog) return null;
+                      const artId = blog.id || blog._id || `card-${idx}`;
+                      const artTitle = getSafeString(blog.title, 'Featured Story');
+                      const artImg = getSafeString((typeof blog.featuredImage === 'string' ? blog.featuredImage : blog.featuredImage?.url) || blog.image || blog.coverImage, 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80');
+                      const artCat = getSafeString(blog.categoryName || blog.categoryLabel || blog.category, 'Startups');
+                      const artAuthor = getSafeString(typeof blog.author === 'object' && blog.author ? blog.author.name : (blog.authorName || blog.author), 'Editorial Bureau');
+                      const artDate = blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : getSafeString(blog.date, 'Today');
 
-                    return (
-                      <article 
-                        key={artId} 
-                        className="mhp-blog-card lse-hover-item"
-                        style={{ position: 'relative' }}
-                      >
-                        {/* Position Indicator Badge */}
-                        <div className="lse-card-rank-badge" title={`Position #${idx + 1} in grid`}>
-                          <span>#{idx + 1}</span>
-                        </div>
-
-                        {/* Floating Reorder & Replace Dock */}
-                        <div className="lse-card-dock">
-                          <button
-                            type="button"
-                            className="lse-dock-btn"
-                            disabled={idx === 0}
-                            onClick={() => handleMoveArticle(idx, 'up')}
-                            title="Move earlier (to left)"
-                          >
-                            <ArrowUp size={13} />
-                          </button>
-                          <button
-                            type="button"
-                            className="lse-dock-btn"
-                            disabled={idx === activeArticles.length - 1}
-                            onClick={() => handleMoveArticle(idx, 'down')}
-                            title="Move later (to right)"
-                          >
-                            <ArrowDown size={13} />
-                          </button>
-                          <button
-                            type="button"
-                            className="lse-dock-btn"
-                            onClick={() => handleOpenPicker({ type: 'replace', index: idx })}
-                            title="Replace this article"
-                          >
-                            <RefreshCw size={13} />
-                          </button>
-                          <button
-                            type="button"
-                            className="lse-dock-btn danger"
-                            onClick={(e) => handleRemoveArticle(idx, e)}
-                            title="Delete this article permanently"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-
-                        <div className="mhp-blog-thumb-wrap">
-                          <img 
-                            src={artImg} 
-                            alt={artTitle} 
-                            className="mhp-blog-thumb"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80';
+                      return (
+                        <article 
+                          key={artId} 
+                          className="mhp-blog-card lse-hover-item"
+                          style={{ 
+                            position: 'relative',
+                            background: '#ffffff',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            border: '2px solid #ea580c',
+                            boxShadow: '0 6px 20px rgba(234, 88, 12, 0.12)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                          }}
+                        >
+                          {/* Top Control Bar: Rank Badge + Horizontal Action Buttons directly ABOVE the card image */}
+                          <div 
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '7px 10px',
+                              background: '#0f172a',
+                              borderBottom: '1px solid rgba(234, 88, 12, 0.35)',
+                              gap: '8px'
                             }}
-                          />
-                          <span className="mhp-blog-category-on-image">
-                            {artCat}
-                          </span>
-                        </div>
-                        <div className="mhp-blog-body">
-                          <h3 className="mhp-blog-card-title">
-                            {artTitle}
-                          </h3>
-                          {blog.excerpt && (
-                            <p className="mhp-blog-excerpt">
-                              {blog.excerpt}
-                            </p>
-                          )}
-                          <div className="mhp-blog-author-row">
-                            <span className="mhp-blog-author-name">{artAuthor}</span>
-                            <span className="mhp-meta-sep">•</span>
-                            <span>{artDate}</span>
-                          </div>
-                          <div className="mhp-blog-footer-row">
-                            <span className="mhp-blog-readmore-btn" style={{ cursor: 'pointer' }}>
-                              <span>READ MORE</span>
-                              <ArrowRight size={13} className="readmore-arrow" />
-                            </span>
-                            <div className="mhp-blog-footer-actions">
-                              <span className="mhp-blog-footer-like-btn">
-                                <Heart size={14} className="mhp-like-icon" />
-                                <span className="mhp-like-count">{blog.claps || blog.likes || 12}</span>
+                          >
+                            {/* Left: Position Indicator Badge with Live Indicator */}
+                            <div 
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 800
+                              }}
+                              title={`Position #${idx + 1} • Live on Frontend Grid`}
+                            >
+                              <span style={{ color: '#fb923c' }}>#{idx + 1}</span>
+                              <span 
+                                style={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '4px', 
+                                  color: '#4ade80', 
+                                  fontSize: '0.64rem', 
+                                  fontWeight: 900, 
+                                  letterSpacing: '0.04em',
+                                  background: 'rgba(34, 197, 94, 0.16)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px'
+                                }}
+                              >
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
+                                LIVE
                               </span>
                             </div>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
 
-                  {/* Add Article to Grid Card */}
-                  <div 
-                    className="mhp-blog-card lse-add-article-card"
-                    onClick={() => handleOpenPicker({ type: 'add' })}
-                    title="Click to add another article to this feed"
-                  >
-                    <div className="lse-add-card-inner">
-                      <div className="lse-add-icon-circle">
-                        <Plus size={26} />
+                            {/* Right: Horizontal Action Buttons */}
+                            <div 
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveArticle(idx, 'up')}
+                                title="Move Left (Earlier in Feed)"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  color: '#ffffff',
+                                  cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === 0 ? 0.35 : 1,
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <ArrowLeft size={13} />
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={idx === frontendArticles.length - 1}
+                                onClick={() => handleMoveArticle(idx, 'down')}
+                                title="Move Right (Later in Feed)"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  color: '#ffffff',
+                                  cursor: idx === frontendArticles.length - 1 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === frontendArticles.length - 1 ? 0.35 : 1,
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <ArrowRight size={13} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenArticleEditor(blog)}
+                                title="Edit Article Details"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  color: '#ffffff',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <Edit2 size={13} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPicker({ type: 'replace', index: idx })}
+                                title="Swap with another article"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  color: '#ffffff',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <RefreshCw size={13} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => handleRemoveArticle(idx, e)}
+                                title="Delete from feed"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '5px',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  background: 'rgba(239, 68, 68, 0.25)',
+                                  color: '#fca5a5',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Thumbnail Wrap (Clean Image with Category Tag) */}
+                          <div 
+                            className="mhp-blog-thumb-wrap"
+                            onClick={() => handleOpenArticleEditor(blog)}
+                            style={{ 
+                              position: 'relative', 
+                              width: '100%', 
+                              height: '190px', 
+                              overflow: 'hidden', 
+                              cursor: 'pointer',
+                              background: '#0f172a'
+                            }}
+                            title="Click to edit article"
+                          >
+                            <img 
+                              src={artImg} 
+                              alt={artTitle} 
+                              className="mhp-blog-thumb"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                                transition: 'transform 0.4s ease'
+                              }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80';
+                              }}
+                            />
+
+                            {/* Bottom Legibility Gradient Overlay */}
+                            <div 
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(180deg, transparent 65%, rgba(15, 23, 42, 0.75) 100%)',
+                                pointerEvents: 'none'
+                              }}
+                            />
+
+                            {/* Category Pill in Bottom-Left of Image */}
+                            <span 
+                              style={{
+                                position: 'absolute',
+                                bottom: '10px',
+                                left: '10px',
+                                zIndex: 10,
+                                background: '#0f172a',
+                                color: '#ffffff',
+                                fontSize: '0.68rem',
+                                fontWeight: 850,
+                                letterSpacing: '0.06em',
+                                padding: '4px 9px',
+                                borderRadius: '5px',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
+                              }}
+                            >
+                              {artCat}
+                            </span>
+                          </div>
+
+                          {/* Card Content Body */}
+                          <div 
+                            style={{
+                              padding: '1.15rem',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              flex: 1,
+                              justifyContent: 'space-between',
+                              background: '#ffffff'
+                            }}
+                          >
+                            <div>
+                              <h3 
+                                onClick={() => handleOpenArticleEditor(blog)}
+                                style={{ 
+                                  cursor: 'pointer',
+                                  fontSize: '0.98rem',
+                                  fontWeight: 750,
+                                  lineHeight: 1.38,
+                                  color: '#0f172a',
+                                  margin: '0 0 8px',
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}
+                                title="Click to edit article title"
+                              >
+                                {artTitle}
+                              </h3>
+
+                              {blog.excerpt && (
+                                <p 
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    color: '#64748b',
+                                    lineHeight: 1.45,
+                                    margin: '0 0 10px',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden'
+                                  }}
+                                >
+                                  {blog.excerpt}
+                                </p>
+                              )}
+
+                              <div 
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '0.76rem',
+                                  color: '#94a3b8',
+                                  fontWeight: 600,
+                                  marginBottom: '14px'
+                                }}
+                              >
+                                <span style={{ color: '#475569', fontWeight: 650 }}>{artAuthor}</span>
+                                <span>•</span>
+                                <span>{artDate}</span>
+                              </div>
+                            </div>
+
+                            {/* Direct Quick Action to Edit Article & Content */}
+                            <button
+                              type="button"
+                              onClick={() => handleOpenArticleEditor(blog)}
+                              title="Open editor to change title, summary, body content, author or image"
+                              style={{
+                                width: '100%',
+                                padding: '9px 14px',
+                                borderRadius: '9px',
+                                background: '#f8fafc',
+                                border: '1.5px solid #e2e8f0',
+                                color: '#0f172a',
+                                fontSize: '0.82rem',
+                                fontWeight: 750,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '7px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                              }}
+                            >
+                              <Edit3 size={14} color="#ea580c" />
+                              <span>Edit Article & Content</span>
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+
+                    {/* + Plus Add Article Card (Only shown if below max fit capacity) */}
+                    {activeArticles.length < maxArticlesFit ? (
+                      <div
+                        className="mhp-blog-card lse-add-article-card"
+                        onClick={() => handleOpenPicker({ type: 'add' })}
+                        role="button"
+                        tabIndex={0}
+                        title={`Add an article to slot #${activeArticles.length + 1} of ${maxArticlesFit}`}
+                        style={{
+                          position: 'relative',
+                          minHeight: '380px',
+                          background: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)',
+                          border: '2px dashed #ea580c',
+                          borderRadius: '16px',
+                          boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '2rem 1.5rem',
+                          textAlign: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            background: '#ffedd5',
+                            color: '#c2410c',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            marginBottom: '1rem'
+                          }}
+                        >
+                          <span>Slot #{activeArticles.length + 1} of ${maxArticlesFit} Max</span>
+                        </div>
+
+                        <div
+                          className="lse-add-plus-badge"
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 8px 22px rgba(234, 88, 12, 0.35)',
+                            transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                            marginBottom: '1rem'
+                          }}
+                        >
+                          <Plus size={30} strokeWidth={2.6} />
+                        </div>
+
+                        <h4
+                          style={{
+                            fontSize: '1.1rem',
+                            fontWeight: 800,
+                            color: '#0f172a',
+                            margin: '0 0 0.4rem',
+                            letterSpacing: '-0.01em'
+                          }}
+                        >
+                          + Add Article Card
+                        </h4>
+
+                        <p
+                          style={{
+                            fontSize: '0.82rem',
+                            color: '#64748b',
+                            margin: '0 0 1rem',
+                            lineHeight: 1.45,
+                            maxWidth: '220px'
+                          }}
+                        >
+                          {maxArticlesFit - activeArticles.length} more card{maxArticlesFit - activeArticles.length === 1 ? '' : 's'} fit in this homepage section
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '210px' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              padding: '8px 16px',
+                              borderRadius: '9999px',
+                              background: '#ea580c',
+                              color: '#ffffff',
+                              fontWeight: 750,
+                              fontSize: '0.82rem',
+                              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)'
+                            }}
+                          >
+                            <Plus size={15} /> Select Article
+                          </span>
+
+                          {pool.length > activeArticles.length && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAutoFillToMax();
+                              }}
+                              title="Auto-fill the remaining slots to complete the frontend grid"
+                              style={{
+                                background: 'transparent',
+                                border: '1.5px solid #fdba74',
+                                borderRadius: '9999px',
+                                padding: '6px 12px',
+                                color: '#ea580c',
+                                fontSize: '0.74rem',
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '5px',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <Sparkles size={12} />
+                              <span>Auto-fill to Max ({maxArticlesFit})</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <span className="lse-add-title">+ Add Article to Feed</span>
-                      <span className="lse-add-subtitle">Pick from database articles</span>
-                    </div>
-                  </div>
+                    ) : null}
+
+                    {/* Full Capacity Indicator for Homepage Section */}
+                    {activeArticles.length >= maxArticlesFit && (
+                      <div
+                        style={{
+                          gridColumn: '1 / -1',
+                          marginTop: '0.5rem',
+                          padding: '12px 18px',
+                          borderRadius: '12px',
+                          background: 'rgba(34, 197, 94, 0.08)',
+                          border: '1.5px solid rgba(34, 197, 94, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <CheckCircle size={17} color="#16a34a" />
+                          <span style={{ fontSize: '0.86rem', fontWeight: 750, color: '#15803d' }}>
+                            Section Full ({activeArticles.length}/{maxArticlesFit} Articles) • Perfectly fills the row on the frontend homepage.
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          To replace or delete cards, use the action buttons on any card above.
+                        </span>
+                      </div>
+                    )}
+
                 </div>
               </section>
             ))}
@@ -1060,20 +2030,6 @@ function LiveGenericSectionStudio({
                 </div>
               </div>
 
-              {/* Simulated Real Frontend Footer */}
-              <footer className="lse-simulated-site-footer">
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                    © 2026 GoReadPost Media. Real-time startup dispatches, deep-tech intelligence, and ecosystem signals.
-                  </div>
-                  <div style={{ display: 'flex', gap: '1.25rem', fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
-                    <span>Privacy Policy</span>
-                    <span>Terms of Service</span>
-                    <span>Contact Desk</span>
-                    <span>Advertise</span>
-                  </div>
-                </div>
-              </footer>
             </div>
           </div>
 
@@ -1262,11 +2218,11 @@ function LiveGenericSectionStudio({
                 <h4 className="lbe-picker-title">
                   <Layers size={18} color="#38bdf8" />
                   <span>
-                    {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : 'Select Article to Add to Section'}
+                    {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : `Select Article to Add (Slot #${activeArticles.length + 1} of ${maxArticlesFit} Max)`}
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
-                  Pick any published article from your database to pin or display in this section.
+                  {pickerTarget?.type === 'replace' ? 'Pick a published article to swap into this slot.' : `This section fits up to ${maxArticlesFit} articles on the frontend grid. Choose an article to fill this slot.`}
                 </p>
               </div>
               <button 
@@ -1360,6 +2316,169 @@ function LiveGenericSectionStudio({
                   })}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Dedicated Article Content & Metadata Editor Modal ── */}
+      {isArticleEditModalOpen && (
+        <div className="lse-modal-overlay" onClick={() => setIsArticleEditModalOpen(false)}>
+          <div className="lse-article-modal" onClick={e => e.stopPropagation()}>
+            <div className="lse-article-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <FileText size={20} color="#ea580c" />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Edit Article & Content</h4>
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                    Changes are saved to the database and update across all frontend pages
+                  </span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="lbe-picker-close-btn"
+                onClick={() => setIsArticleEditModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="lse-article-modal-body">
+              <div className="lse-input-group">
+                <label>Article Title *</label>
+                <input
+                  type="text"
+                  value={articleFormData.title}
+                  onChange={e => setArticleFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Headline of the story..."
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                <div className="lse-input-group">
+                  <label>Desk / Category</label>
+                  <select
+                    value={articleFormData.category}
+                    onChange={e => setArticleFormData(prev => ({ ...prev, category: e.target.value }))}
+                  >
+                    <option value="Startups">Startups & Ecosystem</option>
+                    <option value="Technology">Technology & Cloud</option>
+                    <option value="AI">AI & DeepTech</option>
+                    <option value="Enterprise">Enterprise & SaaS</option>
+                    <option value="FinTech">FinTech & Web3</option>
+                    <option value="HerStory">HerStory (Women Leaders)</option>
+                    <option value="SMBStory">SMBStory (MSME & D2C)</option>
+                    <option value="SocialStory">SocialStory (Impact)</option>
+                    <option value="Hindi">YS Hindi Edition</option>
+                  </select>
+                </div>
+
+                <div className="lse-input-group">
+                  <label>Estimated Reading Time</label>
+                  <input
+                    type="text"
+                    value={articleFormData.readTime}
+                    onChange={e => setArticleFormData(prev => ({ ...prev, readTime: e.target.value }))}
+                    placeholder="e.g. 5 min read"
+                  />
+                </div>
+              </div>
+
+              <div className="lse-input-group">
+                <label>Summary / Excerpt (Lead Paragraph)</label>
+                <textarea
+                  rows={2}
+                  value={articleFormData.excerpt}
+                  onChange={e => setArticleFormData(prev => ({ ...prev, excerpt: e.target.value, subtitle: e.target.value }))}
+                  placeholder="Short teaser shown on the card preview..."
+                />
+              </div>
+
+              <div className="lse-input-group">
+                <label>Article Body Content</label>
+                <textarea
+                  rows={6}
+                  value={articleFormData.content}
+                  onChange={e => setArticleFormData(prev => ({ ...prev, content: e.target.value }))}
+                  placeholder="Full text or HTML content of the article..."
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                <div className="lse-input-group">
+                  <label>Author Name</label>
+                  <input
+                    type="text"
+                    value={articleFormData.authorName}
+                    onChange={e => setArticleFormData(prev => ({ ...prev, authorName: e.target.value }))}
+                    placeholder="Author name..."
+                  />
+                </div>
+                <div className="lse-input-group">
+                  <label>Author Title / Role</label>
+                  <input
+                    type="text"
+                    value={articleFormData.authorTitle}
+                    onChange={e => setArticleFormData(prev => ({ ...prev, authorTitle: e.target.value }))}
+                    placeholder="e.g. Senior Staff Reporter"
+                  />
+                </div>
+              </div>
+
+              <div className="lse-input-group">
+                <label>Featured Image URL</label>
+                <input
+                  type="text"
+                  value={articleFormData.image}
+                  onChange={e => setArticleFormData(prev => ({ ...prev, image: e.target.value }))}
+                  placeholder="https://images.unsplash.com/..."
+                />
+                {articleFormData.image && (
+                  <div style={{ marginTop: '8px', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <img 
+                      src={articleFormData.image} 
+                      alt="Preview" 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={e => { e.target.style.display = 'none'; }} 
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lse-article-modal-footer">
+              <button 
+                type="button" 
+                className="lse-modal-btn cancel" 
+                onClick={() => setIsArticleEditModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="lse-modal-btn save"
+                onClick={handleSaveArticleContent}
+                disabled={articleSaveStatus === 'saving'}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                {articleSaveStatus === 'saving' ? (
+                  <>
+                    <RefreshCw size={14} className="lse-spin" />
+                    <span>Saving to Database...</span>
+                  </>
+                ) : articleSaveStatus === 'saved' ? (
+                  <>
+                    <CheckCircle size={14} color="#22c55e" />
+                    <span>Saved Successfully!</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={14} />
+                    <span>Save Article Changes</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

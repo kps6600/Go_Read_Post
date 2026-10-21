@@ -98,7 +98,21 @@ export default function LiveBannerEditor({
   const [pickerSearch, setPickerSearch] = useState('');
   const [pickerCategory, setPickerCategory] = useState('All');
 
+  // Slide Content Edit Modal State
+  const [isSlideEditOpen, setIsSlideEditOpen] = useState(false);
+  const [slideFormData, setSlideFormData] = useState({
+    title: '',
+    excerpt: '',
+    category: '',
+    image: '',
+    primaryBtnText: 'Read More',
+    link: '',
+    author: ''
+  });
 
+  // Popular Title Inline Edit State
+  const [isEditingPopularTitle, setIsEditingPopularTitle] = useState(false);
+  const [popularTitleValue, setPopularTitleValue] = useState(() => data.popularTitle || 'Popular Posts');
 
   // Load published articles from database on mount
   useEffect(() => {
@@ -210,9 +224,9 @@ export default function LiveBannerEditor({
       })
     : [];
 
-  const popularArticles = rawPopular.length > 0
+  const popularArticles = (rawPopular.length > 0
     ? rawPopular
-    : pool.slice(0, Number(data.popularLimit) || 5).map(formatForPopularPost);
+    : pool.slice(0, Number(data.popularLimit) || 5).map(formatForPopularPost)).slice(0, 5);
 
   const currentSlide = slides[activeSlideIdx] || slides[0] || {};
   const showPopular = data.showPopular !== false;
@@ -252,7 +266,78 @@ export default function LiveBannerEditor({
   // ─────────────────────────────────────────────────────────
   // HERO SLIDE ACTIONS & REORDERING
   // ─────────────────────────────────────────────────────────
+  const handleOpenSlideEditor = () => {
+    const s = slides[activeSlideIdx] || {};
+    setSlideFormData({
+      title: s.title || '',
+      excerpt: s.excerpt || '',
+      category: s.category || '',
+      image: s.image || '',
+      primaryBtnText: s.primaryBtnText || 'Read More',
+      link: s.link || '',
+      author: s.author || 'Editorial Bureau'
+    });
+    setIsSlideEditOpen(true);
+  };
 
+  const handleCreateCustomSlide = () => {
+    const newCustomSlide = {
+      id: `custom-slide-${Date.now()}`,
+      title: 'New Custom Headline',
+      excerpt: 'Add your summary or excerpt here...',
+      category: 'FEATURED',
+      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80',
+      author: 'Editorial Bureau',
+      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+      date: 'Today',
+      readTime: '3 min read',
+      primaryBtnText: 'Read More',
+      link: '/latest',
+      isCustom: true
+    };
+    const nextSlides = [...slides, newCustomSlide];
+    const newIdx = nextSlides.length - 1;
+    updateSlidesState(nextSlides, newIdx);
+    persistToDatabase(nextSlides, popularArticles);
+    setSlideFormData({
+      title: newCustomSlide.title,
+      excerpt: newCustomSlide.excerpt,
+      category: newCustomSlide.category,
+      image: newCustomSlide.image,
+      primaryBtnText: newCustomSlide.primaryBtnText,
+      link: newCustomSlide.link,
+      author: newCustomSlide.author
+    });
+    setIsSlideEditOpen(true);
+  };
+
+  const handleSaveSlideEditor = () => {
+    const nextSlides = [...slides];
+    nextSlides[activeSlideIdx] = {
+      ...nextSlides[activeSlideIdx],
+      ...slideFormData,
+      title: slideFormData.title.trim() || 'Headline Story',
+      headline: slideFormData.title.trim() || 'Headline Story',
+      excerpt: slideFormData.excerpt,
+      subheadline: slideFormData.excerpt,
+      category: slideFormData.category,
+      badge: slideFormData.category,
+      image: slideFormData.image,
+      bgImage: slideFormData.image,
+      isCustom: true
+    };
+    updateSlidesState(nextSlides, activeSlideIdx);
+    persistToDatabase(nextSlides, popularArticles);
+    setIsSlideEditOpen(false);
+  };
+
+  const handleSavePopularTitle = () => {
+    const trimmed = (popularTitleValue || '').trim() || 'Popular Posts';
+    setData(prev => ({ ...prev, popularTitle: trimmed }));
+    setIsEditingPopularTitle(false);
+    const finalData = { ...data, popularTitle: trimmed, slides, popularArticles };
+    if (onAutoSave) onAutoSave(finalData);
+  };
 
   const updateSlidesState = (newSlides, newActiveIdx = null) => {
     setData(prev => ({
@@ -354,11 +439,6 @@ export default function LiveBannerEditor({
     if (!pickerTarget) return;
 
     if (pickerTarget.type === 'hero-add') {
-      if (slides.length >= 5) {
-        alert('Maximum of 5 articles allowed in the hero banner.');
-        setIsPickerOpen(false);
-        return;
-      }
       const newSlide = formatForHeroSlide(article);
       const nextSlides = [...slides, newSlide];
       updateSlidesState(nextSlides, nextSlides.length - 1);
@@ -371,12 +451,11 @@ export default function LiveBannerEditor({
       persistToDatabase(nextSlides, popularArticles);
     } else if (pickerTarget.type === 'popular-add') {
       if (popularArticles.length >= 5) {
-        alert('Maximum of 5 articles allowed in popular posts.');
         setIsPickerOpen(false);
         return;
       }
       const newPop = formatForPopularPost(article);
-      const nextPop = [...popularArticles, newPop];
+      const nextPop = [...popularArticles, newPop].slice(0, 5);
       updatePopularState(nextPop);
       persistToDatabase(slides, nextPop);
     } else if (pickerTarget.type === 'popular-replace') {
@@ -405,58 +484,113 @@ export default function LiveBannerEditor({
       badge: slides[0]?.category || data.badge,
       bgImage: slides[0]?.image || data.bgImage
     };
-    await onSave(finalData);
+    setSaveStatus('saving');
+    try {
+      if (onAutoSave) {
+        await onAutoSave(finalData);
+      } else if (onSave) {
+        await onSave(finalData);
+      }
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Failed to save banner:', err);
+      setSaveStatus('error');
+    }
   };
 
   return (
     <div className="lbe-overlay">
-      {/* ── Top Studio Header Bar ── */}
-      <header className="lbe-header">
-        <div className="lbe-header-left" />
-
-        {/* Action Controls */}
-        <div className="lbe-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-          {/* Real-time Persistence Indicator */}
-          {saveStatus === 'saving' && (
-            <span className="lbe-save-indicator saving">
-              <RefreshCw size={13} className="lbe-spin" />
-              <span>Saving to database...</span>
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="lbe-save-indicator saved">
-              <Check size={13} />
-              <span>Saved permanently</span>
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="lbe-save-indicator error">
-              <X size={13} />
-              <span>Save error</span>
-            </span>
-          )}
-
-
-          <button
-            type="button"
-            className="lbe-btn-save"
-            onClick={handleSaveAndApply}
-          >
+      {/* Sleek Floating Save Button */}
+      <button
+        type="button"
+        className="lbe-floating-save-btn"
+        onClick={handleSaveAndApply}
+        disabled={saveStatus === 'saving'}
+        title="Save changes live to homepage"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '60px',
+          zIndex: 99999,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '7px',
+          padding: '8px 20px',
+          background: saveStatus === 'saved' 
+            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+            : saveStatus === 'error'
+            ? '#ef4444'
+            : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '20px',
+          fontSize: '0.84rem',
+          fontWeight: 750,
+          cursor: saveStatus === 'saving' ? 'not-allowed' : 'pointer',
+          backdropFilter: 'blur(8px)',
+          boxShadow: saveStatus === 'saved'
+            ? '0 4px 14px rgba(16, 185, 129, 0.45)'
+            : '0 4px 14px rgba(234, 88, 12, 0.45)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        {saveStatus === 'saving' ? (
+          <>
+            <RefreshCw size={14} className="lbe-spin" />
+            <span>Saving...</span>
+          </>
+        ) : saveStatus === 'saved' ? (
+          <>
             <Check size={16} />
-            <span>Apply to Live Site</span>
-          </button>
-        </div>
-      </header>
+            <span>Saved Live!</span>
+          </>
+        ) : saveStatus === 'error' ? (
+          <>
+            <span>Failed (Retry)</span>
+          </>
+        ) : (
+          <>
+            <Check size={16} />
+            <span>Save</span>
+          </>
+        )}
+      </button>
+
+      <button
+        type="button"
+        className="lse-floating-close-btn"
+        onClick={onClose}
+        title="Close"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '16px',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          background: 'rgba(15, 23, 42, 0.9)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <X size={17} />
+      </button>
 
       {/* ── Main Studio Canvas ── */}
       <main className="lbe-workspace">
         <div className={`lbe-canvas-wrapper ${deviceView === 'mobile' ? 'mobile-view' : ''}`}>
-          
 
-
-
-                  {/* ── Live Banner Section ── */}
-                  <section className={`mhp-hero-popular-grid ${!showPopular ? 'full-width' : ''}`}>
+          {/* ── Live Banner Section ── */}
+          <section className={`mhp-hero-popular-grid ${!showPopular ? 'full-width' : ''}`}>
             
             {/* ── Left Hero Slide Card ── */}
             <div 
@@ -467,6 +601,7 @@ export default function LiveBannerEditor({
               }}
             >
               <div className="mhp-hero-overlay" />
+
 
 
               {/* Real Article Content on Hero Slide */}
@@ -568,31 +703,22 @@ export default function LiveBannerEditor({
               <div className="mhp-popular-card">
                 <div className="mhp-section-header" style={{ marginBottom: '1rem' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>
-                      {data.popularTitle || 'Popular Posts'}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '6px' }}>
-                      ({popularArticles.length} Slots)
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{data.popularTitle || 'Popular Posts'}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '6px' }}>
+                      ({popularArticles.length}/5 Slots)
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="lbe-btn-add-mini"
-                    disabled={popularArticles.length >= 5}
-                    style={{
-                      cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer',
-                      opacity: popularArticles.length >= 5 ? 0.6 : 1
-                    }}
-                    onClick={() => {
-                      if (popularArticles.length < 5) {
-                        handleOpenPicker({ type: 'popular-add' });
-                      }
-                    }}
-                    title={popularArticles.length >= 5 ? 'Maximum 5 popular articles reached' : 'Add an article to popular posts (max 5)'}
-                  >
-                    <Plus size={13} />
-                    <span>{popularArticles.length >= 5 ? 'Max 5 Reached' : `Add Article (${popularArticles.length}/5)`}</span>
-                  </button>
+                  {popularArticles.length < 5 && (
+                    <button
+                      type="button"
+                      className="lbe-btn-add-mini"
+                      onClick={() => handleOpenPicker({ type: 'popular-add' })}
+                      title="Add an article to popular posts (Max 5)"
+                    >
+                      <Plus size={13} />
+                      <span>Add Article</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="mhp-popular-list">
@@ -629,7 +755,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleMovePopularUp(idx)}
                           title={`Move Up to Position #${idx}`}
                         >
-                          <ArrowUp size={14} />
+                          <ArrowUp size={13} />
                         </button>
                         <button
                           type="button"
@@ -638,7 +764,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleMovePopularDown(idx)}
                           title={`Move Down to Position #${idx + 2}`}
                         >
-                          <ArrowDown size={14} />
+                          <ArrowDown size={13} />
                         </button>
                         <button
                           type="button"
@@ -646,7 +772,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
                           title="Change / Replace this article"
                         >
-                          <RefreshCw size={13} />
+                          <RefreshCw size={12} />
                         </button>
                         <button
                           type="button"
@@ -654,18 +780,17 @@ export default function LiveBannerEditor({
                           onClick={() => handleDeletePopular(idx)}
                           title="Remove from popular posts"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
 
+
               </div>
             )}
           </section>
-
-
         </div>
       </main>
 
@@ -793,7 +918,122 @@ export default function LiveBannerEditor({
         </div>
       )}
 
+      {/* ── Slide Content & Photo Editor Modal ── */}
+      {isSlideEditOpen && (
+        <div className="lbe-slide-edit-overlay" onClick={() => setIsSlideEditOpen(false)}>
+          <div className="lbe-slide-edit-modal" onClick={e => e.stopPropagation()}>
+            <div className="lbe-slide-edit-header">
+              <h4>
+                <Edit3 size={17} color="#fb923c" />
+                <span>Edit Hero Slide #{activeSlideIdx + 1} Content</span>
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsSlideEditOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
 
+            <div className="lbe-slide-edit-body">
+              <div className="lbe-input-group">
+                <label>Badge / Category Tag</label>
+                <input
+                  type="text"
+                  value={slideFormData.category}
+                  onChange={e => setSlideFormData(p => ({ ...p, category: e.target.value }))}
+                  placeholder="e.g. STARTUPS, DEEPTECH FOCUS, BREAKING"
+                />
+              </div>
+
+              <div className="lbe-input-group">
+                <label>Main Headline *</label>
+                <input
+                  type="text"
+                  value={slideFormData.title}
+                  onChange={e => setSlideFormData(p => ({ ...p, title: e.target.value }))}
+                  placeholder="Compelling story headline"
+                />
+              </div>
+
+              <div className="lbe-input-group">
+                <label>Subheadline / Lead Excerpt</label>
+                <textarea
+                  rows={3}
+                  value={slideFormData.excerpt}
+                  onChange={e => setSlideFormData(p => ({ ...p, excerpt: e.target.value }))}
+                  placeholder="Lead paragraph or executive summary"
+                />
+              </div>
+
+              <div className="lbe-input-group">
+                <label>Hero Background Image URL</label>
+                <input
+                  type="text"
+                  value={slideFormData.image}
+                  onChange={e => setSlideFormData(p => ({ ...p, image: e.target.value }))}
+                  placeholder="https://images.unsplash.com/..."
+                />
+                {slideFormData.image && (
+                  <div style={{ marginTop: '8px', maxHeight: '140px', overflow: 'hidden', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <img src={slideFormData.image} alt="Slide Preview" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="lbe-input-group">
+                  <label>Primary Button Text</label>
+                  <input
+                    type="text"
+                    value={slideFormData.primaryBtnText}
+                    onChange={e => setSlideFormData(p => ({ ...p, primaryBtnText: e.target.value }))}
+                    placeholder="e.g. Read More"
+                  />
+                </div>
+                <div className="lbe-input-group">
+                  <label>Story Link / Destination URL</label>
+                  <input
+                    type="text"
+                    value={slideFormData.link}
+                    onChange={e => setSlideFormData(p => ({ ...p, link: e.target.value }))}
+                    placeholder="e.g. /stories/slug or /latest"
+                  />
+                </div>
+              </div>
+
+              <div className="lbe-input-group">
+                <label>Author Byline</label>
+                <input
+                  type="text"
+                  value={slideFormData.author}
+                  onChange={e => setSlideFormData(p => ({ ...p, author: e.target.value }))}
+                  placeholder="e.g. Editorial Bureau"
+                />
+              </div>
+            </div>
+
+            <div className="lbe-slide-edit-footer">
+              <button
+                type="button"
+                className="lbe-btn-cancel"
+                onClick={() => setIsSlideEditOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="lbe-btn-save"
+                onClick={handleSaveSlideEditor}
+              >
+                <Check size={15} />
+                <span>Update Slide & Save</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

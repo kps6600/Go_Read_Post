@@ -3,6 +3,7 @@ import Article from '../models/Article.js';
 import Story from '../models/Story.js';
 import Page from '../models/Page.js';
 import { isDbConnected } from '../db.js';
+import { migrateStoriesToArticles } from '../migrateStoriesToArticles.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -142,31 +143,11 @@ router.get('/', async (req, res) => {
 
     if (isDbConnected()) {
       let count = await Article.countDocuments();
-      if (count === 0) {
-        const stories = await Story.find().limit(25);
-        for (const s of stories) {
-          const sSlug = s.slug || s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-          try {
-            await Article.create({
-              title: s.title,
-              slug: sSlug,
-              subtitle: s.subtitle || '',
-              excerpt: s.summary || s.subtitle || '',
-              content: s.content || '',
-              featuredImage: { url: s.image, alt: s.title, caption: '', credit: '' },
-              authorName: s.authorName || 'Editorial Desk',
-              authorTitle: s.authorTitle || 'Staff Reporter',
-              authorAvatar: s.authorAvatar || '',
-              categoryName: s.categoryTag || 'Startups',
-              tags: s.tags ? s.tags.split(',').map(t => t.trim()) : ['startups'],
-              topics: ['Startups'],
-              isFeatured: s.tag === 'FEATURED' || s.isFeatured || false,
-              isTrending: s.tag === 'TRENDING' || s.isTrending || true,
-              status: 'published',
-              publishedAt: s.createdAt || new Date(),
-              views: s.views || 120
-            });
-          } catch (e) {}
+      if (count < 40) {
+        try {
+          await migrateStoriesToArticles();
+        } catch (e) {
+          console.error('Error during auto-seed in GET /api/articles:', e);
         }
       }
 
@@ -188,6 +169,7 @@ router.get('/', async (req, res) => {
 
     // Fallback store
     let fallback = readFallbackArticles().filter(a => a.status === 'published');
+    fallback.sort((a, b) => new Date(b.publishedAt || b.createdAt || 0) - new Date(a.publishedAt || a.createdAt || 0));
     if (search) {
       const s = search.toLowerCase();
       fallback = fallback.filter(a => a.title.toLowerCase().includes(s) || (a.excerpt && a.excerpt.toLowerCase().includes(s)));

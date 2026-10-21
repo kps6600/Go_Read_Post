@@ -976,8 +976,8 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
                 <label>Section Display Title *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Latest from the Blog, Venture Playbooks"
-                  value={formData.title || formData.heading || ''}
+                  placeholder="Article & Story Feed"
+                  value={formData.title || formData.heading || 'Article & Story Feed'}
                   onChange={(e) => {
                     handleChange('title', e.target.value);
                     handleChange('heading', e.target.value);
@@ -1016,14 +1016,14 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
                 </div>
 
                 <div className="form-group">
-                  <label>Max Stories Limit</label>
+                  <label>Max Stories Limit (Fits 4 on Grid)</label>
                   <input
                     type="number"
                     min="1"
                     max="30"
-                    placeholder="6"
-                    value={formData.limit || 6}
-                    onChange={(e) => handleChange('limit', parseInt(e.target.value, 10) || 6)}
+                    placeholder="4"
+                    value={formData.limit || 4}
+                    onChange={(e) => handleChange('limit', parseInt(e.target.value, 10) || 4)}
                   />
                 </div>
               </div>

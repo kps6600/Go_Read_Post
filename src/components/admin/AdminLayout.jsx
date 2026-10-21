@@ -277,6 +277,17 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       );
     }
 
+    // 17. Homepage Live Studio: /admin/homepage
+    if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) {
+      return (
+        <AdminPageEditor 
+          pageId="home" 
+          onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
+        />
+      );
+    }
+
     // Default: Dashboard /admin/dashboard
     return (
       <AdminDashboardView 

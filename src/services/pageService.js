@@ -60,7 +60,9 @@ export const PageService = {
 
   async getPageById(id) {
     try {
-      const res = await fetch(`${API_BASE}/${id}`, {
+      const url = `${API_BASE}/${id}?_t=${Date.now()}`;
+      const res = await fetch(url, {
+        cache: 'no-store',
         headers: AuthService.getAuthHeaders()
       });
       if (res.ok) {

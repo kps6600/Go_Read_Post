@@ -2,14 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { 
   Globe, Eye, Plus, Trash2, 
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
-  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles
+  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles, ExternalLink
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
+import { HomepageService } from '../../services/homepageService';
 import SectionEditorModal, { SECTION_DEFINITIONS } from './SectionEditorModal';
 import LiveBannerEditor from './LiveBannerEditor';
 import LiveSectionEditor from './LiveSectionEditor';
 import LiveHomepageStudio from './LiveHomepageStudio';
 import { ALL_STORIES } from '../../data/storiesData';
+import { StoryService, getDefaultSeedStories } from '../../services/storyService';
+
+const CANONICAL_SECTION_META = {
+  hero_popular: {
+    badge: 'HERO BANNER & POPULAR POSTS',
+    color: '#ea580c',
+    bg: '#fff7ed',
+    title: 'Lead Stories & Editorial Hero Slider',
+    desc: 'Primary lead dispatch slider + 5 ranked articles sidebar'
+  },
+  latest_blogs: {
+    badge: 'LATEST STORIES FEED',
+    color: '#2563eb',
+    bg: '#eff6ff',
+    title: 'Latest from the Blog',
+    desc: 'Real-time reporting and latest editorial dispatches across the ecosystem'
+  },
+  trending: {
+    badge: 'TRENDING VIRAL FEED',
+    color: '#d97706',
+    bg: '#fffbeb',
+    title: 'Trending Now',
+    desc: 'High-velocity stories capturing builder attention and social virality'
+  },
+  popular_editors: {
+    badge: "EDITOR'S PICKS FEED",
+    color: '#059669',
+    bg: '#ecfdf5',
+    title: "Most Popular & Editor's Picks",
+    desc: 'Essential reads handpicked by newsroom editors with Editor Choice badges'
+  },
+  spotlight: {
+    badge: 'TECH & STARTUP SPOTLIGHT',
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+    title: 'Tech & Startup Spotlight',
+    desc: 'Deep tech breakthroughs, generative AI, and emerging ventures'
+  },
+  newsletter: {
+    badge: 'NEWSLETTER BANNER',
+    color: '#db2777',
+    bg: '#fdf2f8',
+    title: 'Newsletter Subscription Banner',
+    desc: 'Join 100,000+ founders and engineers receiving our daily intelligence briefs'
+  }
+};
 
 export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const [page, setPage] = useState(null);
@@ -34,6 +81,15 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     ogImage: ''
   });
   const [sections, setSections] = useState([]);
+  const [allStories, setAllStories] = useState(() => getDefaultSeedStories());
+
+  useEffect(() => {
+    StoryService.getStories({ limit: 500 }).then(res => {
+      if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+        setAllStories(res.data);
+      }
+    }).catch(() => {});
+  }, []);
 
   const fetchPage = async () => {
     setLoading(true);
@@ -74,8 +130,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       } else if (window.location.search.includes('liveStudio=true')) {
         if (pageId === 'home') {
           setIsWholeHomeStudioOpen(true);
-        } else {
-          setLiveEditingSection(sections[0]);
         }
       } else if (window.location.search.includes('liveSection=')) {
         const match = window.location.search.match(/liveSection=([^&]+)/);
@@ -87,8 +141,75 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
   }, [sections, pageId]);
 
-  // Section Reordering
-  const handleMoveSection = (index, direction) => {
+  // Synchronize browser history / Back button with live editor views
+  useEffect(() => {
+    const handlePopState = () => {
+      const search = window.location.search;
+      if (!search.includes('liveSection=') && !search.includes('liveHero=true')) {
+        setLiveEditingSection(null);
+      }
+      if (!search.includes('liveStudio=true')) {
+        setIsWholeHomeStudioOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Centralized section persistence to database (guarantees DB sync and zero rollback on refresh)
+  const persistSections = async (updatedSections, successToast = null, publishStatus = null) => {
+    setSaving(true);
+    try {
+      const targetStatus = publishStatus || status || page?.status || 'published';
+      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const payload = {
+        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        slug: targetSlug,
+        description: (description || page?.description || '').trim(),
+        status: targetStatus,
+        seo: {
+          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
+          keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
+          ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
+        },
+        sections: updatedSections.map((s, idx) => ({ ...s, order: idx + 1 }))
+      };
+
+      const updated = await PageService.updatePage(pageId, payload);
+      if (updated) {
+        setPage(updated);
+        setSections(updated.sections || updatedSections);
+        setStatus(targetStatus);
+      } else {
+        setSections(updatedSections);
+      }
+
+      // If editing homepage, also sync to HomepageService so both endpoints stay 100% aligned
+      if (pageId === 'home' || page?.id === 'home') {
+        try {
+          await HomepageService.updateSections(payload.sections);
+        } catch (e) {}
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('homepage:change', { detail: payload.sections }));
+        }
+      }
+
+      if (successToast) {
+        onShowToast?.(successToast);
+      }
+      return updated;
+    } catch (err) {
+      console.error('Failed to persist page sections:', err);
+      onShowToast?.(err.message || 'Failed to save section changes to server.');
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Section Reordering with immediate database persistence
+  const handleMoveSection = async (index, direction) => {
     const targetIdx = direction === 'up' ? index - 1 : index + 1;
     if (targetIdx < 0 || targetIdx >= sections.length) return;
 
@@ -99,19 +220,51 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     // Update orders
     const updated = reordered.map((sec, i) => ({ ...sec, order: i + 1 }));
     setSections(updated);
+
+    try {
+      await persistSections(updated, 'Section order updated and saved live.');
+    } catch (err) {
+      setSections(sections);
+    }
   };
 
-  // Section Toggle Enabled/Disabled
-  const handleToggleSectionEnabled = (sectionId) => {
-    setSections(prev =>
-      prev.map(sec => sec.id === sectionId ? { ...sec, enabled: sec.enabled === false ? true : false } : sec)
+  // Section Toggle Enabled/Disabled with immediate database persistence
+  const handleToggleSectionEnabled = async (sectionId) => {
+    const targetSec = sections.find(s => s.id === sectionId);
+    const nextEnabled = targetSec?.enabled === false ? true : false;
+    const updated = sections.map(sec =>
+      sec.id === sectionId ? { ...sec, enabled: nextEnabled } : sec
     );
+    setSections(updated);
+
+    try {
+      await persistSections(updated, `Section ${nextEnabled ? 'enabled' : 'disabled'} and saved live.`);
+    } catch (err) {
+      setSections(sections);
+    }
   };
 
-  // Delete Section
-  const handleDeleteSection = (sectionId) => {
-    if (!window.confirm('Are you sure you want to delete this section?')) return;
-    setSections(prev => prev.filter(sec => sec.id !== sectionId));
+  // Delete Section with immediate database persistence
+  const handleDeleteSection = async (sectionId) => {
+    const secToDelete = sections.find(s => s.id === sectionId);
+    const secName = secToDelete?.data?.heading || secToDelete?.data?.title || secToDelete?.data?.headline || secToDelete?.type || 'Section';
+
+    if (!window.confirm(`Are you sure you want to delete "${secName}"? This change will be saved immediately.`)) return;
+
+    const remaining = sections
+      .filter(sec => sec.id !== sectionId)
+      .map((sec, idx) => ({ ...sec, order: idx + 1 }));
+
+    // Optimistically update UI
+    setSections(remaining);
+
+    try {
+      await persistSections(remaining, `Section "${secName}" deleted and permanently saved.`);
+    } catch (err) {
+      // Revert if saving fails
+      setSections(sections);
+      alert(`Could not delete section: ${err.message || 'Please check your connection and try again.'}`);
+    }
   };
 
   // Add New Section
@@ -124,11 +277,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
     if (sectionType === 'stories_feed') {
       initialData = {
-        title: 'Editorial Stories Feed',
-        heading: 'Editorial Stories Feed',
-        subtitle: 'Latest updates and dispatches across the ecosystem',
+        title: 'Article & Story Feed',
+        heading: 'Article & Story Feed',
+        subtitle: 'Latest updates and editorial dispatches across the ecosystem',
         category: '',
-        limit: 6,
+        limit: 4,
         viewAllText: 'View All',
         viewAllUrl: '/latest'
       };
@@ -137,7 +290,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         title: 'Trending Now',
         heading: 'Trending Now',
         subtitle: 'High-velocity stories capturing builder attention',
-        limit: 6,
+        limit: 8,
         viewAllUrl: '/trending'
       };
     } else if (sectionType === 'spotlight') {
@@ -147,7 +300,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         subtitle: 'Deep tech, generative AI, and emerging ventures',
         category: 'Technology',
         badgeText: 'DEEPTECH FOCUS',
-        limit: 6,
+        limit: 8,
         viewAllUrl: '/category/technology'
       };
     } else if (sectionType === 'newsletter') {
@@ -326,8 +479,12 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       enabled: true,
       data: initialData
     };
-    setSections(prev => [...prev, newSec]);
+    const nextSections = [...sections, newSec];
+    setSections(nextSections);
     setIsAddSectionOpen(false);
+
+    persistSections(nextSections, `Section "${def?.label || sectionType}" added.`).catch(() => {});
+
     if (sectionType === 'hero') {
       setLiveBannerEditingSection(newSec);
     } else {
@@ -337,27 +494,10 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
   // Save changes to backend
   const handleSavePage = async (publishOverride = null) => {
-    setSaving(true);
     try {
       const targetStatus = publishOverride || status;
-      const targetSlug = pageId === 'home' ? '' : slug.trim();
-      const payload = {
-        title: title.trim(),
-        slug: targetSlug,
-        description: description.trim(),
-        status: targetStatus,
-        seo: {
-          title: seo.title.trim() || `${title} | GoReadPost`,
-          description: seo.description.trim() || description.trim(),
-          keywords: Array.isArray(seo.keywords) ? seo.keywords : typeof seo.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : [],
-          ogImage: seo.ogImage.trim()
-        },
-        sections: sections.map((s, idx) => ({ ...s, order: idx + 1 }))
-      };
-
-      const updated = await PageService.updatePage(pageId, payload);
-      setPage(updated);
-      setStatus(targetStatus);
+      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : slug.trim();
+      await persistSections(sections, null, targetStatus);
       onShowToast?.(
         publishOverride === 'published'
           ? (pageId === 'home' || !targetSlug ? 'Homepage is now published live!' : `Page "/${targetSlug}" is now published live!`)
@@ -365,8 +505,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       );
     } catch (err) {
       alert(err.message || 'Failed to save page');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -396,6 +534,146 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             Return to Pages
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Handlers for Dedicated Full-Page Live Studio
+  const handleOpenLiveEditor = (sec) => {
+    setLiveEditingSection(sec);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('liveSection', sec.id || sec._id || sec.type);
+      url.searchParams.delete('liveHero');
+      url.searchParams.delete('liveStudio');
+      window.history.pushState(null, '', url.pathname + url.search);
+    } catch (e) {}
+  };
+
+  const handleCloseLiveEditor = () => {
+    setLiveEditingSection(null);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('liveSection');
+      url.searchParams.delete('liveHero');
+      window.history.pushState(null, '', url.pathname + (url.search ? url.search : ''));
+    } catch (e) {}
+  };
+
+  const handleOpenWholeHomeStudio = () => {
+    setIsWholeHomeStudioOpen(true);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('liveStudio', 'true');
+      url.searchParams.delete('liveSection');
+      url.searchParams.delete('liveHero');
+      window.history.pushState(null, '', url.pathname + url.search);
+    } catch (e) {}
+  };
+
+  const handleCloseWholeHomeStudio = () => {
+    setIsWholeHomeStudioOpen(false);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('liveStudio');
+      window.history.pushState(null, '', url.pathname + (url.search ? url.search : ''));
+    } catch (e) {}
+  };
+
+  const handleAutoSaveLiveSection = async (updatedData) => {
+    if (!liveEditingSection) return;
+    const targetId = liveEditingSection.id || liveEditingSection._id;
+    const updatedSections = sections.map(s => (s.id || s._id) === targetId ? { ...s, data: updatedData } : s);
+    setSections(updatedSections);
+
+    try {
+      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const payload = {
+        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        slug: targetSlug,
+        description: (description || page?.description || '').trim(),
+        status: status || page?.status || 'published',
+        seo: {
+          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
+          keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
+          ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
+        },
+        sections: updatedSections
+      };
+      const updatedPage = await PageService.updatePage(pageId, payload);
+      if (updatedPage) setPage(updatedPage);
+      return updatedPage;
+    } catch (err) {
+      console.error('Failed to auto-save section:', err);
+      throw err;
+    }
+  };
+
+  const handleSaveLiveSection = async (updatedData) => {
+    if (!liveEditingSection) return;
+    const targetId = liveEditingSection.id || liveEditingSection._id;
+    const updatedSections = sections.map(s => (s.id || s._id) === targetId ? { ...s, data: updatedData } : s);
+    setSections(updatedSections);
+    handleCloseLiveEditor();
+
+    try {
+      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const payload = {
+        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        slug: targetSlug,
+        description: (description || page?.description || '').trim(),
+        status: status || page?.status || 'published',
+        seo: {
+          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
+          keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
+          ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
+        },
+        sections: updatedSections
+      };
+      const updatedPage = await PageService.updatePage(pageId, payload);
+      if (updatedPage) setPage(updatedPage);
+      onShowToast?.(`Section "${updatedData.title || updatedData.heading || liveEditingSection.type}" saved and published live!`);
+    } catch (err) {
+      console.error('Failed to save section:', err);
+      onShowToast?.('Section updated in editor. Click "Publish Live" to save.');
+    }
+  };
+
+  // ── 1. DEDICATED FULL-SCREEN LIVE SECTION STUDIO PAGE VIEW ──
+  // Replaces the sections table completely with the full-screen visual live editor!
+  if (liveEditingSection) {
+    return (
+      <div className="admin-live-studio-dedicated-page">
+        <LiveSectionEditor
+          section={liveEditingSection}
+          isOpen={true}
+          pageId={pageId}
+          onClose={handleCloseLiveEditor}
+          onAutoSave={handleAutoSaveLiveSection}
+          onSave={handleSaveLiveSection}
+          stories={allStories.length ? allStories : ALL_STORIES}
+        />
+      </div>
+    );
+  }
+
+  // ── 2. DEDICATED FULL-SCREEN WHOLE HOMEPAGE STUDIO PAGE VIEW ──
+  if (isWholeHomeStudioOpen) {
+    return (
+      <div className="admin-live-studio-dedicated-page">
+        <LiveHomepageStudio
+          isOpen={true}
+          initialSections={sections}
+          stories={allStories.length ? allStories : ALL_STORIES}
+          onClose={handleCloseWholeHomeStudio}
+          onSaveSuccess={(updatedSections) => {
+            if (updatedSections) setSections(updatedSections);
+            fetchPage();
+            onShowToast?.('Whole homepage layout and articles permanently saved live!');
+          }}
+        />
       </div>
     );
   }
@@ -432,10 +710,44 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       {activeTab === 'sections' && (
         <div className="section-builder-wrapper">
           <div className="section-builder-top">
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <h3 style={{ margin: 0 }}>Page Sections Layout</h3>
+              {saving ? (
+                <span style={{ fontSize: '0.8rem', color: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 650, background: 'rgba(234, 88, 12, 0.1)', padding: '3px 9px', borderRadius: '6px' }}>
+                  <RefreshCw size={12} className="spin-animate" /> Saving to database...
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.8rem', color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 650, background: 'rgba(22, 163, 74, 0.1)', padding: '3px 9px', borderRadius: '6px' }}>
+                  <CheckCircle2 size={13} /> Live Synced
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn-admin-secondary"
+                onClick={() => {
+                  if (pageId === 'home') {
+                    handleOpenWholeHomeStudio();
+                  } else if (sections.length > 0) {
+                    handleOpenLiveEditor(sections[0]);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 700
+                }}
+                title="Launch visual live studio for this page"
+              >
+                <Sparkles size={15} />
+                <span>⚡ Live Studio</span>
+              </button>
+
               <button
                 type="button"
                 className="btn-admin-secondary"
@@ -479,6 +791,37 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                   label: sec.type.toUpperCase()
                 };
                 const isEnabled = sec.enabled !== false;
+                const secKey = sec.id ? sec.id.replace(/^sec_/, '') : '';
+                const canon = CANONICAL_SECTION_META[sec.id] || CANONICAL_SECTION_META[secKey] || CANONICAL_SECTION_META[sec.type];
+
+                const badgeText = canon?.badge || def.label?.toUpperCase() || sec.type.toUpperCase();
+                const badgeColor = canon?.color || 'var(--brand-primary)';
+                const badgeBg = canon?.bg || 'rgba(234, 88, 12, 0.08)';
+
+                const titleText = 
+                  sec.data?.heading || 
+                  sec.data?.title || 
+                  sec.data?.headline || 
+                  sec.title || 
+                  canon?.title || 
+                  def.label || 
+                  `Section ${idx + 1}`;
+
+                const subText = 
+                  sec.data?.subheadline || 
+                  sec.data?.subtitle || 
+                  sec.data?.description || 
+                  sec.description || 
+                  canon?.desc || 
+                  def.desc || 
+                  '';
+
+                // Content summary pills
+                const categoryPill = sec.data?.category ? `📂 ${sec.data.category}` : null;
+                const limitPill = sec.data?.limit ? `📰 ${sec.data.limit} Stories Limit` : (sec.type === 'hero' || sec.id === 'hero_popular' ? `🔥 ${sec.data?.popularArticles?.length || 5} Ranked Popular Posts` : null);
+                const viewAllPill = sec.data?.viewAllUrl ? `🔗 ${sec.data.viewAllUrl}` : null;
+                const highlightBadge = sec.data?.badgeText || sec.data?.badge ? `✨ ${sec.data.badgeText || sec.data.badge}` : null;
+                const isHeroCustom = (sec.type === 'hero' || sec.id === 'hero_popular') && sec.data?.headline && sec.data.headline !== titleText;
 
                 return (
                   <div
@@ -515,7 +858,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                         {!isEnabled && <span className="disabled-pill">Disabled</span>}
                       </div>
                       <div className="section-headline-preview">
-                        {sec.data?.heading || sec.data?.title || sec.data?.headline || def.label || `Section ${idx + 1}`}
+                        {titleText}
                       </div>
                     </div>
 
@@ -531,11 +874,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                         <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
                       </button>
 
-                      {/* Live Visual WYSIWYG Editor Button (For EVERY section!) */}
+                      {/* Live Visual WYSIWYG Editor Button (Opens in dedicated page view) */}
                       <button
                         type="button"
                         className="btn-section-action live-edit"
-                        onClick={() => setLiveEditingSection(sec)}
+                        onClick={() => handleOpenLiveEditor(sec)}
                         style={{
                           background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
                           color: '#ffffff',
@@ -555,11 +898,35 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                         <span>Live Edit</span>
                       </button>
 
+                      {/* Quick Open in New Tab Button */}
+                      <a
+                        href={`/admin/pages/${pageId}/edit?liveSection=${encodeURIComponent(sec.id || sec._id || sec.type)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-section-action new-tab"
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          color: '#cbd5e1',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          padding: '6px 9px',
+                          borderRadius: '8px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textDecoration: 'none',
+                          cursor: 'pointer'
+                        }}
+                        title="Open Live Editor in New Browser Tab"
+                      >
+                        <ExternalLink size={14} />
+                      </a>
+
                       <button
                         type="button"
                         className="btn-section-action delete"
                         onClick={() => handleDeleteSection(sec.id)}
-                        title="Remove Section"
+                        disabled={saving}
+                        title="Permanently delete section"
                       >
                         <Trash2 size={15} />
                       </button>
@@ -747,175 +1114,22 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           section={editingSection}
           isOpen={!!editingSection}
           onClose={() => setEditingSection(null)}
-          onSave={(updatedSection) => {
-            setSections(prev =>
-              prev.map(s => s.id === updatedSection.id ? updatedSection : s)
-            );
-            onShowToast?.(`Section "${updatedSection.type}" updated.`);
+          onSave={async (updatedSection) => {
+            const updated = sections.map(s => s.id === updatedSection.id ? updatedSection : s);
+            setSections(updated);
+            setEditingSection(null);
+            try {
+              await persistSections(updated, `Section "${updatedSection.type}" updated and saved live.`);
+            } catch (e) {}
           }}
           onOpenLiveStudio={() => {
             const sec = editingSection;
             setEditingSection(null);
-            setLiveEditingSection(sec);
+            handleOpenLiveEditor(sec);
           }}
         />
       )}
 
-      {/* ========================================================
-          MODAL 3: LIVE WYSIWYG SECTION STUDIO (ALL SECTIONS)
-         ======================================================== */}
-      {liveEditingSection && (
-        <LiveSectionEditor
-          section={liveEditingSection}
-          isOpen={Boolean(liveEditingSection)}
-          pageId={pageId}
-          onClose={() => setLiveEditingSection(null)}
-          onAutoSave={async (updatedData) => {
-            const updatedSections = sections.map(s => s.id === liveEditingSection.id ? { ...s, data: updatedData } : s);
-            setSections(updatedSections);
-
-            try {
-              const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
-              const payload = {
-                title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
-                slug: targetSlug,
-                description: (description || page?.description || '').trim(),
-                status: status || page?.status || 'published',
-                seo: {
-                  title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
-                  description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-                  keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-                  ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-                },
-                sections: updatedSections
-              };
-              const updatedPage = await PageService.updatePage(pageId, payload);
-              if (updatedPage) setPage(updatedPage);
-              return updatedPage;
-            } catch (err) {
-              console.error('Failed to auto-save section:', err);
-              throw err;
-            }
-          }}
-          onSave={async (updatedData) => {
-            const updatedSections = sections.map(s => s.id === liveEditingSection.id ? { ...s, data: updatedData } : s);
-            setSections(updatedSections);
-            setLiveEditingSection(null);
-
-            // Automatically persist immediately to the database so refreshing keeps changes permanently!
-            try {
-              const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
-              const payload = {
-                title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
-                slug: targetSlug,
-                description: (description || page?.description || '').trim(),
-                status: status || page?.status || 'published',
-                seo: {
-                  title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
-                  description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-                  keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-                  ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-                },
-                sections: updatedSections
-              };
-              const updatedPage = await PageService.updatePage(pageId, payload);
-              if (updatedPage) setPage(updatedPage);
-              onShowToast?.(`Section "${updatedData.title || updatedData.heading || liveEditingSection.type}" permanently saved and published live!`);
-            } catch (err) {
-              console.error('Failed to save section:', err);
-              onShowToast?.('Section updated in editor. Click "Publish Live" to save.');
-            }
-          }}
-          stories={ALL_STORIES}
-        />
-      )}
-
-      {/* Fallback legacy modal if liveBannerEditingSection is ever explicitly opened */}
-      {liveBannerEditingSection && (
-        <LiveBannerEditor
-          section={liveBannerEditingSection}
-          isOpen={Boolean(liveBannerEditingSection)}
-          pageId={pageId}
-          onClose={() => setLiveBannerEditingSection(null)}
-          onAutoSave={async (updatedData) => {
-            const updatedSections = sections.map(s => s.id === liveBannerEditingSection.id ? { ...s, data: updatedData } : s);
-            setSections(updatedSections);
-
-            try {
-              const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
-              const payload = {
-                title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
-                slug: targetSlug,
-                description: (description || page?.description || '').trim(),
-                status: status || page?.status || 'published',
-                seo: {
-                  title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
-                  description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-                  keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-                  ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-                },
-                sections: updatedSections
-              };
-              const updatedPage = await PageService.updatePage(pageId, payload);
-              if (updatedPage) setPage(updatedPage);
-              return updatedPage;
-            } catch (err) {
-              console.error('Failed to auto-save banner:', err);
-              throw err;
-            }
-          }}
-          onSave={async (updatedData) => {
-            const updatedSections = sections.map(s => s.id === liveBannerEditingSection.id ? { ...s, data: updatedData } : s);
-            setSections(updatedSections);
-            setLiveBannerEditingSection(null);
-
-            try {
-              const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
-              const payload = {
-                title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
-                slug: targetSlug,
-                description: (description || page?.description || '').trim(),
-                status: status || page?.status || 'published',
-                seo: {
-                  title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
-                  description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-                  keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-                  ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-                },
-                sections: updatedSections
-              };
-              const updatedPage = await PageService.updatePage(pageId, payload);
-              if (updatedPage) setPage(updatedPage);
-              onShowToast?.('Hero banner content permanently saved and published live!');
-            } catch (err) {
-              console.error('Failed to save banner:', err);
-              onShowToast?.('Banner updated in editor. Click "Publish Live" to save.');
-            }
-          }}
-          stories={ALL_STORIES}
-        />
-      )}
-
-      {/* ========================================================
-          MODAL 4: WHOLE HOMEPAGE VISUAL LIVE STUDIO
-         ======================================================== */}
-      {isWholeHomeStudioOpen && (
-        <LiveHomepageStudio
-          isOpen={isWholeHomeStudioOpen}
-          initialSections={sections}
-          stories={ALL_STORIES}
-          onClose={() => {
-            setIsWholeHomeStudioOpen(false);
-            if (typeof window !== 'undefined' && window.location.search.includes('liveStudio=true')) {
-              window.history.replaceState(null, '', `/admin/pages/${pageId}/edit`);
-            }
-          }}
-          onSaveSuccess={(updatedSections) => {
-            setSections(updatedSections);
-            onShowToast?.('Whole homepage layout and articles permanently saved live!');
-          }}
-        />
-      )}
     </div>
   );
 }

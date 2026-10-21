@@ -333,13 +333,14 @@ main {
   border-bottom: 1px solid var(--border-light);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
 }
 
 .header-wrapper.header-hidden {
-  transform: none !important;
-  box-shadow: none;
-  pointer-events: auto !important;
+  transform: translateY(-100%) !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
 }
 
 [data-theme='dark'] .header-wrapper {

@@ -7,7 +7,7 @@ import {
 import { PageService } from '../../services/pageService';
 
 const COMPANY_SLUGS = ['about', 'advertise'];
-const PORTAL_SLUGS = ['latest', 'trending', 'videos', 'newsletter'];
+const PORTAL_SLUGS = ['trending', 'videos', 'newsletter'];
 
 const getPageGroup = (page) => {
   const s = (page.slug || page.id || '').toLowerCase().replace(/^\/+/, '');
@@ -75,9 +75,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   };
 
   const handleDelete = async (page) => {
-    const isCore = ['home', 'about', 'advertise', 'latest', 'trending', 'videos', 'newsletter'].includes((page.slug || page.id || '').toLowerCase());
-    if (page.id === 'home' || isCore) { 
-      onShowToast?.(`"${page.title}" is an active navbar page and cannot be deleted.`); 
+    if (page.id === 'home' || page.slug === '' || page.slug === '/') { 
+      onShowToast?.('Primary Homepage cannot be deleted.'); 
       return; 
     }
     setDeleteConfirmId(null);
@@ -402,6 +401,49 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                             <Edit2 size={14} />
                             <span>Edit</span>
                           </button>
+                          <button
+                            className="apv-action-btn live"
+                            onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveStudio=true`)}
+                            title="Open Visual Live Studio"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '0 8px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'rgba(234, 88, 12, 0.1)',
+                              color: 'var(--brand-primary, #ea580c)',
+                              border: '1px solid rgba(234, 88, 12, 0.25)',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Sparkles size={12} fill="currentColor" />
+                            <span>Live</span>
+                          </button>
+                          {page.id !== 'home' && page.slug !== '' && page.slug !== '/' && (
+                            <button
+                              className="apv-action-btn delete"
+                              onClick={() => setDeleteConfirmId(page.id)}
+                              title="Delete page"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.25)',
+                                background: 'rgba(239, 68, 68, 0.08)',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -9,6 +9,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const router = express.Router();
+
+// Ensure all page endpoints never get stale-cached by browsers
+router.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fallbackFilePath = path.join(__dirname, '..', 'pages_data_store.json');
@@ -322,17 +331,6 @@ export const DEFAULT_PAGES = [
 export async function ensureDefaultPages() {
   if (!isDbConnected()) return;
   try {
-    const allowedSlugs = DEFAULT_PAGES.map(p => (p.slug || '').toLowerCase());
-    const allowedIds = DEFAULT_PAGES.map(p => p.id);
-
-    // Prune any legacy or unlisted pages
-    await Page.deleteMany({
-      $and: [
-        { slug: { $nin: allowedSlugs } },
-        { id: { $nin: allowedIds } }
-      ]
-    });
-
     for (const p of DEFAULT_PAGES) {
       const exists = await Page.findOne({ $or: [{ slug: p.slug.toLowerCase() }, { id: p.id }] });
       if (!exists) {
@@ -617,6 +615,15 @@ router.put('/:id', protectAdmin, async (req, res) => {
 
       const updated = await Page.findOneAndUpdate(buildPageQuery(id), updates, { new: true });
       if (!updated) return res.status(404).json({ success: false, message: 'Page not found' });
+      try {
+        const list = readFallbackPages();
+        const found = findFallbackPage(list, id);
+        if (found) {
+          const index = list.indexOf(found);
+          list[index] = { ...list[index], ...updates };
+          writeFallbackPages(list);
+        }
+      } catch (e) {}
       return res.json({ success: true, message: 'Page updated successfully', data: updated });
     }
 

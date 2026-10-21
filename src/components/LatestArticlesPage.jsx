@@ -9,6 +9,7 @@ import './LatestArticlesPage.css';
 import { NewsletterService } from '../services/newsletterService';
 import { PageService } from '../services/pageService';
 import { ALL_STORIES } from '../data/storiesData';
+import NewsletterBanner from './NewsletterBanner';
 
 // Helper functions for safe extraction from dynamic story objects
 const getStoryId = (s, fallbackIdx = 0) => s?.id || s?._id || s?.slug || `story-${fallbackIdx}`;
@@ -124,12 +125,21 @@ export default function LatestArticlesPage({
       }
     };
     loadLatestConfig();
+
+    window.addEventListener('page:change', loadLatestConfig);
+    return () => window.removeEventListener('page:change', loadLatestConfig);
   }, []);
 
   // Section reference for custom title, subtitle, and curated articles
   const feedSec = useMemo(() => {
     if (!pageConfig?.sections) return null;
     return pageConfig.sections.find(s => s.type === 'stories_feed' || s.id === 'latest_feed' || (s.type || '').includes('feed'));
+  }, [pageConfig]);
+
+  // Section reference for newsletter subscription banner
+  const newsletterSec = useMemo(() => {
+    if (!pageConfig?.sections) return null;
+    return pageConfig.sections.find(s => s.type === 'newsletter' || s.id === 'latest_newsletter');
   }, [pageConfig]);
 
   // Real content master pool (prioritizes admin curated articles if configured)
@@ -474,6 +484,11 @@ export default function LatestArticlesPage({
 
 
       </div>
+      {newsletterSec && newsletterSec.enabled !== false && (
+        <div style={{ maxWidth: '1280px', margin: '3rem auto 0', padding: '0 1rem' }}>
+          <NewsletterBanner />
+        </div>
+      )}
     </div>
   );
 }

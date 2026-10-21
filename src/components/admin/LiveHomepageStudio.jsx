@@ -158,8 +158,21 @@ export default function LiveHomepageStudio({
   }, [initialSections]);
 
   const pool = useMemo(() => {
-    return availableArticles.length > 0 ? availableArticles : ALL_STORIES;
-  }, [availableArticles]);
+    const combined = [...availableArticles];
+    const seen = new Set(
+      combined.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase())
+    );
+
+    const fallbackList = [...(stories || []), ...ALL_STORIES];
+    for (const item of fallbackList) {
+      const key = String(item.slug || item.id || item._id || item.title || '').trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
+    }
+    return combined;
+  }, [availableArticles, stories]);
 
   // Filtered articles in Picker
   const filteredPickerArticles = useMemo(() => {
@@ -303,7 +316,7 @@ export default function LiveHomepageStudio({
   const popularArticles = useMemo(() => {
     const data = heroSection?.data || {};
     if (Array.isArray(data.popularArticles) && data.popularArticles.length > 0) {
-      return data.popularArticles;
+      return data.popularArticles.slice(0, 5);
     }
     const trending = pool.filter(s => s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING');
     if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
@@ -331,22 +344,49 @@ export default function LiveHomepageStudio({
   // ─────────────────────────────────────────────────────────
   const resolveSectionArticles = (sec) => {
     const data = sec?.data || {};
-    if (Array.isArray(data.articles) && data.articles.length > 0) {
-      return data.articles;
-    }
-    if (Array.isArray(data.articleIds) && data.articleIds.length > 0) {
-      const idSet = new Set(data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
-      const matched = pool.filter(s => idSet.has(String(s._id || s.id || s.slug)));
-      if (matched.length > 0) return matched;
-    }
-
+    const maxFit = Number(data.limit || sec?.limit) > 0 ? Number(data.limit || sec?.limit) : 4;
     const cat = data.category || data.filterCategory;
-    const limit = Number(data.limit) || 8;
+    let source = pool;
     if (cat && cat.trim()) {
-      const filtered = pool.filter(s => (s.category || s.categoryLabel || '').toLowerCase().includes(cat.toLowerCase().trim()));
-      if (filtered.length > 0) return filtered.slice(0, limit);
+      const filtered = pool.filter(s => (s.category || s.categoryLabel || s.categoryName || '').toLowerCase().includes(cat.toLowerCase().trim()));
+      if (filtered.length > 0) source = filtered;
     }
-    return pool.slice(0, limit);
+    const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+
+    if (Array.isArray(data.articles) && data.articles.length > 0) {
+      return data.articles.filter(Boolean).slice(0, maxFit);
+    }
+    return sorted.slice(0, maxFit);
+  };
+
+  const handleAutoFillFeedSection = (secId) => {
+    const sec = sections.find(s => s.id === secId);
+    if (!sec) return;
+    const maxFit = Number(sec.data?.limit || sec.limit) > 0 ? Number(sec.data?.limit || sec.limit) : 4;
+    const currentArticles = resolveSectionArticles(sec);
+    if (currentArticles.length >= maxFit) return;
+
+    const existingIds = new Set(currentArticles.map(a => String(a._id || a.id || a.slug)));
+    const needed = maxFit - currentArticles.length;
+    const additions = pool.filter(a => a && !existingIds.has(String(a._id || a.id || a.slug))).slice(0, needed);
+    const nextArticles = [...currentArticles, ...additions];
+
+    const nextSections = sections.map(s => {
+      if (s.id === secId) {
+        return {
+          ...s,
+          data: {
+            ...s.data,
+            articles: nextArticles,
+            articleIds: nextArticles.map(a => a._id || a.id),
+            hasCustomArticles: true
+          }
+        };
+      }
+      return s;
+    });
+
+    persistHomepageToDatabase(nextSections);
   };
 
   const handleMoveFeedArticle = (secId, idx, direction) => {
@@ -426,8 +466,12 @@ export default function LiveHomepageStudio({
       nextSlides[targetIdx] = formatForHeroSlide(article);
       handleUpdateHeroData({ slides: nextSlides });
     } else if (pickerTarget.type === 'popular-add') {
+      if (popularArticles.length >= 5) {
+        setIsPickerOpen(false);
+        return;
+      }
       const newPop = formatForPopularPost(article);
-      const nextPop = [...popularArticles, newPop];
+      const nextPop = [...popularArticles, newPop].slice(0, 5);
       handleUpdateHeroData({ popularArticles: nextPop });
     } else if (pickerTarget.type === 'popular-replace') {
       const targetIdx = pickerTarget.index;
@@ -437,8 +481,13 @@ export default function LiveHomepageStudio({
     } else if (pickerTarget.type === 'feed-add') {
       const sec = sections.find(s => s.id === pickerTarget.sectionId);
       if (sec) {
+        const maxFit = Number(sec?.data?.limit || sec?.limit) > 0 ? Number(sec?.data?.limit || sec?.limit) : 4;
         const currentArticles = resolveSectionArticles(sec);
-        const nextArticles = [...currentArticles, article];
+        if (currentArticles.length >= maxFit) {
+          setIsPickerOpen(false);
+          return;
+        }
+        const nextArticles = [...currentArticles, article].slice(0, maxFit);
         const nextSections = sections.map(s => {
           if (s.id === pickerTarget.sectionId) {
             return {
@@ -720,47 +769,10 @@ export default function LiveHomepageStudio({
             </button>
           </div>
 
-          {/* ── Simulated Browser Window ── */}
+          {/* ── Real Homepage Content Canvas ── */}
           <div className="lhs-browser-frame">
-            {/* Top Address Bar */}
-            <div className="lhs-browser-topbar">
-              <div className="lhs-browser-dots">
-                <span className="lhs-browser-dot red" />
-                <span className="lhs-browser-dot yellow" />
-                <span className="lhs-browser-dot green" />
-              </div>
-              <div className="lhs-browser-url-pill">
-                <span style={{ color: '#10b981', fontSize: '0.85rem' }}>🔒</span>
-                <span>https://goreadpost.com</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
-                {deviceView === 'mobile' ? 'Mobile (480px)' : 'Desktop (1420px)'}
-              </div>
-            </div>
-
             {/* Real Frontend Website Body */}
             <div className="lhs-real-frontend-sheet">
-              {/* Simulated Real Site Header */}
-              <div className="lhs-simulated-site-header">
-                <div className="lhs-simulated-brand-logo">
-                  <span style={{ color: '#e11d48' }}>Go</span>Read<span style={{ color: '#e11d48' }}>Post</span>
-                </div>
-                <nav className="lhs-simulated-nav-links">
-                  <span className="lhs-simulated-nav-link active">Home</span>
-                  <span className="lhs-simulated-nav-link">Latest</span>
-                  <span className="lhs-simulated-nav-link">Trending</span>
-                  <span className="lhs-simulated-nav-link">AI Story</span>
-                  <span className="lhs-simulated-nav-link">Enterprise</span>
-                  <span className="lhs-simulated-nav-link">Videos</span>
-                </nav>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ background: '#f1f5f9', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Search size={14} />
-                    <span>Search stories…</span>
-                  </div>
-                </div>
-              </div>
-
               {/* ── All Homepage Sections In Natural Flow ── */}
               <div className="mhp-container" style={{ padding: '1.5rem clamp(1rem, 2.5vw, 2.5rem) 3rem' }}>
                 {sections.map((sec, idx) => {
@@ -768,7 +780,8 @@ export default function LiveHomepageStudio({
                   const isHero = type.includes('hero');
                   const isNewsletter = type.includes('newsletter');
                   const isGridFeed = !isHero && !isNewsletter;
-                  const secArticles = isGridFeed ? resolveSectionArticles(sec) : [];
+                  const maxFit = Number(sec?.data?.limit || sec?.limit) > 0 ? Number(sec?.data?.limit || sec?.limit) : 4;
+                  const secArticles = isGridFeed ? resolveSectionArticles(sec).slice(0, maxFit) : [];
 
                   return (
                     <div 
@@ -1090,54 +1103,210 @@ export default function LiveHomepageStudio({
                                 <article 
                                   key={artId} 
                                   className="mhp-blog-card lse-hover-item"
-                                  style={{ position: 'relative' }}
+                                  style={{ 
+                                    position: 'relative',
+                                    background: '#ffffff',
+                                    borderRadius: '16px',
+                                    overflow: 'hidden',
+                                    border: aIdx < (sec.limit || 8) ? '2px solid #ea580c' : '1px solid #e2e8f0',
+                                    boxShadow: aIdx < (sec.limit || 8) ? '0 6px 20px rgba(234, 88, 12, 0.12)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    transition: 'all 0.25s ease'
+                                  }}
                                 >
-                                  {/* Position Indicator Badge */}
-                                  <div className="lse-card-rank-badge" title={`Position #${aIdx + 1} in grid`}>
-                                    <span>#{aIdx + 1}</span>
-                                  </div>
+                                  <div 
+                                    className="mhp-blog-thumb-wrap"
+                                    style={{ 
+                                      position: 'relative', 
+                                      width: '100%', 
+                                      height: '210px', 
+                                      overflow: 'hidden', 
+                                      background: '#0f172a'
+                                    }}
+                                  >
+                                    <img 
+                                      src={artImg} 
+                                      alt={artTitle} 
+                                      className="mhp-blog-thumb"
+                                      style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        display: 'block'
+                                      }}
+                                      onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80';
+                                      }}
+                                    />
 
-                                  {/* Hover Reorder & Replace Dock */}
-                                  <div className="lse-card-dock">
-                                    <button
-                                      type="button"
-                                      className="lse-dock-btn"
-                                      disabled={aIdx === 0}
-                                      onClick={() => handleMoveFeedArticle(sec.id, aIdx, 'up')}
-                                      title="Move earlier (to left)"
-                                    >
-                                      <ArrowLeft size={13} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="lse-dock-btn"
-                                      disabled={aIdx === secArticles.length - 1}
-                                      onClick={() => handleMoveFeedArticle(sec.id, aIdx, 'down')}
-                                      title="Move later (to right)"
-                                    >
-                                      <ArrowRight size={13} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="lse-dock-btn"
-                                      onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-replace', index: aIdx })}
-                                      title="Replace this article"
-                                    >
-                                      <RefreshCw size={13} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="lse-dock-btn danger"
-                                      onClick={() => handleRemoveFeedArticle(sec.id, aIdx)}
-                                      title="Delete article permanently"
-                                    >
-                                      <Trash2 size={13} />
-                                    </button>
-                                  </div>
+                                    {/* Top & Bottom Legibility Gradient Overlay */}
+                                    <div 
+                                      style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0) 38%, rgba(15, 23, 42, 0.82) 100%)',
+                                        pointerEvents: 'none'
+                                      }}
+                                    />
 
-                                  <div className="mhp-blog-thumb-wrap">
-                                    <img src={artImg} alt={artTitle} className="mhp-blog-thumb" />
-                                    <span className="mhp-blog-category-on-image">{artCat}</span>
+                                    {/* Position Indicator Badge */}
+                                    <div 
+                                      style={{
+                                        position: 'absolute',
+                                        top: '10px',
+                                        left: '10px',
+                                        zIndex: 10,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        background: aIdx < (sec.limit || 8) ? 'rgba(15, 23, 42, 0.94)' : 'rgba(15, 23, 42, 0.82)',
+                                        backdropFilter: 'blur(8px)',
+                                        border: aIdx < (sec.limit || 8) ? '1.5px solid #ea580c' : '1px solid rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '7px',
+                                        padding: '4px 8px',
+                                        color: '#ffffff',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800,
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.45)'
+                                      }}
+                                      title={`Position #${aIdx + 1} in grid`}
+                                      onClick={e => e.stopPropagation()}
+                                    >
+                                      <span style={{ color: aIdx < (sec.limit || 8) ? '#fb923c' : '#cbd5e1' }}>#{aIdx + 1}</span>
+                                      {aIdx < (sec.limit || 8) && (
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#4ade80', fontSize: '0.64rem', fontWeight: 900, letterSpacing: '0.04em' }}>
+                                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
+                                          LIVE
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Floating Reorder & Replace Dock */}
+                                    <div 
+                                      style={{
+                                        position: 'absolute',
+                                        top: '10px',
+                                        right: '10px',
+                                        zIndex: 10,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px',
+                                        background: 'rgba(15, 23, 42, 0.94)',
+                                        backdropFilter: 'blur(8px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '8px',
+                                        padding: '3px 4px',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)'
+                                      }}
+                                      onClick={e => e.stopPropagation()}
+                                    >
+                                      <button
+                                        type="button"
+                                        disabled={aIdx === 0}
+                                        onClick={() => handleMoveFeedArticle(sec.id, aIdx, 'up')}
+                                        title="Move earlier (to left)"
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          width: '26px',
+                                          height: '26px',
+                                          borderRadius: '5px',
+                                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                                          background: 'rgba(255, 255, 255, 0.08)',
+                                          color: '#ffffff',
+                                          cursor: aIdx === 0 ? 'not-allowed' : 'pointer',
+                                          opacity: aIdx === 0 ? 0.35 : 1,
+                                          padding: 0
+                                        }}
+                                      >
+                                        <ArrowLeft size={13} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={aIdx === secArticles.length - 1}
+                                        onClick={() => handleMoveFeedArticle(sec.id, aIdx, 'down')}
+                                        title="Move later (to right)"
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          width: '26px',
+                                          height: '26px',
+                                          borderRadius: '5px',
+                                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                                          background: 'rgba(255, 255, 255, 0.08)',
+                                          color: '#ffffff',
+                                          cursor: aIdx === secArticles.length - 1 ? 'not-allowed' : 'pointer',
+                                          opacity: aIdx === secArticles.length - 1 ? 0.35 : 1,
+                                          padding: 0
+                                        }}
+                                      >
+                                        <ArrowRight size={13} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-replace', index: aIdx })}
+                                        title="Replace this article"
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          width: '26px',
+                                          height: '26px',
+                                          borderRadius: '5px',
+                                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                                          background: 'rgba(255, 255, 255, 0.08)',
+                                          color: '#ffffff',
+                                          cursor: 'pointer',
+                                          padding: 0
+                                        }}
+                                      >
+                                        <RefreshCw size={13} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveFeedArticle(sec.id, aIdx)}
+                                        title="Delete article permanently"
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          width: '26px',
+                                          height: '26px',
+                                          borderRadius: '5px',
+                                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                                          background: 'rgba(239, 68, 68, 0.25)',
+                                          color: '#fca5a5',
+                                          cursor: 'pointer',
+                                          padding: 0
+                                        }}
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </div>
+
+                                    <span 
+                                      style={{
+                                        position: 'absolute',
+                                        bottom: '10px',
+                                        left: '10px',
+                                        zIndex: 10,
+                                        background: '#0f172a',
+                                        color: '#ffffff',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 850,
+                                        letterSpacing: '0.06em',
+                                        padding: '4px 9px',
+                                        borderRadius: '5px',
+                                        textTransform: 'uppercase',
+                                        boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
+                                      }}
+                                    >
+                                      {artCat}
+                                    </span>
                                   </div>
 
                                   <div className="mhp-blog-body">
@@ -1165,20 +1334,169 @@ export default function LiveHomepageStudio({
                               );
                             })}
 
-                            {/* Add Article to Section Card */}
-                            <div 
-                              className="mhp-blog-card lse-add-article-card"
-                              onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-add' })}
-                              title={`Add story to ${sec.title}`}
-                            >
-                              <div className="lse-add-card-inner">
-                                <div className="lse-add-icon-circle">
-                                  <Plus size={24} />
+                            {/* + Plus Add Article Card (Only shown if below max fit capacity) */}
+                            {secArticles.length < maxFit ? (
+                              <div 
+                                className="mhp-blog-card lse-add-article-card"
+                                onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-add' })}
+                                role="button"
+                                tabIndex={0}
+                                title={`Add an article to slot #${secArticles.length + 1} of ${maxFit}`}
+                                style={{
+                                  position: 'relative',
+                                  minHeight: '380px',
+                                  background: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)',
+                                  border: '2px dashed #ea580c',
+                                  borderRadius: '16px',
+                                  boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '2rem 1.5rem',
+                                  textAlign: 'center',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    background: '#ffedd5',
+                                    color: '#c2410c',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 800,
+                                    marginBottom: '1rem'
+                                  }}
+                                >
+                                  <span>Slot #{secArticles.length + 1} of {maxFit} Max</span>
                                 </div>
-                                <span className="lse-add-title">+ Add Article</span>
-                                <span className="lse-add-subtitle">To {sec.title}</span>
+
+                                <div
+                                  className="lse-add-plus-badge"
+                                  style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)',
+                                    color: '#ffffff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 8px 22px rgba(234, 88, 12, 0.35)',
+                                    transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                    marginBottom: '1rem'
+                                  }}
+                                >
+                                  <Plus size={30} strokeWidth={2.6} />
+                                </div>
+
+                                <h4
+                                  style={{
+                                    fontSize: '1.1rem',
+                                    fontWeight: 800,
+                                    color: '#0f172a',
+                                    margin: '0 0 0.4rem',
+                                    letterSpacing: '-0.01em'
+                                  }}
+                                >
+                                  + Add Article Card
+                                </h4>
+
+                                <p
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    color: '#64748b',
+                                    margin: '0 0 1rem',
+                                    lineHeight: 1.45,
+                                    maxWidth: '220px'
+                                  }}
+                                >
+                                  {maxFit - secArticles.length} more card{maxFit - secArticles.length === 1 ? '' : 's'} fit in this homepage section
+                                </p>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '210px' }}>
+                                  <span
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px',
+                                      padding: '8px 16px',
+                                      borderRadius: '9999px',
+                                      background: '#ea580c',
+                                      color: '#ffffff',
+                                      fontWeight: 750,
+                                      fontSize: '0.82rem',
+                                      boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)'
+                                    }}
+                                  >
+                                    <Plus size={15} /> Select Article
+                                  </span>
+
+                                  {pool.length > secArticles.length && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAutoFillFeedSection(sec.id);
+                                      }}
+                                      title="Auto-fill the remaining slots to complete the frontend grid"
+                                      style={{
+                                        background: 'transparent',
+                                        border: '1.5px solid #fdba74',
+                                        borderRadius: '9999px',
+                                        padding: '6px 12px',
+                                        color: '#ea580c',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 750,
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '5px',
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <Sparkles size={12} />
+                                      <span>Auto-fill to Max ({maxFit})</span>
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
+                            ) : null}
+
+                            {/* Full Capacity Indicator for Homepage Section */}
+                            {secArticles.length >= maxFit && (
+                              <div
+                                style={{
+                                  gridColumn: '1 / -1',
+                                  marginTop: '0.5rem',
+                                  padding: '12px 18px',
+                                  borderRadius: '12px',
+                                  background: 'rgba(34, 197, 94, 0.08)',
+                                  border: '1.5px solid rgba(34, 197, 94, 0.3)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '12px',
+                                  flexWrap: 'wrap'
+                                }}
+                              >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                  <CheckCircle2 size={17} color="#16a34a" />
+                                  <span style={{ fontSize: '0.86rem', fontWeight: 750, color: '#15803d' }}>
+                                    Section Full ({secArticles.length}/{maxFit} Articles) • Perfectly fills the row on the frontend homepage.
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                                  To replace or delete cards, use the action buttons on any card above.
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </section>
                       )}
@@ -1272,17 +1590,6 @@ export default function LiveHomepageStudio({
                 </div>
               </div>
 
-              {/* Simulated Real Frontend Footer */}
-              <div className="lhs-simulated-site-footer">
-                <div style={{ maxWidth: '1420px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', color: '#64748b' }}>
-                  <span>© {new Date().getFullYear()} GoReadPost Media Inc. All rights reserved.</span>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <span>Privacy Policy</span>
-                    <span>Terms of Service</span>
-                    <span>Editorial Guidelines</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

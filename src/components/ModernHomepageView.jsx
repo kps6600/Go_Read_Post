@@ -142,12 +142,20 @@ export default function ModernHomepageView({
     } catch (e) {}
   }, []);
 
-  // Pool of stories: Live database stories preferred, fallback to ALL_STORIES
+  // Pool of stories: Live database stories merged with ALL_STORIES
   const pool = useMemo(() => {
-    if (stories && Array.isArray(stories) && stories.length > 0) {
-      return stories;
+    const combined = Array.isArray(stories) ? [...stories] : [];
+    const seen = new Set(
+      combined.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase())
+    );
+    for (const item of ALL_STORIES) {
+      const key = String(item.slug || item.id || item._id || item.title || '').trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
     }
-    return ALL_STORIES;
+    return combined;
   }, [stories]);
 
   // Active homepage sections from database or sensible defaults
@@ -248,7 +256,7 @@ export default function ModernHomepageView({
         const id = String(item._id || item.id || item.articleId || item.slug);
         return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
       });
-      if (livePopular.length > 0) return livePopular;
+      if (livePopular.length > 0) return livePopular.slice(0, 5);
     }
 
     // Mode B: Dynamic Trending fallback
@@ -270,9 +278,8 @@ export default function ModernHomepageView({
   const latestBlogs = useMemo(() => {
     const heroIds = new Set(heroSlides.map(s => getStoryId(s)));
     const nonHero = pool.filter(s => !heroIds.has(getStoryId(s)));
-    if (nonHero.length >= 10) return nonHero.slice(0, 10);
-    if (nonHero.length > 0) return nonHero;
-    return pool.slice(0, 10);
+    const sorted = [...nonHero].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+    return sorted;
   }, [pool, heroSlides]);
 
   // 4. Dynamic Trending Now Stories
@@ -331,19 +338,19 @@ export default function ModernHomepageView({
 
   // Helper to filter articles by category or pinned list
   const getSectionArticles = (sec, defaultArticles) => {
+    const limit = Number(sec?.data?.limit) > 0 ? Number(sec?.data?.limit) : (Number(sec?.limit) || 4);
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      return sec.data.articles;
+      return sec.data.articles.slice(0, limit);
     }
     if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
-      return sec.articles;
+      return sec.articles.slice(0, limit);
     }
     if (sec?.data?.articleIds && Array.isArray(sec.data.articleIds) && sec.data.articleIds.length > 0) {
       const ids = new Set(sec.data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
       const matched = pool.filter(s => ids.has(String(s._id || s.id || s.slug)));
-      if (matched.length > 0) return matched;
+      if (matched.length > 0) return matched.slice(0, limit);
     }
     const filterCat = sec?.data?.category || sec?.data?.filterCategory || sec?.filterCategory;
-    const limit = sec?.data?.limit || sec?.limit || 10;
     if (filterCat && filterCat.trim()) {
       const cat = filterCat.toLowerCase().trim();
       const filtered = pool.filter(s => {
