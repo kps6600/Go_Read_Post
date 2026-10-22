@@ -612,11 +612,6 @@ export default function TopicsPage({
     <div className="top-page-wrapper">
       {/* ── Hero Banner ── */}
       <section className="top-hero-banner">
-        <div className="top-hero-badge">
-          <Hash size={13} />
-          <span>TAXONOMY DIRECTORY</span>
-        </div>
-
         <h1 className="top-hero-title">
           Browse by Topics & Domains
         </h1>

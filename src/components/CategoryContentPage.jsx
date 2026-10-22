@@ -305,7 +305,7 @@ export default function CategoryContentPage({
   const categoryInfo = useMemo(() => {
     if (currentTargetCategory === 'All') {
       return {
-        name: 'Categories Content',
+        name: 'All Categories',
         badge: 'All Categories',
         desc: 'Comprehensive reporting, strategic perspectives, and startup breakdowns across all editorial categories and desks.'
       };
@@ -326,9 +326,9 @@ export default function CategoryContentPage({
     else if (norm === 'hindi') displayName = 'Hindi';
 
     return {
-      name: `${displayName} Content`,
+      name: displayName,
       badge: `${displayName} Desk`,
-      desc: `Curated reporting, deep analysis, and breaking investigative coverage from the ${displayName} desk at GoReadPost.`
+      desc: `Curated reporting, deep analysis, and breaking investigative coverage from ${displayName} at GoReadPost.`
     };
   }, [currentTargetCategory]);
 
@@ -603,7 +603,6 @@ export default function CategoryContentPage({
         ) : (
           <section className="cat-hero-banner-section">
             <div className="cat-simple-banner">
-              <span className="cat-simple-badge">{categoryInfo.badge}</span>
               <h1 className="cat-simple-title">{categoryInfo.name}</h1>
               <p className="cat-simple-desc">{categoryInfo.desc}</p>
             </div>
