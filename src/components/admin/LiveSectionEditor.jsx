@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Check, Sparkles, Plus, Trash2, 
-  ArrowRight, ChevronLeft, ChevronRight,
+  ArrowLeft, ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type,
@@ -314,16 +314,21 @@ function LiveGenericSectionStudio({
   // - Homepage grid (4 columns wide): 8 articles (exactly 2 complete rows of 4).
   // - Latest articles page (4 columns wide): 16 articles (exactly 4 complete rows of 4).
   const isLatestPage = pageId === 'latest' || section?.id === 'latest_feed';
-  const maxArticlesFit = isLatestPage ? 16 : (Number(data.limit) > 0 ? Number(data.limit) : 4);
+  const isSpotlight = secType === 'spotlight' || section?.id === 'spotlight';
+  const isTrending = secType === 'trending' || section?.id === 'trending';
+  const isLatestSection = secType === 'latest_blogs' || secType === 'latest' || section?.id === 'latest_blogs';
+  const maxArticlesFit = isLatestPage 
+    ? 16 
+    : (isSpotlight || isTrending
+        ? 8
+        : (isLatestSection ? 4 : 8)
+      );
 
   // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
   const frontendArticles = useMemo(() => {
-    const defaultLimit = maxArticlesFit;
-    const limit = Number(data.limit) > 0 ? Number(data.limit) : defaultLimit;
-    
-    // 1. If custom curated articles are pinned in data.articles, use them up to section limit (or custom length)
+    // 1. If custom curated articles are pinned in data.articles, use them up to max capacity
     if (Array.isArray(data.articles) && data.articles.length > 0) {
-      return data.articles.filter(Boolean).slice(0, Math.min(maxArticlesFit, limit));
+      return data.articles.filter(Boolean).slice(0, maxArticlesFit);
     }
     
     // 2. Otherwise compute default frontend pool matching ModernHomepageView
@@ -514,7 +519,7 @@ function LiveGenericSectionStudio({
       isCustom: true
     }));
     const nextArticles = [...activeArticles, ...toAdd];
-    const nextData = { ...data, articles: nextArticles, limit: nextArticles.length, hasCustomArticles: true };
+    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
     persistToDatabase(nextData);
   };
 
@@ -558,7 +563,7 @@ function LiveGenericSectionStudio({
       nextArticles.push(formatted);
     }
 
-    const nextData = { ...data, articles: nextArticles, limit: nextArticles.length, hasCustomArticles: true };
+    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
     persistToDatabase(nextData);
     setIsPickerOpen(false);
   };
@@ -578,7 +583,7 @@ function LiveGenericSectionStudio({
   const handleRemoveArticle = (idx, e) => {
     e?.stopPropagation();
     const nextArticles = activeArticles.filter((_, i) => i !== idx);
-    const nextData = { ...data, articles: nextArticles, limit: nextArticles.length, hasCustomArticles: true };
+    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
     persistToDatabase(nextData);
   };
 
@@ -593,7 +598,7 @@ function LiveGenericSectionStudio({
       viewAllText: data.viewAllText || 'View All',
       viewAllUrl: data.viewAllUrl || '/latest',
       category: data.category || '',
-      limit: data.limit || activeArticles.length || 6,
+      limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : (data.limit || activeArticles.length || 8)),
       // Newsletter
       headline: data.headline || data.title || '',
       buttonText: data.buttonText || 'Subscribe',
@@ -743,9 +748,6 @@ function LiveGenericSectionStudio({
                   <h1 className="lap-title">
                     {getSectionTitle()}
                   </h1>
-                  <p className="lap-subtitle">
-                    {getSectionSubtitle() || 'Discover the most recent stories, investigative reporting, and updates across technology, business, and innovation.'}
-                  </p>
                 </div>
 
                 {/* Real Frontend Category Filter Pills Bar */}
@@ -1277,11 +1279,6 @@ function LiveGenericSectionStudio({
                     <div className="mhp-section-title-wrap">
                       <span>{getSectionTitle()}</span>
                     </div>
-                    {getSectionSubtitle() && (
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)', marginLeft: '1rem' }}>
-                        {getSectionSubtitle()}
-                      </span>
-                    )}
                   </div>
                   <span 
                     className="mhp-view-all-link"

@@ -22,9 +22,13 @@ import AdminHomepageView from './AdminHomepageView';
 import AdminUsersView from './AdminUsersView';
 import AdminAnalyticsView from './AdminAnalyticsView';
 import AdminVideosView from './AdminVideosView';
+import AdminAboutView from './AdminAboutView';
 import AdminNewslettersView from './AdminNewslettersView';
 import AdminCommentsView from './AdminCommentsView';
 import AdminSubmissionsView from './AdminSubmissionsView';
+import AdminTrendingView from './AdminTrendingView';
+import AdminCategoryStudioView from './AdminCategoryStudioView';
+import AdminFounderView from './AdminFounderView';
 
 export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: propSettings }) {
   const [currentPath, setCurrentPath] = useState(() => {
@@ -145,7 +149,17 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
     // Videos TV CMS: /admin/videos
     if (currentPath === '/admin/videos') {
-      return <AdminVideosView onShowToast={onShowToast} />;
+      return <AdminVideosView onShowToast={onShowToast} onNavigate={handleNavigate} />;
+    }
+
+    // About Us Page Studio: /admin/about
+    if (currentPath === '/admin/about' || currentPath.startsWith('/admin/about')) {
+      return <AdminAboutView onShowToast={onShowToast} onNavigate={handleNavigate} />;
+    }
+
+    // Founder First Studio: /admin/founder or /admin/founder-first
+    if (currentPath === '/admin/founder' || currentPath.startsWith('/admin/founder')) {
+      return <AdminFounderView onShowToast={onShowToast} onNavigate={handleNavigate} />;
     }
 
     // Newsletters CMS: /admin/newsletters
@@ -187,6 +201,26 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) {
       return (
         <AdminHomepageView 
+          onShowToast={onShowToast} 
+          onNavigate={handleNavigate} 
+        />
+      );
+    }
+
+    // 6b. Trending CMS & Live Studio: /admin/trending
+    if (currentPath === '/admin/trending' || currentPath.startsWith('/admin/trending')) {
+      return (
+        <AdminTrendingView 
+          onShowToast={onShowToast} 
+          onNavigate={handleNavigate} 
+        />
+      );
+    }
+
+    // 6c. Category Page Live Studio: /admin/category or /admin/category-studio
+    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) {
+      return (
+        <AdminCategoryStudioView 
           onShowToast={onShowToast} 
           onNavigate={handleNavigate} 
         />
@@ -248,6 +282,46 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       const parts = cleanPath.split('/');
       const editIndex = parts.indexOf('edit');
       const pageId = editIndex > 0 ? parts[editIndex - 1] : null;
+      if (pageId === 'trending') {
+        return (
+          <AdminTrendingView 
+            onShowToast={onShowToast} 
+            onNavigate={handleNavigate} 
+          />
+        );
+      }
+      if (pageId === 'category' || pageId === 'categories') {
+        return (
+          <AdminCategoryStudioView 
+            onShowToast={onShowToast} 
+            onNavigate={handleNavigate} 
+          />
+        );
+      }
+      if (pageId === 'videos') {
+        return (
+          <AdminVideosView 
+            onShowToast={onShowToast} 
+            onNavigate={handleNavigate} 
+          />
+        );
+      }
+      if (pageId === 'about' || pageId === 'about-us') {
+        return (
+          <AdminAboutView 
+            onShowToast={onShowToast} 
+            onNavigate={handleNavigate} 
+          />
+        );
+      }
+      if (pageId === 'founder' || pageId === 'founder-first') {
+        return (
+          <AdminFounderView 
+            onShowToast={onShowToast} 
+            onNavigate={handleNavigate} 
+          />
+        );
+      }
       return (
         <AdminPageEditor 
           pageId={pageId} 
@@ -297,6 +371,31 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       />
     );
   };
+
+  // Check if we are on a full-page page editor route (Trending Studio, Videos Studio, About Studio, Founder Studio, Homepage Editor, Page Sections Editor, Page Create)
+  const isPageEditorRoute = (
+    currentPath === '/admin/founder' ||
+    currentPath.startsWith('/admin/founder') ||
+    currentPath === '/admin/trending' ||
+    currentPath.startsWith('/admin/trending') ||
+    currentPath === '/admin/category' ||
+    currentPath.startsWith('/admin/category') ||
+    currentPath === '/admin/videos' ||
+    currentPath.startsWith('/admin/videos') ||
+    currentPath === '/admin/about' ||
+    currentPath.startsWith('/admin/about') ||
+    currentPath === '/admin/homepage' ||
+    currentPath.startsWith('/admin/homepage') ||
+    (currentPath.startsWith('/admin/pages') && (currentPath.includes('/edit') || currentPath.includes('/create')))
+  );
+
+  if (isPageEditorRoute) {
+    return (
+      <div className="admin-fullpage-studio-root">
+        {renderActiveView()}
+      </div>
+    );
+  }
 
   // Check if we are on an article create/edit studio route
   const isPostEditorRoute = (

@@ -2,10 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft, ArrowRight, ChevronRight, ChevronLeft, Search, Mail, 
   Sparkles, Flame, Clock, Calendar, Bookmark, TrendingUp, BookOpen, 
-  Send, CheckCircle2, X
+  Send, CheckCircle2, X, LayoutGrid, Columns, Layers
 } from 'lucide-react';
 import './CategoryContentPage.css';
 import { ALL_STORIES } from '../data/storiesData';
+import { PageService } from '../services/pageService';
 
 // Safe extraction helpers
 const getStoryId = (s, idx = 0) => s?.id || s?._id || s?.slug || `cat-story-${idx}`;
@@ -152,6 +153,7 @@ export const CORE_CATEGORIES = [
 export default function CategoryContentPage({
   slug = 'content',
   stories = [],
+  customConfig = null,
   onSelectStory,
   onBackToHome,
   onCategoryClick,
@@ -165,8 +167,85 @@ export default function CategoryContentPage({
   const [sortBy, setSortBy] = useState('latest');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 8 cards per page for balanced 100% full-breadth grid (4 columns x 2 rows)
-  const CARDS_PER_PAGE = 8;
+  // ── Dynamic Page Configuration (CMS Live Studio Integration) ──
+  const [liveConfig, setLiveConfig] = useState(() => {
+    if (customConfig) return customConfig;
+    try {
+      const stored = localStorage.getItem('goreadpost_category_page_config');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return null;
+  });
+
+  useEffect(() => {
+    if (customConfig) {
+      setLiveConfig(customConfig);
+      return;
+    }
+
+    const loadConfig = async () => {
+      try {
+        const page = await PageService.getPageById('category').catch(() => null);
+        if (page) {
+          const heroSec = (page.sections || []).find(s => s.type === 'hero' || s.id === 'category_hero');
+          const feedSec = (page.sections || []).find(s => s.type === 'stories_feed' || s.id === 'category_feed');
+          setLiveConfig({
+            layoutMode: feedSec?.data?.layoutMode === '2col' ? 'grid' : (feedSec?.data?.layoutMode || 'grid'),
+            cardsPerPage: feedSec?.data?.cardsPerPage || 12,
+            defaultSort: feedSec?.data?.defaultSort || 'latest',
+            showPills: feedSec?.data?.showPills !== false,
+            showHero: heroSec?.enabled !== false,
+            heroHeading: heroSec?.data?.heading || heroSec?.data?.title,
+            heroSubhead: heroSec?.data?.subheadline || heroSec?.data?.subtitle,
+            heroBadge: heroSec?.data?.badge,
+            heroImage: heroSec?.data?.image,
+            heroBtnText: heroSec?.data?.buttonText,
+            curation: feedSec?.data?.curation || {}
+          });
+        }
+      } catch (err) {}
+    };
+
+    loadConfig();
+
+    const handleCategoryConfigChange = (e) => {
+      if (e.detail) {
+        const heroSec = (e.detail.sections || []).find(s => s.type === 'hero' || s.id === 'category_hero');
+        const feedSec = (e.detail.sections || []).find(s => s.type === 'stories_feed' || s.id === 'category_feed');
+        setLiveConfig({
+          layoutMode: feedSec?.data?.layoutMode === '2col' ? 'grid' : (feedSec?.data?.layoutMode || 'grid'),
+          cardsPerPage: feedSec?.data?.cardsPerPage || 12,
+          defaultSort: feedSec?.data?.defaultSort || 'latest',
+          showPills: feedSec?.data?.showPills !== false,
+          showHero: heroSec?.enabled !== false,
+          heroHeading: heroSec?.data?.heading || heroSec?.data?.title,
+          heroSubhead: heroSec?.data?.subheadline || heroSec?.data?.subtitle,
+          heroBadge: heroSec?.data?.badge,
+          heroImage: heroSec?.data?.image,
+          heroBtnText: heroSec?.data?.buttonText,
+          curation: feedSec?.data?.curation || {}
+        });
+      } else {
+        loadConfig();
+      }
+    };
+
+    window.addEventListener('page:category:change', handleCategoryConfigChange);
+    return () => window.removeEventListener('page:category:change', handleCategoryConfigChange);
+  }, [customConfig]);
+
+  // Primary Layout: defaults to 'grid' (4 cards in one row)
+  const [activeLayout, setActiveLayout] = useState('grid');
+  useEffect(() => {
+    if (liveConfig?.layoutMode) {
+      setActiveLayout(liveConfig.layoutMode === '2col' ? 'grid' : liveConfig.layoutMode);
+    } else {
+      setActiveLayout('grid');
+    }
+  }, [liveConfig?.layoutMode]);
+
+  // Cards per page from CMS config (default 12 for 3 full rows of 4 cards)
+  const CARDS_PER_PAGE = liveConfig?.cardsPerPage ? Number(liveConfig.cardsPerPage) : 12;
 
   // Master stories pool
   const masterPool = useMemo(() => {
@@ -231,14 +310,25 @@ export default function CategoryContentPage({
         desc: 'Comprehensive reporting, strategic perspectives, and startup breakdowns across all editorial categories and desks.'
       };
     }
-    const formatted = currentTargetCategory
+    const norm = normalizeCategory(currentTargetCategory);
+    let displayName = currentTargetCategory
       .replace(/-/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
 
+    if (norm === 'ai') displayName = 'AI & DeepTech';
+    else if (norm === 'fintech') displayName = 'FinTech';
+    else if (norm === 'smbstory') displayName = 'SMB & D2C';
+    else if (norm === 'herstory') displayName = 'HerStory';
+    else if (norm === 'startups') displayName = 'Startups';
+    else if (norm === 'technology') displayName = 'Technology';
+    else if (norm === 'enterprise') displayName = 'Enterprise';
+    else if (norm === 'leadership') displayName = 'Leadership';
+    else if (norm === 'hindi') displayName = 'Hindi';
+
     return {
-      name: `${formatted} Content`,
-      badge: `${formatted} Desk`,
-      desc: `Curated reporting, deep analysis, and breaking investigative coverage from the ${formatted} desk at GoReadPost.`
+      name: `${displayName} Content`,
+      badge: `${displayName} Desk`,
+      desc: `Curated reporting, deep analysis, and breaking investigative coverage from the ${displayName} desk at GoReadPost.`
     };
   }, [currentTargetCategory]);
 
@@ -250,11 +340,16 @@ export default function CategoryContentPage({
     };
   }, [categoryInfo]);
 
-  // 1. STORIES STRICTLY MATCHING THE ACTIVE CATEGORY (NO LEAKAGE)
+  // 1. STORIES MATCHING ACTIVE CATEGORY (Respecting CMS Curation if defined)
   const categoryStories = useMemo(() => {
+    const curKey = normalizeCategory(currentTargetCategory) || 'all';
+    const customList = liveConfig?.curation?.[curKey];
+    if (customList && Array.isArray(customList) && customList.length > 0) {
+      return customList;
+    }
     if (currentTargetCategory === 'All') return masterPool;
     return masterPool.filter(story => matchesCategory(story, currentTargetCategory));
-  }, [masterPool, currentTargetCategory]);
+  }, [masterPool, currentTargetCategory, liveConfig?.curation]);
 
   // 2. HERO SLIDES (STRICTLY FROM THIS CATEGORY ONLY)
   const heroSlides = useMemo(() => {
@@ -271,13 +366,13 @@ export default function CategoryContentPage({
   }, [heroSlides.length]);
 
   const activeSlide = heroSlides[currentSlide] || heroSlides[0];
-  const heroTitle = activeSlide ? getStoryTitle(activeSlide) : (categoryStories.length > 0 ? getStoryTitle(categoryStories[0]) : 'Featured Perspective');
+  const heroTitle = liveConfig?.heroHeading || (activeSlide ? getStoryTitle(activeSlide) : (categoryStories.length > 0 ? getStoryTitle(categoryStories[0]) : 'Featured Perspective'));
   const heroAuthor = activeSlide ? getStoryAuthor(activeSlide) : 'Editorial Desk';
   const heroAvatar = activeSlide ? getStoryAvatar(activeSlide) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
   const heroDate = activeSlide ? getStoryDate(activeSlide) : 'Today';
   const heroReadTime = activeSlide ? getStoryReadTime(activeSlide) : '5 min read';
-  const heroCategory = activeSlide ? getStoryCategory(activeSlide) : categoryInfo.name;
-  const heroImage = activeSlide ? getStoryImage(activeSlide) : 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80';
+  const heroCategory = liveConfig?.heroBadge || (activeSlide ? getStoryCategory(activeSlide) : categoryInfo.name);
+  const heroImage = liveConfig?.heroImage || (activeSlide ? getStoryImage(activeSlide) : 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80');
 
   const handlePrevSlide = () => {
     setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
@@ -287,13 +382,13 @@ export default function CategoryContentPage({
     setCurrentSlide(prev => (prev + 1) % heroSlides.length);
   };
 
-  // 3. POPULAR POSTS (STRICTLY FROM THIS CATEGORY ONLY - NO RANDOM LEAKAGE)
+  // 3. POPULAR POSTS
   const popularPosts = useMemo(() => {
     const sorted = [...categoryStories].sort((a, b) => (b.views || 0) - (a.views || 0));
     return sorted.slice(0, 5);
   }, [categoryStories]);
 
-  // 4. FILTERED STORIES FOR BOTTOM GRID (STRICTLY FROM THIS CATEGORY ONLY)
+  // 4. FILTERED STORIES FOR BOTTOM GRID
   const filteredGridStories = useMemo(() => {
     let list = categoryStories;
 
@@ -308,6 +403,10 @@ export default function CategoryContentPage({
     }
 
     return list.sort((a, b) => {
+      // Pinned stories always stay on top
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
       if (sortBy === 'popular') {
         return (b.views || b.reads || 0) - (a.views || a.reads || 0);
       }
@@ -401,7 +500,7 @@ export default function CategoryContentPage({
         </nav>
 
         {/* ── 2. Full-Width Category Featured Banner ── */}
-        {categoryStories.length > 0 ? (
+        {liveConfig?.showHero !== false && (categoryStories.length > 0 ? (
           <section className="cat-hero-banner-section">
             <div 
               className="cat-hero-card"
@@ -450,12 +549,12 @@ export default function CategoryContentPage({
                     className="cat-hero-read-btn"
                     onClick={() => handleCardClick(activeSlide)}
                   >
-                    <span>Read More</span>
+                    <span>{liveConfig?.heroBtnText || 'Read More'}</span>
                     <ArrowRight size={15} />
                   </button>
 
                   <button 
-                    type="button"
+                    type="button" 
                     className={`cat-hero-save-btn ${isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -509,68 +608,9 @@ export default function CategoryContentPage({
               <p className="cat-simple-desc">{categoryInfo.desc}</p>
             </div>
           </section>
-        )}
+        ))}
 
-        {/* ── 3. Filter Bar (Sub-categories, Search, Sort) ── */}
-        <div className="cat-filter-controls-bar">
-          <div className="cat-pills-row">
-            {CORE_CATEGORIES.map((catItem) => {
-              const count = catItem.key === 'All' 
-                ? masterPool.length 
-                : masterPool.filter(s => matchesCategory(s, catItem.key)).length;
 
-              const isPillActive = catItem.key === 'All' 
-                ? currentTargetCategory === 'All'
-                : (normalizeCategory(currentTargetCategory) === normalizeCategory(catItem.key));
-
-              return (
-                <button
-                  key={catItem.key}
-                  type="button"
-                  className={`cat-filter-pill ${isPillActive ? 'active' : ''}`}
-                  onClick={() => handlePillClick(catItem.key)}
-                >
-                  <span>{catItem.name}</span>
-                  {count > 0 && <span className="cat-pill-count">{count}</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="cat-controls-right">
-            <div className="cat-search-box">
-              <Search size={15} className="cat-search-icon" />
-              <input 
-                type="text" 
-                placeholder={`Search in ${categoryInfo.badge}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="cat-search-input"
-              />
-              {searchQuery && (
-                <button 
-                  type="button" 
-                  className="cat-search-clear"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                >
-                  <X size={13} />
-                </button>
-              )}
-            </div>
-
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)}
-              className="cat-sort-select"
-              aria-label="Sort articles"
-            >
-              <option value="latest">Latest First</option>
-              <option value="popular">Most Read</option>
-              <option value="trending">Top Trending</option>
-            </select>
-          </div>
-        </div>
 
         {/* ── 4. Main Articles Grid ── */}
         <section className="cat-grid-section">
@@ -600,102 +640,104 @@ export default function CategoryContentPage({
             </div>
           ) : (
             <>
-              {/* 4-Column Responsive Card Grid (Strictly this Category) */}
-              <div className="cat-cards-grid-3col">
-                {currentGridPage.map((story, idx) => {
-                  const storyId = getStoryId(story, idx);
-                  const storyTitle = getStoryTitle(story);
-                  const storyExcerpt = getStoryExcerpt(story);
-                  const storyCat = getStoryCategory(story);
-                  const storyAuthor = getStoryAuthor(story);
-                  const storyAvatar = getStoryAvatar(story);
-                  const storyDate = getStoryDate(story);
-                  const storyReadTime = getStoryReadTime(story);
-                  const storyImg = getStoryImage(story);
-                  const isStorySaved = isSaved && isSaved(storyId);
+            /* 4 Cards in One Row Card Grid */
+            <div className="cat-cards-grid-4col">
+              {currentGridPage.map((story, idx) => {
+                const storyId = getStoryId(story, idx);
+                const storyTitle = getStoryTitle(story);
+                const storyExcerpt = getStoryExcerpt(story);
+                const storyCat = getStoryCategory(story);
+                const storyAuthor = getStoryAuthor(story);
+                const storyAvatar = getStoryAvatar(story);
+                const storyDate = getStoryDate(story);
+                const storyReadTime = getStoryReadTime(story);
+                const storyImg = getStoryImage(story);
+                const isStorySaved = isSaved && isSaved(storyId);
 
-                  return (
-                    <article 
-                      key={storyId}
-                      className="cat-grid-card"
-                      onClick={() => handleCardClick(story)}
-                    >
-                      <div className="cat-card-thumb-wrap">
-                        <img 
-                          src={storyImg} 
-                          alt={storyTitle} 
-                          className="cat-card-thumb"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
-                          }}
-                        />
-                        <span 
-                          className="cat-card-cat-badge"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePillClick(storyCat);
-                          }}
-                        >
-                          {storyCat}
-                        </span>
+                return (
+                  <article 
+                    key={storyId}
+                    className="cat-grid-card"
+                    onClick={() => handleCardClick(story)}
+                  >
+                    <div className="cat-card-thumb-wrap">
+                      <img 
+                        src={storyImg} 
+                        alt={storyTitle} 
+                        className="cat-card-thumb"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                      <span 
+                        className="cat-card-cat-badge"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePillClick(storyCat);
+                        }}
+                      >
+                        {storyCat}
+                      </span>
+                    </div>
+
+                    <div className="cat-card-body">
+                      <div className="cat-card-meta">
+                        <span className="cat-card-cat-meta-label">{storyCat}</span>
+                        <span>•</span>
+                        <span>{storyDate}</span>
+                        <span>•</span>
+                        <span>{storyReadTime}</span>
                       </div>
 
-                      <div className="cat-card-body">
-                        <div className="cat-card-meta">
-                          <span>{storyDate}</span>
-                          <span>•</span>
-                          <span>{storyReadTime}</span>
+                      <h3 className="cat-card-title">
+                        {storyTitle}
+                      </h3>
+
+                      <p className="cat-card-excerpt">
+                        {storyExcerpt}
+                      </p>
+
+                      <div className="cat-card-footer">
+                        <div className="cat-card-author-cluster">
+                          <img 
+                            src={storyAvatar} 
+                            alt={storyAuthor} 
+                            className="cat-card-author-avatar"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                            }}
+                          />
+                          <span className="cat-card-author-name">{storyAuthor}</span>
                         </div>
 
-                        <h3 className="cat-card-title">
-                          {storyTitle}
-                        </h3>
-
-                        <p className="cat-card-excerpt">
-                          {storyExcerpt}
-                        </p>
-
-                        <div className="cat-card-footer">
-                          <div className="cat-card-author-cluster">
-                            <img 
-                              src={storyAvatar} 
-                              alt={storyAuthor} 
-                              className="cat-card-author-avatar"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-                              }}
-                            />
-                            <span className="cat-card-author-name">{storyAuthor}</span>
-                          </div>
-
-                          <div className="cat-card-actions">
-                            <button 
-                              type="button" 
-                              className={`cat-card-save-btn ${isStorySaved ? 'active' : ''}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onToggleSave) onToggleSave(story);
-                              }}
-                              title={isStorySaved ? "Remove from bookmarks" : "Save story"}
-                              aria-label="Save story"
-                            >
-                              <Bookmark size={15} fill={isStorySaved ? "currentColor" : "none"} />
-                            </button>
-                            <div className="cat-card-arrow" aria-label="Read story">
-                              <ArrowRight size={14} />
-                            </div>
+                        <div className="cat-card-actions">
+                          <button 
+                            type="button" 
+                            className={`cat-card-save-btn ${isStorySaved ? 'active' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onToggleSave) onToggleSave(story);
+                            }}
+                            title={isStorySaved ? "Remove from bookmarks" : "Save story"}
+                            aria-label="Save story"
+                          >
+                            <Bookmark size={15} fill={isStorySaved ? "currentColor" : "none"} />
+                          </button>
+                          <div className="cat-card-arrow" aria-label="Read story">
+                            <ArrowRight size={14} />
                           </div>
                         </div>
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
 
-              {/* Bottom Pagination Controls */}
+          {/* Bottom Pagination Controls */}
               {totalPages > 1 && (
                 <div className="cat-pagination-bar">
                   <button

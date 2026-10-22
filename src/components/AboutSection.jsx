@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Feather, Globe, ShieldCheck, 
   ExternalLink, MessageSquare, 
-  ArrowDown, Users, CheckCircle2
+  ArrowDown, Users, CheckCircle2,
+  Award, Zap
 } from 'lucide-react';
+import { getStoredAboutData, DEFAULT_ABOUT_DATA } from '../data/aboutData';
 import './AboutSection.css';
 
 const LinkedInIcon = ({ size = 16 }) => (
@@ -18,119 +20,132 @@ const GitHubIcon = ({ size = 16 }) => (
   </svg>
 );
 
+const renderValueIcon = (iconName) => {
+  switch ((iconName || '').toLowerCase()) {
+    case 'globe':
+      return <Globe size={20} />;
+    case 'shield':
+    case 'shieldcheck':
+      return <ShieldCheck size={20} />;
+    case 'zap':
+      return <Zap size={20} />;
+    case 'award':
+      return <Award size={20} />;
+    case 'feather':
+    default:
+      return <Feather size={20} />;
+  }
+};
+
 export default function AboutSection({ page }) {
-  const scrollToSection = (id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const [aboutData, setAboutData] = useState(() => {
+    if (page?.data && typeof page.data === 'object' && page.data.hero) {
+      return { ...DEFAULT_ABOUT_DATA, ...page.data };
     }
+    return getStoredAboutData();
+  });
+
+  useEffect(() => {
+    if (page?.data && typeof page.data === 'object' && page.data.hero) {
+      setAboutData({ ...DEFAULT_ABOUT_DATA, ...page.data });
+    } else {
+      setAboutData(getStoredAboutData());
+    }
+
+    const handleStorageUpdate = () => {
+      setAboutData(getStoredAboutData());
+    };
+
+    window.addEventListener('storage', handleStorageUpdate);
+    return () => window.removeEventListener('storage', handleStorageUpdate);
+  }, [page]);
+
+  useEffect(() => {
+    if (aboutData?.seo?.title) {
+      document.title = aboutData.seo.title;
+    } else {
+      document.title = 'About Us | GoReadPost Media';
+    }
+    if (aboutData?.seo?.description) {
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.name = 'description';
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', aboutData.seo.description);
+    }
+  }, [aboutData?.seo]);
+
+  const scrollToSection = (target) => {
+    if (!target) return;
+    if (target.startsWith('#')) {
+      const el = document.getElementById(target.replace('#', ''));
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    window.location.href = target;
   };
 
-  const teamMembers = [
-    {
-      name: "Elena Rostova",
-      role: "Founder & Editor-in-Chief",
-      bio: "Former tech journalist passionate about long-form essayist culture and decentralization.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
-      links: [
-        { icon: LinkedInIcon, url: "https://linkedin.com", label: "LinkedIn" },
-        { icon: ExternalLink, url: "https://goreadpost.com", label: "Portfolio" }
-      ]
-    },
-    {
-      name: "Marcus Chen",
-      role: "Head of Product",
-      bio: "Design-obsessed developer focused on crafting minimalist writing user interfaces.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
-      links: [
-        { icon: GitHubIcon, url: "https://github.com", label: "GitHub" },
-        { icon: LinkedInIcon, url: "https://linkedin.com", label: "LinkedIn" }
-      ]
-    },
-    {
-      name: "Sarah Jenkins",
-      role: "Community Director",
-      bio: "Connecting writers, hosting digital workshops, and cultivating creator mentorships.",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-      links: [
-        { icon: MessageSquare, url: "https://discord.com", label: "Community" },
-        { icon: LinkedInIcon, url: "https://linkedin.com", label: "LinkedIn" }
-      ]
-    },
-    {
-      name: "Devon Vance",
-      role: "Lead AI Engineer",
-      bio: "Building intelligent context discovery systems that respect user data privacy.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
-      links: [
-        { icon: GitHubIcon, url: "https://github.com", label: "GitHub" },
-        { icon: ExternalLink, url: "https://goreadpost.com", label: "Website" }
-      ]
-    }
-  ];
+  const { hero, whoWeAre, statsBar, teamSection } = aboutData;
 
   return (
     <div className="nexus-about-root">
-
       <div className="nexus-about-container">
 
         {/* ── 1. HERO SECTION ── */}
         <section className="nexus-hero-section">
-          <div className="nexus-hero-badge">
-            <span className="nexus-hero-badge-dot"></span>
-            <Sparkles size={13} className="nexus-hero-badge-icon" />
-            <span>THE GOREADPOST MANIFESTO</span>
-          </div>
-
           <h1 className="nexus-hero-title">
-            Where Thoughts Find Their <br className="nexus-hero-br" />
-            <span className="nexus-gradient-text">Infinite Orbit</span>
+            {hero?.titlePrefix || 'Where Thoughts Find Their'} <br className="nexus-hero-br" />
+            <span className="nexus-gradient-text">{hero?.titleHighlight || 'Infinite Orbit'}</span>
           </h1>
 
-          <p className="nexus-hero-subtitle">
-            GoReadPost is an independent publishing platform designed to amplify voices that 
-            matter, spark curiosity, and build a global community around transformative ideas.
-          </p>
+          {hero?.subtitle && (
+            <p className="nexus-hero-subtitle">
+              {hero.subtitle}
+            </p>
+          )}
 
           <div className="nexus-hero-actions">
-            <button 
-              type="button" 
-              className="nexus-btn-primary"
-              onClick={() => scrollToSection('who-we-are')}
-            >
-              <span>Discover Our Story</span>
-              <ArrowDown size={15} className="nexus-btn-arrow" />
-            </button>
+            {hero?.primaryBtnText && (
+              <button 
+                type="button" 
+                className="nexus-btn-primary"
+                onClick={() => scrollToSection(hero.primaryBtnTarget || '#who-we-are')}
+              >
+                <span>{hero.primaryBtnText}</span>
+                <ArrowDown size={15} className="nexus-btn-arrow" />
+              </button>
+            )}
 
-            <button 
-              type="button" 
-              className="nexus-btn-secondary"
-              onClick={() => scrollToSection('team')}
-            >
-              <span>Meet the Team</span>
-              <Users size={15} />
-            </button>
+            {hero?.secondaryBtnText && (
+              <button 
+                type="button" 
+                className="nexus-btn-secondary"
+                onClick={() => scrollToSection(hero.secondaryBtnTarget || '#team')}
+              >
+                <span>{hero.secondaryBtnText}</span>
+                <Users size={15} />
+              </button>
+            )}
           </div>
 
-          <div className="nexus-hero-trust-bar">
-            <div className="nexus-trust-item">
-              <span className="nexus-trust-bullet"></span>
-              <strong>250K+</strong>
-              <span>Monthly Readers</span>
+          {Array.isArray(hero?.trustStats) && hero.trustStats.length > 0 && (
+            <div className="nexus-hero-trust-bar">
+              {hero.trustStats.map((item, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && <div className="nexus-trust-sep" />}
+                  <div className="nexus-trust-item">
+                    <span className="nexus-trust-bullet"></span>
+                    <strong>{item.value}</strong>
+                    <span>{item.label}</span>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
-            <div className="nexus-trust-sep" />
-            <div className="nexus-trust-item">
-              <span className="nexus-trust-bullet"></span>
-              <strong>15K+</strong>
-              <span>Published Perspectives</span>
-            </div>
-            <div className="nexus-trust-sep" />
-            <div className="nexus-trust-item">
-              <span className="nexus-trust-bullet"></span>
-              <strong>100%</strong>
-              <span>Ad-Free Sanctuary</span>
-            </div>
-          </div>
+          )}
         </section>
 
         {/* ── 2. "WHO WE ARE" SPLIT SECTION ── */}
@@ -140,78 +155,51 @@ export default function AboutSection({ page }) {
             {/* Left Column: Narrative & Mini-Features */}
             <div className="nexus-who-left">
               <h2 className="nexus-who-title">
-                Built for thinkers, writers, <br />
-                and <span className="nexus-teal-gradient">curious minds.</span>
+                {whoWeAre?.headingPrefix || 'Built for thinkers, writers, and '}
+                <span className="nexus-teal-gradient">{whoWeAre?.headingHighlight || 'curious minds.'}</span>
               </h2>
 
-              <p className="nexus-who-p">
-                Founded in 2023, GoReadPost began with a single vision: to strip away the noise 
-                of modern algorithms and give long-form content the thoughtful home it deserves.
-              </p>
+              {whoWeAre?.paragraph1 && (
+                <p className="nexus-who-p">
+                  {whoWeAre.paragraph1}
+                </p>
+              )}
 
-              <p className="nexus-who-p">
-                We empower writers with intuitive tools, sleek visual formats, and direct audience 
-                connections, while offering readers an ad-free sanctuary for modern tech, culture, 
-                design, and philosophy insights.
-              </p>
+              {whoWeAre?.paragraph2 && (
+                <p className="nexus-who-p">
+                  {whoWeAre.paragraph2}
+                </p>
+              )}
 
-              <div className="nexus-highlight-row">
-                <div className="nexus-highlight-card card-cyan-accent">
-                  <h4 className="nexus-highlight-title">Ad-Free Experience</h4>
-                  <p className="nexus-highlight-desc">Pure, uninterrupted reading for continuous focus.</p>
+              {Array.isArray(whoWeAre?.highlightCards) && whoWeAre.highlightCards.length > 0 && (
+                <div className="nexus-highlight-row">
+                  {whoWeAre.highlightCards.map((card, cIdx) => (
+                    <div key={cIdx} className={`nexus-highlight-card ${card.accent || 'card-cyan-accent'}`}>
+                      <h4 className="nexus-highlight-title">{card.title}</h4>
+                      <p className="nexus-highlight-desc">{card.desc}</p>
+                    </div>
+                  ))}
                 </div>
-
-                <div className="nexus-highlight-card card-magenta-accent">
-                  <h4 className="nexus-highlight-title">Creator First</h4>
-                  <p className="nexus-highlight-desc">Monetization models that directly empower authors.</p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Right Column: Glass Value Card */}
             <div className="nexus-who-right">
               <div className="nexus-values-card">
-                
-                <div className="nexus-value-item">
-                  <div className="nexus-value-icon-box box-blue">
-                    <Feather size={20} />
-                  </div>
-                  <div className="nexus-value-content">
-                    <h3 className="nexus-value-title">Uncompromising Quality</h3>
-                    <p className="nexus-value-desc">
-                      Every story published on GoReadPost undergoes refined community curation to maintain high literary standards.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="nexus-value-divider" />
-
-                <div className="nexus-value-item">
-                  <div className="nexus-value-icon-box box-purple">
-                    <Globe size={20} />
-                  </div>
-                  <div className="nexus-value-content">
-                    <h3 className="nexus-value-title">Global Knowledge Exchange</h3>
-                    <p className="nexus-value-desc">
-                      Connecting perspective-shifting stories from over 120 countries, translated natively in real time.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="nexus-value-divider" />
-
-                <div className="nexus-value-item">
-                  <div className="nexus-value-icon-box box-rose">
-                    <ShieldCheck size={20} />
-                  </div>
-                  <div className="nexus-value-content">
-                    <h3 className="nexus-value-title">Data & Privacy Respect</h3>
-                    <p className="nexus-value-desc">
-                      Zero invasive trackers, zero sold personal data. Your curiosity remains strictly your own business.
-                    </p>
-                  </div>
-                </div>
-
+                {Array.isArray(whoWeAre?.values) && whoWeAre.values.map((val, vIdx) => (
+                  <React.Fragment key={val.id || vIdx}>
+                    {vIdx > 0 && <div className="nexus-value-divider" />}
+                    <div className="nexus-value-item">
+                      <div className={`nexus-value-icon-box ${val.colorBox || 'box-blue'}`}>
+                        {renderValueIcon(val.icon)}
+                      </div>
+                      <div className="nexus-value-content">
+                        <h3 className="nexus-value-title">{val.title}</h3>
+                        <p className="nexus-value-desc">{val.desc}</p>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
 
@@ -219,83 +207,102 @@ export default function AboutSection({ page }) {
         </section>
 
         {/* ── 3. IMPACT METRICS BAR ── */}
-        <section className="nexus-stats-section">
-          <div className="nexus-stats-bar">
-            
-            <div className="nexus-stat-col">
-              <div className="nexus-stat-num">250K+</div>
-              <div className="nexus-stat-label">ACTIVE READERS</div>
+        {Array.isArray(statsBar?.stats) && statsBar.stats.length > 0 && (
+          <section className="nexus-stats-section">
+            <div className="nexus-stats-bar">
+              {statsBar.stats.map((st, sIdx) => (
+                <div key={sIdx} className="nexus-stat-col">
+                  <div className={`nexus-stat-num ${st.isCyan ? 'cyan-stat' : ''}`}>{st.num}</div>
+                  <div className="nexus-stat-label">{st.label}</div>
+                </div>
+              ))}
             </div>
-
-            <div className="nexus-stat-col">
-              <div className="nexus-stat-num">15K+</div>
-              <div className="nexus-stat-label">PUBLISHED WRITERS</div>
-            </div>
-
-            <div className="nexus-stat-col">
-              <div className="nexus-stat-num">85M+</div>
-              <div className="nexus-stat-label">MONTHLY READS</div>
-            </div>
-
-            <div className="nexus-stat-col">
-              <div className="nexus-stat-num cyan-stat">120+</div>
-              <div className="nexus-stat-label">COUNTRIES REACHED</div>
-            </div>
-
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ── 4. MEET OUR CORE TEAM ── */}
-        <section id="team" className="nexus-team-section">
-          <div className="nexus-section-header-center">
-            <h2 className="nexus-section-title">Meet Our Core Team</h2>
-            <p className="nexus-section-desc">
-              The engineers, editors, and designers shaping the future of digital writing.
-            </p>
-          </div>
+        {Array.isArray(teamSection?.members) && teamSection.members.length > 0 && (
+          <section id="team" className="nexus-team-section">
+            <div className="nexus-section-header-center">
+              <h2 className="nexus-section-title">{teamSection.title || 'Meet Our Core Team'}</h2>
+              {teamSection.subtitle && (
+                <p className="nexus-section-desc">
+                  {teamSection.subtitle}
+                </p>
+              )}
+            </div>
 
-          <div className="nexus-team-grid">
-            {teamMembers.map((member, idx) => (
-              <div key={idx} className="nexus-team-card">
-                
-                <div className="nexus-avatar-wrap">
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    className="nexus-team-avatar"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
-                    }}
-                  />
-                </div>
+            <div className="nexus-team-grid">
+              {teamSection.members.map((member, idx) => (
+                <div key={member.id || idx} className="nexus-team-card">
+                  <div className="nexus-avatar-wrap">
+                    <img 
+                      src={member.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'} 
+                      alt={member.name} 
+                      className="nexus-team-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+                      }}
+                      loading="lazy"
+                    />
+                  </div>
 
-                <h3 className="nexus-team-name">{member.name}</h3>
-                <div className="nexus-team-role">{member.role}</div>
-                <p className="nexus-team-bio">{member.bio}</p>
+                  <h3 className="nexus-team-name">{member.name}</h3>
+                  <div className="nexus-team-role">{member.role}</div>
+                  {member.bio && <p className="nexus-team-bio">{member.bio}</p>}
 
-                <div className="nexus-team-socials">
-                  {member.links.map((link, lIdx) => {
-                    const SIcon = link.icon;
-                    return (
+                  <div className="nexus-team-socials">
+                    {member.linkedin && (
                       <a 
-                        key={lIdx} 
-                        href={link.url} 
+                        href={member.linkedin} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="nexus-social-btn"
-                        title={link.label}
+                        title="LinkedIn"
                       >
-                        <SIcon size={16} />
+                        <LinkedInIcon size={16} />
                       </a>
-                    );
-                  })}
+                    )}
+                    {member.github && (
+                      <a 
+                        href={member.github} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="nexus-social-btn"
+                        title="GitHub"
+                      >
+                        <GitHubIcon size={16} />
+                      </a>
+                    )}
+                    {member.community && (
+                      <a 
+                        href={member.community} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="nexus-social-btn"
+                        title="Community"
+                      >
+                        <MessageSquare size={16} />
+                      </a>
+                    )}
+                    {member.website && (
+                      <a 
+                        href={member.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="nexus-social-btn"
+                        title="Website"
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
+                  </div>
                 </div>
-
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
       </div>
     </div>

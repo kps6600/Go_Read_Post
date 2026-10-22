@@ -308,13 +308,16 @@
 .lap-card-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
+  gap: 5px;
+  font-size: 0.7rem;
   color: #94a3b8;
   font-weight: 600;
   margin-top: auto;
-  padding-top: 0.85rem;
+  padding-top: 0.75rem;
   border-top: 1px solid #f1f5f9;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 [data-theme='dark'] .lap-card-meta {
@@ -322,8 +325,8 @@
 }
 
 .lap-author-avatar {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -332,14 +335,29 @@
 .lap-author-name {
   color: #334155;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 105px;
+  flex-shrink: 1;
 }
 
 [data-theme='dark'] .lap-author-name {
   color: #cbd5e1;
 }
 
+.lap-card-meta span {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lap-card-meta .lap-author-name {
+  flex-shrink: 1;
+}
+
 .lap-meta-sep {
-  opacity: 0.55;
+  opacity: 0.5;
+  font-size: 0.65rem;
 }
 
 /* ── Pagination Bar ── */

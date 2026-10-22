@@ -208,8 +208,8 @@ export default function Header({
       });
       const hasValidChildren = validChildren.length > 0;
 
-      // Only use NAV_DROPDOWNS_DATA as mock fallback if item is NOT loaded from MongoDB
-      const dropdownData = isFromDb ? null : (NAV_DROPDOWNS_DATA[id] || NAV_DROPDOWNS_DATA[link.slug]);
+      // Curated dropdown data fallback for standard editorial menus (Categories, Topics, Company)
+      const fallbackData = NAV_DROPDOWNS_DATA[id] || NAV_DROPDOWNS_DATA[link.slug] || NAV_DROPDOWNS_DATA[link.id];
 
       let columns = link.dropdownColumns;
       if ((!columns || columns.length === 0) && hasValidChildren) {
@@ -245,6 +245,11 @@ export default function Header({
           ];
         }
       }
+
+      if ((!columns || columns.length === 0) && fallbackData?.columns) {
+        columns = fallbackData.columns;
+      }
+      const dropdownData = fallbackData || (columns ? { columns } : null);
 
       const hasColumns = Boolean((columns && columns.length > 0) || (dropdownData && dropdownData.columns && dropdownData.columns.length > 0));
       const isBrands = id === 'brands' || link.slug === 'brands';
@@ -316,9 +321,6 @@ export default function Header({
         return activeCategory === 'techsparks' || normCurrent === '/techsparks';
       }
 
-      if (normLink === '/founder-first') {
-        return activeCategory === 'founder-first' || normCurrent === '/founder-first';
-      }
 
       return normCurrent === normLink;
     }
@@ -480,11 +482,11 @@ export default function Header({
       }
 
       if (directUrl === '/founder-first') {
-        setActiveCategory('founder-first');
+        setActiveCategory('startups');
         setSearchQuery('');
-        window.history.pushState(null, '', directUrl);
+        window.history.pushState(null, '', '/category/startups');
         window.dispatchEvent(new Event('popstate'));
-        setCurrentPath(directUrl);
+        setCurrentPath('/category/startups');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
@@ -548,7 +550,7 @@ export default function Header({
     }
 
     // Known brand & category desks
-    if (['startups', 'technology', 'ai-deeptech', 'enterprise', 'fintech', 'ai-story', 'her-story', 'social-story', 'smbstory', 'hindi'].includes(targetDesk)) {
+    if (['startups', 'technology', 'ai-deeptech', 'ai', 'enterprise', 'fintech', 'leadership', 'ai-story', 'her-story', 'herstory', 'social-story', 'smbstory', 'smb-story', 'hindi'].includes(targetDesk)) {
       if (e) e.preventDefault();
       setActiveCategory(targetDesk);
       setSearchQuery('');
@@ -559,7 +561,7 @@ export default function Header({
       return;
     }
 
-    if (['techsparks', 'founder-first', 'brands', 'resources', 'newsletter'].includes(targetDesk)) {
+    if (['techsparks', 'brands', 'resources', 'newsletter'].includes(targetDesk)) {
       if (e) e.preventDefault();
       setActiveCategory(targetDesk);
       setSearchQuery('');
@@ -665,17 +667,19 @@ export default function Header({
       return;
     }
     if (catKey === 'ai-story' || (item.label && item.label.toLowerCase().includes('ai story'))) {
-      setActiveCategory('ai-story');
+      setActiveCategory('ai');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=ai-story');
+      window.history.pushState(null, '', '/category/ai');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
     }
     if (catKey === 'her-story' || (item.label && item.label.toLowerCase().includes('herstory'))) {
-      setActiveCategory('her-story');
+      setActiveCategory('herstory');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=her-story');
+      window.history.pushState(null, '', '/category/herstory');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -683,7 +687,8 @@ export default function Header({
     if (catKey === 'social-story' || (item.label && item.label.toLowerCase().includes('socialstory'))) {
       setActiveCategory('social-story');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=social-story');
+      window.history.pushState(null, '', '/category/social-story');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -696,7 +701,8 @@ export default function Header({
     ) {
       setActiveCategory('smbstory');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=smbstory');
+      window.history.pushState(null, '', '/category/smbstory');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -708,7 +714,8 @@ export default function Header({
     ) {
       setActiveCategory('enterprise');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=enterprise');
+      window.history.pushState(null, '', '/category/enterprise');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -719,7 +726,8 @@ export default function Header({
     ) {
       setActiveCategory('hindi');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=hindi');
+      window.history.pushState(null, '', '/category/hindi');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -755,9 +763,10 @@ export default function Header({
       brandItem.categoryId === 'ai-story' || 
       (brandItem.title && brandItem.title.toLowerCase().includes('ai story'))
     ) {
-      setActiveCategory('ai-story');
+      setActiveCategory('ai');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=ai-story');
+      window.history.pushState(null, '', '/category/ai');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -766,9 +775,10 @@ export default function Header({
       brandItem.categoryId === 'her-story' || 
       (brandItem.title && brandItem.title.toLowerCase().includes('herstory'))
     ) {
-      setActiveCategory('her-story');
+      setActiveCategory('herstory');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=her-story');
+      window.history.pushState(null, '', '/category/herstory');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -779,7 +789,8 @@ export default function Header({
     ) {
       setActiveCategory('social-story');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=social-story');
+      window.history.pushState(null, '', '/category/social-story');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -792,7 +803,8 @@ export default function Header({
     ) {
       setActiveCategory('smbstory');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=smbstory');
+      window.history.pushState(null, '', '/category/smbstory');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -804,7 +816,8 @@ export default function Header({
     ) {
       setActiveCategory('enterprise');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=enterprise');
+      window.history.pushState(null, '', '/category/enterprise');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -815,7 +828,8 @@ export default function Header({
     ) {
       setActiveCategory('hindi');
       setSearchQuery('');
-      window.history.pushState(null, '', '?brand=hindi');
+      window.history.pushState(null, '', '/category/hindi');
+      window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
       return;
@@ -1240,7 +1254,7 @@ export default function Header({
         {/* 3. Secondary Tier: Categorical Navigation with 3-Column Mega Dropdowns */}
         <nav className="modern-nav-sub">
           <div className="nav-pills-row">
-            {visibleNavLinks.map((link) => {
+            {visibleNavLinks.map((link, idx) => {
               const hasColumns = Boolean(
                 (link.dropdownColumns && link.dropdownColumns.length > 0) ||
                 link.id === 'brands' ||
@@ -1249,6 +1263,7 @@ export default function Header({
               const hasDropdown = Boolean(link.hasDropdown && hasColumns);
               const isDropdownOpen = hasDropdown && activeDropdown === link.id;
               const isActive = isNavActive(link) || isDropdownOpen;
+              const dropdownAlign = link.dropdownData?.align || (idx >= visibleNavLinks.length - 2 ? 'right' : (idx <= 1 ? 'left' : 'center'));
 
               return (
                 <div 
@@ -1284,7 +1299,7 @@ export default function Header({
                         title="Toggle menu"
                       >
                         <ChevronDown 
-                          size={17} 
+                          size={15} 
                           className={`chevron-icon ${isDropdownOpen ? 'rotated' : ''}`} 
                         />
                       </span>
@@ -1399,7 +1414,7 @@ export default function Header({
                   {/* 2. Other Categorized Child Dropdowns (CMS submenus, Custom, Resources, Reports) */}
                   {hasDropdown && isDropdownOpen && link.id !== 'brands' && link.dropdownColumns && link.dropdownColumns.length > 0 && (
                     <div 
-                      className={`modern-mega-dropdown dropdown-align-center cols-${link.dropdownColumns.length} ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column' : ''}`}
+                      className={`modern-mega-dropdown dropdown-align-${dropdownAlign} cols-${link.dropdownColumns.length} ${(link.dropdownColumns && link.dropdownColumns.length === 1) ? 'single-column' : ''}`}
                       style={{
                         width: 'max-content',
                         minWidth: link.dropdownColumns.length === 1 

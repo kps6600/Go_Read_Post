@@ -666,6 +666,83 @@ export const COMPANY_AND_LEGAL_PAGES = [
         }
       }
     ]
+  },
+  // 8. CATEGORIES & DESKS
+  {
+    id: "category",
+    title: "Category Content & Desks",
+    slug: "categories",
+    brand: "GoReadPost",
+    description: "Comprehensive reporting, strategic perspectives, and startup breakdowns across all editorial categories and desks.",
+    heroHeadline: "Curated Reporting Across All Editorial Verticals",
+    heroSubhead: "Explore deep insights, operational lessons, and strategic perspectives from Indian founders and industry pioneers.",
+    heroBanner: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&auto=format&fit=crop&q=80",
+    status: "published",
+    showInNav: true,
+    order: 5,
+    seo: {
+      title: "Editorial Categories & Desks | GoReadPost Intelligence",
+      description: "Curated reporting, deep analysis, and breaking investigative coverage from the editorial desks at GoReadPost.",
+      keywords: ["categories", "startups", "technology", "ai", "enterprise", "fintech"]
+    },
+    sections: [
+      {
+        id: "category_hero",
+        type: "hero",
+        order: 1,
+        enabled: true,
+        data: {
+          title: "Category Featured Spotlight",
+          heading: "Curated Reporting Across All Editorial Verticals",
+          headline: "Curated Reporting Across All Editorial Verticals",
+          subheadline: "Explore deep insights, operational lessons, and strategic perspectives from Indian founders and industry pioneers.",
+          badge: "EDITORIAL DESKS",
+          buttonText: "Read Story",
+          buttonUrl: "#feed",
+          image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&auto=format&fit=crop&q=80",
+          heroSource: "auto"
+        }
+      },
+      {
+        id: "category_feed",
+        type: "stories_feed",
+        order: 2,
+        enabled: true,
+        data: {
+          title: "Category Editorial Feed",
+          heading: "All Editorial Desks",
+          subtitle: "Discover high-impact stories, breaking scoops, and founder journeys across curated verticals",
+          layoutMode: "grid",
+          cardsPerPage: 10,
+          defaultSort: "latest",
+          showPills: true,
+          showHero: true,
+          curation: {}
+        }
+      }
+    ]
+  },
+  {
+    id: "founder-first",
+    slug: "founder-first",
+    title: "Founder First - Zero to One Playbooks",
+    brand: "GoReadPost",
+    description: "Curated founder playbooks, bootstrapping miracles, and startup scaling blueprints from India's audacious builders.",
+    heroHeadline: "Founder First Desk",
+    heroSubhead: "Unfiltered founder playbooks, bootstrapping lessons, and scaling blueprints from India’s audacious builders.",
+    heroBanner: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+    status: "published",
+    showInNav: true,
+    order: 5,
+    sections: [
+      { id: "founder_playbooks", type: "stories", order: 1, enabled: true, title: "Founder Playbooks" },
+      { id: "founder_cta", type: "cta", order: 2, enabled: true, title: "Pitch Callout Banner" }
+    ],
+    seo: {
+      title: "Founder First | Zero-to-One Playbooks & Builder Journeys",
+      description: "Unfiltered founder playbooks, bootstrapping lessons, and scaling blueprints from India’s audacious builders.",
+      keywords: ["startups", "founder stories", "zero to one", "bootstrapped", "playbooks"]
+    }
   }
 ];
 
@@ -675,7 +752,9 @@ export function getFallbackPageBySlug(slug) {
   const clean = slug.toLowerCase().trim().replace(/^\/+/, '');
   return COMPANY_AND_LEGAL_PAGES.find(p => {
     const pSlug = (p.slug || '').toLowerCase().replace(/^\/+/, '');
-    if (pSlug === clean) return true;
+    if (pSlug === clean || p.id === clean) return true;
+    if ((clean === 'founder' || clean === 'founder-first') && (pSlug === 'founder-first' || p.id === 'founder-first')) return true;
+    if ((clean === 'categories' || clean === 'category' || clean === 'content') && (pSlug === 'categories' || p.id === 'category')) return true;
     if (clean === 'about-us' && pSlug === 'about') return true;
     if (clean === 'team' && pSlug === 'editorial-team') return true;
     if (clean === 'authors' && pSlug === 'editorial-team') return true;

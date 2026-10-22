@@ -7,7 +7,7 @@ import {
 import { PageService } from '../../services/pageService';
 
 const COMPANY_SLUGS = ['about', 'advertise'];
-const PORTAL_SLUGS = ['trending', 'videos', 'newsletter'];
+const PORTAL_SLUGS = ['trending', 'videos', 'newsletter', 'category', 'categories', 'topics', 'topic'];
 
 const getPageGroup = (page) => {
   const s = (page.slug || page.id || '').toLowerCase().replace(/^\/+/, '');
@@ -395,55 +395,28 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                           </button>
                           <button
                             className="apv-action-btn edit"
-                            onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`)}
+                            onClick={() => {
+                              if (page.id === 'trending' || targetSlug === 'trending') {
+                                onNavigate('/admin/trending');
+                              } else if (page.id === 'category' || targetSlug === 'category' || targetSlug === 'categories') {
+                                onNavigate('/admin/category');
+                              } else if (page.id === 'founder' || page.id === 'founder-first' || targetSlug === 'founder' || targetSlug === 'founder-first') {
+                                onNavigate('/admin/founder');
+                              } else if (page.id === 'videos' || targetSlug === 'videos') {
+                                onNavigate('/admin/videos');
+                              } else if (page.id === 'about' || targetSlug === 'about' || targetSlug === 'about-us') {
+                                onNavigate('/admin/about');
+                              } else if (page.id === 'topics' || targetSlug === 'topics') {
+                                onNavigate('/admin/topics');
+                              } else {
+                                onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`);
+                              }
+                            }}
                             title="Edit page & sections"
                           >
                             <Edit2 size={14} />
                             <span>Edit</span>
                           </button>
-                          <button
-                            className="apv-action-btn live"
-                            onClick={() => onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit?liveStudio=true`)}
-                            title="Open Visual Live Studio"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              padding: '0 8px',
-                              height: '32px',
-                              borderRadius: '8px',
-                              background: 'rgba(234, 88, 12, 0.1)',
-                              color: 'var(--brand-primary, #ea580c)',
-                              border: '1px solid rgba(234, 88, 12, 0.25)',
-                              fontWeight: 700,
-                              fontSize: '0.78rem',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <Sparkles size={12} fill="currentColor" />
-                            <span>Live</span>
-                          </button>
-                          {page.id !== 'home' && page.slug !== '' && page.slug !== '/' && (
-                            <button
-                              className="apv-action-btn delete"
-                              onClick={() => setDeleteConfirmId(page.id)}
-                              title="Delete page"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '8px',
-                                color: '#ef4444',
-                                border: '1px solid rgba(239, 68, 68, 0.25)',
-                                background: 'rgba(239, 68, 68, 0.08)',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>

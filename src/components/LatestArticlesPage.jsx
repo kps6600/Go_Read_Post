@@ -283,53 +283,11 @@ export default function LatestArticlesPage({
     }
   };
 
-  const handleBreadcrumbHome = () => {
-    if (onBackToHome) {
-      onBackToHome();
-    } else {
-      window.history.pushState(null, '', '/');
-      window.dispatchEvent(new Event('popstate'));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+
 
   return (
     <div className="lap-page-wrapper">
-      {/* ── Breadcrumbs ── */}
-      <nav className="lap-breadcrumbs" aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="lap-breadcrumb-link" onClick={handleBreadcrumbHome}>
-            Home
-          </span>
-          <span className="lap-breadcrumb-sep">&gt;</span>
-          <span className="lap-breadcrumb-current">Latest Articles</span>
-        </div>
 
-        {isAdminUser && (
-          <a
-            href="/admin/pages/latest/edit?liveStudio=true"
-            className="lap-admin-live-edit-pill"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = '/admin/pages/latest/edit?liveStudio=true';
-            }}
-            title="Open Live Visual Studio for Latest Page"
-          >
-            <Sparkles size={13} fill="#ffffff" color="#ffffff" />
-            <span>⚡ Live Edit This Page</span>
-          </a>
-        )}
-      </nav>
-
-      {/* ── Page Header ── */}
-      <div className="lap-header">
-        <h1 className="lap-title">
-          {feedSec?.data?.title || 'Latest Articles'}
-        </h1>
-        <p className="lap-subtitle">
-          {feedSec?.data?.subtitle || 'Discover the most recent stories, investigative reporting, and updates across technology, business, and innovation.'}
-        </p>
-      </div>
 
       {/* ── Category Filter Pills Bar ── */}
       <div className="lap-category-pills-bar">
@@ -484,11 +442,6 @@ export default function LatestArticlesPage({
 
 
       </div>
-      {newsletterSec && newsletterSec.enabled !== false && (
-        <div style={{ maxWidth: '1280px', margin: '3rem auto 0', padding: '0 1rem' }}>
-          <NewsletterBanner />
-        </div>
-      )}
     </div>
   );
 }

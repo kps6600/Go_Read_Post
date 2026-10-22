@@ -87,7 +87,7 @@ export const DEFAULT_NAVIGATION_ITEMS = [
         type: 'group',
         order: 2,
         children: [
-          { title: 'Founder Stories', slug: 'founder-stories', url: '/founder-first', type: 'link', order: 1 },
+          { title: 'Founder Stories', slug: 'founder-stories', url: '/category/startups', type: 'link', order: 1 },
           { title: 'HerStory (Women Leaders)', slug: 'her-story', url: '/category/her-story', type: 'link', order: 2 },
           { title: 'SMBStory (MSME & D2C)', slug: 'smbstory', url: '/category/smbstory', type: 'link', order: 3 },
           { title: 'SocialStory (Impact & Climate)', slug: 'social-story', url: '/category/social-story', type: 'link', order: 4 },

@@ -36,6 +36,8 @@ import VideosPage from './components/VideosPage';
 import VideoPlayerModal from './components/VideoPlayerModal';
 import ResourcesPage from './components/ResourcesPage';
 import NewsletterPage from './components/NewsletterPage';
+import AboutSection from './components/AboutSection';
+import TopicsPage from './components/TopicsPage';
 import DynamicPageRenderer from './components/DynamicPageRenderer';
 import NotFoundPage from './components/NotFoundPage';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -121,6 +123,9 @@ export const parseCurrentRoute = () => {
     if (pathname === '/founder-first' || pathname.startsWith('/founder-first')) {
       return { route: 'founder-first' };
     }
+    if (pathname === '/about' || pathname === '/about-us' || pathname.startsWith('/about')) {
+      return { route: 'about' };
+    }
     if (pathname === '/brands' || pathname.startsWith('/brands')) {
       return { route: 'brands' };
     }
@@ -153,7 +158,7 @@ export const parseCurrentRoute = () => {
       return { route: 'category', slug: 'content' };
     }
     if (pathname === '/topics' || pathname === '/topics/' || pathname === '/tags' || pathname === '/tags/') {
-      return { route: 'not-found' };
+      return { route: 'topics' };
     }
     if (pathname.startsWith('/category/') || pathname.startsWith('/cotegory/')) {
       const slug = pathname.replace(/^\/(category|cotegory)\//, '').split('/')[0].split('?')[0];
@@ -193,17 +198,16 @@ export const parseCurrentRoute = () => {
     }
     const brand = params.get('brand');
     if (brand === 'techsparks') return { route: 'techsparks' };
-    if (brand === 'founder-first') return { route: 'founder-first' };
     if (brand === 'brands') return { route: 'brands' };
     if (brand === 'ystv' || brand === 'videos' || brand === 'video') return { route: 'videos' };
     if (brand === 'resources') return { route: 'resources' };
     if (brand === 'newsletter') return { route: 'newsletter' };
-    if (brand === 'ai-story' || brand === 'aistory') return { route: 'brand', slug: 'ai-story' };
-    if (brand === 'her-story' || brand === 'herstory') return { route: 'brand', slug: 'her-story' };
-    if (brand === 'social-story' || brand === 'socialstory') return { route: 'brand', slug: 'social-story' };
-    if (brand === 'smbstory' || brand === 'smb-story') return { route: 'brand', slug: 'smbstory' };
-    if (brand === 'enterprise' || brand === 'enterprisestory' || brand === 'enterprise-story') return { route: 'brand', slug: 'enterprise' };
-    if (brand === 'hindi' || brand === 'ys-hindi' || brand === 'yshindi') return { route: 'brand', slug: 'hindi' };
+    if (brand === 'ai-story' || brand === 'aistory' || brand === 'ai') return { route: 'category', slug: 'ai' };
+    if (brand === 'her-story' || brand === 'herstory') return { route: 'category', slug: 'herstory' };
+    if (brand === 'social-story' || brand === 'socialstory') return { route: 'category', slug: 'social-story' };
+    if (brand === 'smbstory' || brand === 'smb-story' || brand === 'smb') return { route: 'category', slug: 'smbstory' };
+    if (brand === 'enterprise' || brand === 'enterprisestory' || brand === 'enterprise-story') return { route: 'category', slug: 'enterprise' };
+    if (brand === 'hindi' || brand === 'ys-hindi' || brand === 'yshindi') return { route: 'category', slug: 'hindi' };
 
     const art = params.get('article');
     if (art) return { route: 'article', slug: art };
@@ -213,9 +217,15 @@ export const parseCurrentRoute = () => {
       if (findStoryById(cleanPath)) {
         return { route: 'article', slug: cleanPath };
       }
-      const standardCats = ['startups', 'technology', 'funding', 'fintech', 'deep-tech', 'ai-deeptech', 'leadership', 'captable'];
+      const standardCats = [
+        'startups', 'startup', 'technology', 'tech', 'funding', 'fintech', 
+        'deep-tech', 'deeptech', 'ai-deeptech', 'ai', 'ai-story', 
+        'leadership', 'captable', 'enterprise', 'enterprisestory', 
+        'herstory', 'her-story', 'smbstory', 'smb-story', 'smb', 
+        'hindi', 'social-story', 'socialstory'
+      ];
       if (standardCats.includes(cleanPath.toLowerCase())) {
-        return { route: 'category', slug: cleanPath };
+        return { route: 'category', slug: cleanPath.toLowerCase() };
       }
       return { route: 'dynamic-page', slug: cleanPath };
     }
@@ -782,8 +792,6 @@ export default function App() {
           setActiveCategory('videos');
         } else if (route.route === 'techsparks') {
           setActiveCategory('techsparks');
-        } else if (route.route === 'founder-first') {
-          setActiveCategory('founder-first');
         } else if (route.route === 'brands') {
           setActiveCategory('brands');
         } else if (route.route === 'resources') {
@@ -811,8 +819,6 @@ export default function App() {
           setActiveCategory('hindi');
         } else if (brand && (brand.toLowerCase() === 'techsparks' || brand.toLowerCase() === 'techsparks-2026')) {
           setActiveCategory('techsparks');
-        } else if (brand && brand.toLowerCase() === 'founder-first') {
-          setActiveCategory('founder-first');
         } else if (brand && brand.toLowerCase() === 'brands') {
           setActiveCategory('brands');
         } else if (brand && (brand.toLowerCase() === 'ystv' || brand.toLowerCase() === 'videos' || brand.toLowerCase() === 'video')) {
@@ -1035,22 +1041,21 @@ export default function App() {
           setSelectedStory(null);
           setActiveCategory(catId);
           setSearchQuery('');
-          if (catId === 'just-in') {
-            window.history.pushState(null, '', justInPage === 1 ? '?tag=Just%20In' : `?page=${justInPage}&tag=Just%20In`);
-          } else if (catId === 'ai-story') {
-            window.history.pushState(null, '', '?brand=ai-story');
-          } else if (catId === 'her-story') {
-            window.history.pushState(null, '', '?brand=her-story');
-          } else if (catId === 'social-story') {
-            window.history.pushState(null, '', '?brand=social-story');
-          } else if (catId === 'smbstory' || catId === 'smb-story') {
-            window.history.pushState(null, '', '?brand=smbstory');
-          } else if (catId === 'enterprise' || catId === 'enterprisestory' || catId === 'enterprise-story') {
-            window.history.pushState(null, '', '?brand=enterprise');
-          } else if (catId === 'hindi') {
-            window.history.pushState(null, '', '?brand=hindi');
+          if (catId === 'all') {
+            window.history.pushState(null, '', '/');
+            setCurrentRoute({ route: 'home' });
+          } else if (catId === 'just-in' || catId === 'latest') {
+            window.history.pushState(null, '', '/latest');
+            setCurrentRoute({ route: 'latest' });
+          } else if (catId === 'trending') {
+            window.history.pushState(null, '', '/trending');
+            setCurrentRoute({ route: 'trending' });
+          } else if (['videos', 'ystv', 'video'].includes(catId)) {
+            window.history.pushState(null, '', '/videos');
+            setCurrentRoute({ route: 'videos' });
           } else {
-            window.history.pushState(null, '', window.location.pathname);
+            window.history.pushState(null, '', `/category/${catId}`);
+            setCurrentRoute({ route: 'category', slug: catId });
           }
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
@@ -1126,6 +1131,7 @@ export default function App() {
         ) : (currentRoute.route === 'trending' || (currentRoute.route === 'category' && currentRoute.slug === 'trending') || activeCategory === 'trending') && !searchQuery.trim() ? (
           <TrendingPage 
             stories={stories}
+            pageConfig={sitePages.find(p => p.id === 'trending' || p.slug === 'trending')}
             onSelectStory={handleSelectStory}
             onBackToHome={handleBackToHome}
             onCategoryClick={(cat) => {
@@ -1149,9 +1155,14 @@ export default function App() {
             }}
             onShowToast={showToast}
           />
-        ) : currentRoute.route === 'category' ? (
+        ) : (currentRoute.route === 'category' || (
+          activeCategory && 
+          activeCategory !== 'all' && 
+          !searchQuery.trim() && 
+          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'brands', 'resources', 'newsletter'].includes(activeCategory)
+        )) ? (
           <CategoryContentPage 
-            slug={currentRoute.slug || 'content'}
+            slug={currentRoute.route === 'category' ? (currentRoute.slug || 'content') : activeCategory}
             stories={stories}
             onSelectStory={handleSelectStory}
             onBackToHome={handleBackToHome}
@@ -1315,6 +1326,8 @@ export default function App() {
             onToggleSave={handleToggleSave}
             onShareStory={handleShareStory}
           />
+        ) : (currentRoute.route === 'about' || activeCategory === 'about') && !searchQuery.trim() ? (
+          <AboutSection />
         ) : (currentRoute.route === 'brands' || activeCategory === 'brands') && !searchQuery.trim() ? (
           <BrandsHubPage 
             onBackToHome={handleBackToHome}
@@ -1337,6 +1350,20 @@ export default function App() {
           <VideosPage 
             onBackToHome={handleBackToHome}
             onSelectVideo={(video) => setSelectedVideo(video)}
+          />
+        ) : (currentRoute.route === 'topics' || currentRoute.route === 'topic' || activeCategory === 'topics') && !searchQuery.trim() ? (
+          <TopicsPage 
+            topicSlug={currentRoute.route === 'topic' ? currentRoute.slug : null}
+            onSelectStory={handleSelectStory}
+            onBackToHome={handleBackToHome}
+            onNavigateTopic={(slug) => {
+              window.history.pushState(null, '', slug ? `/topic/${slug}` : '/topics');
+              window.dispatchEvent(new Event('popstate'));
+            }}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
+            onShareStory={handleShareStory}
+            onShowToast={showToast}
           />
         ) : (currentRoute.route === 'dynamic-page' || sitePages.some(p => {
           const cleanP = (p.slug || '').replace(/^\/+/, '');

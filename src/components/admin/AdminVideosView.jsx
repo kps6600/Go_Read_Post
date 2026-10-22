@@ -1,31 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Tv, Play, Plus, Search, Filter, Trash2, Edit3, Eye, 
-  Clock, ThumbsUp, User, ExternalLink, Check, X, Sparkles,
-  ArrowUpRight, RefreshCw, Film, Video, Calendar, Share2,
-  CheckCircle2, AlertCircle, Layers, Sliders,
-  Flame, Star, Image as ImageIcon, Link as LinkIcon, RotateCcw
+  Play, Plus, Search, Filter, Trash2, Edit2, RefreshCw, 
+  ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronDown, 
+  Check, X, ExternalLink, Clock, Sparkles, ThumbsUp, Layers,
+  Film, Video as VideoIcon, Tv, Eye, User
 } from 'lucide-react';
-import { VIDEO_EPISODES, VIDEO_CATEGORIES, getStoredVideos, saveStoredVideos, STORAGE_KEY } from '../../data/videoData';
+import { 
+  VIDEO_EPISODES, 
+  VIDEO_CATEGORIES, 
+  getStoredVideos, 
+  saveStoredVideos 
+} from '../../data/videoData';
 import { VideoService } from '../../services/videoService';
+import { PageService } from '../../services/pageService';
 import VideoPlayerModal from '../VideoPlayerModal';
+import './AdminVideosView.css';
 
-const YoutubeIcon = ({ size = 16, style, color = '#e11d48' }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="currentColor" 
-    style={style}
-    color={color}
-  >
-    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-  </svg>
-);
+// Rank color helpers matching Trending Studio & Visual CMS
+const RANK_COLORS = [
+  { text: '#e11d48', bg: '#ffe4e6' }, // 1 - Rose
+  { text: '#2563eb', bg: '#dbeafe' }, // 2 - Blue
+  { text: '#7c3aed', bg: '#ede9fe' }, // 3 - Purple
+  { text: '#059669', bg: '#d1fae5' }, // 4 - Emerald
+  { text: '#0284c7', bg: '#e0f2fe' }, // 5 - Sky
+  { text: '#ea580c', bg: '#ffedd5' }, // 6 - Orange
+  { text: '#db2777', bg: '#fce7f3' }, // 7 - Pink
+  { text: '#4f46e5', bg: '#e0e7ff' }, // 8 - Indigo
+];
 
+const CATEGORY_COLORS = {
+  interviews: '#ea580c', // Orange
+  masterclass: '#7c3aed', // Purple
+  deeptech: '#2563eb',   // Blue
+  keynotes: '#059669',   // Emerald
+  market: '#e11d48',     // Rose
+  all: '#ea580c'
+};
+
+const getCategoryColor = (catKey) => {
+  if (!catKey) return '#ea580c';
+  const clean = String(catKey).toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const [k, color] of Object.entries(CATEGORY_COLORS)) {
+    if (clean.includes(k)) return color;
+  }
+  return '#ea580c';
+};
+
+// Robust Video URL parser for YouTube and Vimeo
 export function parseVideoUrl(input) {
   if (!input) return null;
-  const str = input.trim();
+  const str = String(input).trim();
 
   // YouTube watch / share / embed / shorts
   const ytWatchMatch = str.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
@@ -82,1529 +106,1449 @@ export function parseVideoUrl(input) {
   return null;
 }
 
-export default function AdminVideosView({ onShowToast }) {
-  const [videos, setVideos] = useState(() => getStoredVideos());
-  const [loading, setLoading] = useState(false);
+// Clean normalizer ensuring all video objects have complete, uniform properties
+const normalizeVideo = (v, index = 0) => {
+  if (!v) return null;
+  const id = String(v.id || v._id || `video-${index}`);
+  const title = v.title || 'Untitled Video Episode';
+  const series = v.series || 'Founders Unfiltered';
+  const category = v.category || 'interviews';
+  const matchedCat = VIDEO_CATEGORIES.find(c => c.id === category);
+  const categoryLabel = v.categoryLabel || (matchedCat ? matchedCat.label : 'Video Episode');
+  const duration = v.duration || '28:15';
+  const views = typeof v.views === 'number' ? `${Math.round(v.views / 1000)}K` : (v.views || '180K');
+  const publishedAt = v.publishedAt || 'Recently';
+  const guest = v.guest || 'Featured Guest';
+  const guestRole = v.guestRole || 'Founder & CEO';
+  const guestCompany = v.guestCompany || '';
+  const guestAvatar = v.guestAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+  const guestBio = v.guestBio || '';
+  const host = v.host || 'Shradha Sharma';
 
+  // Extract thumbnail with fallback to YouTube HQ
+  const parsed = parseVideoUrl(v.youtubeEmbedUrl || v.videoUrl || '');
+  const image = v.image || v.fallbackImage || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80');
+  const youtubeEmbedUrl = v.youtubeEmbedUrl || (parsed ? parsed.embedUrl : '');
+  const videoUrl = v.videoUrl || (parsed ? parsed.watchUrl : (v.youtubeEmbedUrl || ''));
+  const description = v.description || (Array.isArray(v.highlights) && v.highlights[0]) || '';
+  const highlights = Array.isArray(v.highlights) ? v.highlights : [];
+  const chapters = Array.isArray(v.chapters) ? v.chapters : [];
+  const transcript = Array.isArray(v.transcript) ? v.transcript : [];
+
+  return {
+    ...v,
+    id,
+    _id: v._id || id,
+    title,
+    series,
+    category,
+    categoryLabel,
+    duration,
+    views,
+    publishedAt,
+    guest,
+    guestRole,
+    guestCompany,
+    guestAvatar,
+    guestBio,
+    host,
+    image,
+    fallbackImage: v.fallbackImage || (parsed ? parsed.hqThumb : image),
+    youtubeEmbedUrl,
+    videoUrl,
+    description,
+    highlights,
+    chapters,
+    transcript
+  };
+};
+
+export default function AdminVideosView({ onShowToast, onNavigate }) {
+  const [page, setPage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // All available videos pool (deduplicated)
+  const [allVideos, setAllVideos] = useState([]);
+
+  // Ordered ranked videos displayed on the page
+  const [rankedVideos, setRankedVideos] = useState([]);
+
+  // Active Category filter in the videos toolbar
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  // Search filter query
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Hero Spotlight Slider State
+  const [activeSlideIdx, setActiveSlideIdx] = useState(0);
+
+  // Pagination & view mode
+  const [showAllCards, setShowAllCards] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const CARDS_PER_PAGE = 8;
+
+  // Modals state
+  const [previewVideo, setPreviewVideo] = useState(null);
+  const [editModal, setEditModal] = useState({ isOpen: false, isCreate: false, index: null, data: null });
+  const [pickerModal, setPickerModal] = useState({ isOpen: false, targetIndex: null });
+  const [pickerSearch, setPickerSearch] = useState('');
+  const [pickerCategory, setPickerCategory] = useState('all');
+  const [isFetchingMeta, setIsFetchingMeta] = useState(false);
+
+  // Category Filter Popover Dropdown
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  // Close filter dropdown on outside click
   useEffect(() => {
-    loadVideosFromDb();
-  }, [selectedCategory]);
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const loadVideosFromDb = async () => {
+  // Load videos data from backend API, local storage, and page config
+  useEffect(() => {
+    loadVideosData();
+  }, []);
+
+  const loadVideosData = async () => {
     setLoading(true);
     try {
-      const data = await VideoService.getAdminVideos({
-        category: selectedCategory,
-        search: searchQuery
+      const [adminVideosRes, storedList, pageData] = await Promise.all([
+        VideoService.getAdminVideos().catch(() => []),
+        Promise.resolve(getStoredVideos()),
+        PageService.getPageById('videos').catch(() => null)
+      ]);
+
+      // Combine and deduplicate across all available video sources
+      const combined = [];
+      const seen = new Set();
+      const rawPool = [
+        ...(Array.isArray(adminVideosRes) ? adminVideosRes : []),
+        ...(Array.isArray(storedList) ? storedList : []),
+        ...VIDEO_EPISODES
+      ];
+
+      rawPool.forEach((v, idx) => {
+        if (!v || typeof v !== 'object') return;
+        const norm = normalizeVideo(v, idx);
+        if (!norm) return;
+        const key = String(norm.id || norm._id || norm.slug || norm.title).toLowerCase().trim();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          combined.push(norm);
+        }
       });
-      if (Array.isArray(data) && data.length > 0) {
-        setVideos(data);
-        saveStoredVideos(data);
+
+      setAllVideos(combined);
+
+      // Restore custom order from page section or fallback to combined list
+      if (pageData) {
+        setPage(pageData);
+        const feedSec = (pageData.sections || []).find(s => s.type === 'video_feed' || s.id === 'videos_feed');
+        if (feedSec?.data?.videos && Array.isArray(feedSec.data.videos) && feedSec.data.videos.length > 0) {
+          const customNorm = feedSec.data.videos.map((v, i) => normalizeVideo(v, i));
+          const customIds = new Set(customNorm.map(v => String(v.id || v._id || v.slug)));
+          const remaining = combined.filter(v => !customIds.has(String(v.id || v._id || v.slug)));
+          setRankedVideos([...customNorm, ...remaining]);
+        } else {
+          setRankedVideos(combined);
+        }
+      } else {
+        setRankedVideos(combined);
       }
     } catch (err) {
-      console.warn('Could not load videos from DB:', err);
+      console.error('Failed to load videos studio data:', err);
+      const fallbackList = getStoredVideos().map((v, i) => normalizeVideo(v, i));
+      setAllVideos(fallbackList);
+      setRankedVideos(fallbackList);
     } finally {
       setLoading(false);
     }
   };
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
-  const [previewVideo, setPreviewVideo] = useState(null);
-  const [editingVideo, setEditingVideo] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Hero section strictly showcases ONLY the Top 5 Ranked Videos (#1 to #5)
+  const heroSlides = useMemo(() => {
+    return rankedVideos.slice(0, 5);
+  }, [rankedVideos]);
 
-  // Form State for Create / Edit
-  const [formData, setFormData] = useState({
-    title: '',
-    series: 'Founders Unfiltered',
-    category: 'interviews',
-    categoryLabel: 'Founder Interview',
-    duration: '35:00',
-    views: '120K',
-    likes: '12.4K',
-    guest: '',
-    guestRole: 'Founder & CEO',
-    guestCompany: '',
-    guestBio: '',
-    host: 'Shradha Sharma',
-    rawVideoUrl: 'https://www.youtube.com/watch?v=cKxRvEZd3Mw',
-    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1200&auto=format&fit=crop&q=80',
-    fallbackImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-    youtubeEmbedUrl: 'https://www.youtube.com/embed/cKxRvEZd3Mw?autoplay=1&rel=0',
-    description: '',
-    highlights: ['Key operational breakthrough', 'Capital allocation strategy', 'Next 3-year vision'],
-    isFeatured: false,
-    isTrending: true,
-    status: 'published'
-  });
-
-  // UI helpers in modal
-  const [isLivePreview, setIsLivePreview] = useState(false);
-  const [isFetchingMeta, setIsFetchingMeta] = useState(false);
-  const [newHighlightInput, setNewHighlightInput] = useState('');
-  const [videoDetectionStatus, setVideoDetectionStatus] = useState(null);
-
-  // Persist whenever videos change
+  // Keep activeSlideIdx in safe bounds
   useEffect(() => {
-    saveStoredVideos(videos);
-  }, [videos]);
+    if (activeSlideIdx >= heroSlides.length && heroSlides.length > 0) {
+      setActiveSlideIdx(0);
+    }
+  }, [heroSlides.length, activeSlideIdx]);
 
-  // Filter videos
-  const filteredVideos = videos.filter(v => {
-    if (selectedCategory !== 'all' && v.category !== selectedCategory) return false;
+  const activeSlide = heroSlides[activeSlideIdx] || heroSlides[0] || {};
+
+  const handleNextSlide = () => {
+    setActiveSlideIdx(prev => (prev + 1) % Math.max(1, heroSlides.length));
+  };
+
+  const handlePrevSlide = () => {
+    setActiveSlideIdx(prev => (prev - 1 + heroSlides.length) % Math.max(1, heroSlides.length));
+  };
+
+  // Dynamic category stats across all videos
+  const categoryStats = useMemo(() => {
+    const counts = { all: allVideos.length };
+    allVideos.forEach(v => {
+      const cat = v.category || 'interviews';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [allVideos]);
+
+  // Categories list with 'all' first, followed by defined categories
+  const categoriesList = useMemo(() => {
+    const definedIds = VIDEO_CATEGORIES.map(c => c.id);
+    const extraIds = Object.keys(categoryStats).filter(id => !definedIds.includes(id));
+    return [...VIDEO_CATEGORIES, ...extraIds.map(id => ({ id, label: id }))];
+  }, [categoryStats]);
+
+  // Filtered list of ranked videos
+  const displayRankedVideos = useMemo(() => {
+    let list = rankedVideos;
+    if (activeCategory !== 'all') {
+      const target = activeCategory.toLowerCase().trim();
+      list = list.filter(v => {
+        const cat = (v.category || '').toLowerCase().trim();
+        return cat === target || cat.includes(target);
+      });
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      const matchTitle = (v.title || '').toLowerCase().includes(q);
-      const matchGuest = (v.guest || '').toLowerCase().includes(q);
-      const matchSeries = (v.series || '').toLowerCase().includes(q);
-      const matchHost = (v.host || '').toLowerCase().includes(q);
-      if (!matchTitle && !matchGuest && !matchSeries && !matchHost) return false;
+      list = list.filter(v => {
+        const title = (v.title || '').toLowerCase();
+        const guest = (v.guest || '').toLowerCase();
+        const host = (v.host || '').toLowerCase();
+        const series = (v.series || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+        const company = (v.guestCompany || '').toLowerCase();
+        return (
+          title.includes(q) || 
+          guest.includes(q) || 
+          host.includes(q) || 
+          series.includes(q) || 
+          desc.includes(q) || 
+          company.includes(q)
+        );
+      });
     }
-    return true;
-  });
+    return list;
+  }, [rankedVideos, activeCategory, searchQuery]);
 
-  // Calculate Metrics
-  const totalEpisodes = videos.length;
-  const totalViewsNum = videos.reduce((sum, v) => {
-    const raw = parseInt(v.views?.replace(/[^0-9]/g, '') || '0');
-    return sum + raw;
-  }, 0);
-  const seriesCount = new Set(videos.map(v => v.series)).size;
+  const visibleVideos = useMemo(() => {
+    if (showAllCards) return displayRankedVideos;
+    const start = currentPage * CARDS_PER_PAGE;
+    return displayRankedVideos.slice(start, start + CARDS_PER_PAGE);
+  }, [displayRankedVideos, showAllCards, currentPage]);
 
-  const handleVideoUrlChange = (val) => {
-    const parsed = parseVideoUrl(val);
-    if (parsed) {
-      setFormData(prev => ({
-        ...prev,
-        rawVideoUrl: val,
-        youtubeEmbedUrl: parsed.embedUrl,
-        image: prev.image && !prev.image.includes('youtube') && !prev.image.includes('unsplash') ? prev.image : parsed.maxResThumb,
-        fallbackImage: parsed.hqThumb
-      }));
-      setVideoDetectionStatus({ valid: true, id: parsed.id, provider: parsed.provider });
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        rawVideoUrl: val,
-        youtubeEmbedUrl: val
-      }));
-      setVideoDetectionStatus(val.trim() ? { valid: false } : null);
+  const totalPages = Math.max(1, Math.ceil(displayRankedVideos.length / CARDS_PER_PAGE));
+
+  // Reorder videos earlier/later in the ranked list
+  const handleMoveVideo = (index, direction) => {
+    const newIdx = direction === 'up' ? index - 1 : index + 1;
+    if (newIdx < 0 || newIdx >= rankedVideos.length) return;
+
+    setRankedVideos(prev => {
+      const next = [...prev];
+      const temp = next[index];
+      next[index] = next[newIdx];
+      next[newIdx] = temp;
+      return next;
+    });
+
+    if (onShowToast) {
+      onShowToast(`Repositioned to #${newIdx + 1}`);
     }
   };
 
-  const handleAutoFetchDetails = async (targetUrl = null) => {
-    const urlToFetch = targetUrl || formData.rawVideoUrl || formData.youtubeEmbedUrl;
-    if (!urlToFetch || !urlToFetch.trim()) {
-      alert('Please paste a YouTube video URL first.');
+  // Remove video from ranked showcase
+  const handleRemoveVideo = (index) => {
+    const videoToRemove = rankedVideos[index];
+    if (!videoToRemove) return;
+    const confirmDelete = window.confirm(`Remove "${videoToRemove.title.slice(0, 40)}..." from Video Showcase?`);
+    if (!confirmDelete) return;
+
+    setRankedVideos(prev => prev.filter((_, idx) => idx !== index));
+    if (onShowToast) onShowToast('Video removed from showcase.');
+  };
+
+  // Swap / replace video at target index from picker modal
+  const handleReplaceVideo = (chosenVideo) => {
+    const targetIdx = pickerModal.targetIndex;
+    if (typeof targetIdx !== 'number' || targetIdx < 0 || !chosenVideo) return;
+
+    const normChosen = normalizeVideo(chosenVideo);
+    setRankedVideos(prev => {
+      const next = [...prev];
+      next[targetIdx] = normChosen;
+      return next;
+    });
+
+    setPickerModal({ isOpen: false, targetIndex: null });
+    if (onShowToast) onShowToast(`Replaced position #${targetIdx + 1} with "${normChosen.title.slice(0, 35)}..."`);
+  };
+
+  // Auto-fetch YouTube metadata (Title, HD thumbnail, channel name)
+  const handleAutoFetchYouTube = async (url) => {
+    const targetUrl = url || editModal?.data?.videoUrl || editModal?.data?.youtubeEmbedUrl;
+    if (!targetUrl || !targetUrl.trim()) {
+      alert('Please enter a YouTube video URL first.');
       return;
     }
-    const parsed = parseVideoUrl(urlToFetch);
-    const queryUrl = parsed ? parsed.watchUrl : urlToFetch;
+
+    const parsed = parseVideoUrl(targetUrl);
+    const queryUrl = parsed ? parsed.watchUrl : targetUrl;
 
     setIsFetchingMeta(true);
     try {
       const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(queryUrl)}`);
       const data = await res.json();
+
       if (data && data.title) {
-        setFormData(prev => ({
+        setEditModal(prev => ({
           ...prev,
-          title: data.title || prev.title,
-          guest: prev.guest || (data.author_name ? data.author_name.replace(/ - Topic$/, '').replace(/ Official$/, '') : ''),
-          image: data.thumbnail_url || (parsed ? parsed.maxResThumb : prev.image),
-          fallbackImage: parsed ? parsed.hqThumb : prev.fallbackImage,
-          rawVideoUrl: queryUrl,
-          youtubeEmbedUrl: parsed ? parsed.embedUrl : prev.youtubeEmbedUrl
+          data: {
+            ...prev.data,
+            title: data.title || prev.data.title,
+            guest: prev.data.guest || (data.author_name ? data.author_name.replace(/ - Topic$/, '').replace(/ Official$/, '') : ''),
+            image: data.thumbnail_url || (parsed ? parsed.maxResThumb : prev.data.image),
+            videoUrl: queryUrl,
+            youtubeEmbedUrl: parsed ? parsed.embedUrl : (prev.data.youtubeEmbedUrl || queryUrl)
+          }
         }));
-        if (parsed) {
-          setVideoDetectionStatus({ valid: true, id: parsed.id, provider: parsed.provider });
-        }
-        if (onShowToast) onShowToast(`✨ Auto-fetched video info & HD thumbnail for "${data.title.slice(0, 35)}..."`);
+        if (onShowToast) onShowToast(`✨ Auto-fetched info & HD poster for "${data.title.slice(0, 35)}..."`);
       } else if (parsed) {
-        setFormData(prev => ({
+        setEditModal(prev => ({
           ...prev,
-          youtubeEmbedUrl: parsed.embedUrl,
-          image: parsed.maxResThumb,
-          fallbackImage: parsed.hqThumb
+          data: {
+            ...prev.data,
+            image: parsed.maxResThumb,
+            youtubeEmbedUrl: parsed.embedUrl,
+            videoUrl: parsed.watchUrl
+          }
         }));
-        setVideoDetectionStatus({ valid: true, id: parsed.id, provider: parsed.provider });
-        if (onShowToast) onShowToast(`Detected YouTube ID (${parsed.id}) and applied HD poster!`);
+        if (onShowToast) onShowToast(`Detected YouTube ID (${parsed.id}) and set HD thumbnail!`);
       } else {
-        alert('Could not auto-fetch video info. You can still fill details manually.');
+        alert('Could not auto-fetch metadata. You can enter details manually.');
       }
-    } catch (err) {
+    } catch (e) {
       if (parsed) {
-        setFormData(prev => ({
+        setEditModal(prev => ({
           ...prev,
-          youtubeEmbedUrl: parsed.embedUrl,
-          image: parsed.maxResThumb,
-          fallbackImage: parsed.hqThumb
+          data: {
+            ...prev.data,
+            image: parsed.maxResThumb,
+            youtubeEmbedUrl: parsed.embedUrl,
+            videoUrl: parsed.watchUrl
+          }
         }));
-        setVideoDetectionStatus({ valid: true, id: parsed.id, provider: parsed.provider });
-        if (onShowToast) onShowToast(`Detected YouTube ID (${parsed.id}) and set thumbnail!`);
-      } else {
-        alert('Could not connect to metadata service. Please check your internet or enter details manually.');
+        if (onShowToast) onShowToast(`Detected YouTube ID (${parsed.id}) and set HD thumbnail!`);
       }
     } finally {
       setIsFetchingMeta(false);
     }
   };
 
-  const handleAddHighlight = (text) => {
-    const clean = (text || newHighlightInput || '').trim();
-    if (!clean) return;
-    if (!formData.highlights.includes(clean)) {
-      setFormData(prev => ({
-        ...prev,
-        highlights: [...prev.highlights, clean]
-      }));
-    }
-    setNewHighlightInput('');
-  };
-
-  const handleRemoveHighlight = (idxToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      highlights: prev.highlights.filter((_, idx) => idx !== idxToRemove)
-    }));
-  };
-
-  const handleOpenCreate = () => {
-    setEditingVideo(null);
-    setIsLivePreview(false);
-    setNewHighlightInput('');
-    const defaultYt = 'https://www.youtube.com/watch?v=cKxRvEZd3Mw';
-    const parsed = parseVideoUrl(defaultYt);
-    setFormData({
-      title: '',
-      series: 'Founders Unfiltered',
-      category: 'interviews',
-      categoryLabel: 'Founder Interview',
-      duration: '38:00',
-      views: '145K',
-      likes: '14.2K',
-      guest: '',
-      guestRole: 'Founder & CEO',
-      guestCompany: '',
-      guestBio: '',
-      host: 'Shradha Sharma',
-      rawVideoUrl: defaultYt,
-      image: parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1200&auto=format&fit=crop&q=80',
-      fallbackImage: parsed ? parsed.hqThumb : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-      youtubeEmbedUrl: parsed ? parsed.embedUrl : 'https://www.youtube.com/embed/cKxRvEZd3Mw?autoplay=1&rel=0',
-      description: '',
-      highlights: [
-        'Strategic architecture and market breakthrough',
-        'Unit economics and sustainable scale formula',
-        'Leadership lessons from the hyper-growth phase'
-      ],
-      isFeatured: false,
-      isTrending: true,
-      status: 'published'
-    });
-    if (parsed) {
-      setVideoDetectionStatus({ valid: true, id: parsed.id, provider: 'YouTube' });
-    }
-    setIsCreateModalOpen(true);
-  };
-
-  const handleOpenEdit = (v) => {
-    setEditingVideo(v);
-    setIsLivePreview(false);
-    setNewHighlightInput('');
-    const rawUrl = v.youtubeEmbedUrl || `https://www.youtube.com/watch?v=${v.id}`;
-    const parsed = parseVideoUrl(rawUrl);
-    setFormData({
-      title: v.title || '',
-      series: v.series || 'Founders Unfiltered',
-      category: v.category || 'interviews',
-      categoryLabel: v.categoryLabel || 'Founder Interview',
-      duration: v.duration || '35:00',
-      views: v.views || '150K',
-      likes: v.likes || '12K',
-      guest: v.guest || '',
-      guestRole: v.guestRole || '',
-      guestCompany: v.guestCompany || '',
-      guestBio: v.guestBio || '',
-      host: v.host || 'Shradha Sharma',
-      rawVideoUrl: parsed ? parsed.watchUrl : rawUrl,
-      image: v.image || (parsed ? parsed.maxResThumb : ''),
-      fallbackImage: v.fallbackImage || (parsed ? parsed.hqThumb : ''),
-      youtubeEmbedUrl: v.youtubeEmbedUrl || (parsed ? parsed.embedUrl : ''),
-      description: v.description || '',
-      highlights: Array.isArray(v.highlights) && v.highlights.length > 0 ? v.highlights : ['Key operational milestone'],
-      isFeatured: Boolean(v.isFeatured),
-      isTrending: Boolean(v.isTrending),
-      status: v.status || 'published'
-    });
-    if (parsed) {
-      setVideoDetectionStatus({ valid: true, id: parsed.id, provider: parsed.provider });
-    }
-    setIsCreateModalOpen(true);
-  };
-
-  const handleDeleteVideo = async (id) => {
-    if (window.confirm('Are you sure you want to remove this video production from database?')) {
-      try {
-        await VideoService.deleteVideo(id);
-      } catch (e) {
-        console.warn('Could not delete from server DB:', e);
-      }
-      const updated = videos.filter(v => (v._id !== id && v.id !== id));
-      setVideos(updated);
-      saveStoredVideos(updated);
-      onShowToast?.('Video episode removed successfully from database');
-    }
-  };
-
-  const handleSaveVideo = async (e) => {
-    e.preventDefault();
-    if (!formData.title.trim()) {
-      alert('Please provide an episode title.');
+  // Save changes from Edit/Create Video modal
+  const handleSaveEditModal = () => {
+    const { isCreate, index, data } = editModal;
+    if (!data.title || !data.title.trim()) {
+      alert('Video title is required.');
       return;
     }
 
-    const parsed = parseVideoUrl(formData.rawVideoUrl || formData.youtubeEmbedUrl);
-    const finalEmbedUrl = parsed ? parsed.embedUrl : (formData.youtubeEmbedUrl || '');
-    const finalThumb = formData.image || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1200');
+    const parsed = parseVideoUrl(data.videoUrl || data.youtubeEmbedUrl);
+    const finalVideo = normalizeVideo({
+      ...data,
+      youtubeEmbedUrl: parsed ? parsed.embedUrl : (data.youtubeEmbedUrl || data.videoUrl),
+      videoUrl: parsed ? parsed.watchUrl : (data.videoUrl || data.youtubeEmbedUrl),
+      image: data.image || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80')
+    });
 
-    // Matching category label
-    const catObj = VIDEO_CATEGORIES.find(c => c.id === formData.category);
-    const categoryLabel = catObj ? catObj.label : 'Founder Interview';
-
-    const payload = {
-      ...formData,
-      categoryLabel,
-      youtubeEmbedUrl: finalEmbedUrl,
-      videoUrl: formData.rawVideoUrl || (parsed ? parsed.watchUrl : finalEmbedUrl),
-      image: finalThumb
-    };
-
-    let updatedList = [];
-    if (editingVideo) {
-      const targetId = editingVideo._id || editingVideo.id;
-      let saved = null;
-      try {
-        saved = await VideoService.updateVideo(targetId, payload);
-      } catch (err) {
-        console.warn('Error saving to DB:', err);
-      }
-      updatedList = videos.map(v => {
-        if (v._id === targetId || v.id === targetId) {
-          return saved || { ...v, ...payload };
-        }
-        return v;
+    if (isCreate) {
+      setRankedVideos(prev => [finalVideo, ...prev]);
+      setAllVideos(prev => [finalVideo, ...prev]);
+      if (onShowToast) onShowToast(`Added new video: "${finalVideo.title.slice(0, 35)}..."`);
+    } else if (typeof index === 'number' && index >= 0) {
+      setRankedVideos(prev => {
+        const next = [...prev];
+        next[index] = finalVideo;
+        return next;
       });
-      if (onShowToast) onShowToast(`Updated episode in database: "${formData.title}"`);
-    } else {
-      let created = null;
-      try {
-        created = await VideoService.createVideo(payload);
-      } catch (err) {
-        console.warn('Error creating video in DB:', err);
-      }
-      const newEntry = created || {
-        ...payload,
-        id: `video-${Date.now()}`,
-        publishedAt: 'Just now'
+      setAllVideos(prev => {
+        const next = [...prev];
+        const aIdx = next.findIndex(v => v.id === finalVideo.id || v._id === finalVideo._id);
+        if (aIdx >= 0) next[aIdx] = finalVideo;
+        return next;
+      });
+      if (onShowToast) onShowToast(`Updated video #${index + 1}`);
+    }
+
+    setEditModal({ isOpen: false, isCreate: false, index: null, data: null });
+  };
+
+  // Save all changes live to storage, database, and page layout
+  const handleSaveAll = async () => {
+    setSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      // 1. Save ordered video list to localStorage
+      saveStoredVideos(rankedVideos);
+
+      // 2. Persist to PageService layout for /videos
+      const updatedSections = [
+        {
+          id: 'videos_hero',
+          type: 'hero',
+          order: 1,
+          enabled: true,
+          data: {
+            title: 'Top Spotlight Videos',
+            heading: 'Studio Broadcasts & Founder Interviews',
+            slides: heroSlides,
+            heroSource: 'custom'
+          }
+        },
+        {
+          id: 'videos_feed',
+          type: 'video_feed',
+          order: 2,
+          enabled: true,
+          data: {
+            title: 'Ranked Video Showcase',
+            heading: 'Featured Shows & Episodes',
+            videos: rankedVideos,
+            hasCustomVideos: true
+          }
+        }
+      ];
+
+      const pagePayload = {
+        id: 'videos',
+        title: page?.title || 'Video Shows (YSTV)',
+        slug: 'videos',
+        description: page?.description || 'Original studio video shows, founder interviews, and video dispatches.',
+        status: 'published',
+        sections: updatedSections
       };
-      updatedList = [newEntry, ...videos];
-      if (onShowToast) onShowToast(`Published video episode to database: "${formData.title}"`);
-    }
 
-    setVideos(updatedList);
-    saveStoredVideos(updatedList);
-    setIsCreateModalOpen(false);
-    setEditingVideo(null);
-  };
+      await PageService.updatePage('videos', pagePayload).catch(e => {
+        console.warn('PageService updatePage non-fatal warning:', e);
+      });
 
-  const handleResetDefaults = () => {
-    if (window.confirm('Reset all video data to original studio catalog?')) {
-      localStorage.removeItem(STORAGE_KEY);
-      setVideos(VIDEO_EPISODES);
-      saveStoredVideos(VIDEO_EPISODES);
-      onShowToast?.('Video catalog reset to defaults');
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      if (onShowToast) onShowToast('Video Showcase layout permanently saved and published live!');
+    } catch (err) {
+      console.error('Failed to save videos studio:', err);
+      if (onShowToast) onShowToast(err.message || 'Failed to save changes.');
+    } finally {
+      setSaving(false);
     }
   };
+
+  // Filtered pool for video picker modal
+  const filteredPickerPool = useMemo(() => {
+    return allVideos.filter(v => {
+      const q = pickerSearch.trim().toLowerCase();
+      const matchSearch = !q || 
+        (v.title || '').toLowerCase().includes(q) || 
+        (v.guest || '').toLowerCase().includes(q) || 
+        (v.series || '').toLowerCase().includes(q);
+      const matchCat = pickerCategory === 'all' || v.category === pickerCategory;
+      return matchSearch && matchCat;
+    });
+  }, [allVideos, pickerSearch, pickerCategory]);
+
+  if (loading) {
+    return (
+      <div className="avv-container" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <RefreshCw size={34} className="avv-spin" color="#ea580c" />
+        <p style={{ color: '#64748b', fontWeight: 650, marginTop: '14px', fontSize: '0.95rem' }}>
+          Loading Video Studio CMS...
+        </p>
+      </div>
+    );
+  }
+
+  const slideTitle = activeSlide.title || 'Studio Broadcasts & Founder Interviews';
+  const slideDesc = activeSlide.description || (activeSlide.highlights && activeSlide.highlights[0]) || '';
+  const slideCat = activeSlide.categoryLabel || activeSlide.category || 'Interviews';
+  const slideImg = activeSlide.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80';
+  const slideGuest = activeSlide.guest || 'Featured Founder';
+  const slideRole = activeSlide.guestRole ? `${activeSlide.guestRole}${activeSlide.guestCompany ? `, ${activeSlide.guestCompany}` : ''}` : '';
+  const slideAvatar = activeSlide.guestAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+  const slideDuration = activeSlide.duration || '35:00';
+  const slideViews = activeSlide.views || '200K';
 
   return (
-    <div className="admin-posts-container">
-      {/* Top Action Bar */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <button 
-          type="button" 
-          className="adv-secondary-btn" 
-          onClick={handleResetDefaults}
-          title="Restore default catalog"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '7px 14px',
-            background: 'var(--bg-card, #fff)',
-            border: '1px solid var(--border-light, #e2e8f0)',
-            borderRadius: '8px',
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            color: 'var(--text-secondary, #64748b)'
-          }}
-        >
-          <RefreshCw size={14} />
-          <span>Reset Defaults</span>
-        </button>
-
-        <button 
-          type="button" 
-          className="adv-primary-btn" 
-          onClick={handleOpenCreate}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '7px 16px',
-            background: 'var(--brand-primary, #e11d48)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.84rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)'
-          }}
-        >
-          <Plus size={16} />
-          <span>New Video Episode</span>
-        </button>
-      </div>
-
-      {/* KPI Stats Row */}
-      <div className="adv-stats-row" style={{ marginBottom: '1.5rem' }}>
-        <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
-            <Tv size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Total Video Episodes</span>
-            <div className="adv-stat-number">{totalEpisodes}</div>
-            <span className="adv-stat-sub">Across {seriesCount} studio series</span>
-          </div>
+    <div className="avv-fullpage-root">
+      {/* ── Studio Sticky Topbar ── */}
+      <header className="avv-studio-topbar">
+        <div className="avv-topbar-left">
+          <button
+            type="button"
+            className="avv-back-nav-btn"
+            onClick={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+            title="Return to Pages Management"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Pages</span>
+          </button>
         </div>
 
-        <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(14, 165, 233, 0.12)', color: '#0284c7' }}>
-            <Eye size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Total Views Logged</span>
-            <div className="adv-stat-number">{(totalViewsNum / 1000).toFixed(1)}M+</div>
-            <span className="adv-stat-sub">High-signal founder plays</span>
-          </div>
-        </div>
+        <div className="avv-topbar-right">
+          <button
+            type="button"
+            className="avv-btn-secondary"
+            onClick={() => setEditModal({
+              isOpen: true,
+              isCreate: true,
+              index: null,
+              data: {
+                title: '',
+                series: 'Founders Unfiltered',
+                category: 'interviews',
+                categoryLabel: 'Founder Interview',
+                duration: '30:00',
+                views: '120K',
+                guest: '',
+                guestRole: 'Founder & CEO',
+                guestCompany: '',
+                guestAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+                host: 'Shradha Sharma',
+                image: '',
+                videoUrl: '',
+                youtubeEmbedUrl: '',
+                description: '',
+                highlights: []
+              }
+            })}
+          >
+            <Plus size={16} />
+            <span>New Video</span>
+          </button>
 
-        <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-            <Film size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Studio Formats</span>
-            <div className="adv-stat-number">{VIDEO_CATEGORIES.length}</div>
-            <span className="adv-stat-sub">Interviews, Masterclass &amp; Keynotes</span>
-          </div>
-        </div>
-
-        <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
-            <ThumbsUp size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Operator Engagement</span>
-            <div className="adv-stat-number">280K+</div>
-            <span className="adv-stat-sub">Likes &amp; bookmarks recorded</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Omnibar: Search, Filters & View Toggle */}
-      <div className="admin-posts-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: 'var(--bg-card)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-        {/* Search */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flex: 1, minWidth: '260px' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input 
-              type="text"
-              placeholder="Search episodes by title, guest, host, or series..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.6rem 1rem 0.6rem 2.2rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border-light)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                outline: 'none'
-              }}
-            />
-            {searchQuery && (
-              <button 
-                type="button" 
-                onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={14} />
-              </button>
+          <button
+            type="button"
+            className={`avv-btn-primary ${saveSuccess ? 'saved' : ''}`}
+            onClick={handleSaveAll}
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <RefreshCw size={14} className="avv-spin" />
+                <span>Saving...</span>
+              </>
+            ) : saveSuccess ? (
+              <>
+                <Check size={16} />
+                <span>Saved Live!</span>
+              </>
+            ) : (
+              <>
+                <Check size={16} />
+                <span>Save Changes</span>
+              </>
             )}
-          </div>
-        </div>
-
-        {/* Category Tabs */}
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          {VIDEO_CATEGORIES.map(c => (
-            <button
-              key={c.id}
-              type="button"
-              className={`adv-tab-pill ${selectedCategory === c.id ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(c.id)}
-              style={{
-                padding: '0.45rem 0.8rem',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 650,
-                border: selectedCategory === c.id ? '1px solid var(--brand-primary)' : '1px solid var(--border-light)',
-                background: selectedCategory === c.id ? 'rgba(225, 29, 72, 0.1)' : 'var(--bg-card)',
-                color: selectedCategory === c.id ? 'var(--brand-primary)' : 'var(--text-secondary)',
-                cursor: 'pointer'
-              }}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-
-        {/* View Mode */}
-        <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--bg-secondary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
-          <button 
-            type="button"
-            onClick={() => setViewMode('table')}
-            style={{
-              padding: '0.35rem 0.75rem',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              border: 'none',
-              background: viewMode === 'table' ? 'var(--bg-card)' : 'transparent',
-              color: viewMode === 'table' ? 'var(--text-primary)' : 'var(--text-muted)',
-              cursor: 'pointer'
-            }}
-          >
-            Table
-          </button>
-          <button 
-            type="button"
-            onClick={() => setViewMode('cards')}
-            style={{
-              padding: '0.35rem 0.75rem',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              border: 'none',
-              background: viewMode === 'cards' ? 'var(--bg-card)' : 'transparent',
-              color: viewMode === 'cards' ? 'var(--text-primary)' : 'var(--text-muted)',
-              cursor: 'pointer'
-            }}
-          >
-            Cards
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Main Video List Display */}
-      {viewMode === 'table' ? (
-        <div style={{ background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-light)', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.04em' }}>
-                  <th style={{ padding: '0.85rem 1rem' }}>Video Episode</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Series &amp; Category</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Featuring Guest</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Duration</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Metrics</th>
-                  <th style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredVideos.map(vid => (
-                  <tr key={vid.id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.15s ease' }}>
-                    {/* Title + Thumbnail */}
-                    <td style={{ padding: '0.85rem 1rem', minWidth: '320px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                        <div 
-                          style={{ position: 'relative', width: '80px', aspectRatio: '16/9', borderRadius: '6px', overflow: 'hidden', background: '#000', cursor: 'pointer', flexShrink: 0 }}
-                          onClick={() => setPreviewVideo(vid)}
-                          title="Preview video"
-                        >
-                          <img 
-                            src={vid.image} 
-                            alt={vid.title} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            onError={(e) => { e.target.onerror = null; e.target.src = vid.fallbackImage; }}
-                          />
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Play size={14} fill="#fff" color="#fff" />
-                          </div>
-                        </div>
-                        <div>
-                          <strong 
-                            style={{ display: 'block', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 750, lineHeight: 1.35 }}
-                            onClick={() => handleOpenEdit(vid)}
-                          >
-                            {vid.title}
-                          </strong>
-                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>ID: {vid.id}</span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Series */}
-                    <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
-                      <span style={{ display: 'inline-block', fontSize: '0.72rem', fontWeight: 750, color: '#e11d48', background: 'rgba(225, 29, 72, 0.1)', padding: '0.2rem 0.55rem', borderRadius: '4px' }}>
-                        {vid.series}
-                      </span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '3px' }}>
-                        {vid.categoryLabel}
-                      </div>
-                    </td>
-
-                    {/* Guest */}
-                    <td style={{ padding: '0.85rem 1rem' }}>
-                      <strong style={{ color: 'var(--text-primary)', display: 'block' }}>{vid.guest}</strong>
-                      <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{vid.guestRole} • {vid.guestCompany}</span>
-                    </td>
-
-                    {/* Duration */}
-                    <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                      <Clock size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                      {vid.duration}
-                    </td>
-
-                    {/* Views & Likes */}
-                    <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
-                      <div><Eye size={12} style={{ display: 'inline', marginRight: '3px' }} />{vid.views} views</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', marginTop: '2px' }}>
-                        <ThumbsUp size={11} style={{ display: 'inline', marginRight: '3px' }} />{vid.likes || '10K'} likes
-                      </div>
-                    </td>
-
-                    {/* Action buttons */}
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-                        <button 
-                          type="button" 
-                          onClick={() => setPreviewVideo(vid)}
-                          style={{ padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}
-                          title="Watch in Cinema Player"
-                        >
-                          <Play size={13} />
-                        </button>
-
-                        <button 
-                          type="button" 
-                          onClick={() => handleOpenEdit(vid)}
-                          style={{ padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}
-                          title="Edit Episode"
-                        >
-                          <Edit3 size={13} />
-                        </button>
-
-                        <button 
-                          type="button" 
-                          onClick={() => handleDeleteVideo(vid.id)}
-                          style={{ padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(225,29,72,0.2)', background: 'rgba(225,29,72,0.06)', color: '#e11d48', cursor: 'pointer' }}
-                          title="Delete Episode"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        /* Cards View */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '1.25rem' }}>
-          {filteredVideos.map(vid => (
-            <div 
-              key={vid.id} 
-              style={{ background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-light)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
-            >
-              <div 
-                style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', cursor: 'pointer' }}
-                onClick={() => setPreviewVideo(vid)}
-              >
-                <img 
-                  src={vid.image} 
-                  alt={vid.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  onError={(e) => { e.target.onerror = null; e.target.src = vid.fallbackImage; }}
-                />
-                <span style={{ position: 'absolute', bottom: '6px', right: '6px', background: 'rgba(0,0,0,0.8)', color: '#fff', fontSize: '0.7rem', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
-                  {vid.duration}
+      <div className="avv-container">
+        {/* ── SECTION A: Top Interactive Hero Spotlight Slider (Top 5 Ranked Videos) ── */}
+        {heroSlides.length > 0 && activeSlide && (
+          <div 
+            className="avv-hero-preview-box"
+            style={{ backgroundImage: `url(${slideImg})`, position: 'relative' }}
+          >
+            <div className="avv-hero-overlay" />
+            
+            <div className="avv-hero-content">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span className="avv-hero-badge" style={{ background: getCategoryColor(activeSlide.category) }}>
+                  {slideCat}
                 </span>
-                <span style={{ position: 'absolute', top: '6px', left: '6px', background: '#e11d48', color: '#fff', fontSize: '0.65rem', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase' }}>
-                  {vid.series}
+                <span style={{ 
+                  background: 'rgba(234, 88, 12, 0.95)', 
+                  color: '#ffffff', 
+                  fontSize: '0.74rem', 
+                  fontWeight: 800, 
+                  padding: '4px 10px', 
+                  borderRadius: '20px', 
+                  letterSpacing: '0.04em' 
+                }}>
+                  VIDEO SPOTLIGHT • TOP RANK #{activeSlideIdx + 1}
                 </span>
               </div>
 
-              <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.92rem', fontWeight: 750, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                  {vid.title}
-                </h4>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.65rem' }}>
-                  <User size={12} style={{ display: 'inline', marginRight: '3px' }} />
-                  <strong>{vid.guest}</strong> ({vid.guestRole})
-                </div>
+              <h3 className="avv-hero-title">{slideTitle}</h3>
 
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--border-light)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {vid.views} views
-                  </span>
-                  <div style={{ display: 'flex', gap: '0.35rem' }}>
-                    <button 
-                      type="button" 
-                      onClick={() => setPreviewVideo(vid)}
-                      style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
-                    >
-                      Watch
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => handleOpenEdit(vid)}
-                      style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => handleDeleteVideo(vid.id)}
-                      style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(225,29,72,0.2)', background: 'rgba(225,29,72,0.06)', color: '#e11d48', cursor: 'pointer', fontSize: '0.75rem' }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
+              {slideDesc && (
+                <p className="avv-hero-desc">{slideDesc}</p>
+              )}
+
+              <div className="avv-hero-meta">
+                <img src={slideAvatar} alt={slideGuest} className="avv-hero-avatar" />
+                <span style={{ fontWeight: 750, color: '#ffffff' }}>
+                  {slideGuest} {slideRole ? `(${slideRole})` : ''}
+                </span>
+                <span>•</span>
+                <span>Host: {activeSlide.host || 'Shradha Sharma'}</span>
+                <span>•</span>
+                <span>⏱ {slideDuration}</span>
+                <span>•</span>
+                <span>🔥 {slideViews} views</span>
+              </div>
+
+              <button
+                type="button"
+                className="avv-hero-play-btn"
+                onClick={() => setPreviewVideo(activeSlide)}
+                title="Play full video episode"
+              >
+                <Play size={15} fill="currentColor" />
+                <span>Watch Episode</span>
+              </button>
+            </div>
+
+            {/* Slider Controls Bottom-Right */}
+            <div style={{ position: 'absolute', bottom: '24px', right: '24px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px', zIndex: 10 }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handlePrevSlide}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.18)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(6px)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title="Previous spotlight episode"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextSlide}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.18)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(6px)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title="Next spotlight episode"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {heroSlides.map((_, idx) => (
+                  <span
+                    key={idx}
+                    onClick={() => setActiveSlideIdx(idx)}
+                    title={`Spotlight Episode ${idx + 1} (Rank #${idx + 1})`}
+                    style={{
+                      width: idx === activeSlideIdx ? '24px' : '8px',
+                      height: '8px',
+                      borderRadius: '4px',
+                      background: idx === activeSlideIdx ? '#ffffff' : 'rgba(255,255,255,0.4)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                ))}
               </div>
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* ── SECTION B: Ranked Video Showcase Grid ── */}
+        <div className="avv-section-card" id="avv-videos-section">
+          {/* Unified Search & Category Filter Toolbar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+            {/* Left: Prominent Search Input */}
+            <div className="avv-search-bar" style={{ flex: '1', minWidth: '300px', maxWidth: '540px' }}>
+              <Search size={16} color="#64748b" style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Search videos by title, guest, series, topic..."
+                value={searchQuery}
+                onChange={e => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(0);
+                }}
+                className="avv-search-input"
+              />
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  onClick={() => setSearchQuery('')} 
+                  className="avv-search-clear-btn"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Right: Filter Button with Popover Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }} ref={filterRef}>
+              <button
+                type="button"
+                className={`avv-filter-dropdown-btn ${activeCategory !== 'all' ? 'active' : ''}`}
+                onClick={() => setFilterDropdownOpen(prev => !prev)}
+                aria-expanded={filterDropdownOpen}
+                title="Filter episodes by show format"
+              >
+                <Filter size={15} />
+                <span>
+                  {activeCategory === 'all' 
+                    ? 'Filter by Category' 
+                    : `Format: ${categoriesList.find(c => c.id === activeCategory)?.label || activeCategory}`}
+                </span>
+                <span className="avv-filter-count-badge">
+                  {categoryStats[activeCategory] || allVideos.length}
+                </span>
+                <ChevronDown
+                  size={14}
+                  style={{
+                    transform: filterDropdownOpen ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.2s ease'
+                  }}
+                />
+              </button>
+
+              {filterDropdownOpen && (
+                <div className="avv-filter-popover-menu">
+                  <div className="avv-filter-popover-title">Filter by Show Format</div>
+                  <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                    {categoriesList.map(cat => {
+                      const isSelected = activeCategory === cat.id;
+                      const count = categoryStats[cat.id] || 0;
+                      const dotColor = getCategoryColor(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          className={`avv-filter-popover-item ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setActiveCategory(cat.id);
+                            setCurrentPage(0);
+                            setFilterDropdownOpen(false);
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span 
+                              style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: dotColor,
+                                flexShrink: 0
+                              }}
+                            />
+                            <span style={{ fontWeight: isSelected ? 750 : 500 }}>{cat.label}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="avv-filter-popover-count">{count}</span>
+                            {isSelected && <Check size={14} color="#ea580c" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {activeCategory !== 'all' && (
+                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px', marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        className="avv-filter-reset-btn"
+                        onClick={() => {
+                          setActiveCategory('all');
+                          setCurrentPage(0);
+                          setFilterDropdownOpen(false);
+                        }}
+                      >
+                        Reset to All Formats ({allVideos.length})
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Count & View Mode Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', fontSize: '0.85rem', color: '#64748b', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+            <div>
+              Showing <strong style={{ color: '#0f172a' }}>{visibleVideos.length}</strong> of <strong style={{ color: '#0f172a' }}>{displayRankedVideos.length}</strong> Videos
+              {searchQuery && ` (filtered by "${searchQuery}")`}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 650 }}>View Mode:</span>
+              <button
+                type="button"
+                onClick={() => setShowAllCards(true)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: showAllCards ? '#ea580c' : '#cbd5e1',
+                  background: showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
+                  color: showAllCards ? '#ea580c' : '#475569',
+                  fontSize: '0.76rem',
+                  fontWeight: 750,
+                  cursor: 'pointer'
+                }}
+              >
+                Show All ({displayRankedVideos.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAllCards(false)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: !showAllCards ? '#ea580c' : '#cbd5e1',
+                  background: !showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
+                  color: !showAllCards ? '#ea580c' : '#475569',
+                  fontSize: '0.76rem',
+                  fontWeight: 750,
+                  cursor: 'pointer'
+                }}
+              >
+                Paginated (8/page)
+              </button>
+            </div>
+          </div>
+
+          {/* 2-Column Responsive Card Grid (arranged over the screen) */}
+          <div className="avv-cards-grid">
+            {visibleVideos.map((video, inPageIdx) => {
+              const vidId = video.id || video._id || `vid-${inPageIdx}`;
+              const displayRank = showAllCards ? inPageIdx : currentPage * CARDS_PER_PAGE + inPageIdx;
+              const rankColor = RANK_COLORS[displayRank % RANK_COLORS.length];
+              const masterRankIdx = rankedVideos.findIndex(v => (v.id || v._id) === (video.id || video._id));
+              const targetIdx = masterRankIdx >= 0 ? masterRankIdx : displayRank;
+
+              const vidTitle = video.title || 'Untitled Episode';
+              const vidCat = video.categoryLabel || video.category || 'Interview';
+              const vidDesc = video.description || (video.highlights && video.highlights[0]) || '';
+              const vidImg = video.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80';
+              const vidGuest = video.guest || 'Featured Guest';
+              const vidRole = video.guestRole ? `${video.guestRole}${video.guestCompany ? `, ${video.guestCompany}` : ''}` : '';
+              const vidAvatar = video.guestAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+              const vidDuration = video.duration || '25:00';
+              const vidViews = video.views || '150K';
+
+              return (
+                <div key={vidId} className="avv-card-item">
+                  {/* Top Control Bar: Position + Action Buttons */}
+                  <div className="avv-card-admin-bar">
+                    <div className="avv-rank-label">
+                      <span style={{ color: '#ea580c', fontWeight: 850 }}>#{displayRank + 1}</span>
+                      <span style={{ marginLeft: '6px', opacity: 0.65 }}>in Video Showcase</span>
+                    </div>
+
+                    <div className="avv-card-btn-group">
+                      <button
+                        type="button"
+                        className="avv-icon-btn"
+                        disabled={targetIdx <= 0}
+                        onClick={() => handleMoveVideo(targetIdx, 'up')}
+                        title="Move earlier (# position)"
+                      >
+                        <ArrowLeft size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="avv-icon-btn"
+                        disabled={targetIdx >= rankedVideos.length - 1}
+                        onClick={() => handleMoveVideo(targetIdx, 'down')}
+                        title="Move later (# position)"
+                      >
+                        <ArrowRight size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="avv-icon-btn"
+                        onClick={() => setPickerModal({ isOpen: true, targetIndex: targetIdx })}
+                        title="Swap/replace this video"
+                      >
+                        <RefreshCw size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="avv-icon-btn"
+                        onClick={() => setEditModal({
+                          isOpen: true,
+                          isCreate: false,
+                          index: targetIdx,
+                          data: { ...video }
+                        })}
+                        title="Edit video episode details"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="avv-icon-btn danger"
+                        onClick={() => handleRemoveVideo(targetIdx)}
+                        title="Remove from video showcase"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Card Interior - Horizontal Layout */}
+                  <div className="avv-card-interior">
+                    {/* Left Column: 16:9 Thumbnail + Guest Meta Directly Below Image */}
+                    <div className="avv-card-thumb-column">
+                      <div 
+                        className="avv-card-thumb-wrap"
+                        onClick={() => setPreviewVideo(video)}
+                        title="Click to play preview"
+                      >
+                        <div 
+                          className="avv-card-badge"
+                          style={{ color: rankColor.text, background: rankColor.bg }}
+                        >
+                          {displayRank + 1}
+                        </div>
+
+                        <div className="avv-card-duration-badge">
+                          <Clock size={10} />
+                          <span>{vidDuration}</span>
+                        </div>
+
+                        <div className="avv-play-overlay-icon">
+                          <Play size={18} fill="currentColor" />
+                        </div>
+
+                        <img 
+                          src={vidImg} 
+                          alt={vidTitle} 
+                          className="avv-card-thumb"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80';
+                          }}
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Guest Meta Directly BELOW the Image (Exact User Requirement) */}
+                      <div className="avv-card-meta-below-img">
+                        <img src={vidAvatar} alt={vidGuest} className="avv-card-meta-avatar" />
+                        <div className="avv-card-meta-info">
+                          <span className="avv-card-meta-author" title={vidGuest}>
+                            {vidGuest}
+                          </span>
+                          <div className="avv-card-meta-sub" title={vidRole || video.host}>
+                            <span>{vidRole || video.host || 'Founder'}</span>
+                            <span>•</span>
+                            <span>{vidDuration}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Title, Category, Description, and Actions */}
+                    <div className="avv-card-body">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '0.45rem' }}>
+                        <span 
+                          className="avv-card-cat"
+                          style={{ background: getCategoryColor(video.category), margin: 0 }}
+                        >
+                          {vidCat}
+                        </span>
+                        <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 750 }}>
+                          🔥 {vidViews} views
+                        </span>
+                      </div>
+
+                      <h3 className="avv-card-title">{vidTitle}</h3>
+
+                      {vidDesc && (
+                        <p className="avv-card-desc">{vidDesc}</p>
+                      )}
+
+                      <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewVideo(video)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: 'rgba(234, 88, 12, 0.1)',
+                            color: '#ea580c',
+                            border: '1px solid rgba(234, 88, 12, 0.25)',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            fontSize: '0.78rem',
+                            fontWeight: 750,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Play size={12} fill="currentColor" />
+                          <span>Watch Preview</span>
+                        </button>
+
+                        {video.videoUrl && (
+                          <a
+                            href={video.videoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              color: '#64748b',
+                              fontSize: '0.76rem',
+                              fontWeight: 650,
+                              textDecoration: 'none'
+                            }}
+                            title="Open external video link"
+                          >
+                            <ExternalLink size={12} />
+                            <span>Source</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Pagination Controls (when not showAllCards) */}
+          {!showAllCards && totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                disabled={currentPage <= 0}
+                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: currentPage <= 0 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage <= 0 ? 0.4 : 1
+                }}
+              >
+                Previous
+              </button>
+              <span style={{ fontSize: '0.84rem', color: '#64748b', fontWeight: 650, padding: '0 8px' }}>
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={currentPage >= totalPages - 1}
+                onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: currentPage >= totalPages - 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage >= totalPages - 1 ? 0.4 : 1
+                }}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* ── MODAL 1: Full Interactive Video Player Modal ── */}
+      {previewVideo && (
+        <VideoPlayerModal
+          video={previewVideo}
+          onClose={() => setPreviewVideo(null)}
+        />
       )}
 
-      {/* Video Studio Production Modal (Industry-Grade CMS Workbench) */}
-      {isCreateModalOpen && (
-        <div className="video-studio-backdrop" onClick={() => setIsCreateModalOpen(false)}>
-          <div 
-            className="video-studio-modal" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="video-studio-header">
-              <div>
-                <div className="video-studio-badge">
-                  <Film size={14} />
-                  <span>{editingVideo ? 'EDIT EPISODE' : 'NEW STUDIO PRODUCTION'}</span>
-                </div>
-                <h3 className="video-studio-title">
-                  {editingVideo ? `Edit: ${editingVideo.title}` : 'Add New Video Episode'}
+      {/* ── MODAL 2: Video Editor Modal (Create / Edit) ── */}
+      {editModal.isOpen && editModal.data && (
+        <div className="avv-modal-overlay" onClick={() => setEditModal({ isOpen: false, isCreate: false, index: null, data: null })}>
+          <div className="avv-modal-box" onClick={e => e.stopPropagation()}>
+            <div className="avv-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Film size={20} color="#ea580c" />
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  {editModal.isCreate ? 'Create New Video Episode' : `Edit Video Episode #${(editModal.index || 0) + 1}`}
                 </h3>
-                <p className="video-studio-subtitle">
-                  Paste YouTube or Vimeo link with instant 1-click auto-metadata extraction and 16:9 stage preview.
-                </p>
               </div>
-              <button 
-                type="button" 
-                className="video-studio-close-btn" 
-                onClick={() => setIsCreateModalOpen(false)}
-                title="Close Modal"
+              <button
+                type="button"
+                onClick={() => setEditModal({ isOpen: false, isCreate: false, index: null, data: null })}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* Modal Form with 2-Column Studio Grid */}
-            <form onSubmit={handleSaveVideo} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              <div className="video-studio-body">
-                
-                {/* ═══ LEFT COLUMN: Media Source, Live Stage & Visual Assets ═══ */}
-                <div className="video-studio-pane">
-                  
-                  {/* Smart Video Import Card */}
-                  <div className="video-studio-card card-highlight">
-                    <div className="video-studio-card-title">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#e11d48' }}>
-                        <Sparkles size={16} />
-                        1-Click Smart Video Import
-                      </span>
-                      {videoDetectionStatus && (
-                        <span style={{ 
-                          fontSize: '0.7rem', 
-                          padding: '0.15rem 0.5rem', 
-                          borderRadius: '999px',
-                          background: videoDetectionStatus.valid ? '#ecfdf5' : '#fef2f2',
-                          color: videoDetectionStatus.valid ? '#059669' : '#dc2626',
-                          fontWeight: 700,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem'
-                        }}>
-                          {videoDetectionStatus.valid ? (
-                            <>
-                              <CheckCircle2 size={12} />
-                              {videoDetectionStatus.provider} ({videoDetectionStatus.id})
-                            </>
-                          ) : (
-                            <>
-                              <AlertCircle size={12} />
-                              Invalid URL
-                            </>
-                          )}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                      <div style={{ position: 'relative', flex: 1 }}>
-                        <YoutubeIcon size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#e11d48' }} />
-                        <input 
-                          type="text"
-                          placeholder="Paste YouTube watch URL, shorts, or embed URL..."
-                          value={formData.rawVideoUrl}
-                          onChange={(e) => handleVideoUrlChange(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '0.65rem 0.75rem 0.65rem 2.2rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                            fontFamily: 'monospace'
-                          }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleAutoFetchDetails()}
-                        disabled={isFetchingMeta}
-                        className="adv-secondary-btn"
-                        style={{
-                          whiteSpace: 'nowrap',
-                          padding: '0.55rem 0.85rem',
-                          background: '#f8fafc',
-                          borderColor: '#cbd5e1',
-                          color: '#0f172a',
-                          fontWeight: 750,
-                          fontSize: '0.8rem'
-                        }}
-                        title="Fetch title, guest, and HD thumbnail from YouTube oEmbed"
-                      >
-                        {isFetchingMeta ? (
-                          <>
-                            <RefreshCw size={13} className="spin-animate" />
-                            Fetching...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={13} color="#e11d48" />
-                            Auto-Fetch
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Quick Demos:</span>
-                      <button 
-                        type="button" 
-                        className="video-pill-preset"
-                        onClick={() => {
-                          const demo = 'https://www.youtube.com/watch?v=cKxRvEZd3Mw';
-                          handleVideoUrlChange(demo);
-                          handleAutoFetchDetails(demo);
-                        }}
-                      >
-                        Ola Krutrim AI
-                      </button>
-                      <button 
-                        type="button" 
-                        className="video-pill-preset"
-                        onClick={() => {
-                          const demo = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-                          handleVideoUrlChange(demo);
-                          handleAutoFetchDetails(demo);
-                        }}
-                      >
-                        Studio Keynote
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* 16:9 Cinema Stage Preview & Interactive Player Card */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>16:9 Stage Preview</span>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button
-                          type="button"
-                          onClick={() => setIsLivePreview(false)}
-                          style={{
-                            padding: '0.2rem 0.55rem',
-                            borderRadius: '6px',
-                            border: '1px solid',
-                            borderColor: !isLivePreview ? '#e11d48' : 'var(--border-light)',
-                            background: !isLivePreview ? 'rgba(225, 29, 72, 0.08)' : 'transparent',
-                            color: !isLivePreview ? '#e11d48' : 'var(--text-secondary)',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Poster View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsLivePreview(true)}
-                          style={{
-                            padding: '0.2rem 0.55rem',
-                            borderRadius: '6px',
-                            border: '1px solid',
-                            borderColor: isLivePreview ? '#e11d48' : 'var(--border-light)',
-                            background: isLivePreview ? 'rgba(225, 29, 72, 0.08)' : 'transparent',
-                            color: isLivePreview ? '#e11d48' : 'var(--text-secondary)',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Live Player
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="video-stage-box">
-                      {isLivePreview && formData.youtubeEmbedUrl ? (
-                        <iframe
-                          src={formData.youtubeEmbedUrl}
-                          title={formData.title || 'Video Preview'}
-                          style={{ width: '100%', height: '100%', border: 'none' }}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <>
-                          <img 
-                            src={formData.image || formData.fallbackImage} 
-                            alt={formData.title || 'Video poster'} 
-                            className="video-stage-poster"
-                            onError={(e) => { e.target.onerror = null; e.target.src = formData.fallbackImage; }}
-                          />
-                          <div 
-                            className="video-stage-play-overlay"
-                            onClick={() => setIsLivePreview(true)}
-                            title="Click to play preview"
-                          >
-                            <div className="video-stage-play-btn">
-                              <Play size={22} fill="#ffffff" style={{ marginLeft: '3px' }} />
-                            </div>
-                          </div>
-                          <span className="video-stage-tag">{formData.series}</span>
-                          <span className="video-stage-duration">{formData.duration || '00:00'}</span>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Poster Presets & Custom URL */}
-                    <div style={{ marginTop: '0.85rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 750, color: 'var(--text-secondary)' }}>
-                          Thumbnail Poster URL
-                        </label>
-                        {videoDetectionStatus?.id && (
-                          <div style={{ display: 'flex', gap: '0.3rem' }}>
-                            <button
-                              type="button"
-                              className="video-pill-preset"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  image: `https://img.youtube.com/vi/${videoDetectionStatus.id}/maxresdefault.jpg`
-                                }));
-                              }}
-                            >
-                              MaxRes (1080p)
-                            </button>
-                            <button
-                              type="button"
-                              className="video-pill-preset"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  image: `https://img.youtube.com/vi/${videoDetectionStatus.id}/hqdefault.jpg`
-                                }));
-                              }}
-                            >
-                              HQ (720p)
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <input 
-                        type="text"
-                        placeholder="https://img.youtube.com/... or https://images.unsplash.com/..."
-                        value={formData.image}
-                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '0.55rem 0.75rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-light)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.78rem'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Duration & Engagement Preset Card */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>Runtime &amp; Metrics</span>
-                      <Clock size={14} color="var(--text-muted)" />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.65rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Duration (MM:SS) *
-                        </label>
-                        <input 
-                          type="text"
-                          required
-                          placeholder="e.g. 38:00"
-                          value={formData.duration}
-                          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                            fontWeight: 700
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Display Views
-                        </label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. 145K"
-                          value={formData.views}
-                          onChange={(e) => setFormData({ ...formData, views: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Display Likes
-                        </label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. 12.8K"
-                          value={formData.likes}
-                          onChange={(e) => setFormData({ ...formData, likes: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Presets:</span>
-                      {['15:00', '25:00', '35:00', '45:00', '58:30'].map(dur => (
-                        <button
-                          key={dur}
-                          type="button"
-                          className={`video-pill-preset ${formData.duration === dur ? 'is-active' : ''}`}
-                          onClick={() => setFormData({ ...formData, duration: dur })}
-                        >
-                          {dur}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* ═══ RIGHT COLUMN: Metadata, Taxonomy, Guest & Highlights ═══ */}
-                <div className="video-studio-pane">
-
-                  {/* Primary Editorial Info */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>Editorial Identification</span>
-                      <Film size={14} color="#e11d48" />
-                    </div>
-
-                    <div style={{ marginBottom: '1rem' }}>
-                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                        Episode Title *
-                      </label>
-                      <input 
-                        type="text"
-                        required
-                        placeholder="e.g. Building Sovereign AI Stack: Bhavish Aggarwal on Krutrim..."
-                        value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.85rem',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-light)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.92rem',
-                          fontWeight: 700
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                          Series Franchise *
-                        </label>
-                        <select 
-                          value={formData.series}
-                          onChange={(e) => setFormData({ ...formData, series: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.6rem 0.75rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                            fontWeight: 600
-                          }}
-                        >
-                          <option value="Founders Unfiltered">Founders Unfiltered</option>
-                          <option value="Studio Masterclass">Studio Masterclass</option>
-                          <option value="DeepTech Spotlight">DeepTech Spotlight</option>
-                          <option value="TechSparks Archives">TechSparks Archives</option>
-                          <option value="Capital Roundtable">Capital Roundtable</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                          Category Track *
-                        </label>
-                        <select 
-                          value={formData.category}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const catObj = VIDEO_CATEGORIES.find(c => c.slug === val);
-                            setFormData({
-                              ...formData,
-                              category: val,
-                              categoryLabel: catObj ? catObj.title : val
-                            });
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '0.6rem 0.75rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                            fontWeight: 600
-                          }}
-                        >
-                          {VIDEO_CATEGORIES.filter(c => c.slug !== 'all').map(cat => (
-                            <option key={cat.slug} value={cat.slug}>
-                              {cat.title} ({cat.slug})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                        Episode Synopsis / Brief
-                      </label>
-                      <textarea 
-                        rows={3}
-                        placeholder="Inside the high-stakes ambition to build India's sovereign AI infrastructure, computational sovereignty, and scaling foundational models..."
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '0.6rem 0.75rem',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-light)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.82rem',
-                          lineHeight: 1.5,
-                          resize: 'vertical'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Guest & Host Credentials */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>Featured Guest &amp; Host</span>
-                      <User size={14} color="#64748b" />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Guest Full Name *
-                        </label>
-                        <input 
-                          type="text"
-                          required
-                          placeholder="e.g. Bhavish Aggarwal"
-                          value={formData.guest}
-                          onChange={(e) => setFormData({ ...formData, guest: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                            fontWeight: 700
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Guest Role
-                        </label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Founder & CEO"
-                          value={formData.guestRole}
-                          onChange={(e) => setFormData({ ...formData, guestRole: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Guest Company
-                        </label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Ola & Krutrim"
-                          value={formData.guestCompany}
-                          onChange={(e) => setFormData({ ...formData, guestCompany: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.55rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 750, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                        Anchor / Host
-                      </label>
-                      <input 
-                        type="text"
-                        placeholder="e.g. Shradha Sharma"
-                        value={formData.host}
-                        onChange={(e) => setFormData({ ...formData, host: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '0.55rem 0.65rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-light)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.82rem'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Key Takeaways & Discussion Highlights Chip Builder */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>Key Discussion Takeaways</span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        {formData.highlights.length} added
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.65rem' }}>
-                      <input 
-                        type="text"
-                        placeholder="Add takeaway (e.g. $50M seed round breakdown)..."
-                        value={newHighlightInput}
-                        onChange={(e) => setNewHighlightInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddHighlight();
-                          }
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '0.5rem 0.65rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-light)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.8rem'
-                        }}
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => handleAddHighlight()}
-                        className="adv-secondary-btn"
-                        style={{ padding: '0.45rem 0.75rem', fontSize: '0.78rem' }}
-                      >
-                        <Plus size={14} />
-                        Add
-                      </button>
-                    </div>
-
-                    {/* Chips Display */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                      {formData.highlights.map((item, idx) => (
-                        <span 
-                          key={idx}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem',
-                            padding: '0.25rem 0.6rem',
-                            borderRadius: '999px',
-                            background: 'var(--bg-secondary)',
-                            border: '1px solid var(--border-light)',
-                            fontSize: '0.75rem',
-                            color: 'var(--text-primary)',
-                            fontWeight: 600
-                          }}
-                        >
-                          <span>{item}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveHighlight(idx)}
-                            style={{
-                              background: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                              cursor: 'pointer',
-                              color: 'var(--text-muted)',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                            title="Remove takeaway"
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                      {formData.highlights.length === 0 && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                          No takeaways added yet. Type above and press Enter.
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Placement & Publication Settings */}
-                  <div className="video-studio-card">
-                    <div className="video-studio-card-title">
-                      <span>Placement &amp; Distribution</span>
-                      <Sliders size={14} color="var(--text-muted)" />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                      <label style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.5rem', 
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-light)',
-                        background: formData.isFeatured ? '#fff1f2' : 'var(--bg-secondary)',
-                        cursor: 'pointer'
-                      }}>
-                        <input 
-                          type="checkbox"
-                          checked={formData.isFeatured}
-                          onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                          style={{ accentColor: '#e11d48' }}
-                        />
-                        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: formData.isFeatured ? '#e11d48' : 'var(--text-primary)' }}>
-                          Hero Featured
-                        </span>
-                      </label>
-
-                      <label style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.5rem', 
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-light)',
-                        background: formData.isTrending ? '#ecfdf5' : 'var(--bg-secondary)',
-                        cursor: 'pointer'
-                      }}>
-                        <input 
-                          type="checkbox"
-                          checked={formData.isTrending}
-                          onChange={(e) => setFormData({ ...formData, isTrending: e.target.checked })}
-                          style={{ accentColor: '#059669' }}
-                        />
-                        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: formData.isTrending ? '#059669' : 'var(--text-primary)' }}>
-                          Trending Feed
-                        </span>
-                      </label>
-
-                      <div>
-                        <select 
-                          value={formData.status}
-                          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem 0.65rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-light)',
-                            background: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.78rem',
-                            fontWeight: 700
-                          }}
-                        >
-                          <option value="published">Status: Published</option>
-                          <option value="draft">Status: Draft</option>
-                          <option value="archived">Status: Archived</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* Modal Footer Bar */}
-              <div className="video-studio-footer">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button 
-                    type="button" 
-                    className="adv-secondary-btn"
-                    onClick={() => {
-                      setPreviewVideo({
-                        ...formData,
-                        id: editingVideo?.id || 'live-preview-temp'
-                      });
+            <div className="avv-modal-body">
+              {/* Video URL with Auto-fetch Button */}
+              <div className="avv-form-group">
+                <label className="avv-form-label">YouTube or Vimeo Video URL</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                    value={editModal.data.videoUrl || ''}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const parsed = parseVideoUrl(val);
+                      setEditModal(prev => ({
+                        ...prev,
+                        data: {
+                          ...prev.data,
+                          videoUrl: val,
+                          youtubeEmbedUrl: parsed ? parsed.embedUrl : (prev.data.youtubeEmbedUrl || val),
+                          image: prev.data.image || (parsed ? parsed.maxResThumb : '')
+                        }
+                      }));
                     }}
-                    style={{ fontSize: '0.78rem', padding: '0.5rem 0.85rem' }}
-                    title="Open in GoReadPost Fullscreen Cinema Player"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFetchYouTube()}
+                    disabled={isFetchingMeta}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      background: '#ea580c',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.82rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
                   >
-                    <Play size={13} fill="currentColor" />
-                    Cinema Player Test
-                  </button>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    Auto-saves to browser storage &amp; updates public /videos page instantly
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <button 
-                    type="button" 
-                    className="adv-secondary-btn" 
-                    onClick={() => setIsCreateModalOpen(false)}
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.82rem' }}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="adv-primary-btn"
-                    style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
-                  >
-                    <Check size={16} />
-                    <span>{editingVideo ? 'Save Changes' : 'Publish Video Episode'}</span>
+                    {isFetchingMeta ? <RefreshCw size={13} className="avv-spin" /> : <Sparkles size={13} />}
+                    <span>Auto-Fetch</span>
                   </button>
                 </div>
               </div>
-            </form>
+
+              {/* Title */}
+              <div className="avv-form-group">
+                <label className="avv-form-label">Episode Title *</label>
+                <input
+                  type="text"
+                  className="avv-form-input"
+                  placeholder="e.g. Building India's Sovereign AI Stack: Bhavish Aggarwal on Krutrim"
+                  value={editModal.data.title || ''}
+                  onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, title: e.target.value } }))}
+                />
+              </div>
+
+              {/* 2-Column: Series & Category */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Series / Show Name</label>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="e.g. Founders Unfiltered"
+                    value={editModal.data.series || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, series: e.target.value } }))}
+                  />
+                </div>
+
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Format / Category</label>
+                  <select
+                    className="avv-form-select"
+                    value={editModal.data.category || 'interviews'}
+                    onChange={e => {
+                      const catId = e.target.value;
+                      const matched = VIDEO_CATEGORIES.find(c => c.id === catId);
+                      setEditModal(prev => ({
+                        ...prev,
+                        data: {
+                          ...prev.data,
+                          category: catId,
+                          categoryLabel: matched ? matched.label : catId
+                        }
+                      }));
+                    }}
+                  >
+                    {VIDEO_CATEGORIES.filter(c => c.id !== 'all').map(c => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* 2-Column: Duration & Views */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Duration (e.g. 42:15)</label>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="42:15"
+                    value={editModal.data.duration || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, duration: e.target.value } }))}
+                  />
+                </div>
+
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Views Count (e.g. 245K)</label>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="245K"
+                    value={editModal.data.views || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, views: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              {/* Guest & Role */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Guest Name</label>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="e.g. Bhavish Aggarwal"
+                    value={editModal.data.guest || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, guest: e.target.value } }))}
+                  />
+                </div>
+
+                <div className="avv-form-group">
+                  <label className="avv-form-label">Guest Role / Company</label>
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="e.g. Founder & CEO, Ola & Krutrim"
+                    value={editModal.data.guestRole || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, guestRole: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              {/* Thumbnail Image URL with Preview */}
+              <div className="avv-form-group">
+                <label className="avv-form-label">Thumbnail Image URL</label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  {editModal.data.image && (
+                    <img 
+                      src={editModal.data.image} 
+                      alt="Thumbnail preview" 
+                      style={{ width: '80px', height: '48px', borderRadius: '6px', objectFit: 'cover' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                  <input
+                    type="text"
+                    className="avv-form-input"
+                    placeholder="https://..."
+                    value={editModal.data.image || ''}
+                    onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, image: e.target.value } }))}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="avv-form-group">
+                <label className="avv-form-label">Episode Description & Summary</label>
+                <textarea
+                  className="avv-form-textarea"
+                  rows={3}
+                  placeholder="Summary of the conversation, key takeaways, and discussion points..."
+                  value={editModal.data.description || ''}
+                  onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, description: e.target.value } }))}
+                />
+              </div>
+            </div>
+
+            <div className="avv-modal-footer">
+              <button
+                type="button"
+                className="avv-btn-secondary"
+                onClick={() => setEditModal({ isOpen: false, isCreate: false, index: null, data: null })}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="avv-btn-primary"
+                onClick={handleSaveEditModal}
+              >
+                <Check size={16} />
+                <span>{editModal.isCreate ? 'Add Video' : 'Save Changes'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Cinema Player Preview Inside Admin */}
-      {previewVideo && (
-        <VideoPlayerModal 
-          video={previewVideo}
-          onClose={() => setPreviewVideo(null)}
-          onSelectVideo={(v) => setPreviewVideo(v)}
-        />
+      {/* ── MODAL 3: Video Picker / Swap Modal ── */}
+      {pickerModal.isOpen && (
+        <div className="avv-modal-overlay" onClick={() => setPickerModal({ isOpen: false, targetIndex: null })}>
+          <div className="avv-modal-box" onClick={e => e.stopPropagation()}>
+            <div className="avv-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <RefreshCw size={18} color="#ea580c" />
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Swap Video for Position #{typeof pickerModal.targetIndex === 'number' ? pickerModal.targetIndex + 1 : 1}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickerModal({ isOpen: false, targetIndex: null })}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="avv-modal-body">
+              {/* Search & Filter in Picker */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="avv-search-bar" style={{ flex: 1, padding: '7px 14px' }}>
+                  <Search size={14} color="#64748b" />
+                  <input
+                    type="text"
+                    placeholder="Search by title, guest, series..."
+                    value={pickerSearch}
+                    onChange={e => setPickerSearch(e.target.value)}
+                    className="avv-search-input"
+                  />
+                  {pickerSearch && (
+                    <button type="button" onClick={() => setPickerSearch('')} className="avv-search-clear-btn">✕</button>
+                  )}
+                </div>
+
+                <select
+                  className="avv-form-select"
+                  style={{ width: 'auto', minWidth: '160px' }}
+                  value={pickerCategory}
+                  onChange={e => setPickerCategory(e.target.value)}
+                >
+                  <option value="all">All Formats</option>
+                  {VIDEO_CATEGORIES.filter(c => c.id !== 'all').map(c => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* List of Videos */}
+              <div className="avv-picker-grid">
+                {filteredPickerPool.length === 0 ? (
+                  <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem 0' }}>No videos found.</p>
+                ) : (
+                  filteredPickerPool.map((item, idx) => (
+                    <div
+                      key={item.id || idx}
+                      className="avv-picker-card"
+                      onClick={() => handleReplaceVideo(item)}
+                    >
+                      <img 
+                        src={item.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&auto=format&fit=crop&q=80'} 
+                        alt={item.title} 
+                        className="avv-picker-thumb"
+                      />
+                      <div className="avv-picker-details">
+                        <span className="avv-picker-title">{item.title}</span>
+                        <div className="avv-picker-meta">
+                          <span style={{ color: getCategoryColor(item.category), fontWeight: 700 }}>
+                            {item.categoryLabel || item.category}
+                          </span>
+                          <span>•</span>
+                          <span>{item.guest}</span>
+                          <span>•</span>
+                          <span>{item.duration}</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #ea580c',
+                          background: 'rgba(234, 88, 12, 0.1)',
+                          color: '#ea580c',
+                          fontSize: '0.78rem',
+                          fontWeight: 750,
+                          cursor: 'pointer',
+                          flexShrink: 0
+                        }}
+                      >
+                        Select
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="avv-modal-footer">
+              <button
+                type="button"
+                className="avv-btn-secondary"
+                onClick={() => setPickerModal({ isOpen: false, targetIndex: null })}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

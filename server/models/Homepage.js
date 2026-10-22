@@ -40,7 +40,7 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
   {
     sectionKey: 'latest_blogs',
     title: 'Latest from the Blog',
-    subtitle: 'Real-time reporting and latest editorial dispatches',
+    subtitle: '',
     enabled: true,
     order: 2,
     limit: 10,

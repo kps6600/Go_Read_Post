@@ -229,7 +229,7 @@ export default function LiveBannerEditor({
     : pool.slice(0, Number(data.popularLimit) || 5).map(formatForPopularPost)).slice(0, 5);
 
   const currentSlide = slides[activeSlideIdx] || slides[0] || {};
-  const showPopular = data.showPopular !== false;
+  const showPopular = data.showPopular !== false && pageId !== 'trending' && section?.id !== 'trending_hero';
 
   // ─────────────────────────────────────────────────────────
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE

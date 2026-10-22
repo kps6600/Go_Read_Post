@@ -88,7 +88,7 @@ const DEFAULT_CMS_FOOTER = {
       links: [
         { label: 'Startups & Funding', url: '/category/startups', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'DeepTech & AI', url: '/category/technology', badge: '', badgeColor: '', openInNewTab: false },
-        { label: 'Founder Stories', url: '/founder-first', badge: '', badgeColor: '', openInNewTab: false },
+        { label: 'Founder Stories', url: '/category/startups', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'Video Shows (YSTV)', url: '/videos', badge: '', badgeColor: '', openInNewTab: false }
       ]
     },

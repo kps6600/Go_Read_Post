@@ -93,7 +93,7 @@ const ONLY_5_HOMEPAGE_SECTIONS = [
     data: {
       title: 'Latest from the Blog',
       heading: 'Latest from the Blog',
-      subtitle: 'Real-time reporting and latest editorial dispatches across the ecosystem',
+      subtitle: '',
       category: '',
       limit: 6,
       viewAllText: 'View All Articles',

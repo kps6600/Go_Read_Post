@@ -4,7 +4,7 @@ import {
   Menu as MenuIcon, PanelBottom, Search, Settings, 
   LogOut, ExternalLink, X, ChevronRight, Newspaper, Layers,
   Hash, Tag, Users, Shield, BarChart3, FileEdit, Archive,
-  Tv, Mail, MessageSquare, Send, Sparkles
+  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 
@@ -46,6 +46,10 @@ export const ADMIN_NAV_GROUPS = [
     group: 'SITE ARCHITECTURE & CMS',
     items: [
       { id: 'homepage', path: '/admin/homepage', label: 'Homepage Live Studio', icon: Sparkles, badge: 'LIVE' },
+      { id: 'trending', path: '/admin/trending', label: 'Trending Page Studio', icon: Flame, badge: 'LIVE' },
+      { id: 'category', path: '/admin/category', label: 'Category Page Studio', icon: Layers, badge: 'LIVE' },
+      { id: 'founder', path: '/admin/founder', label: 'Founder First Studio', icon: Rocket, badge: 'LIVE' },
+      { id: 'about', path: '/admin/about', label: 'About Us Studio', icon: Compass, badge: 'LIVE' },
       { id: 'pages', path: '/admin/pages', label: 'Pages & Legal CMS', icon: FileText },
       { id: 'navigation', path: '/admin/navigation', label: 'Navigation CMS', icon: MenuIcon },
       { id: 'footer', path: '/admin/footer', label: 'Footer CMS', icon: PanelBottom },

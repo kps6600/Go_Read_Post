@@ -58,7 +58,7 @@ export const NAV_DROPDOWNS_DATA = {
       {
         title: 'SPECIALTY DESKS',
         items: [
-          { label: 'Founder Stories', url: '/founder-first' },
+          { label: 'Founder Stories', url: '/category/startups' },
           { label: 'HerStory (Women Pioneers)', url: '/category/her-story', badge: 'Pioneers' },
           { label: 'SMBStory (MSME & D2C)', url: '/category/smbstory' },
           { label: 'SocialStory (Impact & Climate)', url: '/category/social-story' },

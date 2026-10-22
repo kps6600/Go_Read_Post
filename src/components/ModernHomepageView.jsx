@@ -79,17 +79,33 @@ const getStoryAvatar = (s) => {
 };
 
 const getStoryDate = (s) => {
-  const d = s?.publishedAt || s?.date || s?.formattedDate;
+  const d = s?.publishedAt || s?.date || s?.formattedDate || s?.createdAt;
   if (!d) return 'Today';
-  if (typeof d === 'string') return d;
-  if (typeof d === 'number') return new Date(d).toLocaleDateString();
-  if (d instanceof Date) return d.toLocaleDateString();
+  if (typeof d === 'string') {
+    if (d.includes('T') || (d.includes('-') && d.length > 10)) {
+      const parsed = new Date(d);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    }
+    return d;
+  }
+  if (typeof d === 'number') {
+    const parsed = new Date(d);
+    return !isNaN(parsed.getTime()) ? parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Today';
+  }
+  if (d instanceof Date) return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   return 'Today';
 };
 
 const getStoryReadTime = (s) => {
   if (typeof s?.readTime === 'string') return s.readTime;
-  if (typeof s?.readingTime === 'number' || typeof s?.readingTime === 'string') return `${s.readingTime} min read`;
+  if (typeof s?.readingTime === 'number') return `${s.readingTime} min read`;
+  if (typeof s?.readingTime === 'string') {
+    const clean = s.readingTime.trim();
+    if (/min\s*read/i.test(clean)) return clean;
+    return `${clean} min read`;
+  }
   return '4 min read';
 };
 
@@ -170,8 +186,7 @@ export default function ModernHomepageView({
       { sectionKey: 'latest_blogs', title: 'Latest from the Blog', enabled: true, order: 2 },
       { sectionKey: 'trending', title: 'Trending Now', enabled: true, order: 3 },
       { sectionKey: 'popular_editors', title: "Most Popular & Editor's Picks", enabled: true, order: 4 },
-      { sectionKey: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true, order: 5 },
-      { sectionKey: 'newsletter', title: 'Newsletter Subscription Banner', enabled: true, order: 6 },
+      { sectionKey: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true, order: 5 }
     ];
   }, [homepageSections]);
 
@@ -338,7 +353,11 @@ export default function ModernHomepageView({
 
   // Helper to filter articles by category or pinned list
   const getSectionArticles = (sec, defaultArticles) => {
-    const limit = Number(sec?.data?.limit) > 0 ? Number(sec?.data?.limit) : (Number(sec?.limit) || 4);
+    const isSpotlight = sec?.id === 'spotlight' || sec?.type === 'spotlight';
+    const isTrending = sec?.id === 'trending' || sec?.type === 'trending';
+    const defaultLimit = (isSpotlight || isTrending) ? 8 : 4;
+    const rawLimit = Number(sec?.data?.limit || sec?.limit);
+    const limit = (isSpotlight || isTrending) ? 8 : (rawLimit > 0 ? rawLimit : defaultLimit);
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
       return sec.data.articles.slice(0, limit);
     }
@@ -507,13 +526,7 @@ export default function ModernHomepageView({
             />
             <span className="mhp-blog-author-name">{blogAuthor}</span>
             <span className="mhp-meta-sep">•</span>
-            <span>{blogDate}</span>
-            {blogReadTime && (
-              <>
-                <span className="mhp-meta-sep mhp-meta-readtime">•</span>
-                <span className="mhp-meta-readtime">{blogReadTime}</span>
-              </>
-            )}
+            <span className="mhp-blog-date">{blogDate}</span>
           </div>
 
           <div className="mhp-blog-footer-row">
@@ -918,11 +931,6 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && (
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                {subtitle}
-              </span>
-            )}
           </div>
           <span 
             className="mhp-view-all-link"
@@ -946,7 +954,6 @@ export default function ModernHomepageView({
   // Section 3: Trending Now
   const renderTrendingSection = (sec) => {
     const title = sec?.data?.title || sec?.data?.heading || sec?.title || "Trending Now";
-    const subtitle = sec?.data?.subtitle || sec?.data?.subheading || sec?.subtitle;
     const viewAllText = sec?.data?.viewAllText || sec?.customConfig?.viewAllText || "View All Trending";
     const viewAllUrl = sec?.data?.viewAllUrl || sec?.customConfig?.viewAllUrl || "/trending";
     const articles = getSectionArticles(sec, trendingStories);
@@ -958,11 +965,6 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && (
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                {subtitle}
-              </span>
-            )}
           </div>
           <span 
             className="mhp-view-all-link"
@@ -986,7 +988,6 @@ export default function ModernHomepageView({
   // Section 4: Most Popular & Editor's Picks
   const renderPopularEditorsSection = (sec) => {
     const title = sec?.data?.title || sec?.data?.heading || sec?.title || "Most Popular & Editor's Picks";
-    const subtitle = sec?.data?.subtitle || sec?.data?.subheading || sec?.subtitle;
     const viewAllText = sec?.data?.viewAllText || sec?.customConfig?.viewAllText || "Explore Popular";
     const viewAllUrl = sec?.data?.viewAllUrl || sec?.customConfig?.viewAllUrl || "/category/startups";
     const badgeText = sec?.data?.badgeText || sec?.customConfig?.badgeText || "Editor's Choice";
@@ -999,11 +1000,6 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && (
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                {subtitle}
-              </span>
-            )}
           </div>
           <span 
             className="mhp-view-all-link"
@@ -1036,7 +1032,6 @@ export default function ModernHomepageView({
   // Section 5: Tech & Startup Spotlight
   const renderSpotlightSection = (sec) => {
     const title = sec?.data?.title || sec?.data?.heading || sec?.title || "Tech & Startup Spotlight";
-    const subtitle = sec?.data?.subtitle || sec?.data?.subheading || sec?.subtitle;
     const viewAllText = sec?.data?.viewAllText || sec?.customConfig?.viewAllText || "Explore Startups";
     const viewAllUrl = sec?.data?.viewAllUrl || sec?.customConfig?.viewAllUrl || "/category/technology";
     const badgeText = sec?.data?.badgeText || sec?.customConfig?.badgeText || "Spotlight";
@@ -1049,11 +1044,6 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && (
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '1rem' }}>
-                {subtitle}
-              </span>
-            )}
           </div>
           <span 
             className="mhp-view-all-link"

@@ -135,8 +135,7 @@ export default function LiveHomepageStudio({
               { id: 'latest_blogs', type: 'stories_feed', title: 'Latest from the Blog', enabled: true, order: 2, data: {} },
               { id: 'trending', type: 'trending', title: 'Trending Now', enabled: true, order: 3, data: {} },
               { id: 'popular_editors', type: 'stories_feed', title: "Most Popular & Editor's Picks", enabled: true, order: 4, data: {} },
-              { id: 'spotlight', type: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true, order: 5, data: {} },
-              { id: 'newsletter', type: 'newsletter', title: 'Newsletter Subscription Banner', enabled: true, order: 6, data: {} }
+              { id: 'spotlight', type: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true, order: 5, data: {} }
             ]);
           }
         }
@@ -342,9 +341,18 @@ export default function LiveHomepageStudio({
   // ─────────────────────────────────────────────────────────
   // FEED SECTIONS ARTICLE REORDERING & CURATION
   // ─────────────────────────────────────────────────────────
+  const getSectionMaxFit = (sec) => {
+    const isSpot = sec?.id === 'spotlight' || sec?.type === 'spotlight';
+    const isTrend = sec?.id === 'trending' || sec?.type === 'trending';
+    const rawLimit = Number(sec?.data?.limit || sec?.limit);
+    if (isSpot) return (rawLimit > 0 && rawLimit !== 5) ? rawLimit : 8;
+    if (isTrend) return rawLimit > 0 ? rawLimit : 8;
+    return rawLimit > 0 ? rawLimit : 4;
+  };
+
   const resolveSectionArticles = (sec) => {
     const data = sec?.data || {};
-    const maxFit = Number(data.limit || sec?.limit) > 0 ? Number(data.limit || sec?.limit) : 4;
+    const maxFit = getSectionMaxFit(sec);
     const cat = data.category || data.filterCategory;
     let source = pool;
     if (cat && cat.trim()) {
@@ -362,7 +370,7 @@ export default function LiveHomepageStudio({
   const handleAutoFillFeedSection = (secId) => {
     const sec = sections.find(s => s.id === secId);
     if (!sec) return;
-    const maxFit = Number(sec.data?.limit || sec.limit) > 0 ? Number(sec.data?.limit || sec.limit) : 4;
+    const maxFit = getSectionMaxFit(sec);
     const currentArticles = resolveSectionArticles(sec);
     if (currentArticles.length >= maxFit) return;
 
@@ -481,7 +489,7 @@ export default function LiveHomepageStudio({
     } else if (pickerTarget.type === 'feed-add') {
       const sec = sections.find(s => s.id === pickerTarget.sectionId);
       if (sec) {
-        const maxFit = Number(sec?.data?.limit || sec?.limit) > 0 ? Number(sec?.data?.limit || sec?.limit) : 4;
+        const maxFit = getSectionMaxFit(sec);
         const currentArticles = resolveSectionArticles(sec);
         if (currentArticles.length >= maxFit) {
           setIsPickerOpen(false);
@@ -780,7 +788,7 @@ export default function LiveHomepageStudio({
                   const isHero = type.includes('hero');
                   const isNewsletter = type.includes('newsletter');
                   const isGridFeed = !isHero && !isNewsletter;
-                  const maxFit = Number(sec?.data?.limit || sec?.limit) > 0 ? Number(sec?.data?.limit || sec?.limit) : 4;
+                  const maxFit = getSectionMaxFit(sec);
                   const secArticles = isGridFeed ? resolveSectionArticles(sec).slice(0, maxFit) : [];
 
                   return (
@@ -1061,16 +1069,6 @@ export default function LiveHomepageStudio({
                                   {sec.data?.title || sec.title}
                                 </span>
                               </div>
-                              {(sec.data?.subtitle || sec.subtitle) && (
-                                <span 
-                                  className="lse-inline-edit-hint"
-                                  onClick={() => handleOpenEditSectionModal(sec)}
-                                  title="Click to edit subtitle"
-                                  style={{ fontSize: '0.9rem', color: '#94a3b8' }}
-                                >
-                                  {sec.data?.subtitle || sec.subtitle}
-                                </span>
-                              )}
                               {sec.data?.badgeText && (
                                 <span className="mhp-editor-pick-pill">
                                   <Sparkles size={12} fill="#ffffff" color="#ffffff" />

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Flame, Eye, Send, Tag, ArrowRight, 
+  ArrowRight, 
   Cpu, Briefcase, GraduationCap, Heart, Plane, 
-  Gamepad2, Atom, Layers, CheckCircle2, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Bookmark
+  Gamepad2, Atom, Layers, ChevronRight, ChevronLeft, Bookmark
 } from 'lucide-react';
 import { ALL_STORIES } from '../data/storiesData';
-import { NewsletterService } from '../services/newsletterService';
 import './TrendingPage.css';
 
 // Category color and icon helpers
@@ -59,11 +58,22 @@ const getStoryAvatar = (s) => {
   return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
 };
 
-const getStoryDate = (s) => s?.publishedAt || s?.date || s?.formattedDate || 'Apr 25, 2026';
+const formatStoryDate = (dateStr) => {
+  if (!dateStr || dateStr === 'Today') return 'Today';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (e) {
+    return dateStr;
+  }
+};
+const getStoryDate = (s) => formatStoryDate(s?.publishedAt || s?.date || s?.formattedDate || 'Apr 25, 2026');
 const getStoryReadTime = (s) => s?.readTime || (s?.readingTime ? `${s.readingTime} min read` : '5 min read');
 
 export default function TrendingPage({
   stories = [],
+  pageConfig = null,
   onSelectStory,
   onBackToHome,
   onCategoryClick,
@@ -72,27 +82,30 @@ export default function TrendingPage({
   onToggleSave
 }) {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [sidebarTab, setSidebarTab] = useState('trending'); // 'trending' | 'most-read'
   const [activeTag, setActiveTag] = useState(null);
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
-  const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
 
-  // Master real stories pool
+  // Master real stories pool (respects custom ranked priority from admin studio if available)
   const pool = useMemo(() => {
-    if (stories && Array.isArray(stories) && stories.length > 0) {
-      return stories;
+    const baseStories = (stories && Array.isArray(stories) && stories.length > 0) ? stories : ALL_STORIES;
+    const feedSec = pageConfig?.sections?.find(s => s.type === 'stories_feed' || s.id === 'trending_feed');
+    if (feedSec?.data?.articles && Array.isArray(feedSec.data.articles) && feedSec.data.articles.length > 0) {
+      const customNorm = feedSec.data.articles;
+      const customIds = new Set(customNorm.map(a => String(a.id || a._id || a.slug)));
+      const remaining = baseStories.filter(a => !customIds.has(String(a.id || a._id || a.slug)));
+      return [...customNorm, ...remaining];
     }
-    return ALL_STORIES;
-  }, [stories]);
+    return baseStories;
+  }, [stories, pageConfig]);
 
-  // Top trending slides for hero slider
+  // Top trending slides for hero slider: strictly top 5 ranked articles
   const trendingHeroSlides = useMemo(() => {
-    const list = pool.filter(s => s && s.title && (s.isTrending || s.trending || (s.views && s.views > 50) || s.tag === 'TRENDING'));
-    if (list.length >= 3) return list.slice(0, 5);
+    const heroSec = pageConfig?.sections?.find(s => s.type === 'hero' || s.id === 'trending_hero');
+    if (heroSec?.data?.slides && Array.isArray(heroSec.data.slides) && heroSec.data.slides.length > 0) {
+      return heroSec.data.slides.slice(0, 5);
+    }
     return pool.slice(0, 5);
-  }, [pool]);
+  }, [pageConfig, pool]);
 
   // Auto rotate hero slide every 6.5 seconds
   useEffect(() => {
@@ -137,13 +150,6 @@ export default function TrendingPage({
     { label: 'Science', icon: Atom, slug: 'science' },
   ];
 
-  // Popular tags
-  const POPULAR_TAGS = [
-    'AI', 'Web Development', 'React', 'Next.js', 'Python', 
-    'JavaScript', 'DSA', 'Career', 'Productivity', 'Investing',
-    'Startups', 'Technology'
-  ];
-
   // Filtered stories for main list
   const filteredStories = useMemo(() => {
     let result = pool.filter(s => s && s.title);
@@ -169,9 +175,9 @@ export default function TrendingPage({
     return result.sort((a, b) => (b.views || 0) - (a.views || 0));
   }, [pool, activeCategory, activeTag]);
 
-  // Pagination state: 4 cards per page
+  // Pagination state: 8 cards per page across the screen
   const [currentArticlePage, setCurrentArticlePage] = useState(0);
-  const CARDS_PER_PAGE = 4;
+  const CARDS_PER_PAGE = 8;
 
   useEffect(() => {
     setCurrentArticlePage(0);
@@ -197,36 +203,6 @@ export default function TrendingPage({
     }
     return [1, '...', current - 1, current, current + 1, '...', totalArticlePages];
   }, [currentArticlePage, totalArticlePages]);
-
-  // Sidebar ranked stories (Top 5)
-  const sidebarStories = useMemo(() => {
-    const list = [...pool].sort((a, b) => (b.views || 0) - (a.views || 0));
-    return list.slice(0, 5).map((s, idx) => ({
-      ...s,
-      viewsCount: s.views ? `${(s.views / 1000).toFixed(1)}K reads` : `${(12.4 - idx * 1.3).toFixed(1)}K reads`
-    }));
-  }, [pool]);
-
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim() || !newsletterEmail.includes('@')) return;
-    setNewsletterLoading(true);
-    try {
-      await NewsletterService.subscribe({
-        email: newsletterEmail.trim(),
-        publications: ['The Morning Dispatch'],
-        source: 'trending_page'
-      });
-      setNewsletterSubscribed(true);
-      if (onShowToast) {
-        onShowToast('✓ Subscribed! You will receive daily trending briefs.');
-      }
-    } catch (err) {
-      if (onShowToast) onShowToast(err.message || 'Subscription failed');
-    } finally {
-      setNewsletterLoading(false);
-    }
-  };
 
   return (
     <div className="tp-page-wrapper">
@@ -417,18 +393,41 @@ export default function TrendingPage({
                           {globalIdx + 1}
                         </div>
 
-                        {/* Left Thumbnail Image */}
-                        <div className="tp-card-thumb-wrap">
-                          <img 
-                            src={storyImg} 
-                            alt={storyTitle} 
-                            className="tp-card-thumb"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
-                            }}
-                            loading="lazy"
-                          />
+                        {/* Left Column: Thumbnail Image + Author Meta Below Image */}
+                        <div className="tp-card-thumb-column">
+                          <div className="tp-card-thumb-wrap">
+                            <img 
+                              src={storyImg} 
+                              alt={storyTitle} 
+                              className="tp-card-thumb"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
+                              }}
+                              loading="lazy"
+                            />
+                          </div>
+
+                          {/* Author & Date Meta Placed Below the Image */}
+                          <div className="tp-author-cluster-below-img">
+                            <img 
+                              src={storyAvatar} 
+                              alt={storyAuthor} 
+                              className="tp-author-avatar"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                              }}
+                            />
+                            <div className="tp-author-info-box">
+                              <span className="tp-author-name" title={storyAuthor}>{storyAuthor}</span>
+                              <div className="tp-author-sub">
+                                <span>{storyDate}</span>
+                                <span className="tp-sep">•</span>
+                                <span>{storyReadTime}</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Right Content */}
@@ -450,24 +449,7 @@ export default function TrendingPage({
                             </p>
                           )}
 
-                          <div className="tp-card-footer">
-                            <div className="tp-author-cluster">
-                              <img 
-                                src={storyAvatar} 
-                                alt={storyAuthor} 
-                                className="tp-author-avatar"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-                                }}
-                              />
-                              <span className="tp-author-name">{storyAuthor}</span>
-                              <span className="tp-sep">•</span>
-                              <span>{storyDate}</span>
-                              <span className="tp-sep">•</span>
-                              <span>{storyReadTime}</span>
-                            </div>
-
+                          <div className="tp-card-footer" style={{ marginTop: 'auto', justifyContent: 'flex-end' }}>
                             <div className="tp-card-actions-row">
                               <button 
                                 type="button" 
@@ -557,143 +539,6 @@ export default function TrendingPage({
               </div>
             )}
           </div>
-
-          {/* ════ RIGHT COLUMN: Sidebar Widgets ════ */}
-          <aside className="tp-sidebar">
-            
-            {/* Widget 1: Trending Now / Most Read Tabs */}
-            <div className="tp-widget-card tp-tabs-widget">
-              <div className="tp-widget-segmented">
-                <button
-                  type="button"
-                  className={`tp-segment-btn ${sidebarTab === 'trending' ? 'active' : ''}`}
-                  onClick={() => setSidebarTab('trending')}
-                >
-                  <Flame size={14} />
-                  <span>Trending Now</span>
-                </button>
-                <button
-                  type="button"
-                  className={`tp-segment-btn ${sidebarTab === 'most-read' ? 'active' : ''}`}
-                  onClick={() => setSidebarTab('most-read')}
-                >
-                  <Eye size={14} />
-                  <span>Most Read</span>
-                </button>
-              </div>
-
-              <div className="tp-mini-list">
-                {sidebarStories.map((item, idx) => {
-                  const itemId = item.id || item._id || item.slug;
-                  const itemImg = item.featuredImage?.url || 
-                                 (typeof item.featuredImage === 'string' ? item.featuredImage : null) || 
-                                 item.heroImage || 
-                                 item.image || 
-                                 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&auto=format&fit=crop&q=80';
-                  const rankColor = RANK_COLORS[idx % RANK_COLORS.length];
-
-                  return (
-                    <div 
-                      key={itemId || idx}
-                      className="tp-mini-item"
-                      onClick={() => onSelectStory && onSelectStory(item)}
-                    >
-                      <div 
-                        className="tp-mini-rank"
-                        style={{ color: rankColor.text, background: rankColor.bg }}
-                      >
-                        {idx + 1}
-                      </div>
-                      <img 
-                        src={itemImg} 
-                        alt={item.title} 
-                        className="tp-mini-thumb"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=200&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                      <div className="tp-mini-body">
-                        <h4 className="tp-mini-title">
-                          {item.title}
-                        </h4>
-                        <div className="tp-mini-meta">
-                          <Eye size={12} className="tp-eye-icon" />
-                          <span>{item.viewsCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Widget 2: Stay Updated Newsletter */}
-            <div className="tp-widget-card tp-newsletter-widget">
-              <div className="tp-nl-header">
-                <div className="tp-nl-icon-wrap">
-                  <Send size={18} />
-                </div>
-                <h3 className="tp-nl-title">Stay Updated</h3>
-              </div>
-              <p className="tp-nl-desc">
-                Get the latest trending articles, insights and updates delivered to your inbox.
-              </p>
-
-              {newsletterSubscribed ? (
-                <div className="tp-nl-success">
-                  <CheckCircle2 size={16} />
-                  <span>You are subscribed!</span>
-                </div>
-              ) : (
-                <form className="tp-nl-form" onSubmit={handleNewsletterSubmit}>
-                  <input 
-                    type="email"
-                    required
-                    placeholder="Enter your email address"
-                    value={newsletterEmail}
-                    onChange={e => setNewsletterEmail(e.target.value)}
-                    className="tp-nl-input"
-                  />
-                  <button 
-                    type="submit" 
-                    disabled={newsletterLoading}
-                    className="tp-nl-btn"
-                  >
-                    {newsletterLoading ? 'Subscribing...' : 'Subscribe'}
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Widget 3: Popular Tags */}
-            <div className="tp-widget-card tp-tags-widget">
-              <div className="tp-tags-header">
-                <Tag size={16} className="tp-tag-icon" />
-                <h3 className="tp-tags-title">Popular Tags</h3>
-              </div>
-
-              <div className="tp-tags-cluster">
-                {POPULAR_TAGS.map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={`tp-tag-pill ${activeTag === tag ? 'active' : ''}`}
-                    onClick={() => {
-                      if (activeTag === tag) {
-                        setActiveTag(null);
-                      } else {
-                        setActiveTag(tag);
-                      }
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </aside>
         </div>
       </div>
     </div>

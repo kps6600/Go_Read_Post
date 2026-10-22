@@ -43,6 +43,7 @@ const pageSchema = new mongoose.Schema(
     order: { type: Number, default: 0 },
     seo: { type: seoSchema, default: () => ({}) },
     sections: { type: [sectionSchema], default: [] },
+    data: { type: mongoose.Schema.Types.Mixed, default: {} },
     publishedAt: { type: Date }
   },
   { timestamps: true }

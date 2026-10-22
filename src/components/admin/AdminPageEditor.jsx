@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Globe, Eye, Plus, Trash2, 
+  Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
   Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles, ExternalLink
 } from 'lucide-react';
@@ -48,6 +48,27 @@ const CANONICAL_SECTION_META = {
     bg: '#f5f3ff',
     title: 'Tech & Startup Spotlight',
     desc: 'Deep tech breakthroughs, generative AI, and emerging ventures'
+  },
+  trending_hero: {
+    badge: 'TRENDING HERO SLIDER',
+    color: '#ea580c',
+    bg: '#fff7ed',
+    title: 'Top Trending Hero Slider',
+    desc: 'Interactive full-width hero slider showcasing viral and top trending dispatches'
+  },
+  trending_feed: {
+    badge: 'RANKED STORIES FEED',
+    color: '#059669',
+    bg: '#ecfdf5',
+    title: 'Ranked Trending Stories Feed',
+    desc: 'Paginated ranked cards with live velocity badges, categories, and author metadata'
+  },
+  trending_sidebar: {
+    badge: 'TRENDING SIDEBAR & NEWSLETTER',
+    color: '#db2777',
+    bg: '#fdf2f8',
+    title: 'Trending Sidebar & Newsletter Banner',
+    desc: 'Most-read top 5 leaderboard, newsletter subscription card, and popular tag cloud'
   },
   newsletter: {
     badge: 'NEWSLETTER BANNER',
@@ -681,9 +702,87 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const isLive = status === 'published' || status === 'active';
 
   return (
-    <div className="admin-view-container">
-      {/* Segmented Editor Tabs */}
-      <div className="admin-segmented-tabs-bar">
+    <div className="admin-fullpage-root" style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
+      {/* ── Fullpage Studio Top Header Bar ── */}
+      <header className="atv-studio-topbar">
+        <div className="atv-topbar-left">
+          <button
+            type="button"
+            className="atv-back-nav-btn"
+            onClick={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+            title="Return to Pages Management"
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Pages</span>
+          </button>
+
+          <div className="atv-topbar-divider" />
+
+          <div className="atv-topbar-title-wrap">
+            <span className="atv-topbar-title">{page?.title || title || 'Edit Page'}</span>
+            <span className="atv-topbar-slug">{pageId === 'home' ? '/' : `/${slug || pageId}`}</span>
+            <span className={`atv-topbar-pill ${isLive ? 'live' : 'draft'}`} style={{
+              background: isLive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(148, 163, 184, 0.15)',
+              color: isLive ? '#059669' : '#64748b',
+              border: `1px solid ${isLive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(148, 163, 184, 0.3)'}`
+            }}>
+              {isLive ? 'Live' : 'Draft'}
+            </span>
+          </div>
+        </div>
+
+        <div className="atv-topbar-right">
+          {pageId === 'home' && (
+            <button
+              type="button"
+              className="btn-admin-secondary"
+              onClick={handleOpenWholeHomeStudio}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                fontSize: '0.82rem',
+                borderRadius: '8px',
+                fontWeight: 700,
+                border: '1px solid #fed7aa',
+                background: '#fff7ed',
+                color: '#ea580c'
+              }}
+              title="Open full interactive live studio"
+            >
+              <Sparkles size={14} />
+              <span>Interactive Live Studio</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="atv-btn-secondary"
+            onClick={() => window.open(pageId === 'home' ? '/' : `/${slug || pageId}`, '_blank')}
+            title="View live public page"
+            style={{ borderRadius: '8px', padding: '7px 14px', fontSize: '0.82rem' }}
+          >
+            <ExternalLink size={13} />
+            <span>View Live Page</span>
+          </button>
+
+          <button
+            type="button"
+            className="atv-btn-primary"
+            onClick={() => handleSavePage('published')}
+            disabled={saving}
+            style={{ borderRadius: '8px', padding: '7px 18px', fontSize: '0.82rem' }}
+          >
+            <Check size={15} />
+            <span>{saving ? 'Publishing...' : 'Publish Live'}</span>
+          </button>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', padding: '1.75rem 2.5rem 4rem', boxSizing: 'border-box' }}>
+        {/* Segmented Editor Tabs */}
+        <div className="admin-segmented-tabs-bar">
         <button
           type="button"
           className={`admin-nav-tab-item ${activeTab === 'sections' ? 'active' : ''}`}
@@ -709,66 +808,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
          ======================================================== */}
       {activeTab === 'sections' && (
         <div className="section-builder-wrapper">
-          <div className="section-builder-top">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h3 style={{ margin: 0 }}>Page Sections Layout</h3>
-              {saving ? (
-                <span style={{ fontSize: '0.8rem', color: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 650, background: 'rgba(234, 88, 12, 0.1)', padding: '3px 9px', borderRadius: '6px' }}>
-                  <RefreshCw size={12} className="spin-animate" /> Saving to database...
-                </span>
-              ) : (
-                <span style={{ fontSize: '0.8rem', color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 650, background: 'rgba(22, 163, 74, 0.1)', padding: '3px 9px', borderRadius: '6px' }}>
-                  <CheckCircle2 size={13} /> Live Synced
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn-admin-secondary"
-                onClick={() => {
-                  if (pageId === 'home') {
-                    handleOpenWholeHomeStudio();
-                  } else if (sections.length > 0) {
-                    handleOpenLiveEditor(sections[0]);
-                  }
-                }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 700
-                }}
-                title="Launch visual live studio for this page"
-              >
-                <Sparkles size={15} />
-                <span>⚡ Live Studio</span>
-              </button>
-
-              <button
-                type="button"
-                className="btn-admin-secondary"
-                onClick={() => handleSavePage('draft')}
-                disabled={saving}
-              >
-                <span>Save Draft</span>
-              </button>
-
-              <button
-                type="button"
-                className="btn-admin-primary"
-                onClick={() => handleSavePage('published')}
-                disabled={saving}
-              >
-                <CheckCircle2 size={16} />
-                <span>{isLive ? 'Update Published' : 'Publish Live'}</span>
-              </button>
-            </div>
-          </div>
-
           {/* Section Stack */}
           {sections.length === 0 ? (
             <div className="admin-empty-indicator">
@@ -1066,6 +1105,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           </div>
         </div>
       )}
+      </div>
 
       {/* ========================================================
           MODAL 1: ADD SECTION PICKER

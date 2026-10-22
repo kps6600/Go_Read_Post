@@ -8,7 +8,7 @@
     "client": "vite",
     "dev:all": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm:server:dev\" \"npm:client\"",
     "server": "node server/server.js",
-    "server:dev": "node --watch server/server.js",
+    "server:dev": "node --watch-path=server/server.js --watch-path=server/routes --watch-path=server/models --watch-path=server/middleware server/server.js",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

@@ -1172,9 +1172,9 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
                     type="number"
                     min="1"
                     max="20"
-                    placeholder="6"
-                    value={formData.limit || 6}
-                    onChange={(e) => handleChange('limit', parseInt(e.target.value, 10) || 6)}
+                    placeholder="8"
+                    value={formData.limit || 8}
+                    onChange={(e) => handleChange('limit', parseInt(e.target.value, 10) || 8)}
                   />
                 </div>
 
@@ -1243,6 +1243,33 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
                   />
                 </div>
               </div>
+
+              {/* Optional Sidebar Title & Tags (Used on Trending / Feed sidebars) */}
+              {(section.id === 'trending_sidebar' || formData.sidebarTitle || formData.tags) && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-light, #e2e8f0)' }}>
+                  <div className="form-group">
+                    <label>Sidebar Leaderboard Title (e.g. "Trending Now" or "Top 5 Reads")</label>
+                    <input
+                      type="text"
+                      placeholder="Trending Now"
+                      value={formData.sidebarTitle || ''}
+                      onChange={(e) => handleChange('sidebarTitle', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Popular Tags (Comma-separated)</label>
+                    <input
+                      type="text"
+                      placeholder="AI, React, Python, Startups..."
+                      value={Array.isArray(formData.tags) ? formData.tags.join(', ') : (formData.tags || '')}
+                      onChange={(e) => {
+                        const tagsArr = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+                        handleChange('tags', tagsArr);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

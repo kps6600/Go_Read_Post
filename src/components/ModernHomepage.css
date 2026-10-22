@@ -552,37 +552,57 @@
   letter-spacing: 0.02em;
 }
 
-/* ── Latest Blog Grid (Responsive 1-5 columns) ── */
+/* ── Latest Blog Grid (4 cards in one row on desktop/laptop) ── */
 .mhp-blog-cards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+  gap: 1.35rem;
   width: 100%;
 }
 
+.mhp-latest-section .mhp-blog-cards-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
 @media (min-width: 1536px) {
-  .mhp-blog-cards-grid {
-    grid-template-columns: repeat(5, 1fr);
+  .mhp-latest-section .mhp-blog-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.35rem;
   }
 }
 
 @media (max-width: 1200px) {
-  .mhp-blog-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
+  .mhp-blog-cards-grid,
+  .mhp-latest-section .mhp-blog-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.1rem;
+  }
+
+  .mhp-blog-thumb-wrap {
+    height: 190px;
+  }
+
+  .mhp-blog-body {
+    padding: 1.05rem;
+  }
+
+  .mhp-blog-card-title {
+    font-size: 1.04rem;
   }
 }
 
-@media (max-width: 860px) {
-  .mhp-blog-cards-grid {
+@media (max-width: 920px) {
+  .mhp-blog-cards-grid,
+  .mhp-latest-section .mhp-blog-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.15rem;
   }
 }
 
 @media (max-width: 580px) {
-  .mhp-blog-cards-grid {
+  .mhp-blog-cards-grid,
+  .mhp-latest-section .mhp-blog-cards-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
@@ -751,6 +771,9 @@
   margin-top: auto;
   margin-bottom: 0.85rem;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-wrap: nowrap;
 }
 
 [data-theme='dark'] .mhp-blog-author-row {
@@ -776,21 +799,29 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 [data-theme='dark'] .mhp-blog-author-name {
   color: #cbd5e1;
 }
 
+.mhp-blog-date {
+  font-size: 0.78rem;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .mhp-blog-date {
+  color: #94a3b8;
+}
+
 .mhp-meta-sep {
   opacity: 0.6;
   font-size: 0.75rem;
-}
-
-.mhp-meta-readtime {
-  font-size: 0.78rem;
-  opacity: 0.85;
+  flex-shrink: 0;
 }
 
 @media (max-width: 400px) {
