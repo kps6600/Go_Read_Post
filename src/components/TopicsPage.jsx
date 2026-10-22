@@ -66,6 +66,15 @@ const articleMatchesTopic = (article, topic) => {
   const tSlug = (topic.slug || '').toLowerCase().trim();
   const tId = String(topic._id || topic.id || '').toLowerCase().trim();
 
+  // Check article.topicIds
+  if (Array.isArray(article.topicIds)) {
+    const hasIdMatch = article.topicIds.some(tid => {
+      const idStr = String(typeof tid === 'object' ? (tid._id || tid.id) : tid).toLowerCase().trim();
+      return idStr && idStr === tId;
+    });
+    if (hasIdMatch) return true;
+  }
+
   // Check article.topics array
   if (Array.isArray(article.topics)) {
     const hasMatch = article.topics.some(t => {
