@@ -491,13 +491,8 @@ export default function TopicsPage({
         {/* Topic Header Card */}
         {activeTopic && (
           <div className="top-single-header">
-            <div className="top-single-tag-pill">
-              <Hash size={13} />
-              <span>THEMATIC TOPIC</span>
-            </div>
-
             <h1 className="top-single-title">
-              #{activeTopic.name}
+              {activeTopic.name}
             </h1>
 
             {activeTopic.description && (
@@ -762,7 +757,7 @@ export default function TopicsPage({
                 </div>
 
                 <h3 className="top-card-name">
-                  #{topicName}
+                  {topicName}
                 </h3>
 
                 <p className="top-card-desc">
@@ -791,12 +786,12 @@ export default function TopicsPage({
         <div className="top-articles-header">
           <div className="top-articles-title-group">
             <h2 className="top-articles-title">
-              {activeFilterTopic ? `Articles in #${activeFilterTopic.name}` : 'Published Articles & Stories'}
+              {activeFilterTopic ? `Articles in ${activeFilterTopic.name}` : 'Published Articles & Stories'}
             </h2>
 
             {activeFilterTopic && (
               <div className="top-active-filter-pill">
-                <span>Filter: #{activeFilterTopic.name}</span>
+                <span>Filter: {activeFilterTopic.name}</span>
                 <button
                   type="button"
                   className="top-active-filter-clear"
@@ -841,7 +836,7 @@ export default function TopicsPage({
 
         <p className="top-articles-subtext">
           Showing {filteredFeedArticles.length} {filteredFeedArticles.length === 1 ? 'article' : 'articles'} 
-          {activeFilterTopic ? ` tagged with #${activeFilterTopic.name}` : ' across all taxonomy topics'}.
+          {activeFilterTopic ? ` tagged with ${activeFilterTopic.name}` : ' across all taxonomy topics'}.
           {activeFilterTopic && (
             <button
               type="button"
