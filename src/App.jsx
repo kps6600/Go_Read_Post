@@ -1155,11 +1155,41 @@ export default function App() {
             }}
             onShowToast={showToast}
           />
+        ) : (
+          currentRoute.route === 'topics' || 
+          currentRoute.route === 'topic' || 
+          activeCategory === 'topics' || 
+          (activeCategory && activeCategory.startsWith('topic:'))
+        ) && !searchQuery.trim() ? (
+          <TopicsPage 
+            topicSlug={
+              currentRoute.route === 'topic' 
+                ? currentRoute.slug 
+                : (activeCategory && activeCategory.startsWith('topic:') ? activeCategory.replace('topic:', '') : null)
+            }
+            onSelectStory={handleSelectStory}
+            onBackToHome={handleBackToHome}
+            onNavigateTopic={(slug) => {
+              window.history.pushState(null, '', slug ? `/topic/${slug}` : '/topics');
+              setCurrentRoute({ route: slug ? 'topic' : 'topics', slug });
+              setActiveCategory(slug ? `topic:${slug}` : 'topics');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
+            onShareStory={handleShareStory}
+            onShowToast={showToast}
+          />
         ) : (currentRoute.route === 'category' || (
           activeCategory && 
           activeCategory !== 'all' && 
+          !activeCategory.startsWith('topic:') &&
+          !activeCategory.startsWith('tag:') &&
+          !activeCategory.startsWith('author:') &&
+          activeCategory !== 'topics' &&
+          activeCategory !== 'about' &&
           !searchQuery.trim() && 
-          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'brands', 'resources', 'newsletter'].includes(activeCategory)
+          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'brands', 'resources', 'newsletter', 'about', 'topics'].includes(activeCategory)
         )) ? (
           <CategoryContentPage 
             slug={currentRoute.route === 'category' ? (currentRoute.slug || 'content') : activeCategory}
@@ -1179,7 +1209,7 @@ export default function App() {
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
           />
-        ) : (currentRoute.route === 'topic' || currentRoute.route === 'tag' || currentRoute.route === 'author') ? (
+        ) : (currentRoute.route === 'tag' || currentRoute.route === 'author') ? (
           <DynamicEntityPage
             type={currentRoute.route}
             slug={currentRoute.slug}
@@ -1351,20 +1381,7 @@ export default function App() {
             onBackToHome={handleBackToHome}
             onSelectVideo={(video) => setSelectedVideo(video)}
           />
-        ) : (currentRoute.route === 'topics' || currentRoute.route === 'topic' || activeCategory === 'topics') && !searchQuery.trim() ? (
-          <TopicsPage 
-            topicSlug={currentRoute.route === 'topic' ? currentRoute.slug : null}
-            onSelectStory={handleSelectStory}
-            onBackToHome={handleBackToHome}
-            onNavigateTopic={(slug) => {
-              window.history.pushState(null, '', slug ? `/topic/${slug}` : '/topics');
-              window.dispatchEvent(new Event('popstate'));
-            }}
-            isSaved={isSaved}
-            onToggleSave={handleToggleSave}
-            onShareStory={handleShareStory}
-            onShowToast={showToast}
-          />
+
         ) : (currentRoute.route === 'dynamic-page' || sitePages.some(p => {
           const cleanP = (p.slug || '').replace(/^\/+/, '');
           return cleanP === activeCategory || p.id === activeCategory;

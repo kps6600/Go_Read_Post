@@ -26,6 +26,102 @@ export const FAKE_TOPICS_LIST = [
     badge: "Hot"
   },
   {
+    id: "top-dpi",
+    slug: "dpi",
+    name: "Digital Public Infrastructure (DPI)",
+    description: "UPI 2.0 rails, DigiLocker data standards, Account Aggregator frameworks, open health protocols, and sovereign identity stacks transforming Bharat.",
+    category: "Technology",
+    categoryIds: ["Technology"],
+    articleCount: 6,
+    isTrending: true,
+    color: "#2563eb",
+    badge: "Sovereign"
+  },
+  {
+    id: "top-saas-short",
+    slug: "saas",
+    name: "B2B SaaS & Cloud",
+    description: "Net dollar retention benchmarks, developer tooling, Kubernetes-native devops, and cloud optimization architectures.",
+    category: "Enterprise & Cloud",
+    categoryIds: ["Enterprise & Cloud"],
+    articleCount: 6,
+    isTrending: false,
+    color: "#7c3aed",
+    badge: "B2B"
+  },
+  {
+    id: "top-web3-short",
+    slug: "web3",
+    name: "Web3 & Decentralized",
+    description: "Zero-knowledge proofs, real-world asset (RWA) tokenization, decentralized compute networks, and regulatory compliance.",
+    category: "FinTech & Web3",
+    categoryIds: ["FinTech & Web3"],
+    articleCount: 5,
+    isTrending: false,
+    color: "#9333ea",
+    badge: "Crypto"
+  },
+  {
+    id: "top-unicorns",
+    slug: "unicorns",
+    name: "Unicorns & Late Stage",
+    description: "Billion-dollar valuations, private equity secondary liquidity, governance audits, and pre-IPO organizational design.",
+    category: "Markets & Capital",
+    categoryIds: ["Markets & Capital"],
+    articleCount: 6,
+    isTrending: true,
+    color: "#059669",
+    badge: "Scale"
+  },
+  {
+    id: "top-ipo",
+    slug: "ipo",
+    name: "IPO & Public Markets",
+    description: "Draft Red Herring Prospectus (DRHP) analyses, anchor investor allocations, post-listing earnings audits, and retail subscriptions.",
+    category: "Markets & Capital",
+    categoryIds: ["Markets & Capital"],
+    articleCount: 5,
+    isTrending: true,
+    color: "#ea580c",
+    badge: "Public"
+  },
+  {
+    id: "top-seed",
+    slug: "seed-funding",
+    name: "Early-Stage Seed & Pre-A",
+    description: "First institutional capital, angel syndicates, minimum viable product audits, and pre-seed founder playbooks.",
+    category: "Markets & Capital",
+    categoryIds: ["Markets & Capital"],
+    articleCount: 5,
+    isTrending: false,
+    color: "#d97706",
+    badge: "Seed"
+  },
+  {
+    id: "top-compute",
+    slug: "compute",
+    name: "Sovereign Compute & Chips",
+    description: "Sovereign wafer fabrication facilities, RISC-V open architecture silicon, packaging testing units, and design talent.",
+    category: "AI & DeepTech",
+    categoryIds: ["AI & DeepTech"],
+    articleCount: 5,
+    isTrending: true,
+    color: "#475569",
+    badge: "Hardware"
+  },
+  {
+    id: "top-cyber-short",
+    slug: "cyber",
+    name: "Cybersecurity & Defense Tech",
+    description: "Zero-trust network architectures, LLM jailbreak defense, sovereign cloud cryptography, and critical infrastructure resilience.",
+    category: "Enterprise & Cloud",
+    categoryIds: ["Enterprise & Cloud"],
+    articleCount: 5,
+    isTrending: false,
+    color: "#0891b2",
+    badge: "Defense"
+  },
+  {
     id: "top-fintech",
     slug: "fintech",
     name: "FinTech & Payments",
@@ -242,8 +338,8 @@ export const FAKE_TOPIC_ARTICLES = [
     title: "How Cross-Border UPI Is Dismantling Legacy SWIFT Fees Across Southeast Asia",
     summary: "Real-time rupee settlement between domestic payment banks and bilateral counterparts is turning remittance into a zero-spread commodity.",
     category: "FinTech & Web3",
-    topics: ["FinTech & Payments", "Web3 & Tokenomics"],
-    tags: ["fintech", "payments", "upi", "banking"],
+    topics: ["FinTech & Payments", "Web3 & Tokenomics", "Digital Public Infrastructure (DPI)", "dpi"],
+    tags: ["fintech", "payments", "upi", "banking", "dpi"],
     author: {
       name: "Kunal Mehra",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
@@ -255,6 +351,26 @@ export const FAKE_TOPIC_ARTICLES = [
     publishedAt: "2026-10-18T09:00:00.000Z",
     readTime: "6 min read",
     views: 18400
+  },
+  {
+    id: "art-top-dpi",
+    slug: "india-stack-dpi-global-export-revolution",
+    title: "The India Stack Blueprint: How DPI Is Powering Real-Time Identity, Payments & Health",
+    summary: "From UPI transactions crossing 15 billion a month to DigiLocker and ONDC, how Digital Public Infrastructure became the world's most replicated sovereign software stack.",
+    category: "Technology",
+    topics: ["Digital Public Infrastructure (DPI)", "dpi", "FinTech & Payments", "Sovereign AI"],
+    tags: ["dpi", "digital-infrastructure", "upi", "fintech", "technology"],
+    author: {
+      name: "Kunal Mehra",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+      role: "Senior FinTech Bureau"
+    },
+    featuredImage: {
+      url: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop&q=80"
+    },
+    publishedAt: "2026-10-21T08:00:00.000Z",
+    readTime: "8 min read",
+    views: 26800
   },
   {
     id: "art-top-04",
