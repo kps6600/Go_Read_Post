@@ -1308,13 +1308,13 @@ export default function LiveHomepageStudio({
                                   </div>
 
                                   <div className="mhp-blog-body">
-                                    <h3 className="mhp-blog-card-title">{artTitle}</h3>
-                                    {art.excerpt && <p className="mhp-blog-excerpt">{art.excerpt}</p>}
                                     <div className="mhp-blog-author-row">
                                       <span className="mhp-blog-author-name">{artAuthor}</span>
                                       <span className="mhp-meta-sep">•</span>
                                       <span>{artDate}</span>
                                     </div>
+                                    <h3 className="mhp-blog-card-title">{artTitle}</h3>
+                                    {art.excerpt && <p className="mhp-blog-excerpt">{art.excerpt}</p>}
                                     <div className="mhp-blog-footer-row">
                                       <span className="mhp-blog-readmore-btn">
                                         <span>READ MORE</span>

@@ -502,18 +502,6 @@ export default function ModernHomepageView({
           {badgeNode}
         </div>
         <div className="mhp-blog-body">
-          <h3 
-            className="mhp-blog-card-title"
-            onClick={() => onSelectStory && onSelectStory(blog)}
-          >
-            {blogTitle}
-          </h3>
-          {blogExcerpt && (
-            <p className="mhp-blog-excerpt">
-              {blogExcerpt}
-            </p>
-          )}
-
           <div className="mhp-blog-author-row">
             <img 
               src={blogAvatar} 
@@ -528,6 +516,18 @@ export default function ModernHomepageView({
             <span className="mhp-meta-sep">•</span>
             <span className="mhp-blog-date">{blogDate}</span>
           </div>
+
+          <h3 
+            className="mhp-blog-card-title"
+            onClick={() => onSelectStory && onSelectStory(blog)}
+          >
+            {blogTitle}
+          </h3>
+          {blogExcerpt && (
+            <p className="mhp-blog-excerpt">
+              {blogExcerpt}
+            </p>
+          )}
 
           <div className="mhp-blog-footer-row">
             <button 
