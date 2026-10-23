@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Bookmark, Share2, Volume2, Play, Pause, 
   MessageSquare, ThumbsUp, Send, Copy, Sparkles,
@@ -93,7 +93,7 @@ export default function ArticleReaderModal({
       particleCount: 45,
       spread: 65,
       origin: { y: 0.8 },
-      colors: ['#ea580c', '#f97316', '#fb923c', '#e11d48', '#38bdf8']
+      colors: ['#ea580c', '#f97316', '#fb923c', '#dc2626', '#38bdf8']
     });
   };
 

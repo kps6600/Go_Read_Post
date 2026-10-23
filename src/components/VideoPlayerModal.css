@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    ULTRA-PREMIUM CINEMA VIDEO PLAYER & THEATER MODE (.cvp-*)
    ========================================================================== */
 
@@ -110,7 +110,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffffff;
-  background: #e11d48;
+  background: #dc2626;
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
 }
@@ -148,8 +148,8 @@
 }
 
 .cvp-header-action-btn.active {
-  background: rgba(225, 29, 72, 0.18);
-  border-color: rgba(225, 29, 72, 0.4);
+  background: rgba(220, 38, 38, 0.18);
+  border-color: rgba(220, 38, 38, 0.4);
   color: #fca5a5;
 }
 
@@ -167,8 +167,8 @@
 }
 
 .cvp-close-btn:hover {
-  background: #e11d48;
-  border-color: #e11d48;
+  background: #dc2626;
+  border-color: #dc2626;
   color: #ffffff;
 }
 
@@ -192,7 +192,7 @@
 .cvp-ambient-glow-layer {
   position: absolute;
   inset: -10px;
-  background: radial-gradient(circle at 50% 40%, rgba(225, 29, 72, 0.25) 0%, rgba(56, 189, 248, 0.16) 40%, transparent 70%);
+  background: radial-gradient(circle at 50% 40%, rgba(220, 38, 38, 0.25) 0%, rgba(56, 189, 248, 0.16) 40%, transparent 70%);
   filter: blur(45px);
   pointer-events: none;
   z-index: 0;
@@ -256,8 +256,8 @@
 }
 
 .cvp-act-pill.liked {
-  background: rgba(225, 29, 72, 0.22);
-  border-color: rgba(225, 29, 72, 0.5);
+  background: rgba(220, 38, 38, 0.22);
+  border-color: rgba(220, 38, 38, 0.5);
   color: #fda4af;
 }
 
@@ -332,7 +332,7 @@
   height: 54px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e11d48;
+  border: 2px solid #dc2626;
   flex-shrink: 0;
 }
 
@@ -413,8 +413,8 @@
 
 .cvp-tab-btn.active {
   color: #ffffff;
-  background: rgba(225, 29, 72, 0.15);
-  border-color: rgba(225, 29, 72, 0.35);
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.35);
 }
 
 /* Tab Bodies */
@@ -467,8 +467,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(225, 29, 72, 0.2);
-  color: #f43f5e;
+  background: rgba(220, 38, 38, 0.2);
+  color: #ef4444;
   font-size: 0.74rem;
   font-weight: 850;
   display: flex;
@@ -540,15 +540,15 @@
 }
 
 .cvp-chapter-row.selected {
-  background: rgba(225, 29, 72, 0.15);
-  border-color: rgba(225, 29, 72, 0.4);
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.4);
 }
 
 .cvp-chapter-time-pill {
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
-  background: rgba(225, 29, 72, 0.2);
-  color: #f43f5e;
+  background: rgba(220, 38, 38, 0.2);
+  color: #ef4444;
   font-size: 0.8rem;
   font-weight: 750;
   font-family: monospace;
@@ -585,7 +585,7 @@
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 3px solid #e11d48;
+  border-left: 3px solid #dc2626;
 }
 
 .cvp-quote-speaker-bar {
@@ -635,7 +635,7 @@
 }
 
 .cvp-comment-input:focus {
-  border-color: #e11d48;
+  border-color: #dc2626;
 }
 
 .cvp-comment-btn-row {
@@ -656,7 +656,7 @@
   gap: 0.4rem;
   padding: 0.45rem 1rem;
   border-radius: 8px;
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
   border: none;
   font-size: 0.8rem;
@@ -666,7 +666,7 @@
 }
 
 .cvp-comment-submit-btn:hover {
-  background: #f43f5e;
+  background: #ef4444;
 }
 
 .cvp-comments-list {
@@ -688,7 +688,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 800;
@@ -838,7 +838,7 @@
 }
 
 .cvp-toggle-switch input:checked + .cvp-toggle-slider {
-  background: #e11d48;
+  background: #dc2626;
 }
 
 .cvp-toggle-switch input:checked + .cvp-toggle-slider:before {
@@ -931,7 +931,7 @@
 
 .cvp-queue-series-tag {
   font-size: 0.68rem;
-  color: #f43f5e;
+  color: #ef4444;
   font-weight: 750;
   text-transform: uppercase;
   display: block;

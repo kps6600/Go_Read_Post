@@ -11,8 +11,8 @@ export default function BrandsHubPage({ onBackToHome, onNavigateBrand }) {
       name: 'AIStory',
       tagline: 'GenAI, Sovereign Compute & Frontier Tech',
       desc: 'Dedicated daily coverage of foundational AI models, agentic workflows, semiconductor roadmaps, and the Indian deeptech builders competing on the global stage.',
-      color: '#0284c7',
-      bg: '#f0f9ff',
+      color: '#dc2626',
+      bg: '#fee2e2',
       icon: Cpu,
       stats: '450+ Stories • Daily AI Dispatch',
       leadStory: 'From Krutrim to Sarvam: Inside India’s Race to Build Indic Language Foundation Models',
@@ -71,8 +71,8 @@ export default function BrandsHubPage({ onBackToHome, onNavigateBrand }) {
       name: 'YS हिंदी',
       tagline: 'भारत का सबसे भरोसेमंद स्टार्टअप और बिज़नेस मंच',
       desc: 'भारतीय भाषा में संपूर्ण स्टार्टअप, बिज़नेस, फंडिंग और उद्यमिता का विश्वसनीय मंच। हर रोज़ लाखों हिंदी पाठकों तक पहुंचता समाचार।',
-      color: '#ea580c',
-      bg: '#fff7ed',
+      color: '#dc2626',
+      bg: '#fee2e2',
       icon: Languages,
       stats: '2,500+ हिंदी लेख • देश भर में पाठक',
       leadStory: 'छोटे शहरों से उभरे 10 स्टार्टअप जिन्होंने बदली भारतीय बाज़ार की तस्वीर',
@@ -89,7 +89,7 @@ export default function BrandsHubPage({ onBackToHome, onNavigateBrand }) {
           <span>Back to Frontpage</span>
         </button>
         <div className="bhp-badge-top">
-          <Layers size={14} color="#e11d48" />
+          <Layers size={14} color="#dc2626" />
           <span>EDITORIAL NETWORK • 6 SPECIALIZED VERTICALS</span>
         </div>
       </div>

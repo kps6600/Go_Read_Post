@@ -1377,6 +1377,17 @@ export default function LiveArticleStudio({
                   {liveArticle.categoryName}
                 </div>
 
+                {/* Featured Cover Banner */}
+                {liveArticle.image && (
+                  <div className="map-hero-wrapper" style={{ margin: '1.25rem 0' }}>
+                    <img 
+                      src={liveArticle.image} 
+                      alt={liveArticle.title} 
+                      className="map-hero-img"
+                    />
+                  </div>
+                )}
+
                 {/* Article Headline */}
                 <h1 className="map-title" title={liveArticle.title} style={{ whiteSpace: 'normal' }}>
                   {liveArticle.title}
@@ -1387,22 +1398,6 @@ export default function LiveArticleStudio({
                   <p className="map-subtitle">
                     {liveArticle.subtitle}
                   </p>
-                )}
-
-                {/* Featured Cover Banner */}
-                {liveArticle.image && (
-                  <div className="map-hero-wrapper" style={{ margin: '1.25rem 0' }}>
-                    <img 
-                      src={liveArticle.image} 
-                      alt={liveArticle.title} 
-                      className="map-hero-img"
-                    />
-                    {liveArticle.photoCredit && (
-                      <p className="map-hero-caption">
-                        {liveArticle.photoCredit}
-                      </p>
-                    )}
-                  </div>
                 )}
 
                 {/* Author Cluster & Date */}

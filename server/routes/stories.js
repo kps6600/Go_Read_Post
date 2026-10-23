@@ -31,8 +31,22 @@ export function mapArticleToStory(art) {
   else if (a.isTrending) tag = 'TRENDING';
   else if (a.isEditorsPick) tag = "EDITOR'S PICK";
 
-  const catName = a.categoryName || a.category || 'Startups';
-  const catSlug = (catName || 'startups').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const isHexId = (v) => typeof v === 'string' && /^[0-9a-fA-F]{24}$/.test(v.trim());
+  let catName = a.categoryName;
+  if (!catName || isHexId(catName)) {
+    if (a.category && typeof a.category === 'object' && a.category.name && !isHexId(a.category.name)) {
+      catName = a.category.name;
+    } else if (typeof a.category === 'string' && a.category.trim() && !isHexId(a.category)) {
+      catName = a.category;
+    } else if (Array.isArray(a.topics) && a.topics[0] && !isHexId(a.topics[0])) {
+      catName = a.topics[0];
+    } else if (Array.isArray(a.tags) && a.tags[0] && !isHexId(a.tags[0])) {
+      catName = a.tags[0];
+    } else {
+      catName = 'Technology';
+    }
+  }
+  const catSlug = (catName || 'technology').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
   return {
     _id: a._id ? String(a._id) : ('story_' + (a.slug || Date.now())),

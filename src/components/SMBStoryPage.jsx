@@ -194,7 +194,7 @@ export default function SMBStoryPage({
                 <div className="smb-author-name-row">
                   <span className="smb-author-fullname">{story.author}</span>
                   <span className="smb-author-verified-badge" title="SMBStory Verified Editor">
-                    <CheckCircle size={13} fill="#ea580c" color="#ffffff" />
+                    <CheckCircle size={13} fill="#dc2626" color="#ffffff" />
                   </span>
                 </div>
                 <div className="smb-author-submeta">
@@ -227,7 +227,7 @@ export default function SMBStoryPage({
                 onClick={handleClap}
                 title="Applaud story"
               >
-                <Heart size={14} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                <Heart size={14} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                 <span>{likeCount}</span>
               </button>
 
@@ -247,7 +247,7 @@ export default function SMBStoryPage({
                 onClick={() => onToggleSave && onToggleSave(story)}
                 title={isArticleSaved ? 'Saved in Bookmarks' : 'Save for later'}
               >
-                <Bookmark size={14} fill={isArticleSaved ? '#ea580c' : 'none'} color={isArticleSaved ? '#ea580c' : 'currentColor'} />
+                <Bookmark size={14} fill={isArticleSaved ? '#dc2626' : 'none'} color={isArticleSaved ? '#dc2626' : 'currentColor'} />
                 <span>{isArticleSaved ? 'Saved' : 'Save'}</span>
               </button>
             </div>
@@ -263,7 +263,7 @@ export default function SMBStoryPage({
               loading="eager"
             />
             <div className="smb-hero-floating-badge">
-              <Award size={14} color="#ea580c" />
+              <Award size={14} color="#dc2626" />
               <span>{story.heroBadgeText}</span>
             </div>
             <div className="smb-hero-media-caption">
@@ -351,7 +351,7 @@ export default function SMBStoryPage({
                 {story.pullquoteText}
               </blockquote>
               <div className="smb-pullquote-author-row">
-                <div className="smb-mindset-avatar-badge" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}>
+                <div className="smb-mindset-avatar-badge" style={{ background: 'linear-gradient(135deg, #f97316, #dc2626)' }}>
                   {getInitials(story.pullquoteAuthor)}
                 </div>
                 <div>
@@ -442,7 +442,7 @@ export default function SMBStoryPage({
                     <span className="smb-bio-role">{story.role}</span>
                   </div>
                   <span className="smb-verified-badge-pill">
-                    <CheckCircle size={12} fill="#ea580c" color="#ffffff" />
+                    <CheckCircle size={12} fill="#dc2626" color="#ffffff" />
                     Verified Desk
                   </span>
                 </div>
@@ -460,7 +460,7 @@ export default function SMBStoryPage({
                   className={`smb-clap-btn ${liked ? 'active' : ''}`}
                   onClick={handleClap}
                 >
-                  <Heart size={18} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                  <Heart size={18} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                   <span>{liked ? 'Applauded' : 'Clap for Story'}</span>
                   <span className="smb-clap-counter">{likeCount}</span>
                 </button>
@@ -479,7 +479,7 @@ export default function SMBStoryPage({
                   className={`smb-secondary-action-btn ${isArticleSaved ? 'saved' : ''}`}
                   onClick={() => onToggleSave && onToggleSave(story)}
                 >
-                  <Bookmark size={16} fill={isArticleSaved ? '#ea580c' : 'none'} color={isArticleSaved ? '#ea580c' : 'currentColor'} />
+                  <Bookmark size={16} fill={isArticleSaved ? '#dc2626' : 'none'} color={isArticleSaved ? '#dc2626' : 'currentColor'} />
                   <span>{isArticleSaved ? 'Bookmarked' : 'Bookmark'}</span>
                 </button>
               </div>
@@ -548,7 +548,7 @@ export default function SMBStoryPage({
                         title={isItemSaved ? 'Saved' : 'Save'}
                         aria-label="Bookmark"
                       >
-                        <Bookmark size={14} fill={isItemSaved ? '#ea580c' : 'none'} color={isItemSaved ? '#ea580c' : 'white'} />
+                        <Bookmark size={14} fill={isItemSaved ? '#dc2626' : 'none'} color={isItemSaved ? '#dc2626' : 'white'} />
                       </button>
                     </div>
 

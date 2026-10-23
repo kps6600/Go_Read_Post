@@ -1,7 +1,7 @@
-/* ==========================================================================
-   GOREADPOST ABOUT US - CLEAN EDITORIAL DESIGN
-   Pure solid text colors and neutral buttons matching the previous page.
-   Zero neon/multi-color gradients.
+﻿/* ==========================================================================
+   GOREADPOST ABOUT US - PREMIUM EDITORIAL DESIGN
+   "Welcome to Our Blog — Ideas, Stories & Inspiration"
+   Clean typography, smooth card interactions, responsive layout.
    ========================================================================== */
 
 .nexus-about-root {
@@ -22,10 +22,10 @@
   top: -60px;
   left: 50%;
   transform: translateX(-50%);
-  width: 900px;
-  max-width: 100vw;
+  width: 100vw;
+  max-width: 100%;
   height: 520px;
-  background: radial-gradient(ellipse 65% 50% at 50% 15%, rgba(234, 88, 12, 0.09) 0%, rgba(225, 29, 72, 0.045) 45%, transparent 75%);
+  background: radial-gradient(ellipse 70% 50% at 50% 15%, rgba(220, 38, 38, 0.08) 0%, rgba(220, 38, 38, 0.03) 45%, transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
@@ -38,7 +38,7 @@
   left: 0;
   right: 0;
   height: 560px;
-  background-image: radial-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px);
   background-size: 26px 26px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
@@ -52,37 +52,72 @@
 }
 
 [data-theme='dark'] .nexus-about-root::before {
-  background: radial-gradient(ellipse 65% 50% at 50% 15%, rgba(249, 115, 22, 0.16) 0%, rgba(225, 29, 72, 0.08) 50%, transparent 80%);
+  background: radial-gradient(ellipse 65% 50% at 50% 15%, rgba(220, 38, 38, 0.14) 0%, rgba(220, 38, 38, 0.05) 50%, transparent 80%);
 }
 
 [data-theme='dark'] .nexus-about-root::after {
   background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
-/* Zero background glow blobs */
-.nexus-glow-mesh {
-  display: none !important;
-}
-
-/* ── Container (100% Full Breadth) ── */
+/* ── Container ── */
 .nexus-about-container {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 3.5rem 3.5rem 7.5rem;
+  padding: 3.5rem clamp(1.5rem, 4vw, 4rem) 6.5rem;
   display: flex;
   flex-direction: column;
-  gap: 5.5rem;
+  gap: 5rem;
   box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .nexus-about-container {
-    padding: 2.25rem 1.25rem 5rem;
-    gap: 4rem;
+    padding: 2.25rem 1rem 4.5rem;
+    gap: 3.5rem;
   }
+}
+
+/* ── Common Section Headers ── */
+.nexus-section {
+  width: 100%;
+}
+
+.nexus-section-header {
+  text-align: center;
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto 2.5rem;
+}
+
+.nexus-sub-badge {
+  display: none !important;
+}
+
+.nexus-section-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.6rem);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+  line-height: 1.22;
+  color: #0f172a;
+  margin: 0 0 0.75rem;
+}
+
+[data-theme='dark'] .nexus-section-title {
+  color: #ffffff;
+}
+
+.nexus-section-intro {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #64748b;
+  margin: 0 auto;
+}
+
+[data-theme='dark'] .nexus-section-intro {
+  color: #94a3b8;
 }
 
 /* ── 1. Hero Section ── */
@@ -92,100 +127,137 @@
   align-items: center;
   text-align: center;
   width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1rem 1rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 1.5rem 0 0;
 }
 
-/* Eyebrow Badge */
 .nexus-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(234, 88, 12, 0.07);
-  border: 1px solid rgba(234, 88, 12, 0.22);
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.22);
   border-radius: 9999px;
   padding: 6px 16px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 750;
   letter-spacing: 0.1em;
-  color: #ea580c;
+  color: #dc2626;
   text-transform: uppercase;
   margin-bottom: 1.75rem;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.06);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 [data-theme='dark'] .nexus-hero-badge {
-  background: rgba(234, 88, 12, 0.14);
-  border-color: rgba(234, 88, 12, 0.32);
-  color: #fb923c;
-  box-shadow: 0 2px 14px rgba(234, 88, 12, 0.16);
+  background: rgba(220, 38, 38, 0.16);
+  border-color: rgba(220, 38, 38, 0.35);
+  color: #f87171;
 }
 
 .nexus-hero-badge-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #ea580c;
-  box-shadow: 0 0 8px #ea580c;
+  background: #dc2626;
+  box-shadow: 0 0 8px #dc2626;
 }
 
 [data-theme='dark'] .nexus-hero-badge-dot {
-  background: #fb923c;
-  box-shadow: 0 0 8px #fb923c;
-}
-
-.nexus-hero-badge-icon {
-  color: #ea580c;
-}
-
-[data-theme='dark'] .nexus-hero-badge-icon {
-  color: #fb923c;
+  background: #f87171;
+  box-shadow: 0 0 8px #f87171;
 }
 
 .nexus-hero-title {
-  font-size: clamp(2.5rem, 5.2vw, 4.4rem);
+  font-size: clamp(2.3rem, 4.8vw, 3.8rem);
   font-weight: 850;
-  line-height: 1.14;
-  letter-spacing: -0.038em;
+  line-height: 1.16;
+  letter-spacing: -0.035em;
   color: #0f172a;
   margin: 0 0 1.5rem;
-  max-width: 880px;
-}
-
-@media (max-width: 640px) {
-  .nexus-hero-br {
-    display: none;
-  }
+  width: 100%;
+  max-width: 100%;
 }
 
 [data-theme='dark'] .nexus-hero-title {
-  color: #f8fafc;
+  color: #ffffff;
 }
 
-/* Vibrant Editorial Sunset / Crimson Gradient Text */
 .nexus-gradient-text {
-  background: linear-gradient(135deg, #ea580c 0%, #e11d48 52%, #9333ea 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  display: inline-block;
-  padding-bottom: 2px;
+  color: #dc2626;
+  display: inline;
 }
 
-.nexus-hero-subtitle {
-  font-size: clamp(1.02rem, 1.6vw, 1.18rem);
-  line-height: 1.72;
+[data-theme='dark'] .nexus-gradient-text {
+  color: #f87171;
+}
+
+.nexus-hero-lead {
+  font-size: clamp(1.05rem, 1.7vw, 1.24rem);
+  line-height: 1.75;
   color: #475569;
-  max-width: 680px;
-  margin: 0 auto 2.25rem;
-  font-weight: 450;
+  max-width: 1200px;
+  margin: 0 auto 1.75rem;
+  font-weight: 400;
 }
 
-[data-theme='dark'] .nexus-hero-subtitle {
+[data-theme='dark'] .nexus-hero-lead {
   color: #94a3b8;
+}
+
+/* Mission Callout Box - Modern Editorial Card */
+.nexus-mission-callout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #dc2626;
+  border-radius: 14px;
+  padding: 1.25rem 2rem;
+  margin: 0 auto 2.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  text-align: left;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.nexus-mission-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.08);
+  border-color: #cbd5e1;
+  border-left-color: #dc2626;
+}
+
+[data-theme='dark'] .nexus-mission-callout {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #dc2626;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-mission-text {
+  font-size: 1.04rem;
+  line-height: 1.68;
+  color: #334155;
+  margin: 0;
+}
+
+[data-theme='dark'] .nexus-mission-text {
+  color: #cbd5e1;
+}
+
+.nexus-mission-highlight {
+  color: #dc2626;
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+[data-theme='dark'] .nexus-mission-highlight {
+  color: #f87171;
 }
 
 .nexus-hero-actions {
@@ -194,50 +266,49 @@
   gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 2.75rem;
 }
 
-/* Gradient Primary Action Button */
+/* Primary Action Button */
 .nexus-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #ef4444 50%, #dc2626 100%);
   color: #ffffff !important;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   font-weight: 700;
-  padding: 13px 28px;
+  padding: 12px 26px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   cursor: pointer;
-  box-shadow: 0 4px 18px rgba(234, 88, 12, 0.32), 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(220, 38, 38, 0.32);
+  transition: all 0.25s ease;
 }
 
 .nexus-btn-primary:hover {
-  background: linear-gradient(135deg, #c2410c 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #dc2626 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.42), 0 3px 6px rgba(0, 0, 0, 0.08);
-}
-
-.nexus-btn-primary:hover .nexus-btn-arrow {
-  transform: translateY(2px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45);
 }
 
 .nexus-btn-arrow {
-  transition: transform 0.22s ease;
+  transition: transform 0.2s ease;
 }
 
-/* Glassmorphic Secondary Button */
+.nexus-btn-primary:hover .nexus-btn-arrow {
+  transform: translateX(3px);
+}
+
+/* Secondary Button */
 .nexus-btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   background: #ffffff;
   color: #0f172a;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   font-weight: 650;
-  padding: 13px 26px;
+  padding: 12px 24px;
   border-radius: 9999px;
   border: 1.5px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -254,7 +325,7 @@
 
 .nexus-btn-secondary:hover {
   background: #f8fafc;
-  color: #ea580c;
+  color: #dc2626;
   border-color: #cbd5e1;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
@@ -262,551 +333,636 @@
 
 [data-theme='dark'] .nexus-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: #fb923c;
-  border-color: rgba(234, 88, 12, 0.5);
+  color: #f87171;
+  border-color: rgba(220, 38, 38, 0.5);
 }
 
-/* ── Hero Social Proof / Trust Bar ── */
-.nexus-hero-trust-bar {
-  display: inline-flex;
-  align-items: center;
-  gap: 20px;
+/* ── 2. Who We Are Section ── */
+.nexus-who-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  padding: 9px 22px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  flex-wrap: wrap;
-  justify-content: center;
+  border-radius: 18px;
+  padding: 2.75rem 3rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-[data-theme='dark'] .nexus-hero-trust-bar {
-  background: rgba(15, 23, 42, 0.7);
+[data-theme='dark'] .nexus-who-card {
+  background: #111827;
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
-.nexus-trust-item {
+.nexus-who-content {
+  font-size: 1.15rem;
+  line-height: 1.85;
+  color: #334155;
+  margin: 0 0 2rem;
+}
+
+[data-theme='dark'] .nexus-who-content {
+  color: #cbd5e1;
+}
+
+.nexus-who-traits {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.84rem;
-  color: #475569;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-[data-theme='dark'] .nexus-trust-item {
-  color: #94a3b8;
-}
-
-.nexus-trust-item strong {
-  color: #0f172a;
-  font-weight: 750;
-}
-
-[data-theme='dark'] .nexus-trust-item strong {
-  color: #f8fafc;
-}
-
-.nexus-trust-bullet {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ea580c;
-  box-shadow: 0 0 6px rgba(234, 88, 12, 0.6);
-}
-
-.nexus-trust-sep {
-  width: 1px;
-  height: 16px;
-  background: #e2e8f0;
-}
-
-[data-theme='dark'] .nexus-trust-sep {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-@media (max-width: 640px) {
-  .nexus-hero-trust-bar {
-    border-radius: 16px;
-    padding: 10px 16px;
-    gap: 12px;
-  }
-  .nexus-trust-sep {
-    display: none;
-  }
-}
-
-/* ── 2. "Who We Are" Split Section ── */
-.nexus-who-section {
-  width: 100%;
-}
-
-.nexus-who-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 4.5rem;
+.nexus-trait-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .nexus-trait-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+.nexus-trait-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+}
+
+[data-theme='dark'] .nexus-trait-pill:hover {
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #f87171;
+}
+
+.nexus-trait-icon {
+  color: #dc2626;
+}
+
+[data-theme='dark'] .nexus-trait-icon {
+  color: #f87171;
+}
+
+/* ── 3. What We Share 4-Card Grid ── */
+.nexus-share-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
 }
 
 @media (max-width: 990px) {
-  .nexus-who-grid {
-    grid-template-columns: 1fr;
-    gap: 3.5rem;
+  .nexus-share-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-}
-
-.nexus-who-title {
-  font-size: clamp(2rem, 3.8vw, 3.15rem);
-  font-weight: 850;
-  line-height: 1.18;
-  letter-spacing: -0.025em;
-  color: #0f172a;
-  margin: 0 0 1.75rem;
-}
-
-[data-theme='dark'] .nexus-who-title {
-  color: #ffffff;
-}
-
-/* Solid text color matching previous page */
-.nexus-teal-gradient {
-  color: #0f172a;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: initial !important;
-  display: inline;
-}
-
-[data-theme='dark'] .nexus-teal-gradient {
-  color: #ffffff;
-}
-
-.nexus-who-p {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: #475569;
-  margin: 0 0 1.25rem;
-}
-
-[data-theme='dark'] .nexus-who-p {
-  color: #94a3b8;
-}
-
-.nexus-highlight-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-top: 2.25rem;
 }
 
 @media (max-width: 600px) {
-  .nexus-highlight-row {
+  .nexus-share-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.nexus-highlight-card {
+.nexus-share-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] .nexus-share-card {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nexus-share-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+[data-theme='dark'] .nexus-share-card:hover {
+  border-color: rgba(220, 38, 38, 0.4);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Top Accent line - unified RED for all cards */
+.nexus-share-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  border-radius: 3px;
+  background: #dc2626;
+}
+
+.nexus-share-card-title {
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0 0 0.65rem;
+}
+
+[data-theme='dark'] .nexus-share-card-title {
+  color: #ffffff;
+}
+
+.nexus-share-card-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .nexus-share-card-desc {
+  color: #94a3b8;
+}
+
+/* ── 4. Mission & Vision Dual Grid ── */
+.nexus-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 800px) {
+  .nexus-dual-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nexus-dual-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 2.75rem 2.25rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.035);
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme='dark'] .nexus-dual-card {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-mission-card,
+.nexus-vision-card {
+  border-left: 4px solid #dc2626;
+}
+
+.nexus-mission-card .nexus-dual-badge,
+.nexus-vision-card .nexus-dual-badge {
+  color: #dc2626;
+}
+
+[data-theme='dark'] .nexus-mission-card .nexus-dual-badge,
+[data-theme='dark'] .nexus-vision-card .nexus-dual-badge {
+  color: #f87171;
+}
+
+.nexus-dual-title {
+  font-size: 1.65rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin: 0 0 1rem;
+}
+
+[data-theme='dark'] .nexus-dual-title {
+  color: #ffffff;
+}
+
+.nexus-dual-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #475569;
+  margin: 0;
+}
+
+[data-theme='dark'] .nexus-dual-desc {
+  color: #94a3b8;
+}
+
+/* ── 5. Why Choose Us ── */
+.nexus-why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .nexus-why-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nexus-why-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 1.35rem 1.5rem;
-  box-shadow: 0 4px 14px -3px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.22s ease;
 }
 
-[data-theme='dark'] .nexus-highlight-card {
+[data-theme='dark'] .nexus-why-card {
   background: #111827;
-  border-color: #1f2937;
-  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.nexus-highlight-card:hover {
+.nexus-why-card:hover {
   transform: translateY(-2px);
-  border-color: #cbd5e1;
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.08);
 }
 
-.nexus-highlight-card.card-cyan-accent,
-.nexus-highlight-card.card-magenta-accent {
-  border-left: 3.5px solid #0f172a;
+[data-theme='dark'] .nexus-why-card:hover {
+  border-color: rgba(220, 38, 38, 0.35);
 }
 
-[data-theme='dark'] .nexus-highlight-card.card-cyan-accent,
-[data-theme='dark'] .nexus-highlight-card.card-magenta-accent {
-  border-left-color: #ffffff;
-}
-
-.nexus-highlight-title {
-  font-size: 1.05rem;
-  font-weight: 750;
-  color: #0f172a;
-  margin: 0 0 0.45rem;
-}
-
-[data-theme='dark'] .nexus-highlight-title {
-  color: #ffffff;
-}
-
-.nexus-highlight-desc {
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: #64748b;
-  margin: 0;
-}
-
-[data-theme='dark'] .nexus-highlight-desc {
-  color: #94a3b8;
-}
-
-/* Values Card */
-.nexus-values-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 2.5rem 2.25rem;
-  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-}
-
-[data-theme='dark'] .nexus-values-card {
-  background: #111827;
-  border-color: #1f2937;
-  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.5);
-}
-
-.nexus-value-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.nexus-value-icon-box {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-}
-
-[data-theme='dark'] .nexus-value-icon-box {
-  background: #1e293b;
-  color: #ffffff;
-  border-color: #334155;
-}
-
-.nexus-value-content {
-  flex: 1;
-}
-
-.nexus-value-title {
-  font-size: 1.15rem;
-  font-weight: 750;
-  color: #0f172a;
-  margin: 0 0 0.45rem;
-}
-
-[data-theme='dark'] .nexus-value-title {
-  color: #ffffff;
-}
-
-.nexus-value-desc {
-  font-size: 0.93rem;
-  line-height: 1.65;
-  color: #475569;
-  margin: 0;
-}
-
-[data-theme='dark'] .nexus-value-desc {
-  color: #94a3b8;
-}
-
-.nexus-value-divider {
-  height: 1px;
-  background: #f1f5f9;
-}
-
-[data-theme='dark'] .nexus-value-divider {
-  background: #1f2937;
-}
-
-/* ── 3. Impact Metrics Bar ── */
-.nexus-stats-section {
-  width: 100%;
-}
-
-.nexus-stats-bar {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 3rem 2.5rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  text-align: center;
-  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme='dark'] .nexus-stats-bar {
-  background: #111827;
-  border-color: #1f2937;
-  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.45);
-}
-
-@media (max-width: 900px) {
-  .nexus-stats-bar {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem 1.5rem;
-  }
-}
-
-@media (max-width: 500px) {
-  .nexus-stats-bar {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-.nexus-stat-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.nexus-stat-num {
-  font-size: clamp(2.35rem, 4vw, 3.5rem);
-  font-weight: 850;
-  letter-spacing: -0.03em;
-  color: #0f172a;
-  line-height: 1;
-}
-
-[data-theme='dark'] .nexus-stat-num {
-  color: #ffffff;
-}
-
-.nexus-stat-num.cyan-stat {
-  color: #0f172a;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: initial !important;
-}
-
-[data-theme='dark'] .nexus-stat-num.cyan-stat {
-  color: #ffffff;
-}
-
-.nexus-stat-label {
-  font-size: 0.8rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-[data-theme='dark'] .nexus-stat-label {
-  color: #94a3b8;
-}
-
-/* ── 4. Evolutionary Journey Timeline ── */
-.nexus-timeline-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nexus-section-header-center {
-  text-align: center;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto 3.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nexus-section-title {
-  font-size: clamp(2.1rem, 3.8vw, 3rem);
-  font-weight: 850;
-  letter-spacing: -0.025em;
-  color: #0f172a;
-  margin: 0 0 0.85rem;
-}
-
-[data-theme='dark'] .nexus-section-title {
-  color: #ffffff;
-}
-
-.nexus-section-desc {
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: #64748b;
-  margin: 0;
-}
-
-[data-theme='dark'] .nexus-section-desc {
-  color: #94a3b8;
-}
-
-/* ── 4. Meet Our Core Team ── */
-.nexus-team-section {
-  width: 100%;
-}
-
-.nexus-team-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.75rem;
-}
-
-@media (max-width: 1100px) {
-  .nexus-team-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
-}
-
-@media (max-width: 620px) {
-  .nexus-team-grid {
-    grid-template-columns: 1fr;
-    max-width: 380px;
-    margin: 0 auto;
-  }
-}
-
-.nexus-team-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  padding: 2.25rem 1.75rem 2rem;
-  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-[data-theme='dark'] .nexus-team-card {
-  background: #111827;
-  border-color: #1f2937;
-  box-shadow: none;
-}
-
-.nexus-team-card:hover {
-  transform: translateY(-5px);
-  border-color: #cbd5e1;
-  box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='dark'] .nexus-team-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.nexus-avatar-wrap {
-  width: 82px;
-  height: 82px;
-  border-radius: 20px;
-  padding: 2px;
-  border: 2px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.35rem;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme='dark'] .nexus-avatar-wrap {
-  border-color: #334155;
-}
-
-.nexus-team-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 17px;
-  object-fit: cover;
-  background: #f1f5f9;
-}
-
-.nexus-team-name {
-  font-size: 1.28rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 0.35rem;
-}
-
-[data-theme='dark'] .nexus-team-name {
-  color: #ffffff;
-}
-
-.nexus-team-role {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #475569;
-  margin-bottom: 0.95rem;
-}
-
-[data-theme='dark'] .nexus-team-role {
-  color: #94a3b8;
-}
-
-.nexus-team-bio {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #475569;
-  margin: 0 0 1.5rem;
-  flex: 1;
-}
-
-[data-theme='dark'] .nexus-team-bio {
-  color: #94a3b8;
-}
-
-.nexus-team-socials {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nexus-social-btn {
+.nexus-why-icon-box {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+  background: #fff1f2;
+  color: #dc2626;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-[data-theme='dark'] .nexus-social-btn {
-  background: rgba(255, 255, 255, 0.05);
+[data-theme='dark'] .nexus-why-icon-box {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}
+
+.nexus-check-icon {
+  flex-shrink: 0;
+}
+
+.nexus-why-text {
+  font-size: 1.02rem;
+  font-weight: 550;
+  line-height: 1.6;
+  color: #1e293b;
+}
+
+[data-theme='dark'] .nexus-why-text {
+  color: #e2e8f0;
+}
+
+/* ── 6. Join Our Community & Contact CTA ── */
+.nexus-community-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .nexus-community-card {
+  background: #111827;
   border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-community-p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #334155;
+  margin: 0 0 1.25rem;
+}
+
+[data-theme='dark'] .nexus-community-p {
+  color: #cbd5e1;
+}
+
+/* ── Query Form Card ── */
+.nexus-query-form-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 2.25rem 2rem;
+  margin: 2.25rem 0 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border-left: 4px solid #dc2626;
+}
+
+[data-theme='dark'] .nexus-query-form-card {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #dc2626;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-query-form-header {
+  margin-bottom: 1.5rem;
+}
+
+.nexus-query-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.nexus-query-title {
+  font-size: 1.35rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin: 0;
+}
+
+[data-theme='dark'] .nexus-query-title {
+  color: #ffffff;
+}
+
+.nexus-query-badge {
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+[data-theme='dark'] .nexus-query-badge {
+  color: #f87171;
+  background: rgba(220, 38, 38, 0.16);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.nexus-query-subtitle {
+  font-size: 0.96rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .nexus-query-subtitle {
   color: #94a3b8;
 }
 
-.nexus-social-btn:hover {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
-  transform: translateY(-2px);
+.nexus-query-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
 }
 
-[data-theme='dark'] .nexus-social-btn:hover {
-  background: #ffffff;
+.nexus-query-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem;
+}
+
+@media (max-width: 640px) {
+  .nexus-query-grid-2col {
+    grid-template-columns: 1fr;
+  }
+  .nexus-query-form-card {
+    padding: 1.5rem 1.2rem;
+  }
+}
+
+.nexus-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  text-align: left;
+}
+
+.nexus-form-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.01em;
+}
+
+[data-theme='dark'] .nexus-form-label {
+  color: #e2e8f0;
+}
+
+.nexus-req {
+  color: #dc2626;
+}
+
+.nexus-form-input,
+.nexus-form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
   color: #0f172a;
-  border-color: #ffffff;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .nexus-form-input,
+[data-theme='dark'] .nexus-form-textarea {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.nexus-form-input:focus,
+.nexus-form-textarea:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+[data-theme='dark'] .nexus-form-input:focus,
+[data-theme='dark'] .nexus-form-textarea:focus {
+  background: #0f172a;
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+}
+
+.nexus-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.nexus-query-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.nexus-query-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.nexus-query-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
+}
+
+.nexus-query-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.nexus-query-error {
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Success Box */
+.nexus-query-success {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.nexus-query-success-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff1f2;
+  color: #dc2626;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+[data-theme='dark'] .nexus-query-success-icon {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}
+
+.nexus-query-success-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+
+[data-theme='dark'] .nexus-query-success-title {
+  color: #ffffff;
+}
+
+.nexus-query-success-desc {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: #64748b;
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+}
+
+[data-theme='dark'] .nexus-query-success-desc {
+  color: #94a3b8;
+}
+
+.nexus-query-reset-btn {
+  margin: 0 auto;
+}
+
+/* Signature Tagline Ribbon */
+.nexus-signature-ribbon {
+  text-align: center;
+  padding-top: 1.75rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+[data-theme='dark'] .nexus-signature-ribbon {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.nexus-signature-quote {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #dc2626;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+[data-theme='dark'] .nexus-signature-quote {
+  color: #f87171;
+}
+
+@media (max-width: 640px) {
+  .nexus-community-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .nexus-who-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .nexus-contact-box {
+    padding: 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nexus-contact-box-actions {
+    width: 100%;
+  }
+
+  .nexus-contact-box-actions .nexus-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
 }

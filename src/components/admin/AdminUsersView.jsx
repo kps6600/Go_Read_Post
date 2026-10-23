@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Users, Shield, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Check, Lock, Mail, UserCheck, CheckSquare
 } from 'lucide-react';
@@ -217,11 +217,11 @@ export default function AdminUsersView({ onShowToast }) {
               padding: '12px 18px',
               borderRadius: '10px',
               marginBottom: '20px',
-              boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{
-                  backgroundColor: '#e11d48',
+                  backgroundColor: '#dc2626',
                   color: '#fff',
                   padding: '4px 12px',
                   borderRadius: '20px',
@@ -240,7 +240,7 @@ export default function AdminUsersView({ onShowToast }) {
                 <button
                   type="button"
                   onClick={() => setSelectedIds(new Set(filteredUsers.map(u => u._id)))}
-                  style={{ background: 'none', border: 'none', color: '#e11d48', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
+                  style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
                 >
                   Select All ({filteredUsers.length})
                 </button>
@@ -262,14 +262,14 @@ export default function AdminUsersView({ onShowToast }) {
                   alignItems: 'center',
                   gap: '6px',
                   padding: '7px 14px',
-                  backgroundColor: '#e11d48',
+                  backgroundColor: '#dc2626',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '0.85rem',
                   fontWeight: 600,
                   color: '#ffffff',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+                  boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
                 }}
               >
                 <Trash2 size={15} />

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ArrowLeft, AlertCircle, RefreshCw, CheckCircle, Share2, 
+  ArrowLeft, ArrowRight, AlertCircle, RefreshCw, CheckCircle, Share2, 
   Bookmark, Link2, Mail, Check, Quote, Lock, Edit3, Trash2, X,
-  ChevronRight, ExternalLink, MessageSquare, ThumbsUp, Send, Sparkles, Star
+  ChevronRight, ChevronDown, ChevronUp, ExternalLink, MessageSquare, ThumbsUp, Send, Sparkles, Star
 } from 'lucide-react';
 import { ArticleService } from '../services/articleService';
 import { CommentService } from '../services/commentService';
 import { AuthService } from '../services/authService';
+import { ALL_STORIES } from '../data/storiesData';
 import './ArticlePage.css';
 
 function getReaderClientId() {
@@ -42,6 +43,7 @@ export default function ArticlePage({
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [isTitleExpanded, setIsTitleExpanded] = useState(false);
 
   // Authentication State for Comments & Discussion
   const [currentUser, setCurrentUser] = useState(() => propUser || AuthService.getUser() || AuthService.getAdminUser());
@@ -291,15 +293,75 @@ export default function ArticlePage({
     loadArticle(slug, false);
   }, [slug, story]);
 
-  // 2. SEO Title
+  // 2. SEO Title, Metadata & JSON-LD Structured Data
   useEffect(() => {
-    if (article?.title) {
-      document.title = `${article.title} | GoReadPost`;
+    if (!article?.title) return;
+
+    const pageTitle = article.seo?.title || `${article.title} | GoReadPost`;
+    document.title = pageTitle;
+
+    const metaDescText = article.seo?.description || article.excerpt || article.subtitle || '';
+    const imgUrl = (typeof article.featuredImage === 'string' ? article.featuredImage : article.featuredImage?.url) || article.image || '';
+    const canonUrl = article.seo?.canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
+
+    // Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = 'description';
+      document.head.appendChild(metaDesc);
     }
+    metaDesc.setAttribute('content', metaDescText);
+
+    // Canonical Link
+    let linkCanon = document.querySelector('link[rel="canonical"]');
+    if (!linkCanon) {
+      linkCanon = document.createElement('link');
+      linkCanon.rel = 'canonical';
+      document.head.appendChild(linkCanon);
+    }
+    linkCanon.setAttribute('href', canonUrl);
+
+    // JSON-LD Structured Data
+    const scriptId = 'article-structured-jsonld';
+    let jsonLdScript = document.getElementById(scriptId);
+    if (!jsonLdScript) {
+      jsonLdScript = document.createElement('script');
+      jsonLdScript.id = scriptId;
+      jsonLdScript.type = 'application/ld+json';
+      document.head.appendChild(jsonLdScript);
+    }
+
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      'headline': article.title,
+      'description': metaDescText,
+      'image': imgUrl ? [imgUrl] : [],
+      'datePublished': article.publishedAt || article.createdAt,
+      'dateModified': article.updatedAt || article.publishedAt || article.createdAt,
+      'author': {
+        '@type': 'Person',
+        'name': article.authorName || 'Editorial Desk'
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'GoReadPost',
+        'url': 'https://goreadpost.com'
+      },
+      'mainEntityOfPage': {
+        '@type': 'WebPage',
+        '@id': canonUrl
+      }
+    };
+    jsonLdScript.textContent = JSON.stringify(structuredData);
+
     return () => {
       document.title = 'GoReadPost - Business, Tech & Startup Intelligence';
+      const scriptToRemove = document.getElementById(scriptId);
+      if (scriptToRemove) scriptToRemove.remove();
     };
-  }, [article?.title]);
+  }, [article]);
 
   const loadArticle = async (targetSlug, isBackground = false) => {
     if (!isBackground) {
@@ -363,8 +425,7 @@ export default function ArticlePage({
       : `${rawDuration} min read`;
 
     const photoCredit = article.photoCredit || 
-                        article.featuredImage?.credit || 
-                        'Indian startups are increasingly using AI to build innovative solutions and stay competitive in a fast-changing market. Photo by: Unsplash';
+                        article.featuredImage?.credit || '';
 
     return {
       ...article,
@@ -450,36 +511,115 @@ export default function ArticlePage({
     return '';
   };
 
-  // 4. Related Articles (Strictly matching the opened article's category only)
+  // Combined candidate pool of stories (live stories + curated fallback stories)
+  const allStoriesPool = useMemo(() => {
+    const list = Array.isArray(stories) && stories.length > 0 ? [...stories] : [];
+    const seen = new Set();
+    list.forEach(item => {
+      const key = String(item.id || item._id || item.slug || item.title || '').trim();
+      if (key) seen.add(key);
+    });
+    (ALL_STORIES || []).forEach(item => {
+      const key = String(item.id || item._id || item.slug || item.title || '').trim();
+      if (key && !seen.has(key)) {
+        list.push(item);
+        seen.add(key);
+      }
+    });
+    return list;
+  }, [stories]);
+
+  // Helper to test if a candidate story is the currently open article
+  const isCurrentArticle = (s) => {
+    if (!current || !s) return false;
+    const currentId = String(current.id || current._id || current.slug || '');
+    const currentSlug = String(current.slug || '');
+    const currentTitle = String(current.title || '').trim().toLowerCase();
+
+    const sId = String(s.id || s._id || s.slug || '');
+    if (currentId && (sId === currentId || s._id === currentId || s.id === currentId)) return true;
+    if (currentSlug && (s.slug === currentSlug || sId === currentSlug)) return true;
+    if (currentTitle && String(s.title || '').trim().toLowerCase() === currentTitle) return true;
+    return false;
+  };
+
+  // 4. Related Articles (Intelligent matching: category match -> topics/tags -> fallback fill to always show 4 articles)
   const relatedArticles = useMemo(() => {
     if (!current) return [];
-    const currentId = current.id || current._id || current.slug;
-    const currentSlug = current.slug;
-    const currentTitle = (current.title || '').trim().toLowerCase();
     const currentCatNorm = getCanonicalCat(current);
+    const currentTopics = (current.topics || []).map(t => String(typeof t === 'object' && t ? t.name : t).toLowerCase().trim()).filter(Boolean);
+    const currentTags = (current.tags || []).map(t => String(t).toLowerCase().trim()).filter(Boolean);
 
-    const sameCatStories = (stories && stories.length > 0 ? stories : []).filter(s => {
-      const sId = s.id || s._id || s.slug;
-      if (currentId && (sId === currentId || s._id === currentId || s.id === currentId)) return false;
-      if (currentSlug && (s.slug === currentSlug || sId === currentSlug)) return false;
-      if (currentTitle && (s.title || '').trim().toLowerCase() === currentTitle) return false;
-      
+    // Candidates excluding current story
+    const candidates = allStoriesPool.filter(s => !isCurrentArticle(s));
+
+    // Relevance scoring
+    const scored = candidates.map(s => {
+      let score = 0;
       const sCatNorm = getCanonicalCat(s);
-      return currentCatNorm ? sCatNorm === currentCatNorm : true;
+
+      // Exact category match gets high priority
+      if (currentCatNorm && sCatNorm && sCatNorm === currentCatNorm) {
+        score += 100;
+      }
+
+      // Matching topics or tags
+      const sTopics = (s.topics || []).map(t => String(typeof t === 'object' && t ? t.name : t).toLowerCase().trim());
+      const sTags = (s.tags || []).map(t => String(t).toLowerCase().trim());
+      currentTopics.forEach(top => {
+        if (sTopics.includes(top) || sTags.includes(top)) score += 25;
+      });
+      currentTags.forEach(tag => {
+        if (sTags.includes(tag) || sTopics.includes(tag)) score += 15;
+      });
+
+      if (s.isTrending || s.trending) score += 10;
+
+      const dateVal = s.publishedAt ? new Date(s.publishedAt).getTime() : 0;
+      return { item: s, score, dateVal };
     });
 
-    return sameCatStories.slice(0, 4).map(item => ({
+    // Sort by relevance score desc, then date desc
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.dateVal - a.dateVal;
+    });
+
+    return scored.slice(0, 4).map(({ item }) => ({
       ...item,
       id: item.id || item._id || item.slug,
+      slug: item.slug || item.id || item._id,
+      title: item.title,
       image: item.image || item.heroImage || (typeof item.featuredImage === 'string' ? item.featuredImage : item.featuredImage?.url) || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80',
       category: (item.categoryName || item.categoryLabel || item.category || current.categoryName || 'ARTICLE').toUpperCase(),
       date: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : (item.date || 'Recent')
     }));
-  }, [current, stories]);
+  }, [current, allStoriesPool]);
+
+  // 4b. Latest Articles (Sorted by most recent publishedAt)
+  const latestArticles = useMemo(() => {
+    const list = allStoriesPool.filter(s => !isCurrentArticle(s));
+    list.sort((a, b) => {
+      const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return list.slice(0, 4).map(item => ({
+      ...item,
+      id: item.id || item._id || item.slug,
+      slug: item.slug || item.id || item._id,
+      title: item.title,
+      image: item.image || item.heroImage || (typeof item.featuredImage === 'string' ? item.featuredImage : item.featuredImage?.url) || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80',
+      category: (item.categoryName || item.categoryLabel || item.category || 'LATEST').toUpperCase(),
+      date: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : (item.date || 'Recent')
+    }));
+  }, [current, allStoriesPool]);
 
   // 5. Trending Now (5 items with numbered circle badges)
   const trendingArticles = useMemo(() => {
-    const liveTrending = (stories || []).filter(s => s.isTrending || s.trending || (s.views && s.views > 20)).slice(0, 5);
+    const candidates = allStoriesPool.filter(s => !isCurrentArticle(s));
+    const liveTrending = candidates.filter(s => s.isTrending || s.trending || (s.views && s.views > 20)).slice(0, 5);
     if (liveTrending.length > 0) {
       return liveTrending.map((s, idx) => ({
         id: s.id || s._id || s.slug || `trend-${idx}`,
@@ -487,39 +627,47 @@ export default function ArticlePage({
         ...s
       }));
     }
-    return (stories || []).slice(0, 5).map((s, idx) => ({
+    return candidates.slice(0, 5).map((s, idx) => ({
       id: s.id || s._id || s.slug || `trend-${idx}`,
       title: s.title,
       ...s
     }));
-  }, [stories]);
+  }, [current, allStoriesPool]);
 
-  // 6. Bottom "You May Also Like" (Strictly matching the opened article's category only)
+  // 6. Bottom "You May Also Like" (Articles with graceful fallback)
   const bottomArticles = useMemo(() => {
     if (!current) return [];
-    const currentId = current.id || current._id || current.slug;
-    const currentSlug = current.slug;
-    const currentTitle = (current.title || '').trim().toLowerCase();
     const currentCatNorm = getCanonicalCat(current);
+    const relatedIds = new Set(relatedArticles.map(r => String(r.id || r._id || r.slug || '')));
 
-    const sameCatStories = (stories && stories.length > 0 ? stories : []).filter(s => {
-      const sId = s.id || s._id || s.slug;
-      if (currentId && (sId === currentId || s._id === currentId || s.id === currentId)) return false;
-      if (currentSlug && (s.slug === currentSlug || sId === currentSlug)) return false;
-      if (currentTitle && (s.title || '').trim().toLowerCase() === currentTitle) return false;
-      
+    const candidates = allStoriesPool.filter(s => !isCurrentArticle(s) && !relatedIds.has(String(s.id || s._id || s.slug || '')));
+
+    const scored = candidates.map(s => {
+      let score = 0;
       const sCatNorm = getCanonicalCat(s);
-      return currentCatNorm ? sCatNorm === currentCatNorm : true;
+      if (currentCatNorm && sCatNorm && sCatNorm === currentCatNorm) score += 50;
+      if (s.isTrending || s.trending) score += 10;
+      const dateVal = s.publishedAt ? new Date(s.publishedAt).getTime() : 0;
+      return { item: s, score, dateVal };
     });
 
-    return sameCatStories.slice(0, 4).map(s => ({
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.dateVal - a.dateVal;
+    });
+
+    const poolToUse = scored.length >= 4 ? scored.map(x => x.item) : candidates;
+
+    return poolToUse.slice(0, 4).map(s => ({
       ...s,
       id: s.id || s._id || s.slug,
+      slug: s.slug || s.id || s._id,
+      title: s.title,
       image: s.image || s.heroImage || (typeof s.featuredImage === 'string' ? s.featuredImage : s.featuredImage?.url) || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80',
       category: (s.categoryName || s.categoryLabel || s.category || current.categoryName || 'ARTICLE').toUpperCase(),
       date: s.publishedAt ? new Date(s.publishedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : (s.date || 'Recent')
     }));
-  }, [stories, current]);
+  }, [current, allStoriesPool, relatedArticles]);
 
   // Social Sharing Handlers
   const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://goreadpost.com';
@@ -574,6 +722,18 @@ export default function ArticlePage({
 
   const handleCategoryClick = (catSlug) => {
     window.history.pushState(null, '', `/category/${catSlug}`);
+    window.dispatchEvent(new Event('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateLatest = () => {
+    window.history.pushState(null, '', '/latest');
+    window.dispatchEvent(new Event('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateTrending = () => {
+    window.history.pushState(null, '', '/trending');
     window.dispatchEvent(new Event('popstate'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -659,11 +819,6 @@ export default function ArticlePage({
              ════════════════════════════════════════════════ */}
           <main className="modern-article-main">
             
-            {/* Article Headline (One Line) */}
-            <h1 className="map-title" title={current.title}>
-              {current.title}
-            </h1>
-
             {/* Featured Image */}
             <div className="map-hero-wrapper">
               <img 
@@ -672,11 +827,28 @@ export default function ArticlePage({
                 className="map-hero-img"
                 loading="eager"
               />
-              {current.photoCredit && (
-                <p className="map-hero-caption">
-                  {current.photoCredit}
-                </p>
-              )}
+            </div>
+
+            {/* Article Headline with Show Full Text Button */}
+            <div className="map-title-row">
+              <h1 
+                className={`map-title ${isTitleExpanded ? 'expanded' : ''}`} 
+                title={current.title}
+                onClick={() => setIsTitleExpanded(prev => !prev)}
+              >
+                {current.title}
+              </h1>
+              
+              <button 
+                type="button" 
+                className="map-title-toggle-btn"
+                onClick={() => setIsTitleExpanded(prev => !prev)}
+                aria-expanded={isTitleExpanded}
+                title={isTitleExpanded ? "Collapse title" : "Show full text"}
+              >
+                <span>{isTitleExpanded ? 'Show less' : 'Show full text'}</span>
+                {isTitleExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
             </div>
 
             {/* Author Byline & Social Sharing Row (Positioned below image) */}
@@ -1253,7 +1425,94 @@ export default function ArticlePage({
              ════════════════════════════════════════════════ */}
           <aside className="modern-article-sidebar">
             
-            {/* 1. Related Articles Widget */}
+            {/* 1. Latest Articles Widget (Before Trending) */}
+            <div className="sidebar-widget">
+              <div className="sidebar-widget-header">
+                <h3 className="sidebar-widget-title">Latest Articles</h3>
+                <button
+                  type="button"
+                  className="sidebar-widget-view-all"
+                  onClick={handleNavigateLatest}
+                  title="View all latest articles"
+                >
+                  <span>View All</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+
+              <div className="sidebar-related-list">
+                {latestArticles.map((lat) => {
+                  const isLatSaved = isSaved ? Boolean(isSaved(lat.id || lat._id || lat.slug)) : false;
+                  return (
+                    <div 
+                      key={lat.id} 
+                      className="sidebar-related-item"
+                      onClick={() => handleArticleClick(lat)}
+                    >
+                      <img 
+                        src={lat.image} 
+                        alt={lat.title} 
+                        className="sidebar-related-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                      <div className="sidebar-related-info">
+                        <h4 className="sidebar-related-title">{lat.title}</h4>
+                        <div className="sidebar-related-meta">
+                          <span className="cat">{lat.category}</span> • {lat.date}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className={`sidebar-related-save-btn ${isLatSaved ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(lat);
+                        }}
+                        title={isLatSaved ? 'Remove from reading list' : 'Save to read later'}
+                        aria-label="Save story"
+                      >
+                        <Bookmark size={13} fill={isLatSaved ? 'currentColor' : 'none'} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="sidebar-widget-footer-btn"
+                onClick={handleNavigateLatest}
+              >
+                <span>View All Latest Articles</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
+            {/* 2. Trending Now Widget */}
+            <div className="sidebar-widget">
+              <div className="sidebar-widget-header">
+                <h3 className="sidebar-widget-title">Trending Now</h3>
+              </div>
+
+              <div className="sidebar-trending-list">
+                {trendingArticles.map((tr, index) => (
+                  <div 
+                    key={tr.id || index} 
+                    className="sidebar-trending-item"
+                    onClick={() => handleArticleClick(tr)}
+                  >
+                    <div className="sidebar-trending-badge">{index + 1}</div>
+                    <p className="sidebar-trending-title">{tr.title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Related Articles Widget */}
             <div className="sidebar-widget">
               <h3 className="sidebar-widget-title">Related Articles</h3>
               <div className="sidebar-related-list">
@@ -1270,6 +1529,9 @@ export default function ArticlePage({
                         alt={rel.title} 
                         className="sidebar-related-img"
                         loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80';
+                        }}
                       />
                       <div className="sidebar-related-info">
                         <h4 className="sidebar-related-title">{rel.title}</h4>
@@ -1292,23 +1554,6 @@ export default function ArticlePage({
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* 2. Trending Now Widget */}
-            <div className="sidebar-widget">
-              <h3 className="sidebar-widget-title">Trending Now</h3>
-              <div className="sidebar-trending-list">
-                {trendingArticles.map((tr, index) => (
-                  <div 
-                    key={tr.id || index} 
-                    className="sidebar-trending-item"
-                    onClick={() => handleArticleClick(tr)}
-                  >
-                    <div className="sidebar-trending-badge">{index + 1}</div>
-                    <p className="sidebar-trending-title">{tr.title}</p>
-                  </div>
-                ))}
               </div>
             </div>
 

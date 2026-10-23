@@ -1314,7 +1314,6 @@ export default function LiveHomepageStudio({
                                       <span>{artDate}</span>
                                     </div>
                                     <h3 className="mhp-blog-card-title">{artTitle}</h3>
-                                    {art.excerpt && <p className="mhp-blog-excerpt">{art.excerpt}</p>}
                                     <div className="mhp-blog-footer-row">
                                       <span className="mhp-blog-readmore-btn">
                                         <span>READ MORE</span>

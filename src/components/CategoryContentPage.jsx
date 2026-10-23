@@ -33,17 +33,26 @@ const getStoryExcerpt = (s) => {
   return 'Explore deep insights, operational lessons, and strategic perspectives from Indian founders and industry pioneers.';
 };
 
+const isHexId = (val) => typeof val === 'string' && /^[0-9a-fA-F]{24}$/.test(val.trim());
+
 const getStoryCategory = (s) => {
-  if (typeof s?.category === 'object' && s?.category?.name) return s.category.name;
-  if (typeof s?.category === 'string' && s.category.trim()) return s.category;
-  return s?.categoryName || s?.categoryLabel || 'General';
+  if (typeof s?.category === 'object' && s?.category?.name && !isHexId(s.category.name)) return s.category.name;
+  if (typeof s?.category === 'string' && s.category.trim() && !isHexId(s.category)) return s.category;
+  if (s?.categoryName && !isHexId(s.categoryName)) return s.categoryName;
+  if (s?.categoryLabel && !isHexId(s.categoryLabel)) return s.categoryLabel;
+  if (s?.categoryTag && !isHexId(s.categoryTag)) return s.categoryTag;
+  if (Array.isArray(s?.topics) && s.topics[0] && !isHexId(s.topics[0])) return s.topics[0];
+  if (Array.isArray(s?.tags) && s.tags[0] && !isHexId(s.tags[0])) return s.tags[0];
+  if (s?.tag && !isHexId(s.tag)) return s.tag;
+  if (s?.brand && !isHexId(s.brand)) return s.brand;
+  return 'Technology';
 };
 
 const getStoryCategorySlug = (s) => {
-  if (typeof s?.category === 'object' && s?.category?.slug) return s.category.slug;
-  if (s?.categorySlug) return s.categorySlug;
+  if (typeof s?.category === 'object' && s?.category?.slug && !isHexId(s.category.slug)) return s.category.slug;
+  if (s?.categorySlug && !isHexId(s.categorySlug)) return s.categorySlug;
   const cat = getStoryCategory(s);
-  return cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
+  return cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'technology';
 };
 
 const getStoryAuthor = (s) => {
@@ -508,18 +517,6 @@ export default function CategoryContentPage({
             >
               <div className="cat-hero-overlay" />
               <div className="cat-hero-content">
-                <div style={{ marginBottom: '0.85rem' }}>
-                  <span 
-                    className="cat-category-tag"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePillClick(heroCategory);
-                    }}
-                  >
-                    {heroCategory}
-                  </span>
-                </div>
-
                 <h1 
                   className="cat-hero-title"
                   onClick={() => handleCardClick(activeSlide)}
@@ -545,6 +542,7 @@ export default function CategoryContentPage({
                 </div>
 
                 <div className="cat-hero-bottom-actions">
+
                   <button 
                     className="cat-hero-read-btn"
                     onClick={() => handleCardClick(activeSlide)}
@@ -624,7 +622,7 @@ export default function CategoryContentPage({
 
           {filteredGridStories.length === 0 ? (
             <div className="cat-empty-box">
-              <BookOpen size={40} color="#ea580c" style={{ marginBottom: '1rem', opacity: 0.8 }} />
+              <BookOpen size={40} color="#dc2626" style={{ marginBottom: '1rem', opacity: 0.8 }} />
               <h3 className="cat-empty-title">No Articles in {categoryInfo.name}</h3>
               <p className="cat-empty-desc">
                 No articles were found matching your current selection. Try selecting another category desk or resetting filters.
@@ -639,7 +637,6 @@ export default function CategoryContentPage({
             </div>
           ) : (
             <>
-            /* 4 Cards in One Row Card Grid */
             <div className="cat-cards-grid-4col">
               {currentGridPage.map((story, idx) => {
                 const storyId = getStoryId(story, idx);
@@ -670,15 +667,6 @@ export default function CategoryContentPage({
                           e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
                         }}
                       />
-                      <span 
-                        className="cat-card-cat-badge"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePillClick(storyCat);
-                        }}
-                      >
-                        {storyCat}
-                      </span>
                     </div>
 
                     <div className="cat-card-body">
@@ -693,10 +681,6 @@ export default function CategoryContentPage({
                       <h3 className="cat-card-title">
                         {storyTitle}
                       </h3>
-
-                      <p className="cat-card-excerpt">
-                        {storyExcerpt}
-                      </p>
 
                       <div className="cat-card-footer">
                         <div className="cat-card-author-cluster">

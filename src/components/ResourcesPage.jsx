@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   BookOpen, Download, ExternalLink, ArrowLeft, Search, FileText, 
   Calculator, Shield, Users, CheckCircle2, Sparkles, Filter, Code
@@ -96,7 +96,7 @@ export default function ResourcesPage({ onBackToHome }) {
           <span>Back to Frontpage</span>
         </button>
         <div className="rep-badge-top">
-          <BookOpen size={14} color="#e11d48" />
+          <BookOpen size={14} color="#dc2626" />
           <span>FOUNDER TOOLKIT • VETTED TEMPLATES & DATA</span>
         </div>
       </div>
@@ -148,7 +148,7 @@ export default function ResourcesPage({ onBackToHome }) {
             <div key={res.id} className="rep-card">
               <div className="rep-card-top">
                 <div className="rep-icon-bubble">
-                  <Icon size={22} color="#e11d48" />
+                  <Icon size={22} color="#dc2626" />
                 </div>
                 <span className="rep-format-tag">{res.format}</span>
               </div>

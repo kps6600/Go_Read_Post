@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, TrendingUp, BookOpen, 
   Send, ExternalLink, Bookmark, Share2, ThumbsUp, Eye, Sparkles, Filter
@@ -87,7 +87,6 @@ export default function FounderFirstPage({
               <h3 className="ffp-story-title" onClick={() => onSelectStory && onSelectStory(story)}>
                 {story.title}
               </h3>
-              <p className="ffp-story-excerpt">{story.excerpt}</p>
               
               <div className="ffp-story-footer">
                 <div className="ffp-story-meta">
@@ -101,7 +100,7 @@ export default function FounderFirstPage({
                     onClick={() => onToggleSave && onToggleSave(story.id)}
                     title="Bookmark Playbook"
                   >
-                    <Bookmark size={15} fill={isSaved && isSaved(story.id) ? '#e11d48' : 'none'} color={isSaved && isSaved(story.id) ? '#e11d48' : 'currentColor'} />
+                    <Bookmark size={15} fill={isSaved && isSaved(story.id) ? '#dc2626' : 'none'} color={isSaved && isSaved(story.id) ? '#dc2626' : 'currentColor'} />
                   </button>
                   <button 
                     className="ffp-icon-btn"

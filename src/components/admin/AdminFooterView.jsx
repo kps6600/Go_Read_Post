@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Layers, Save, RefreshCw, AlertCircle, Plus, Trash2, Globe, Shield, 
   Share2, MessageSquare, Send, CheckCircle, ArrowUpRight,
@@ -8,7 +8,7 @@ import {
 import { FooterService } from '../../services/footerService';
 
 const PRESET_BADGE_COLORS = [
-  { label: 'Red / Hot', color: '#e11d48' },
+  { label: 'Red / Hot', color: '#dc2626' },
   { label: 'Amber / Hindi', color: '#f59e0b' },
   { label: 'Orange / Summit', color: '#f97316' },
   { label: 'Green / Hiring', color: '#10b981' },
@@ -743,7 +743,7 @@ export default function AdminFooterView({ onShowToast }) {
 
                           <input
                             type="color"
-                            value={lnk.badgeColor || '#e11d48'}
+                            value={lnk.badgeColor || '#dc2626'}
                             onChange={e => updateColumnLink(cIdx, lIdx, 'badgeColor', e.target.value)}
                             style={{
                               width: '22px',
@@ -763,7 +763,7 @@ export default function AdminFooterView({ onShowToast }) {
                               display: 'inline-block',
                               padding: '2px 5px',
                               borderRadius: '3px',
-                              background: lnk.badgeColor || '#e11d48',
+                              background: lnk.badgeColor || '#dc2626',
                               color: '#ffffff',
                               fontSize: '0.62rem',
                               fontWeight: 800,

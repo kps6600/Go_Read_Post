@@ -1,0 +1,577 @@
+/* ==========================================================================
+   GoReadPost - Exact Advertisement Page Styles
+   Matching User Screenshot Design Specification
+   ========================================================================== */
+
+.adv-exact-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   1. TOP HERO BANNER (DARK NAVY WITH LAPTOP MOCKUP)
+   ───────────────────────────────────────────────────────────── */
+.adv-hero-banner {
+  width: 100%;
+  background: linear-gradient(135deg, #091b34 0%, #0c2342 60%, #0d274a 100%);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.adv-hero-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: center;
+  gap: 40px;
+  min-height: 380px;
+}
+
+/* Left Hero Content */
+.adv-hero-content {
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.adv-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.adv-hero-badge-text {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.adv-hero-badge-line {
+  display: inline-block;
+  width: 44px;
+  height: 3px;
+  background-color: #f59e0b;
+  border-radius: 2px;
+}
+
+.adv-hero-heading {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+}
+
+.adv-hero-subtext {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #cbd5e1;
+  margin: 0 0 28px 0;
+  max-width: 540px;
+}
+
+/* 3 Checkmark Feature Badges */
+.adv-hero-checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.adv-check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adv-check-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.adv-check-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f1f5f9;
+}
+
+/* Right Hero Media */
+.adv-hero-media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.adv-hero-media-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  background: #0d223f;
+}
+
+.adv-hero-laptop-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.adv-hero-media-wrapper:hover .adv-hero-laptop-img {
+  transform: scale(1.02);
+}
+
+.adv-hero-media-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(9, 27, 52, 0.4) 0%, rgba(9, 27, 52, 0) 25%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. TWO-COLUMN MAIN BODY
+   ───────────────────────────────────────────────────────────── */
+.adv-main-section {
+  width: 100%;
+  padding: 56px 24px 80px 24px;
+  background-color: #f8fafc;
+}
+
+.adv-main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 56px;
+  align-items: flex-start;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LEFT COLUMN: BENEFITS & CALLOUT
+   ───────────────────────────────────────────────────────────── */
+.adv-left-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.adv-why-header {
+  margin-bottom: 32px;
+}
+
+.adv-why-tag {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--brand-primary, #dc2626);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.adv-why-title {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.6px;
+}
+
+.adv-why-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #64748b;
+  margin: 0;
+  max-width: 480px;
+}
+
+/* Benefits list */
+.adv-benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.adv-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.adv-benefit-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.adv-benefit-item:hover .adv-benefit-icon-wrap {
+  transform: translateY(-2px);
+}
+
+.adv-icon-blue {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.adv-icon-green {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.adv-icon-purple {
+  background-color: #ede9fe;
+  color: #7c3aed;
+}
+
+.adv-benefit-text {
+  flex: 1;
+}
+
+.adv-benefit-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.adv-benefit-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #64748b;
+  margin: 0;
+}
+
+/* "Need to Talk Directly?" Callout Box */
+.adv-callout-card {
+  background-color: #edf6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-top: 10px;
+}
+
+.adv-callout-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.adv-callout-text {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #64748b;
+  margin: 0 0 18px 0;
+}
+
+.adv-callout-action-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.adv-call-now-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #0f2442;
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(15, 36, 66, 0.2);
+}
+
+.adv-call-now-btn:hover {
+  background-color: #0a1b32;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 36, 66, 0.3);
+}
+
+.adv-callout-divider {
+  display: inline-block;
+  width: 1px;
+  height: 24px;
+  background-color: #cbd5e1;
+}
+
+.adv-callout-phone-link {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.adv-callout-phone-link:hover {
+  color: var(--brand-primary, #dc2626);
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   RIGHT COLUMN: SUBMIT YOUR ENQUIRY CARD
+   ───────────────────────────────────────────────────────────── */
+.adv-right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.adv-form-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 38px 36px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 10px -2px rgba(0, 0, 0, 0.02);
+}
+
+.adv-form-header {
+  margin-bottom: 26px;
+}
+
+.adv-form-title {
+  font-size: 27px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+
+.adv-form-subtitle {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Form layout */
+.adv-enquiry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adv-form-row {
+  display: flex;
+  width: 100%;
+}
+
+.adv-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.adv-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.adv-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.adv-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* Inputs & Textareas */
+.adv-input,
+.adv-select,
+.adv-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 15px;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.adv-input::placeholder,
+.adv-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.adv-input:focus,
+.adv-select:focus,
+.adv-textarea:focus {
+  border-color: var(--brand-primary, #dc2626);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.adv-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.adv-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.adv-textarea {
+  resize: vertical;
+  min-height: 105px;
+  line-height: 1.5;
+}
+
+/* Green WhatsApp Submit Button */
+.adv-whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 22px;
+  margin-top: 8px;
+  background-color: #16a34a;
+  color: #ffffff;
+  font-size: 15.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.adv-whatsapp-btn:hover:not(:disabled) {
+  background-color: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
+}
+
+.adv-whatsapp-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.adv-wa-icon {
+  flex-shrink: 0;
+}
+
+.adv-wa-arrow {
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.adv-whatsapp-btn:hover:not(:disabled) .adv-wa-arrow {
+  transform: translateX(3px);
+}
+
+.adv-form-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #94a3b8;
+  text-align: center;
+  margin: 6px 0 0 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. RESPONSIVE MEDIA QUERIES
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .adv-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 24px;
+  }
+
+  .adv-hero-media {
+    justify-content: flex-start;
+  }
+
+  .adv-main-container {
+    grid-template-columns: 1fr;
+    gap: 44px;
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .adv-hero-heading {
+    font-size: 30px;
+  }
+
+  .adv-hero-checks {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .adv-why-title {
+    font-size: 26px;
+  }
+
+  .adv-two-cols {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .adv-form-card {
+    padding: 24px 20px;
+  }
+
+  .adv-callout-action-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .adv-callout-divider {
+    display: none;
+  }
+}

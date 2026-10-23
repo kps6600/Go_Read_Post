@@ -59,6 +59,44 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
   const [isAuthenticated, setIsAuthenticated] = useState(() => AuthService.isAdminAuthenticated());
   const [adminUser, setAdminUser] = useState(() => AuthService.getAdminUser());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem('admin_sidebar_open');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+      setIsMobileSidebarOpen(prev => !prev);
+    } else {
+      setIsSidebarOpen(prev => {
+        const next = !prev;
+        try {
+          localStorage.setItem('admin_sidebar_open', String(next));
+        } catch {}
+        return next;
+      });
+    }
+  };
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+        const tag = document.activeElement?.tagName?.toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || document.activeElement?.isContentEditable) {
+          return;
+        }
+        e.preventDefault();
+        handleToggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Sync with browser back/forward buttons
   useEffect(() => {
@@ -416,6 +454,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
         onLogout={handleLogout}
         onViewSite={() => handleNavigate('/')}
         adminUser={adminUser}
+        isOpen={isSidebarOpen}
+        onToggleSidebar={handleToggleSidebar}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         siteSettings={siteSettings}
@@ -424,6 +464,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       <div className="admin-main-stage">
         <AdminTopNavbar 
           currentPath={currentPath}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onViewSite={() => handleNavigate('/')}
           adminUser={adminUser}

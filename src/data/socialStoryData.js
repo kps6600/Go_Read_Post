@@ -117,7 +117,7 @@ export const SOCIAL_GRID_STORIES = [
   {
     id: 'social-grid-1',
     tag: 'SOCIAL IMPACT',
-    tagColor: '#0284c7',
+    tagColor: '#dc2626',
     categoryTag: 'Social Enterprise',
     subTopic: 'Social Enterprise',
     title: "D&G Foundation's Kaneo Ngail on its work in India for differently-abled artisans",
@@ -174,7 +174,7 @@ export const SOCIAL_GRID_STORIES = [
   {
     id: 'social-grid-4',
     tag: 'RURAL IMPACT',
-    tagColor: '#0284c7',
+    tagColor: '#dc2626',
     categoryTag: 'CSR',
     subTopic: 'CSR',
     title: '6 organisations taking healthcare to rural India with mobile clinical units',
@@ -193,7 +193,7 @@ export const SOCIAL_GRID_STORIES = [
   {
     id: 'social-grid-5',
     tag: 'RURAL LIVELIHOODS',
-    tagColor: '#0284c7',
+    tagColor: '#dc2626',
     categoryTag: 'Founder First',
     subTopic: 'Founder First',
     title: 'How Magic Bus India Foundation is helping rural women become financial decision-makers',
@@ -234,7 +234,7 @@ export const SOCIAL_LATEST_STORIES = [
   {
     id: 'social-latest-1',
     tag: 'SOCIAL MEDIA FOR CHILDREN',
-    tagColor: '#0284c7',
+    tagColor: '#dc2626',
     categoryTag: 'YouthSpark',
     subTopic: 'YouthSpark',
     title: 'Why keeping children off social media may not be enough to prevent cyber bullying',
@@ -313,7 +313,7 @@ export const SOCIAL_EXPERT_OPINION_STORIES = [
   {
     id: 'social-expert-2',
     tag: 'SILVER ECONOMY',
-    tagColor: '#0284c7',
+    tagColor: '#dc2626',
     categoryTag: 'Reports',
     subTopic: 'Reports',
     title: "The missing infrastructure in India's silver economy boom and senior eldercare",

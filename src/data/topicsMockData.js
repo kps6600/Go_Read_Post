@@ -10,7 +10,7 @@ export const FAKE_TOPICS_LIST = [
     categoryIds: ["AI & DeepTech"],
     articleCount: 8,
     isTrending: true,
-    color: "#e11d48",
+    color: "#dc2626",
     badge: "Frontier"
   },
   {
@@ -22,19 +22,19 @@ export const FAKE_TOPICS_LIST = [
     categoryIds: ["Markets & Capital"],
     articleCount: 7,
     isTrending: true,
-    color: "#2563eb",
+    color: "#dc2626",
     badge: "Hot"
   },
   {
     id: "top-dpi",
     slug: "dpi",
     name: "Digital Public Infrastructure (DPI)",
-    description: "UPI 2.0 rails, DigiLocker data standards, Account Aggregator frameworks, open health protocols, and sovereign identity stacks transforming Bharat.",
+    description: "",
     category: "Technology",
     categoryIds: ["Technology"],
     articleCount: 6,
     isTrending: true,
-    color: "#2563eb",
+    color: "#dc2626",
     badge: "Sovereign"
   },
   {

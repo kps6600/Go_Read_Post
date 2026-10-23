@@ -450,15 +450,27 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
   // Synchronize route with editor view and status tabs
   useEffect(() => {
-    if (currentPath === '/admin/posts/create' || currentPath === '/admin/blogs/create' || currentPath === '/admin/articles/create') {
+    if (
+      currentPath === '/admin/articles/new' || 
+      currentPath === '/admin/articles/create' || 
+      currentPath === '/admin/posts/create' || 
+      currentPath === '/admin/blogs/create' ||
+      currentPath?.endsWith('/new')
+    ) {
       if (!isEditorOpen) handleOpenCreate();
-    } else if (currentPath && (currentPath.includes('/posts/') || currentPath.includes('/blogs/') || currentPath.includes('/articles/')) && currentPath.includes('/edit') && articles.length > 0) {
+    } else if (currentPath && (currentPath.includes('/posts/') || currentPath.includes('/blogs/') || currentPath.includes('/articles/')) && currentPath.includes('/edit')) {
       const parts = currentPath.split('/');
       const editIndex = parts.indexOf('edit');
       const targetId = editIndex > 0 ? parts[editIndex - 1] : null;
       if (targetId && (!editingArticle || (editingArticle._id !== targetId && editingArticle.id !== targetId))) {
-        const found = articles.find(a => (a._id === targetId || a.id === targetId));
-        if (found) handleOpenEdit(found);
+        const found = articles.find(a => (a._id === targetId || a.id === targetId || a.slug === targetId));
+        if (found) {
+          handleOpenEdit(found);
+        } else {
+          ArticleService.getAdminArticleById(targetId)
+            .then(art => art && handleOpenEdit(art))
+            .catch(() => {});
+        }
       }
     } else if (currentPath === '/admin/drafts' || currentPath?.includes('/draft')) {
       setActiveTab('draft');
@@ -573,9 +585,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     });
     setIsEditorOpen(true);
     if (onNavigate) {
-      onNavigate('/admin/posts/create');
+      onNavigate('/admin/articles/new');
     } else {
-      try { window.history.pushState(null, '', '/admin/posts/create'); } catch (e) {}
+      try { window.history.pushState(null, '', '/admin/articles/new'); } catch (e) {}
     }
   };
 
@@ -654,9 +666,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     const articleId = article._id || article.id;
     setIsEditorOpen(true);
     if (onNavigate) {
-      onNavigate(`/admin/posts/${articleId}/edit`);
+      onNavigate(`/admin/articles/${articleId}/edit`);
     } else {
-      try { window.history.pushState(null, '', `/admin/posts/${articleId}/edit`); } catch (e) {}
+      try { window.history.pushState(null, '', `/admin/articles/${articleId}/edit`); } catch (e) {}
     }
   };
 
@@ -664,9 +676,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     setIsEditorOpen(false);
     setEditingArticle(null);
     if (onNavigate) {
-      onNavigate('/admin/posts');
+      onNavigate('/admin/articles');
     } else {
-      try { window.history.pushState(null, '', '/admin/posts'); } catch (e) {}
+      try { window.history.pushState(null, '', '/admin/articles'); } catch (e) {}
     }
   };
 
@@ -2181,10 +2193,10 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                                       border: isSelected ? '1px solid #fecdd3' : '1px solid #f1f5f9',
                                       fontSize: '0.8rem',
                                       fontWeight: isSelected ? 700 : 500,
-                                      color: isSelected ? '#e11d48' : '#334155'
+                                      color: isSelected ? '#dc2626' : '#334155'
                                     }}
                                   >
-                                    {isSelected ? <CheckSquare size={14} color="#e11d48" /> : <Square size={14} color="#94a3b8" />}
+                                    {isSelected ? <CheckSquare size={14} color="#dc2626" /> : <Square size={14} color="#94a3b8" />}
                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
                                   </div>
                                 );
@@ -2195,7 +2207,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                                 <button
                                   type="button"
                                   onClick={() => handleCreateQuickTopic(topicSearchInput)}
-                                  style={{ display: 'block', margin: '0.4rem auto 0', color: '#e11d48', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}
+                                  style={{ display: 'block', margin: '0.4rem auto 0', color: '#dc2626', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}
                                 >
                                   + Create new topic "{topicSearchInput}"
                                 </button>
@@ -2328,7 +2340,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                               borderTop: '1px solid #f1f5f9',
                               cursor: 'pointer',
                               fontSize: '0.78rem',
-                              color: '#e11d48',
+                              color: '#dc2626',
                               fontWeight: 700
                             }}
                           >
@@ -3000,56 +3012,17 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
       </div>
 
-      {/* 2. Status Tabs Navigation & Actions */}
+      {/* 2. Top Actions Row */}
       <div className="apv-tabs-row" style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'space-between', 
+        justifyContent: 'flex-end', 
         flexWrap: 'wrap', 
         gap: '0.75rem', 
         borderBottom: '1px solid var(--border-light)', 
         paddingBottom: '0.75rem', 
         marginBottom: '1rem' 
       }}>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {[
-            { id: 'all', label: 'All Posts', count: articles.length },
-            { id: 'published', label: 'Published', count: publishedCount },
-            { id: 'draft', label: 'Drafts', count: draftCount },
-            { id: 'scheduled', label: 'Scheduled', count: scheduledCount }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`apv-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => handleTabClick(tab.id)}
-              style={{
-                background: activeTab === tab.id ? 'var(--brand-primary)' : 'transparent',
-                color: activeTab === tab.id ? 'var(--text-inverted)' : 'var(--text-secondary)',
-                border: 'none',
-                padding: '0.45rem 0.95rem',
-                borderRadius: '8px',
-                fontSize: '0.84rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.45rem'
-              }}
-            >
-              <span>{tab.label}</span>
-              <span style={{ 
-                fontSize: '0.7rem', 
-                background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : 'var(--bg-tertiary)',
-                padding: '0.1rem 0.4rem', 
-                borderRadius: '999px' 
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
         <button 
           className="abv-btn-primary" 
           onClick={handleOpenCreate}
@@ -3058,14 +3031,14 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             alignItems: 'center',
             gap: '8px',
             padding: '8px 18px',
-            background: 'var(--brand-primary, #e11d48)',
+            background: 'var(--brand-primary, #dc2626)',
             color: '#fff',
             border: 'none',
             borderRadius: '8px',
             fontWeight: '600',
             fontSize: '0.86rem',
             cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)',
+            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
             transition: 'all 0.15s ease'
           }}
         >
@@ -3135,11 +3108,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           padding: '12px 18px',
           borderRadius: '10px',
           marginBottom: '1rem',
-          boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <div style={{
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               color: '#fff',
               padding: '4px 12px',
               borderRadius: '20px',
@@ -3161,7 +3134,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#e11d48',
+                color: '#dc2626',
                 cursor: 'pointer',
                 fontSize: '0.8rem',
                 fontWeight: 600,
@@ -3235,14 +3208,14 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 alignItems: 'center',
                 gap: '6px',
                 padding: '7px 14px',
-                backgroundColor: '#e11d48',
+                backgroundColor: '#dc2626',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 color: '#ffffff',
                 cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
               }}
             >
               <Trash2 size={15} />

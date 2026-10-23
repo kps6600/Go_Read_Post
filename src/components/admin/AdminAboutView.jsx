@@ -378,7 +378,7 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
                   className="aav-form-input"
                   value={hero?.titlePrefix || ''}
                   onChange={e => updateHero('titlePrefix', e.target.value)}
-                  placeholder="Where Thoughts Find Their"
+                  placeholder="Where Curiosity Meets"
                 />
               </div>
 
@@ -392,7 +392,7 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
                   className="aav-form-input"
                   value={hero?.titleHighlight || ''}
                   onChange={e => updateHero('titleHighlight', e.target.value)}
-                  placeholder="Infinite Orbit"
+                  placeholder="Independent Intelligence"
                 />
               </div>
             </div>

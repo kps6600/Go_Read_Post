@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ArrowLeft, Bookmark, Share2, Heart, Award, Clock, 
   CheckCircle, Check, ChevronRight, MessageSquare,
@@ -274,7 +274,7 @@ export default function FullStoryPage({
         particleCount: 55,
         spread: 75,
         origin: { y: 0.75 },
-        colors: ['#ea580c', '#f97316', '#fb923c', '#e11d48', '#ec4899', '#10b981']
+        colors: ['#ea580c', '#f97316', '#fb923c', '#dc2626', '#ec4899', '#10b981']
       });
       if (onShowToast) onShowToast('👏 Applauded story! Shared with GoReadPost community.');
     }
@@ -487,7 +487,7 @@ export default function FullStoryPage({
                 onClick={handleClap}
                 title="Applaud story"
               >
-                <Heart size={14} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                <Heart size={14} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                 <span>{likeCount}</span>
               </button>
 
@@ -720,7 +720,7 @@ export default function FullStoryPage({
                   className={`smb-clap-btn ${liked ? 'active' : ''}`}
                   onClick={handleClap}
                 >
-                  <Heart size={18} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                  <Heart size={18} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                   <span>{liked ? 'Applauded' : 'Clap for Story'}</span>
                   <span className="smb-clap-counter">{likeCount}</span>
                 </button>

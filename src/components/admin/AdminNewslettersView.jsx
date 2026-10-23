@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Mail, Send, Users, CheckCircle, Clock, Search, Plus, 
   Trash2, Edit3, Eye, Download, Sparkles, Filter, X, Check,
@@ -21,7 +21,7 @@ const DEFAULT_PUBLICATIONS = [
     editor: 'Shradha Sharma',
     openRate: '54.2%',
     active: true,
-    color: '#e11d48',
+    color: '#dc2626',
     description: 'The definitive daily operational briefing for Indian startup founders and corporate leadership.'
   },
   {
@@ -345,7 +345,7 @@ export default function AdminNewslettersView({ onShowToast }) {
       {/* KPI Cards */}
       <div className="adv-stats-row" style={{ marginTop: '0.25rem', marginBottom: '1.5rem' }}>
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
+          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
             <Mail size={22} />
           </div>
           <div className="adv-stat-content">
@@ -401,7 +401,7 @@ export default function AdminNewslettersView({ onShowToast }) {
               fontSize: '0.85rem',
               fontWeight: 750,
               border: 'none',
-              background: activeTab === 'publications' ? 'rgba(225, 29, 72, 0.12)' : 'transparent',
+              background: activeTab === 'publications' ? 'rgba(220, 38, 38, 0.12)' : 'transparent',
               color: activeTab === 'publications' ? 'var(--brand-primary)' : 'var(--text-secondary)',
               cursor: 'pointer'
             }}
@@ -418,7 +418,7 @@ export default function AdminNewslettersView({ onShowToast }) {
               fontSize: '0.85rem',
               fontWeight: 750,
               border: 'none',
-              background: activeTab === 'dispatches' ? 'rgba(225, 29, 72, 0.12)' : 'transparent',
+              background: activeTab === 'dispatches' ? 'rgba(220, 38, 38, 0.12)' : 'transparent',
               color: activeTab === 'dispatches' ? 'var(--brand-primary)' : 'var(--text-secondary)',
               cursor: 'pointer'
             }}
@@ -435,7 +435,7 @@ export default function AdminNewslettersView({ onShowToast }) {
               fontSize: '0.85rem',
               fontWeight: 750,
               border: 'none',
-              background: activeTab === 'subscribers' ? 'rgba(225, 29, 72, 0.12)' : 'transparent',
+              background: activeTab === 'subscribers' ? 'rgba(220, 38, 38, 0.12)' : 'transparent',
               color: activeTab === 'subscribers' ? 'var(--brand-primary)' : 'var(--text-secondary)',
               cursor: 'pointer'
             }}
@@ -476,14 +476,14 @@ export default function AdminNewslettersView({ onShowToast }) {
               alignItems: 'center',
               gap: '6px',
               padding: '7px 16px',
-              background: 'var(--brand-primary, #e11d48)',
+              background: 'var(--brand-primary, #dc2626)',
               color: '#fff',
               border: 'none',
               borderRadius: '8px',
               fontSize: '0.84rem',
               fontWeight: 600,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)'
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)'
             }}
           >
             <Send size={15} />
@@ -728,7 +728,7 @@ export default function AdminNewslettersView({ onShowToast }) {
                   <div className="dispatch-field-group">
                     <label className="dispatch-field-label">
                       <span className="dispatch-field-label-left">
-                        <Mail size={14} style={{ color: '#e11d48' }} />
+                        <Mail size={14} style={{ color: '#dc2626' }} />
                         <span>Target Publication Franchise *</span>
                       </span>
                       <span className="dispatch-field-label-hint">Delivers to subscribed readers</span>
@@ -749,7 +749,7 @@ export default function AdminNewslettersView({ onShowToast }) {
                     {selectedPub && (
                       <div className="dispatch-pub-overview-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: selectedPub.color || '#e11d48' }}></span>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: selectedPub.color || '#dc2626' }}></span>
                           <strong style={{ fontSize: '0.84rem', color: 'var(--text-primary)' }}>{selectedPub.title}</strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -871,7 +871,7 @@ export default function AdminNewslettersView({ onShowToast }) {
                             width: '20px', 
                             height: '20px', 
                             borderRadius: '50%', 
-                            background: selectedPub?.color || '#e11d48',
+                            background: selectedPub?.color || '#dc2626',
                             color: '#ffffff',
                             display: 'inline-flex',
                             alignItems: 'center',

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, Eye, BookOpen, Users, FolderTree, TrendingUp, RefreshCw, AlertCircle, ArrowUpRight, Flame, Heart, Sparkles, Layers
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
 
 const CATEGORY_ACCENTS = {
-  'Startups': '#e11d48',
+  'Startups': '#dc2626',
   'Technology': '#0284c7',
   'Enterprise': '#6366f1',
   'AI & DeepTech': '#8b5cf6',
@@ -155,7 +155,7 @@ export default function AdminAnalyticsView() {
         <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>ENGAGEMENT</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Heart size={18} />
             </div>
           </div>
@@ -206,11 +206,11 @@ export default function AdminAnalyticsView() {
                     <span style={{ 
                       fontSize: '12px', 
                       fontWeight: '800', 
-                      color: idx < 3 ? '#e11d48' : 'var(--text-muted, #94a3b8)', 
+                      color: idx < 3 ? '#dc2626' : 'var(--text-muted, #94a3b8)', 
                       width: '24px',
                       height: '24px',
                       borderRadius: '6px',
-                      background: idx < 3 ? 'rgba(225, 29, 72, 0.08)' : 'var(--bg-tertiary, #f1f5f9)',
+                      background: idx < 3 ? 'rgba(220, 38, 38, 0.08)' : 'var(--bg-tertiary, #f1f5f9)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -239,7 +239,7 @@ export default function AdminAnalyticsView() {
                       </a>
                       <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ 
-                          color: CATEGORY_ACCENTS[art.categoryName] || '#e11d48',
+                          color: CATEGORY_ACCENTS[art.categoryName] || '#dc2626',
                           fontWeight: '700'
                         }}>
                           {art.categoryName || 'Startups'}
@@ -249,14 +249,14 @@ export default function AdminAnalyticsView() {
                         {art.claps > 0 && (
                           <>
                             <span>•</span>
-                            <span style={{ color: '#e11d48', fontWeight: '600' }}>👏 {art.claps}</span>
+                            <span style={{ color: '#dc2626', fontWeight: '600' }}>👏 {art.claps}</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span style={{ fontWeight: '800', fontSize: '14px', color: '#e11d48' }}>
+                    <span style={{ fontWeight: '800', fontSize: '14px', color: '#dc2626' }}>
                       {(art.views || 0).toLocaleString()}
                     </span>
                     <span style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)', display: 'block' }}>views</span>

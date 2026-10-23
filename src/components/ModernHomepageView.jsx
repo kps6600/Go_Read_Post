@@ -51,17 +51,81 @@ const getStoryExcerpt = (s) => {
   return '';
 };
 
-const getStoryCategory = (s) => {
-  if (typeof s?.categoryLabel === 'string' && s.categoryLabel) return s.categoryLabel;
-  if (typeof s?.categoryTag === 'string' && s.categoryTag) return s.categoryTag;
-  if (typeof s?.category === 'string' && s.category) return s.category;
-  if (typeof s?.category === 'object' && s.category?.name) return s.category.name;
-  return 'News';
+const getStoryTag = (s) => {
+  const tagList = [];
+  if (Array.isArray(s?.tags)) {
+    s.tags.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  } else if (typeof s?.tags === 'string' && s.tags.trim()) {
+    s.tags.split(',').forEach(t => {
+      const clean = t.trim();
+      if (clean && clean.toLowerCase() !== 'news') tagList.push(clean);
+    });
+  }
+  if (typeof s?.tag === 'string' && s.tag.trim() && s.tag.toLowerCase() !== 'news') {
+    tagList.push(s.tag.trim());
+  }
+  if (Array.isArray(s?.topics)) {
+    s.topics.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  }
+  if (typeof s?.topic === 'string' && s.topic.trim() && s.topic.toLowerCase() !== 'news') {
+    tagList.push(s.topic.trim());
+  }
+  if (typeof s?.categoryName === 'string' && s.categoryName.trim() && s.categoryName.toLowerCase() !== 'news') {
+    tagList.push(s.categoryName.trim());
+  }
+  if (typeof s?.categoryLabel === 'string' && s.categoryLabel.trim() && s.categoryLabel.toLowerCase() !== 'news') {
+    tagList.push(s.categoryLabel.trim());
+  }
+  if (typeof s?.categoryTag === 'string' && s.categoryTag.trim() && s.categoryTag.toLowerCase() !== 'news') {
+    tagList.push(s.categoryTag.trim());
+  }
+  if (typeof s?.category === 'object' && s.category?.name && s.category.name.toLowerCase() !== 'news') {
+    tagList.push(s.category.name.trim());
+  }
+  if (typeof s?.category === 'string' && s.category.trim() && s.category.toLowerCase() !== 'news' && !/^[0-9a-fA-F]{24}$/.test(s.category)) {
+    tagList.push(s.category.trim());
+  }
+
+  const unique = [];
+  const seen = new Set();
+  tagList.forEach(item => {
+    const key = item.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+  });
+
+  if (unique.length > 0) {
+    if (unique.length > 1 && (unique[0].length + unique[1].length <= 16)) {
+      return `${unique[0]} · ${unique[1]}`;
+    }
+    return unique[0];
+  }
+
+  const title = (s?.title || '').toLowerCase();
+  if (title.includes('ai') || title.includes('tech') || title.includes('robot') || title.includes('compute') || title.includes('silicon')) return 'AI & Tech';
+  if (title.includes('startup') || title.includes('founder') || title.includes('bootstrap') || title.includes('pitch')) return 'Startups';
+  if (title.includes('fund') || title.includes('invest') || title.includes('ipo') || title.includes('vc') || title.includes('crore')) return 'Funding';
+  if (title.includes('farmer') || title.includes('rural') || title.includes('grassroot') || title.includes('women')) return 'HerStory';
+  if (title.includes('school') || title.includes('child') || title.includes('library') || title.includes('social')) return 'Social Impact';
+
+  return 'Spotlight';
 };
 
+const getStoryCategory = (s) => getStoryTag(s);
+
 const getStoryCategorySlug = (s) => {
-  const cat = (typeof s?.category === 'string' ? s.category : '') || 
-              (typeof s?.categoryLabel === 'string' ? s.categoryLabel : '') || 'startups';
+  const cat = (typeof s?.category === 'string' && !/^[0-9a-fA-F]{24}$/.test(s.category) ? s.category : '') || 
+              (typeof s?.categoryLabel === 'string' && !/^[0-9a-fA-F]{24}$/.test(s.categoryLabel) ? s.categoryLabel : '') || 'startups';
   return cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'startups';
 };
 
@@ -99,12 +163,11 @@ const getStoryDate = (s) => {
 };
 
 const getStoryReadTime = (s) => {
-  if (typeof s?.readTime === 'string') return s.readTime;
-  if (typeof s?.readingTime === 'number') return `${s.readingTime} min read`;
-  if (typeof s?.readingTime === 'string') {
-    const clean = s.readingTime.trim();
-    if (/min\s*read/i.test(clean)) return clean;
-    return `${clean} min read`;
+  let val = s?.readTime || s?.readingTime || '4 min read';
+  if (typeof val === 'number') return `${val} min read`;
+  if (typeof val === 'string') {
+    const clean = val.replace(/\s*min\s*read\s*/gi, '').trim();
+    return `${clean || '4'} min read`;
   }
   return '4 min read';
 };
@@ -112,15 +175,14 @@ const getStoryReadTime = (s) => {
 const getCategoryBadgeColor = (slug) => {
   const clean = (slug || '').toLowerCase();
   if (clean.includes('startup')) return '#059669';
-  if (clean.includes('tech')) return '#2563eb';
-  if (clean.includes('ai')) return '#4f46e5';
+  if (clean.includes('tech') || clean.includes('ai')) return '#dc2626';
   if (clean.includes('enterprise')) return '#7c3aed';
   if (clean.includes('her') || clean.includes('women')) return '#db2777';
   if (clean.includes('smb') || clean.includes('msme')) return '#ea580c';
   if (clean.includes('leader')) return '#0891b2';
   if (clean.includes('social') || clean.includes('impact')) return '#10b981';
   if (clean.includes('sport')) return '#dc2626';
-  return '#2563eb';
+  return '#dc2626';
 };
 
 export default function ModernHomepageView({ 
@@ -523,11 +585,6 @@ export default function ModernHomepageView({
           >
             {blogTitle}
           </h3>
-          {blogExcerpt && (
-            <p className="mhp-blog-excerpt">
-              {blogExcerpt}
-            </p>
-          )}
 
           <div className="mhp-blog-footer-row">
             <button 
@@ -550,8 +607,8 @@ export default function ModernHomepageView({
                 <Heart 
                   size={14} 
                   className="mhp-like-icon"
-                  fill={isCardLiked ? '#f43f5e' : 'none'} 
-                  color={isCardLiked ? '#f43f5e' : 'currentColor'} 
+                  fill={isCardLiked ? '#ef4444' : 'none'} 
+                  color={isCardLiked ? '#ef4444' : 'currentColor'} 
                 />
                 {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
               </button>
@@ -1059,14 +1116,7 @@ export default function ModernHomepageView({
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => 
-            renderStoryCard(
-              blog, 
-              idx, 
-              <span className="mhp-spotlight-pill">
-                <Zap size={12} fill="#ffffff" color="#ffffff" />
-                {badgeText}
-              </span>
-            )
+            renderStoryCard(blog, idx)
           )}
         </div>
       </section>

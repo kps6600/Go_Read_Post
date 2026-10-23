@@ -1031,7 +1031,7 @@ export default function Header({
                     width: '24px',
                     height: '24px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--brand-primary, #ea580c)',
+                    backgroundColor: 'var(--brand-primary, #dc2626)',
                     color: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -1063,7 +1063,7 @@ export default function Header({
                     color: 'var(--text-primary, #111827)'
                   }}>
                     <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--border-color, #f3f4f6)', marginBottom: '8px' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser.name || currentUser.username}</div>
+                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser.name || currentUser.username}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
                       <div style={{ marginTop: '6px' }}>
                         <span style={{
@@ -1072,8 +1072,8 @@ export default function Header({
                           fontWeight: 700,
                           padding: '2px 8px',
                           borderRadius: '10px',
-                          backgroundColor: AuthService.isStaff(currentUser) ? 'rgba(234, 88, 12, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                          color: AuthService.isStaff(currentUser) ? '#ea580c' : '#2563eb',
+                          backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                          color: '#dc2626',
                           textTransform: 'uppercase'
                         }}>
                           {currentUser.role || 'READER'}
@@ -1098,13 +1098,13 @@ export default function Header({
                           border: 'none',
                           borderRadius: '6px',
                           cursor: 'pointer',
-                          color: '#ea580c',
+                          color: '#dc2626',
                           fontWeight: 600,
                           fontSize: '0.85rem',
                           textAlign: 'left'
                         }}
                       >
-                        <LayoutDashboard size={15} color="#ea580c" />
+                        <LayoutDashboard size={15} color="#dc2626" />
                         <span>Admin Console</span>
                       </button>
                     )}
@@ -1560,11 +1560,11 @@ export default function Header({
                                     justifyContent: 'space-between',
                                     width: '100%',
                                     textDecoration: 'none',
-                                    color: isLinkActive ? 'var(--primary-color, #e11d48)' : 'inherit',
+                                    color: isLinkActive ? 'var(--primary-color, #dc2626)' : 'inherit',
                                     fontWeight: isLinkActive ? 650 : 500,
                                     padding: '7px 10px',
                                     borderRadius: '6px',
-                                    background: isLinkActive ? 'rgba(225, 29, 72, 0.08)' : 'transparent',
+                                    background: isLinkActive ? 'rgba(220, 38, 38, 0.08)' : 'transparent',
                                     transition: 'all 0.15s ease'
                                   }}
                                 >

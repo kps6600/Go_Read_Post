@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X, Mail, CheckSquare
 } from 'lucide-react';
@@ -161,11 +161,11 @@ export default function AdminAuthorsView({ onShowToast }) {
           padding: '12px 18px',
           borderRadius: '10px',
           marginBottom: '20px',
-          boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <div style={{
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               color: '#fff',
               padding: '4px 12px',
               borderRadius: '20px',
@@ -184,7 +184,7 @@ export default function AdminAuthorsView({ onShowToast }) {
             <button
               type="button"
               onClick={() => setSelectedIds(new Set(filteredAuthors.map(a => a._id || a.slug)))}
-              style={{ background: 'none', border: 'none', color: '#e11d48', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
+              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
             >
               Select All ({filteredAuthors.length})
             </button>
@@ -206,14 +206,14 @@ export default function AdminAuthorsView({ onShowToast }) {
               alignItems: 'center',
               gap: '6px',
               padding: '7px 14px',
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               border: 'none',
               borderRadius: '6px',
               fontSize: '0.85rem',
               fontWeight: 600,
               color: '#ffffff',
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
             }}
           >
             <Trash2 size={15} />
@@ -291,7 +291,7 @@ export default function AdminAuthorsView({ onShowToast }) {
                 key={id}
                 style={{
                   background: isSelected ? '#fff1f2' : '#fff', padding: '20px', borderRadius: '12px',
-                  border: isSelected ? '1.5px solid #e11d48' : '1px solid #e2e8f0',
+                  border: isSelected ? '1.5px solid #dc2626' : '1px solid #e2e8f0',
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative'
                 }}
               >

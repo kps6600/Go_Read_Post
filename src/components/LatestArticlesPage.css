@@ -281,28 +281,15 @@
 }
 
 .lap-card:hover .lap-card-title {
-  color: #0f172a;
+  color: var(--brand-primary, #dc2626);
 }
 
 [data-theme='dark'] .lap-card:hover .lap-card-title {
-  color: #ffffff;
+  color: #ef4444;
 }
 
 .lap-card-excerpt {
-  font-size: 0.88rem;
-  color: #64748b;
-  line-height: 1.55;
-  margin: 0 0 1.15rem 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
-}
-
-[data-theme='dark'] .lap-card-excerpt {
-  color: #94a3b8;
+  display: none !important;
 }
 
 .lap-card-meta {
@@ -669,8 +656,8 @@ main:has(.lap-page-wrapper) + .site-footer {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #eff6ff;
-  color: #3b82f6;
+  background: #fee2e2;
+  color: var(--brand-primary, #dc2626);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -678,7 +665,8 @@ main:has(.lap-page-wrapper) + .site-footer {
 }
 
 [data-theme='dark'] .lap-newsletter-icon-wrap {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(220, 38, 38, 0.15);
+  color: #ef4444;
 }
 
 .lap-newsletter-title {

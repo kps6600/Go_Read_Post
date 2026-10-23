@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Hash, Search, ArrowRight, ArrowLeft, Layers, Bookmark, 
   Share2, RefreshCw, X, Sparkles, Filter, BookOpen, Clock, Calendar,
@@ -32,10 +32,17 @@ const getStoryExcerpt = (s) => {
   return 'Explore deep insights, operational lessons, and strategic perspectives on this topic.';
 };
 
+const isHexId = (val) => typeof val === 'string' && /^[0-9a-fA-F]{24}$/.test(val.trim());
+
 const getStoryCategory = (s) => {
-  if (typeof s?.category === 'object' && s?.category?.name) return s.category.name;
-  if (typeof s?.category === 'string' && s.category.trim()) return s.category;
-  return s?.categoryName || s?.categoryLabel || 'General';
+  if (typeof s?.category === 'object' && s?.category?.name && !isHexId(s.category.name)) return s.category.name;
+  if (typeof s?.category === 'string' && s.category.trim() && !isHexId(s.category)) return s.category;
+  if (s?.categoryName && !isHexId(s.categoryName)) return s.categoryName;
+  if (s?.categoryLabel && !isHexId(s.categoryLabel)) return s.categoryLabel;
+  if (s?.categoryTag && !isHexId(s.categoryTag)) return s.categoryTag;
+  if (Array.isArray(s?.topics) && s.topics[0] && !isHexId(s.topics[0])) return s.topics[0];
+  if (Array.isArray(s?.tags) && s.tags[0] && !isHexId(s.tags[0])) return s.tags[0];
+  return 'Technology';
 };
 
 const getStoryAuthor = (s) => {
@@ -202,7 +209,7 @@ export default function TopicsPage({
             description: dt.description?.trim() ? dt.description : base.description,
             category: dt.category || base.category,
             badge: base.badge || null,
-            color: base.color || '#e11d48'
+            color: base.color || '#dc2626'
           });
         } else {
           topicMap.set(slug, {
@@ -211,7 +218,7 @@ export default function TopicsPage({
             description: dt.description?.trim() ? dt.description : `Deep reporting, startup investigations, and executive dispatches tagged with #${dt.name}.`,
             category: dt.category || 'General',
             categoryIds: (Array.isArray(dt.categoryIds) && dt.categoryIds.length > 0) ? dt.categoryIds : ['General'],
-            color: '#e11d48',
+            color: '#dc2626',
             articleCount: 4
           });
         }
@@ -471,22 +478,6 @@ export default function TopicsPage({
   if (topicSlug || activeTopic) {
     return (
       <div className="top-page-wrapper">
-        {/* Breadcrumb Navigation Bar */}
-        <div className="top-breadcrumb-bar">
-          <button 
-            type="button" 
-            className="top-back-btn" 
-            onClick={handleBackToAllTopics}
-            title="Return to all topics directory"
-          >
-            <ArrowLeft size={16} />
-            <span>All Topics</span>
-          </button>
-
-          <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 650 }}>
-            {topicArticles.length} {topicArticles.length === 1 ? 'Article' : 'Articles'} in Topic
-          </span>
-        </div>
 
         {/* Topic Header Card */}
         {activeTopic && (
@@ -494,34 +485,13 @@ export default function TopicsPage({
             <h1 className="top-single-title">
               {activeTopic.name}
             </h1>
-
-            {activeTopic.description && (
-              <p className="top-single-desc">
-                {activeTopic.description}
-              </p>
-            )}
-
-            <div className="top-single-meta-strip">
-              <span>{topicArticles.length} Published Dispatches</span>
-              <span>•</span>
-              <button
-                type="button"
-                className="top-icon-btn"
-                onClick={() => handleShareTopic(activeTopic)}
-                title="Share Topic"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#e11d48', fontWeight: 750, fontSize: '0.82rem' }}
-              >
-                <Share2 size={14} />
-                <span>Share Topic</span>
-              </button>
-            </div>
           </div>
         )}
 
         {/* Single Topic Articles Grid */}
         {singleLoading ? (
           <div style={{ padding: '5rem 1rem', textAlign: 'center' }}>
-            <RefreshCw size={32} className="animate-spin" color="#e11d48" style={{ margin: '0 auto 12px' }} />
+            <RefreshCw size={32} className="animate-spin" color="#dc2626" style={{ margin: '0 auto 12px' }} />
             <p style={{ color: '#64748b', fontWeight: 650 }}>Loading stories tagged with this topic...</p>
           </div>
         ) : (
@@ -569,10 +539,6 @@ export default function TopicsPage({
                     <h3 className="top-art-title">
                       {artTitle}
                     </h3>
-
-                    <p className="top-art-excerpt">
-                      {artExcerpt}
-                    </p>
 
                     <div className="top-art-footer">
                       <span className="top-art-date">{artDate}</span>
@@ -690,7 +656,7 @@ export default function TopicsPage({
 
       {loading ? (
         <div style={{ padding: '5rem 1rem', textAlign: 'center' }}>
-          <RefreshCw size={32} className="animate-spin" color="#e11d48" style={{ margin: '0 auto 12px' }} />
+          <RefreshCw size={32} className="animate-spin" color="#dc2626" style={{ margin: '0 auto 12px' }} />
           <p style={{ color: '#64748b', fontWeight: 650 }}>Loading taxonomy topics directory...</p>
         </div>
       ) : filteredTopics.length === 0 ? (
@@ -718,7 +684,7 @@ export default function TopicsPage({
             const primaryCat = topic.category || (Array.isArray(topic.categoryIds) && topic.categoryIds.length > 0 ? (typeof topic.categoryIds[0] === 'object' ? topic.categoryIds[0].name : topic.categoryIds[0]) : 'Domain');
             const count = topic.articleCount !== undefined ? topic.articleCount : 5;
             const isSelected = activeFilterTopic && (activeFilterTopic.slug === topic.slug || activeFilterTopic._id === topic._id);
-            const cardColor = topic.color || '#e11d48';
+            const cardColor = topic.color || '#dc2626';
 
             return (
               <div
@@ -754,10 +720,6 @@ export default function TopicsPage({
                 <h3 className="top-card-name">
                   {topicName}
                 </h3>
-
-                <p className="top-card-desc">
-                  {topicDesc}
-                </p>
 
                 <div className="top-card-footer">
                   <span className="top-card-cat-badge">{primaryCat}</span>
@@ -839,7 +801,7 @@ export default function TopicsPage({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#e11d48',
+                color: '#dc2626',
                 fontWeight: 750,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -857,7 +819,7 @@ export default function TopicsPage({
 
         {articlesLoading ? (
           <div style={{ padding: '4rem 1rem', textAlign: 'center' }}>
-            <RefreshCw size={28} className="animate-spin" color="#e11d48" style={{ margin: '0 auto 10px' }} />
+            <RefreshCw size={28} className="animate-spin" color="#dc2626" style={{ margin: '0 auto 10px' }} />
             <p style={{ color: '#64748b', fontWeight: 650 }}>Loading published articles...</p>
           </div>
         ) : filteredFeedArticles.length === 0 ? (
@@ -937,10 +899,6 @@ export default function TopicsPage({
                       <h3 className="top-art-title">
                         {artTitle}
                       </h3>
-
-                      <p className="top-art-excerpt">
-                        {artExcerpt}
-                      </p>
 
                       <div className="top-art-footer">
                         <span className="top-art-date">{artDate}</span>

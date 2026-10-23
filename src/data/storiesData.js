@@ -3,7 +3,6 @@ export const NAV_LINKS = [
   { id: "latest", label: "Latest", hasDropdown: false, url: "/latest" },
   { id: "trending", label: "Trending", hasDropdown: false, url: "/trending" },
   { id: "categories", label: "Categories", hasDropdown: true, url: "/category/startups" },
-  { id: "topics", label: "Topics", hasDropdown: true, url: "/topic/artificial-intelligence" },
   { id: "videos", label: "Videos", hasDropdown: false, url: "/videos" },
   { id: "newsletter", label: "Newsletter", hasDropdown: false, url: "/newsletter" }
 ];

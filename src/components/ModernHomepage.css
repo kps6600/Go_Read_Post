@@ -14,9 +14,9 @@
 .mhp-hero-popular-grid {
   display: grid;
   grid-template-columns: 1.85fr 1fr;
-  gap: 1.75rem;
-  margin-top: 1.5rem;
-  margin-bottom: 2.75rem;
+  gap: 1.35rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
   align-items: stretch;
 }
 
@@ -27,7 +27,7 @@
 @media (max-width: 1100px) {
   .mhp-hero-popular-grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 1.35rem;
   }
 }
 
@@ -36,11 +36,11 @@
   position: relative;
   border-radius: 18px;
   overflow: hidden;
-  min-height: 440px;
+  min-height: 380px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 2.5rem 2.5rem 2rem;
+  padding: 1.85rem 2rem 1.6rem;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -85,7 +85,7 @@
   font-size: 0.88rem;
   font-weight: 750;
   letter-spacing: 0.02em;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 20px;
   margin-bottom: 0;
   text-transform: capitalize;
@@ -99,12 +99,12 @@
 }
 
 .mhp-hero-title {
-  font-size: clamp(2.5rem, 3vw + 1rem, 3.5rem);
-  font-weight: 850;
-  line-height: 1.16;
-  letter-spacing: -0.025em;
+  font-size: clamp(1.28rem, 1.1vw + 0.5rem, 1.8rem);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
   color: #ffffff;
-  margin: 0 0 1.35rem;
+  margin: 0 0 0.75rem;
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -114,10 +114,10 @@
 }
 
 .mhp-hero-desc {
-  font-size: clamp(1.05rem, 0.4vw + 0.92rem, 1.25rem);
-  line-height: 1.6;
+  font-size: clamp(0.95rem, 0.25vw + 0.85rem, 1.12rem);
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.35rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -127,15 +127,15 @@
 .mhp-author-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.95rem;
+  gap: 10px;
+  font-size: 0.88rem;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1.65rem;
+  margin-bottom: 1.15rem;
 }
 
 .mhp-author-avatar {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.8);
@@ -148,12 +148,12 @@
 .mhp-hero-read-btn {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   background: #ffffff;
   color: #0f172a;
-  font-size: 0.96rem;
+  font-size: 0.88rem;
   font-weight: 750;
-  padding: 11px 24px;
+  padding: 8px 18px;
   border-radius: 30px;
   border: none;
   cursor: pointer;
@@ -223,7 +223,7 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
-  padding: 1.75rem 1.75rem;
+  padding: 1.25rem 1.35rem;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
@@ -238,8 +238,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.35rem;
-  padding-bottom: 0.95rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.65rem;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -250,8 +250,8 @@
 .mhp-section-title-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.55rem;
+  gap: 8px;
+  font-size: 1.28rem;
   font-weight: 700;
   color: #1e293b;
   letter-spacing: -0.015em;
@@ -262,13 +262,13 @@
 }
 
 .mhp-view-all-link {
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 750;
   color: #64748b;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   cursor: pointer;
   transition: color 0.15s ease;
 }
@@ -280,7 +280,7 @@
 .mhp-popular-list {
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
+  gap: 0.75rem;
   flex: 1;
   justify-content: space-between;
 }
@@ -288,7 +288,7 @@
 .mhp-popular-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -300,15 +300,15 @@
 }
 
 .mhp-popular-rank {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #0f172a;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.02rem;
+  font-size: 0.82rem;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -318,9 +318,9 @@
 }
 
 .mhp-popular-thumb {
-  width: 82px;
-  height: 82px;
-  border-radius: 14px;
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -328,16 +328,17 @@
 .mhp-popular-info {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 3px;
   flex: 1;
+  min-width: 0;
 }
 
 .mhp-popular-title {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 0.92rem;
+  font-weight: 750;
   color: #1e293b;
-  line-height: 1.35;
-  letter-spacing: -0.015em;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -355,7 +356,7 @@
 }
 
 .mhp-popular-meta {
-  font-size: 1rem;
+  font-size: 0.76rem;
   color: #64748b;
   font-weight: 600;
 }
@@ -535,21 +536,7 @@
 }
 
 .mhp-spotlight-pill {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  padding: 4px 11px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-  z-index: 2;
-  letter-spacing: 0.02em;
+  display: none !important;
 }
 
 /* ── Latest Blog Grid (4 cards in one row on desktop/laptop) ── */
@@ -715,7 +702,8 @@
   color: #0f172a;
   line-height: 1.4;
   letter-spacing: -0.01em;
-  margin: 0 0 0.55rem;
+  margin: 0 0 1rem;
+  flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -726,6 +714,7 @@
   overflow-wrap: break-word;
   word-break: normal;
   transition: color 0.15s ease;
+  max-height: 2.8em;
 }
 
 [data-theme='dark'] .mhp-blog-card-title {
@@ -733,27 +722,15 @@
 }
 
 .mhp-blog-card:hover .mhp-blog-card-title {
-  color: #ea580c;
+  color: var(--brand-primary, #dc2626);
 }
 
 [data-theme='dark'] .mhp-blog-card:hover .mhp-blog-card-title {
-  color: #fb923c;
+  color: #ef4444;
 }
 
 .mhp-blog-excerpt {
-  font-size: 0.875rem;
-  color: #64748b;
-  line-height: 1.55;
-  margin: 0 0 0.85rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  overflow-wrap: break-word;
-  word-break: normal;
-  flex: 1;
+  display: none !important;
 }
 
 [data-theme='dark'] .mhp-blog-excerpt {
@@ -868,12 +845,12 @@
 }
 
 .mhp-blog-readmore-btn:hover {
-  color: #ea580c;
+  color: var(--brand-primary, #dc2626);
   gap: 7px;
 }
 
 [data-theme='dark'] .mhp-blog-readmore-btn:hover {
-  color: #fb923c;
+  color: #ef4444;
 }
 
 .mhp-blog-readmore-btn .readmore-arrow {
@@ -915,15 +892,15 @@
 }
 
 .mhp-blog-footer-like-btn:hover {
-  border-color: #f43f5e;
-  color: #f43f5e;
-  background: rgba(244, 63, 94, 0.08);
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(220, 38, 38, 0.08);
 }
 
 .mhp-blog-footer-like-btn.active {
-  background: rgba(244, 63, 94, 0.12);
-  border-color: #f43f5e;
-  color: #f43f5e;
+  background: rgba(220, 38, 38, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
 }
 
 .mhp-blog-footer-like-btn .mhp-like-icon {
@@ -963,15 +940,15 @@
 }
 
 .mhp-blog-footer-save-btn:hover {
-  border-color: #ea580c;
-  color: #ea580c;
-  background: rgba(234, 88, 12, 0.08);
+  border-color: var(--brand-primary, #dc2626);
+  color: var(--brand-primary, #dc2626);
+  background: rgba(220, 38, 38, 0.08);
 }
 
 .mhp-blog-footer-save-btn.active {
-  background: rgba(234, 88, 12, 0.12);
-  border-color: #ea580c;
-  color: #ea580c;
+  background: rgba(220, 38, 38, 0.12);
+  border-color: var(--brand-primary, #dc2626);
+  color: var(--brand-primary, #dc2626);
 }
 
 .mhp-blog-footer-save-btn .mhp-save-icon {
@@ -984,7 +961,7 @@
 }
 
 .mhp-blog-footer-save-btn.active svg {
-  fill: #ea580c;
+  fill: var(--brand-primary, #dc2626);
 }
 
 @media (max-width: 380px) {
@@ -1016,7 +993,7 @@ main:has(.mhp-container) ~ .site-footer {
 .mhp-newsletter-card {
   position: relative;
   background: #fff1f2;
-  border: 1px solid #ffe4e6;
+  border: 1px solid #fee2e2;
   border-radius: 20px;
   padding: 2.5rem 3rem;
   display: flex;
@@ -1050,14 +1027,14 @@ main:has(.mhp-container) ~ .site-footer {
 .mhp-newsletter-icon-wrap {
   width: 64px;
   height: 64px;
-  background: #f43f5e;
+  background: #ef4444;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   flex-shrink: 0;
-  box-shadow: 0 8px 18px rgba(244, 63, 94, 0.3);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.3);
 }
 
 .mhp-newsletter-label {
@@ -1164,18 +1141,18 @@ main:has(.mhp-container) ~ .site-footer {
 }
 
 .mhp-card-save-btn:hover {
-  background: #ea580c;
+  background: var(--brand-primary, #dc2626);
   color: #ffffff;
-  border-color: #ea580c;
+  border-color: var(--brand-primary, #dc2626);
   transform: scale(1.12);
-  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.45);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.45);
 }
 
 .mhp-card-save-btn.active {
-  background: #ea580c;
+  background: var(--brand-primary, #dc2626);
   color: #ffffff;
-  border-color: #ea580c;
-  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);
+  border-color: var(--brand-primary, #dc2626);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.5);
 }
 
 .mhp-card-save-btn.active svg {
@@ -1209,10 +1186,10 @@ main:has(.mhp-container) ~ .site-footer {
 }
 
 .mhp-hero-save-btn.active {
-  background: #ea580c;
-  border-color: #ea580c;
+  background: var(--brand-primary, #dc2626);
+  border-color: var(--brand-primary, #dc2626);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
 }
 
 .mhp-hero-save-btn.active svg {
@@ -1243,19 +1220,30 @@ main:has(.mhp-container) ~ .site-footer {
 }
 
 .mhp-popular-save-btn:hover {
-  border-color: #ea580c;
-  color: #ea580c;
-  background: rgba(234, 88, 12, 0.1);
+  border-color: var(--brand-primary, #dc2626);
+  color: var(--brand-primary, #dc2626);
+  background: rgba(220, 38, 38, 0.1);
   transform: scale(1.08);
 }
 
 .mhp-popular-save-btn.active {
-  border-color: #ea580c;
-  color: #ea580c;
-  background: rgba(234, 88, 12, 0.15);
+  border-color: var(--brand-primary, #dc2626);
+  color: var(--brand-primary, #dc2626);
+  background: rgba(220, 38, 38, 0.15);
 }
 
 .mhp-popular-save-btn.active svg {
-  fill: #ea580c;
+  fill: var(--brand-primary, #dc2626);
+}
+
+@media (max-width: 640px) {
+  .mhp-hero-card {
+    padding: 1.75rem 1.25rem 1.5rem;
+    min-height: 380px;
+  }
+  .mhp-hero-title {
+    font-size: 1.28rem;
+    line-height: 1.35;
+  }
 }
 

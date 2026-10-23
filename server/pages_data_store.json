@@ -44,36 +44,6 @@
               "primaryBtnText": "Read More",
               "link": "/stories/techsparks-2024-bengaluru",
               "slug": "techsparks-2024-bengaluru"
-            },
-            {
-              "id": "6ad5c3febb37b499a59f41db",
-              "articleId": "6ad5c3febb37b499a59f41db",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "excerpt": "<p>Updated live content from Admin CMS workbench.</p>",
-              "category": "Startups",
-              "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
-              "author": "Editorial Bureau",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
-              "date": "2026-10-08T08:55:07.642Z",
-              "readTime": "5 min read min read",
-              "primaryBtnText": "Read More",
-              "link": "/stories/how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39"
-            },
-            {
-              "id": "6ad5c3febb37b499a59f41da",
-              "articleId": "6ad5c3febb37b499a59f41da",
-              "title": "Bootstrapping ₹12 Cr organic skincare from a single kitchen stove",
-              "excerpt": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
-              "category": "Startups",
-              "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
-              "author": "Editorial Bureau",
-              "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:30:18.852Z",
-              "readTime": "5 min read min read",
-              "primaryBtnText": "Read More",
-              "link": "/stories/sim-8",
-              "slug": "sim-8"
             }
           ],
           "popularArticles": [
@@ -1310,7 +1280,7 @@
               "id": "6ad5c3febb37b499a59f41da",
               "title": "Bootstrapping ₹12 Cr organic skincare from a single kitchen stove",
               "excerpt": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
-              "category": "Startups",
+              "category": "HerStory",
               "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
               "author": "Editorial Bureau",
               "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80",
@@ -1318,13 +1288,21 @@
               "readTime": "5 min read",
               "slug": "sim-8",
               "_id": "6ad5c3febb37b499a59f41da",
-              "categoryName": "Startups",
+              "categoryName": "HerStory",
               "categoryLabel": "Startups",
               "coverImage": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
               "heroImage": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
               "authorName": "Editorial Bureau",
               "readingTime": 5,
-              "views": 450
+              "views": 450,
+              "tags": [
+                "HerStory",
+                "D2C",
+                "Startups"
+              ],
+              "topics": [
+                "FOUNDER JOURNEY"
+              ]
             },
             {
               "id": "6ad5c3febb37b499a59f41d9",
@@ -1575,7 +1553,7 @@
               "authorName": "Sunita Sharma",
               "authorTitle": "Agrarian Affairs Editor, HerStory",
               "categoryId": "6ac7356dcb836f17b0f09ef3",
-              "categoryName": "Startups",
+              "categoryName": "HerStory",
               "claps": 210,
               "content": "",
               "contentBlocks": [],
@@ -1596,16 +1574,20 @@
               "subCategoryId": null,
               "subtitle": "Overcoming droughts and debt through millet cultivation and farmer collective bargaining.",
               "tagIds": [],
-              "tags": [],
+              "tags": [
+                "Grassroots",
+                "Agriculture",
+                "Sustainability"
+              ],
               "title": "Women farmers of Vidarbha turning dryland tracts into organic profit",
               "topicIds": [],
               "topics": [
-                "GRASSROOTS"
+                "RURAL HEROES"
               ],
               "updatedAt": "2026-10-19T07:17:18.843Z",
               "views": 3204,
               "id": "6ad5c3febb37b499a59f41d5",
-              "category": "Startups",
+              "category": "HerStory",
               "categoryLabel": "Startups",
               "image": "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=900&auto=format&fit=crop&q=80",
               "coverImage": "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=900&auto=format&fit=crop&q=80",
@@ -2153,16 +2135,17 @@
               "authorTitle": "Consumer Brands & D2C",
               "authorAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80",
               "categoryId": "6ac7356dcb836f17b0f09ef3",
-              "categoryName": "Startups",
+              "categoryName": "Enterprise",
               "subCategoryId": null,
               "topicIds": [],
               "tagIds": [],
               "tags": [
-                "smbstory",
-                "just-in"
+                "Retail",
+                "Manufacturing",
+                "Unicorn"
               ],
               "topics": [
-                "STARTUPS"
+                "ENTERPRISE"
               ],
               "contentType": "article",
               "readingTime": "5 min read",
@@ -2181,7 +2164,7 @@
               "updatedAt": "2026-10-19T07:17:18.714Z",
               "__v": 0,
               "id": "6ad5c293a4876bace95a23e7",
-              "category": "Startups",
+              "category": "Enterprise",
               "categoryLabel": "Startups",
               "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop&q=80",
               "coverImage": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop&q=80",
@@ -2608,16 +2591,17 @@
               "authorTitle": "Staff Reporter",
               "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
               "categoryId": "6ac7356dcb836f17b0f09ef5",
-              "categoryName": "Enterprise",
+              "categoryName": "Leadership Lens",
               "subCategoryId": null,
               "topicIds": [],
               "tagIds": [],
               "tags": [
-                "goreadpost",
-                "leadership"
+                "Policy",
+                "Governance",
+                "Investments"
               ],
               "topics": [
-                "Leadership Lens"
+                "POLICY & GOVERNANCE"
               ],
               "contentType": "article",
               "readingTime": "9 min read",
@@ -2636,7 +2620,7 @@
               "updatedAt": "2026-10-19T07:17:18.778Z",
               "__v": 0,
               "id": "6ad5c294a4876bace95a23ef",
-              "category": "Enterprise",
+              "category": "Leadership Lens",
               "categoryLabel": "Enterprise",
               "image": "https://images.yourstory.com/cs/2/1a70b4f0170611edbdd8b5d28d859895/HowAndhraChhattisgarhandBiharareoutsmartingIndiasricheststatesoninvestmentswithoutoutspending-1785988535145.jpg?mode=min&ar=2%3A1&format=auto&w=1200&q=80",
               "coverImage": "https://images.yourstory.com/cs/2/1a70b4f0170611edbdd8b5d28d859895/HowAndhraChhattisgarhandBiharareoutsmartingIndiasricheststatesoninvestmentswithoutoutspending-1785988535145.jpg?mode=min&ar=2%3A1&format=auto&w=1200&q=80",
@@ -5533,16 +5517,16 @@
               "authorTitle": "Editor, SocialStory",
               "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
               "categoryId": "6ac7356dcb836f17b0f09ef3",
-              "categoryName": "Startups",
+              "categoryName": "SocialStory",
               "subCategoryId": null,
               "topicIds": [],
               "tagIds": [],
               "tags": [
-                "socialstory",
-                "social-story"
+                "Education",
+                "Social Impact"
               ],
               "topics": [
-                "YouthSpark"
+                "EDUCATION"
               ],
               "contentType": "article",
               "readingTime": "3 min read",
@@ -5561,7 +5545,7 @@
               "updatedAt": "2026-10-19T07:17:18.054Z",
               "__v": 0,
               "id": "6ad5c294a4876bace95a242f",
-              "category": "Startups",
+              "category": "SocialStory",
               "categoryLabel": "Startups",
               "image": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80",
               "coverImage": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80",
@@ -9043,9 +9027,9 @@
     "title": "About Us",
     "slug": "about",
     "brand": "GoReadPost",
-    "description": "Learn about GoReadPost's mission, editorial charter, and global bureaus.",
-    "heroHeadline": "Powering the Stories That Build Tomorrow",
-    "heroSubhead": "GoReadPost is India's leading digital publication for startup stories, venture capital news, and emerging technology. We bring you insights, analysis, and real stories from the people shaping Bharat's innovation economy.",
+    "description": "Welcome to Our Blog — Ideas, Stories & Inspiration. We believe every great idea deserves to be shared.",
+    "heroHeadline": "Welcome to Our Blog — Ideas, Stories & Inspiration",
+    "heroSubhead": "We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.",
     "heroBanner": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80",
     "status": "published",
     "showInNav": true,
@@ -9136,147 +9120,86 @@
     "data": {
       "hero": {
         "badge": "",
-        "titlePrefix": "Where Thoughts Find Their",
-        "titleHighlight": "Infinite Orbit",
-        "subtitle": "GoReadPost is an independent publishing platform designed to amplify voices that matter, spark curiosity, and build a global community around transformative ideas.",
-        "primaryBtnText": "Discover Our Story",
-        "primaryBtnTarget": "#who-we-are",
-        "secondaryBtnText": "Meet the Team",
-        "secondaryBtnTarget": "#team",
-        "trustStats": [
-          {
-            "value": "250K+",
-            "label": "Monthly Readers"
-          },
-          {
-            "value": "15K+",
-            "label": "Published Perspectives"
-          },
-          {
-            "value": "100%",
-            "label": "Ad-Free Sanctuary"
-          }
-        ]
+        "titlePrefix": "Welcome to Our Blog —",
+        "titleHighlight": "Ideas, Stories & Inspiration",
+        "introLead": "We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.",
+        "missionStatement": "Our mission is simple: to make useful information accessible, engaging, and easy to understand.",
+        "primaryBtnText": "Explore Latest Articles",
+        "primaryBtnTarget": "/latest",
+        "secondaryBtnText": "Contact Us",
+        "secondaryBtnTarget": "/contact"
       },
       "whoWeAre": {
-        "headingPrefix": "Built for thinkers, writers, and ",
-        "headingHighlight": "curious minds.",
-        "paragraph1": "Founded in 2023, GoReadPost began with a single vision: to strip away the noise of modern algorithms and give long-form content the thoughtful home it deserves.",
-        "paragraph2": "We empower writers with intuitive tools, sleek visual formats, and direct audience connections, while offering readers an ad-free sanctuary for modern tech, culture, design, and philosophy insights.",
-        "highlightCards": [
+        "badge": "Who We Are",
+        "title": "Who We Are",
+        "content": "We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life."
+      },
+      "whatWeShare": {
+        "badge": "What We Share",
+        "title": "What We Share",
+        "lead": "Our blog brings you carefully prepared content across a range of topics, including:",
+        "items": [
           {
-            "title": "Ad-Free Experience",
-            "desc": "Pure, uninterrupted reading for continuous focus.",
-            "accent": "card-cyan-accent"
+            "id": "share-1",
+            "icon": "book",
+            "title": "Informative Articles",
+            "description": "Useful insights to help you learn and grow."
           },
           {
-            "title": "Creator First",
-            "desc": "Monetization models that directly empower authors.",
-            "accent": "card-magenta-accent"
-          }
-        ],
-        "values": [
-          {
-            "id": "val-1",
-            "icon": "feather",
-            "title": "Uncompromising Quality",
-            "desc": "Every story published on GoReadPost undergoes refined community curation to maintain high literary standards.",
-            "colorBox": "box-blue"
+            "id": "share-2",
+            "icon": "lightbulb",
+            "title": "Tips & Guides",
+            "description": "Practical advice you can apply in everyday life."
           },
           {
-            "id": "val-2",
-            "icon": "globe",
-            "title": "Global Knowledge Exchange",
-            "desc": "Connecting perspective-shifting stories from over 120 countries, translated natively in real time.",
-            "colorBox": "box-purple"
+            "id": "share-3",
+            "icon": "trending",
+            "title": "Trending Topics",
+            "description": "Fresh perspectives on what's happening around us."
           },
           {
-            "id": "val-3",
-            "icon": "shield",
-            "title": "Data & Privacy Respect",
-            "desc": "Zero invasive trackers, zero sold personal data. Your curiosity remains strictly your own business.",
-            "colorBox": "box-rose"
+            "id": "share-4",
+            "icon": "sparkles",
+            "title": "Stories & Inspiration",
+            "description": "Ideas that spark curiosity and creativity."
           }
         ]
       },
-      "statsBar": {
-        "stats": [
-          {
-            "num": "250K+",
-            "label": "ACTIVE READERS",
-            "isCyan": false
-          },
-          {
-            "num": "15K+",
-            "label": "PUBLISHED WRITERS",
-            "isCyan": false
-          },
-          {
-            "num": "85M+",
-            "label": "MONTHLY READS",
-            "isCyan": false
-          },
-          {
-            "num": "120+",
-            "label": "COUNTRIES REACHED",
-            "isCyan": true
-          }
+      "mission": {
+        "badge": "Our Mission",
+        "title": "Our Mission",
+        "description": "Our mission is to inform, inspire, and empower our readers through quality content. We focus on making every article meaningful, easy to read, and worth your time."
+      },
+      "vision": {
+        "badge": "Our Vision",
+        "title": "Our Vision",
+        "description": "We aspire to build a trusted blogging community where readers can explore ideas, discover opportunities, and keep learning. Your time and trust matter to us, and we strive to make every visit worthwhile."
+      },
+      "whyChooseUs": {
+        "badge": "Why Choose Us?",
+        "title": "Why Choose Us?",
+        "points": [
+          "Reader-focused and easy-to-understand content.",
+          "Informative articles designed to provide real value.",
+          "A commitment to quality, clarity, and continuous improvement.",
+          "A welcoming platform where curiosity leads to discovery."
         ]
       },
-      "teamSection": {
-        "title": "Meet Our Core Team",
-        "subtitle": "The engineers, editors, and designers shaping the future of digital writing.",
-        "members": [
-          {
-            "id": "team-1",
-            "name": "Elena Rostova",
-            "role": "Founder & Editor-in-Chief",
-            "bio": "Former tech journalist passionate about long-form essayist culture and decentralization.",
-            "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
-            "linkedin": "https://linkedin.com",
-            "github": "",
-            "website": "https://goreadpost.com",
-            "community": ""
-          },
-          {
-            "id": "team-2",
-            "name": "Marcus Chen",
-            "role": "Head of Product",
-            "bio": "Design-obsessed developer focused on crafting minimalist writing user interfaces.",
-            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
-            "linkedin": "https://linkedin.com",
-            "github": "https://github.com",
-            "website": "",
-            "community": ""
-          },
-          {
-            "id": "team-3",
-            "name": "Sarah Jenkins",
-            "role": "Community Director",
-            "bio": "Connecting writers, hosting digital workshops, and cultivating creator mentorships.",
-            "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-            "linkedin": "https://linkedin.com",
-            "github": "",
-            "website": "",
-            "community": "https://discord.com"
-          },
-          {
-            "id": "team-4",
-            "name": "Devon Vance",
-            "role": "Lead AI Engineer",
-            "bio": "Building intelligent context discovery systems that respect user data privacy.",
-            "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
-            "linkedin": "",
-            "github": "https://github.com",
-            "website": "https://goreadpost.com",
-            "community": ""
-          }
-        ]
+      "community": {
+        "badge": "Join Our Community",
+        "title": "Join Our Community",
+        "paragraph1": "Thank you for being part of our journey. Whether you're visiting for the first time or returning for another article, we're glad you're here.",
+        "paragraph2": "Explore our latest posts, share your thoughts, and stay connected as we continue to learn and grow together.",
+        "contactQuestion": "Have a question or want to collaborate?",
+        "contactActionText": "Visit our Contact Us page. We'd love to hear from you.",
+        "contactBtnText": "Visit Contact Us Page",
+        "contactBtnTarget": "/contact",
+        "tagline": "Read. Discover. Learn. Grow."
       },
       "seo": {
-        "title": "About Us | GoReadPost Media",
-        "description": "GoReadPost is the premier digital journalism network chronicling breakthrough founders, deep technology, AI revolutions, and venture capital.",
-        "keywords": "about us, GoReadPost, editorial, tech media, startup journalism"
+        "title": "About Us | GoReadPost",
+        "description": "Welcome to Our Blog — Ideas, Stories & Inspiration. Discover fresh perspectives, informative articles, practical tips, and inspiring stories.",
+        "keywords": "About Us, GoReadPost, Ideas Stories Inspiration, Informative Articles, Tips & Guides, Trending Topics"
       }
     }
   },
@@ -9584,32 +9507,6 @@
         "description": "Unfiltered founder playbooks, bootstrapping lessons, and scaling blueprints from India’s audacious builders.",
         "keywords": "founder stories, startups, zero to one, bootstrapped heroes, entrepreneurship, playbooks"
       }
-    }
-  },
-  {
-    "id": "topics",
-    "title": "Topics & Taxonomy Directory",
-    "slug": "topics",
-    "brand": "GoReadPost",
-    "description": "Thematic directory organizing startup insights, technical audits, and founder playbooks across 65+ domain topics.",
-    "heroHeadline": "Browse by Topics & Domains",
-    "heroSubhead": "Discover curated startup intelligence, technical audits, founder playbooks, and market analyses grouped by domain themes.",
-    "heroBanner": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
-    "status": "published",
-    "showInNav": true,
-    "order": 7,
-    "sections": [],
-    "seo": {
-      "title": "Topics Directory | GoReadPost Media",
-      "description": "Explore the complete directory of startup, technology, venture capital, and deeptech topics chronicled by GoReadPost.",
-      "keywords": [
-        "topics",
-        "startups",
-        "technology",
-        "deeptech",
-        "ai",
-        "fintech"
-      ]
     }
   }
 ]

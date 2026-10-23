@@ -1,8 +1,10 @@
 import React from 'react';
-import { Menu, Database, RefreshCw, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Menu, Database, RefreshCw, ExternalLink, ShieldCheck, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export default function AdminTopNavbar({
   currentPath,
+  isSidebarOpen = true,
+  onToggleSidebar,
   onOpenMobileSidebar,
   onViewSite,
   isDbConnected = true,
@@ -35,11 +37,12 @@ export default function AdminTopNavbar({
       <div className="topbar-left">
         <button
           type="button"
-          className="topbar-mobile-menu-btn"
-          onClick={onOpenMobileSidebar}
-          aria-label="Open navigation menu"
+          className="topbar-sidebar-toggle-btn"
+          onClick={onToggleSidebar || onOpenMobileSidebar}
+          aria-label={isSidebarOpen ? "Hide sidebar" : "Open sidebar"}
+          title={isSidebarOpen ? "Hide sidebar (Ctrl+B)" : "Open sidebar (Ctrl+B)"}
         >
-          <Menu size={20} />
+          {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
         </button>
 
         <div className="topbar-breadcrumbs">

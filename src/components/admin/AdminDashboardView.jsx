@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   FileText, Globe, CheckCircle, Clock, Eye, ThumbsUp, Plus, 
   ArrowUpRight, Image as ImageIcon, Navigation, Settings, Search,
@@ -123,7 +123,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
     const name = (cat?.name || '').toLowerCase();
     
     if (slug.includes('startup') || name.includes('startup')) {
-      return { icon: Rocket, color: '#e11d48', bg: '#fff1f2' };
+      return { icon: Rocket, color: '#dc2626', bg: '#fff1f2' };
     }
     if ((slug.includes('tech') && !slug.includes('deeptech')) || name === 'technology') {
       return { icon: Cpu, color: '#2563eb', bg: '#eff6ff' };
@@ -246,7 +246,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/videos')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
+          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
             <Tv size={22} />
           </div>
           <div className="adv-stat-content">

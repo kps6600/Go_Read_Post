@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════════════════════════════════
+﻿/* ══════════════════════════════════════════════════════════════════
    ADMIN FOUNDER FIRST LIVE EDIT STUDIO (.afv-*)
    ══════════════════════════════════════════════════════════════════ */
 
@@ -107,16 +107,16 @@
 }
 
 .afv-header-btn-add:hover {
-  border-color: #e11d48;
-  color: #e11d48;
-  background: rgba(225, 29, 72, 0.04);
+  border-color: #dc2626;
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.04);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
 }
 
 [data-theme='dark'] .afv-header-btn-add:hover {
-  background: rgba(225, 29, 72, 0.12);
-  border-color: #e11d48;
+  background: rgba(220, 38, 38, 0.12);
+  border-color: #dc2626;
   color: #fda4af;
 }
 
@@ -128,20 +128,20 @@
   padding: 8px 22px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .afv-header-btn-save:hover:not(:disabled) {
-  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);
+  background: linear-gradient(135deg, #b91c1c 0%, #9f1239 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
 }
 
 .afv-header-btn-save:disabled {
@@ -168,19 +168,19 @@
   padding: 12px 24px;
   border-radius: 999px;
   border: none;
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
   font-size: 0.92rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.45);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .afv-floating-save-btn:hover:not(:disabled) {
-  background: #be123c;
+  background: #b91c1c;
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 12px 28px rgba(225, 29, 72, 0.55);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.55);
 }
 
 .afv-floating-save-btn:disabled {
@@ -212,8 +212,8 @@
 }
 
 .afv-editable-badge-wrapper:hover {
-  outline: 2px dashed #e11d48;
-  background: rgba(225, 29, 72, 0.05);
+  outline: 2px dashed #dc2626;
+  background: rgba(220, 38, 38, 0.05);
 }
 
 .afv-quick-edit-icon {
@@ -223,10 +223,10 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
   margin-left: 4px;
-  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.3);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
 }
 
 /* ── Filter Pills Live Bar ── */
@@ -246,9 +246,9 @@
 }
 
 .afv-add-tag-inline-btn:hover {
-  border-color: #e11d48;
-  color: #e11d48;
-  background: rgba(225, 29, 72, 0.05);
+  border-color: #dc2626;
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.05);
 }
 
 .afv-tag-item-wrap {
@@ -291,8 +291,8 @@
 }
 
 .afv-live-card:hover {
-  outline: 2px solid #e11d48;
-  box-shadow: 0 12px 28px rgba(225, 29, 72, 0.12);
+  outline: 2px solid #dc2626;
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.12);
 }
 
 .afv-card-hover-toolbar {
@@ -486,8 +486,8 @@
 .afv-input:focus,
 .afv-textarea:focus,
 .afv-select:focus {
-  border-color: #e11d48;
-  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .afv-textarea {
@@ -516,7 +516,7 @@
   padding: 8px 20px;
   border-radius: 8px;
   border: none;
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
   font-size: 0.84rem;
   font-weight: 750;
@@ -524,7 +524,7 @@
 }
 
 .afv-btn-submit:hover {
-  background: #be123c;
+  background: #b91c1c;
 }
 
 .afv-icon-btn {
@@ -607,8 +607,8 @@
 }
 
 .afv-picker-search-box:focus-within {
-  border-color: #e11d48;
-  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
   background: #ffffff;
 }
 
@@ -678,9 +678,9 @@
 }
 
 .afv-picker-cat-btn.active {
-  background: #e11d48;
+  background: #dc2626;
   color: #ffffff;
-  border-color: #e11d48;
+  border-color: #dc2626;
 }
 
 /* ── Picker Articles Viewport ── */
@@ -763,8 +763,8 @@
 }
 
 .afv-picker-card:hover {
-  border-color: #e11d48;
-  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.14);
+  border-color: #dc2626;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.14);
   transform: translateY(-2px);
 }
 
@@ -881,20 +881,20 @@
   padding: 8px 12px;
   border-radius: 9px;
   border: none;
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .afv-picker-btn-quick:hover {
-  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);
+  background: linear-gradient(135deg, #b91c1c 0%, #9f1239 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
 }
 
 /* ── Picker Footer ── */
@@ -947,6 +947,6 @@
 }
 
 .afv-picker-btn-manual:hover {
-  border-color: #e11d48;
-  color: #e11d48;
+  border-color: #dc2626;
+  color: #dc2626;
 }

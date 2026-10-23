@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Send, Globe, ArrowUp, ArrowUpRight, ShieldCheck, 
   ExternalLink, Rss, MessageSquare, Radio
@@ -114,9 +114,9 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
           { label: 'Home', url: '/', badge: '', badgeColor: '', openInNewTab: false },
           { label: 'Latest', url: '/latest', badge: '', badgeColor: '', openInNewTab: false },
           { label: 'Categories', url: '/categories', badge: '', badgeColor: '', openInNewTab: false },
-          { label: 'Topics', url: '/topics', badge: '', badgeColor: '', openInNewTab: false },
           { label: 'Trending', url: '/trending', badge: '', badgeColor: '', openInNewTab: false },
-          { label: 'About Us', url: '/about', badge: '', badgeColor: '', openInNewTab: false }
+          { label: 'About Us', url: '/about', badge: '', badgeColor: '', openInNewTab: false },
+          { label: 'Advertise With Us', url: '/advertise', badge: 'Partner', badgeColor: '#10b981', openInNewTab: false }
         ]
       },
       {
@@ -288,18 +288,11 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
     <footer className="site-footer">
       <div className="container footer-container">
         
-        {/* Top Utility Bar: Live Editorial Desk & Social Channels */}
-        <div className="footer-top-bar">
-          <div className="footer-live-status">
-            <span className="live-pulse-dot" />
-            <span className="live-status-text">
-              <strong>{liveDeskText}</strong> • {liveLocations}
-            </span>
-          </div>
-
-          <div className="footer-top-actions">
+        {/* Top Utility Bar: Social Channels */}
+        <div className="footer-top-bar" style={{ justifyContent: 'center' }}>
+          <div className="footer-top-actions" style={{ justifyContent: 'center', width: '100%' }}>
             {/* Social Connect Icons */}
-            <div className="footer-social-icons">
+            <div className="footer-social-icons" style={{ justifyContent: 'center' }}>
               {socialList.map((item, idx) => (
                 <a 
                   key={idx}
@@ -344,7 +337,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
                     referrerPolicy="no-referrer"
                   />
                   {(siteSettings?.siteName || siteSettings?.brandPrefix) && (
-                    <span style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', color: '#fff' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', color: '#0f172a' }}>
                       {siteSettings?.siteName || siteSettings?.brandPrefix}
                       {siteSettings?.brandSuffix ? <span className="dot">{siteSettings.brandSuffix}</span> : null}
                     </span>
@@ -369,7 +362,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
                     {siteSettings?.brandEmblem || 'G'}
                   </span>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1.15 }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em', color: '#0f172a', lineHeight: 1.15 }}>
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.04em', marginTop: '1px' }}>
@@ -411,7 +404,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
                         <span 
                           className="footer-pill-badge" 
                           style={{ 
-                            background: lnk.badgeColor || 'var(--brand-primary, #e11d48)', 
+                            background: lnk.badgeColor || 'var(--brand-primary, #dc2626)', 
                             color: '#fff' 
                           }}
                         >

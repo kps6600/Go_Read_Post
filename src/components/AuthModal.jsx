@@ -174,9 +174,9 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
                   style={{
                     padding: '0.35rem 0.75rem',
                     borderRadius: '6px',
-                    border: '1px solid #ea580c',
-                    background: '#fff7ed',
-                    color: '#ea580c',
+                    border: '1px solid var(--brand-primary, #dc2626)',
+                    background: '#fee2e2',
+                    color: 'var(--brand-primary, #dc2626)',
                     fontWeight: 750,
                     fontSize: '0.78rem',
                     cursor: 'pointer',

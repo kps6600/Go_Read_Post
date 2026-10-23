@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Hash, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, 
   AlertCircle, AlertTriangle, CheckCircle, Check, X, Globe, 
@@ -352,13 +352,13 @@ export default function AdminTopicsView({ onShowToast }) {
           <ChevronRight size={13} />
           <span>Taxonomy & Entities</span>
           <ChevronRight size={13} />
-          <span style={{ color: 'var(--brand-primary, #e11d48)', fontWeight: 600 }}>Topics</span>
+          <span style={{ color: 'var(--brand-primary, #dc2626)', fontWeight: 600 }}>Topics</span>
         </nav>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Hash size={26} color="var(--brand-primary, #e11d48)" />
+              <Hash size={26} color="var(--brand-primary, #dc2626)" />
               Topics
             </h1>
             <p style={{ margin: '0.3rem 0 0', color: '#64748b', fontSize: '0.92rem' }}>
@@ -398,14 +398,14 @@ export default function AdminTopicsView({ onShowToast }) {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '0.65rem 1.35rem',
-                backgroundColor: 'var(--brand-primary, #e11d48)',
+                backgroundColor: 'var(--brand-primary, #dc2626)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '9px',
                 fontSize: '0.9rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(225, 29, 72, 0.28)'
+                boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)'
               }}
             >
               <Plus size={17} />
@@ -607,7 +607,7 @@ export default function AdminTopicsView({ onShowToast }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               color: '#fff',
               padding: '3px 10px',
               borderRadius: '20px',
@@ -619,7 +619,7 @@ export default function AdminTopicsView({ onShowToast }) {
             <button
               type="button"
               onClick={() => setSelectedIds(new Set(filteredAndSorted.map(t => t._id || t.slug)))}
-              style={{ background: 'none', border: 'none', color: '#e11d48', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'underline' }}
+              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'underline' }}
             >
               Select All ({filteredAndSorted.length})
             </button>
@@ -682,7 +682,7 @@ export default function AdminTopicsView({ onShowToast }) {
                 alignItems: 'center',
                 gap: '5px',
                 padding: '6px 14px',
-                backgroundColor: '#e11d48',
+                backgroundColor: '#dc2626',
                 border: 'none',
                 borderRadius: '7px',
                 fontSize: '0.82rem',
@@ -1434,14 +1434,14 @@ export default function AdminTopicsView({ onShowToast }) {
                   disabled={saving}
                   style={{
                     padding: '0.65rem 1.5rem',
-                    background: 'var(--brand-primary, #e11d48)',
+                    background: 'var(--brand-primary, #dc2626)',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '0.88rem',
                     fontWeight: 700,
                     color: '#ffffff',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
                   }}
                 >
                   {saving ? 'Saving...' : editingTopic ? 'Save Changes' : 'Create Topic'}
@@ -1511,7 +1511,7 @@ export default function AdminTopicsView({ onShowToast }) {
                       padding: '1rem',
                       marginBottom: '1rem'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#be123c', fontWeight: 700, fontSize: '0.88rem', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b91c1c', fontWeight: 700, fontSize: '0.88rem', marginBottom: '6px' }}>
                         <AlertCircle size={16} />
                         <span>Topic is associated with {usageData.totalCount} article(s)</span>
                       </div>

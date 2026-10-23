@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   Calendar, MapPin, Users, Award, Sparkles, ArrowRight, Play, CheckCircle2, 
   ExternalLink, Ticket, ShieldCheck, Zap, Globe, Star, ArrowLeft
@@ -115,7 +115,7 @@ export default function TechSparksPage({ onBackToHome, onSelectStory }) {
           <span>Back to Home</span>
         </button>
         <div className="tsp-badge-top">
-          <Sparkles size={14} color="#e11d48" />
+          <Sparkles size={14} color="#dc2626" />
           <span>16TH EDITION • ASIA'S LARGEST STARTUP SUMMIT</span>
         </div>
       </div>
@@ -138,21 +138,21 @@ export default function TechSparksPage({ onBackToHome, onSelectStory }) {
 
             <div className="tsp-meta-cards-row">
               <div className="tsp-meta-box">
-                <Calendar size={18} color="#e11d48" />
+                <Calendar size={18} color="#dc2626" />
                 <div>
                   <strong>OCTOBER 22 - 24, 2026</strong>
                   <span>3 Days • 4 Specialized Tracks</span>
                 </div>
               </div>
               <div className="tsp-meta-box">
-                <MapPin size={18} color="#e11d48" />
+                <MapPin size={18} color="#dc2626" />
                 <div>
                   <strong>BENGALURU, INDIA</strong>
                   <span>Taj West End & Virtual Live Stream</span>
                 </div>
               </div>
               <div className="tsp-meta-box">
-                <Users size={18} color="#e11d48" />
+                <Users size={18} color="#dc2626" />
                 <div>
                   <strong>5,000+ DELEGATES</strong>
                   <span>150+ Unicorn Founders & Investors</span>
@@ -281,7 +281,7 @@ export default function TechSparksPage({ onBackToHome, onSelectStory }) {
               <ul className="tsp-pass-features">
                 {pass.features.map((feat, fIdx) => (
                   <li key={fIdx}>
-                    <CheckCircle2 size={16} color={pass.popular ? '#e11d48' : '#10b981'} />
+                    <CheckCircle2 size={16} color={pass.popular ? '#dc2626' : '#10b981'} />
                     <span>{feat}</span>
                   </li>
                 ))}

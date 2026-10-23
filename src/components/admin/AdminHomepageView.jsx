@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   ArrowUp, ArrowDown, Eye, EyeOff, Save, RefreshCw, 
   AlertCircle, CheckCircle, X, Search, FileText, ArrowLeft,
@@ -15,7 +15,7 @@ const SECTION_META = {
   hero_popular: {
     label: 'Hero Slider & Popular Posts',
     icon: Flame,
-    color: '#e11d48',
+    color: '#dc2626',
     bg: '#ffe4e6',
     defaultDesc: 'Primary hero editorial slider (left) and top 5 ranked articles sidebar (right).'
   },
@@ -351,14 +351,14 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
               alignItems: 'center',
               gap: '8px',
               padding: '8px 20px',
-              background: '#e11d48',
+              background: '#dc2626',
               color: '#fff',
               border: 'none',
               borderRadius: '8px',
               fontWeight: 700,
               fontSize: '0.88rem',
               cursor: saving ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
             }}
           >
             <Save size={16} />
@@ -504,12 +504,12 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                         onClick={() => openArticleSelector(sec)}
                         style={{
                           padding: '7px 12px',
-                          border: currentIds.length > 0 ? '1px solid #e11d48' : '1px solid #cbd5e1',
+                          border: currentIds.length > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
                           background: currentIds.length > 0 ? '#fff1f2' : '#fff',
                           borderRadius: '6px',
                           fontSize: '0.8rem',
                           fontWeight: 700,
-                          color: currentIds.length > 0 ? '#e11d48' : '#334155',
+                          color: currentIds.length > 0 ? '#dc2626' : '#334155',
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -677,7 +677,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                     onClick={() => toggleArticleSelection(art._id)}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '8px',
-                      border: isSelected ? '1px solid #e11d48' : '1px solid #e2e8f0',
+                      border: isSelected ? '1px solid #dc2626' : '1px solid #e2e8f0',
                       background: isSelected ? '#fff1f2' : '#fff', cursor: 'pointer'
                     }}
                   >
@@ -685,7 +685,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => {}}
-                      style={{ cursor: 'pointer', accentColor: '#e11d48' }}
+                      style={{ cursor: 'pointer', accentColor: '#dc2626' }}
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>{art.title}</div>
@@ -702,7 +702,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
               </span>
               <button
                 onClick={() => setSelectedSectionForArticles(null)}
-                style={{ padding: '8px 20px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
+                style={{ padding: '8px 20px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
               >
                 Done
               </button>
