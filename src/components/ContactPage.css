@@ -414,7 +414,7 @@
 .contact-direct-title-group h3 {
   font-size: 1.45rem;
   font-weight: 800;
-  margin: 0 0 0.5rem;
+  margin: 0;
   color: var(--text-primary, #0f172a);
 }
 
@@ -561,7 +561,7 @@ a.contact-channel-val:hover {
 .contact-form-header h3 {
   font-size: 1.5rem;
   font-weight: 800;
-  margin: 0 0 0.45rem;
+  margin: 0;
   color: var(--text-primary, #0f172a);
 }
 

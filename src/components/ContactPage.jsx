@@ -195,10 +195,6 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
           <h1 className="contact-hero-title">
             {hero.titlePrefix} <span className="contact-highlight-red">{hero.titleHighlight}</span>
           </h1>
-
-          <p className="contact-hero-subtitle">
-            {hero.subtitle}
-          </p>
         </header>
 
 
@@ -210,9 +206,6 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
             <div className="contact-direct-card">
               <div className="contact-direct-title-group">
                 <h3>Direct Lines & Bureaus</h3>
-                <p>
-                  Need immediate press assistance, have an urgent scoop, or prefer speaking directly with our desks?
-                </p>
               </div>
 
               <div className="contact-channel-list">
@@ -222,11 +215,9 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                     <Phone size={20} />
                   </div>
                   <div className="contact-channel-info">
-                    <span className="contact-channel-label">Direct Bureau Line</span>
                     <a href={`tel:${channels.phone}`} className="contact-channel-val">
                       {channels.displayPhone}
                     </a>
-                    <span className="contact-channel-sub">{channels.workingHours}</span>
                   </div>
                 </div>
 
@@ -304,9 +295,6 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                 <>
                   <div className="contact-form-header">
                     <h3>Send a Direct Message</h3>
-                    <p>
-                      Fill out the form below. For confidential scoops or embargoed news, check the embargo flag.
-                    </p>
                   </div>
 
                   {formError && (
@@ -399,27 +387,6 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                       </div>
                     </div>
 
-                    {/* Quick Topic Helper Pills */}
-                    <div className="contact-quick-pills">
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary, #94a3b8)', fontWeight: 600 }}>
-                        Quick Select:
-                      </span>
-                      {[
-                        'Editorial & Story Pitches',
-                        'Brand Solutions & Ads',
-                        'Editorial Correction'
-                      ].map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className={`contact-quick-pill ${formData.department === tag ? 'active' : ''}`}
-                          onClick={() => setFormData(prev => ({ ...prev, department: tag }))}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-
                     {/* Row 3: Subject */}
                     <div className="contact-form-field">
                       <label htmlFor="contact-subject">
@@ -485,10 +452,6 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                         </>
                       )}
                     </button>
-
-                    <p className="contact-form-notice">
-                      🔒 Your submission is encrypted. We respect journalist source confidentiality and NDAs.
-                    </p>
                   </form>
                 </>
               )}
