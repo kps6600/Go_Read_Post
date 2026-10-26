@@ -4,7 +4,8 @@ import {
   Menu as MenuIcon, PanelBottom, Search, Settings, 
   LogOut, ExternalLink, X, ChevronRight, Newspaper, Layers,
   Hash, Tag, Users, Shield, BarChart3, FileEdit, Archive,
-  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
+  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket,
+  PanelLeftClose
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 
@@ -73,6 +74,9 @@ export default function AdminSidebar({
   onLogout,
   onViewSite,
   adminUser,
+  isOpen = true,
+  onClose,
+  onToggle,
   isOpenMobile,
   onCloseMobile,
   siteSettings: propSettings
@@ -108,17 +112,17 @@ export default function AdminSidebar({
 
   return (
     <>
-      {isOpenMobile && (
-        <div className="admin-sidebar-backdrop" onClick={onCloseMobile} />
+      {(isOpenMobile || (isOpen && typeof window !== 'undefined' && window.innerWidth <= 768)) && (
+        <div className="admin-sidebar-backdrop" onClick={onClose || onCloseMobile} />
       )}
 
-      <aside className={`admin-cms-sidebar ${isOpenMobile ? 'open-mobile' : ''}`}>
+      <aside className={`admin-cms-sidebar ${!isOpen ? 'closed' : ''} ${isOpenMobile ? 'open-mobile' : ''}`}>
         {/* Brand Header */}
         <div className="sidebar-brand-header">
           <div 
             className="sidebar-brand-link" 
             onClick={() => onNavigate('/admin/dashboard')}
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', minWidth: 0 }}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}
             title={siteSettings?.siteTitle || siteSettings?.siteName || "Dashboard"}
           >
             {(siteSettings?.logo || siteSettings?.logoUrl) && !imgFailed ? (
@@ -156,11 +160,16 @@ export default function AdminSidebar({
               </>
             )}
           </div>
-          {isOpenMobile && (
-            <button className="sidebar-close-mobile-btn" onClick={onCloseMobile}>
-              <X size={18} />
-            </button>
-          )}
+          
+          <button 
+            type="button" 
+            className="sidebar-close-btn" 
+            onClick={onClose || onCloseMobile || onToggle}
+            title="Close sidebar"
+            aria-label="Close sidebar"
+          >
+            <PanelLeftClose size={18} />
+          </button>
         </div>
 
         {/* Navigation Items Grouped */}

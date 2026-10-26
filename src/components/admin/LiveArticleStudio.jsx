@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { 
+  Bold, Italic, Underline, AlignLeft, AlignCenter, RemoveFormatting,
+  Image as ImageIcon, UploadCloud, FolderOpen, Trash2, RefreshCw,
+  Search, Check, X, ChevronDown, Plus, Tag, Bookmark
+} from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { MediaService } from '../../services/mediaService';
+import TipTapEditor from './TipTapEditor';
 import './LiveArticleStudio.css';
 import '../ArticlePage.css';
 
@@ -108,9 +114,397 @@ const DEFAULT_INITIAL_BLOCKS = [
     id: 'blk_sec_1',
     type: 'section',
     heading: '',
-    content: ''
+    content: '',
+    images: []
   }
 ];
+
+const FALLBACK_TOPICS = [
+  'Startups', 'Technology', 'AI & DeepTech', 'Venture Capital', 'FinTech',
+  'Enterprise & SaaS', 'HerStory', 'SMB & MSME', 'CleanTech', 'Policy & Governance'
+];
+
+const FALLBACK_TAGS = [
+  'Startups', 'AI', 'Technology', 'Funding', 'FinTech', 'HerStory',
+  'Enterprise', 'Venture Capital', 'Innovation', 'Growth'
+];
+
+// Reusable Searchable Multi-Select Component for Topics & Tags
+function MultiSelectField({
+  label,
+  icon: IconComponent,
+  placeholder,
+  options = [],
+  selectedValues = [],
+  onSelect,
+  onRemove,
+  onClearAll,
+  colorTheme = 'indigo',
+  prefix = ''
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isOpen]);
+
+  const normalizedOptions = useMemo(() => {
+    const set = new Set();
+    options.forEach(opt => {
+      const name = typeof opt === 'string' ? opt.trim() : ((opt?.name || opt?.slug || '').trim());
+      if (name) set.add(name);
+    });
+    // Ensure selected values are also present as options
+    selectedValues.forEach(val => {
+      if (val && val.trim()) set.add(val.trim());
+    });
+    return Array.from(set);
+  }, [options, selectedValues]);
+
+  const filteredOptions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return normalizedOptions;
+    return normalizedOptions.filter(opt => opt.toLowerCase().includes(q));
+  }, [normalizedOptions, searchQuery]);
+
+  const canAddCustom = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q) return false;
+    return !normalizedOptions.some(opt => opt.toLowerCase() === q.toLowerCase());
+  }, [searchQuery, normalizedOptions]);
+
+  const isSelected = (val) => {
+    return selectedValues.some(curr => curr.toLowerCase() === val.toLowerCase());
+  };
+
+  const handleToggle = (val) => {
+    if (isSelected(val)) {
+      onRemove(val);
+    } else {
+      onSelect(val);
+    }
+  };
+
+  const theme = colorTheme === 'indigo' ? {
+    accent: '#4f46e5',
+    chipBg: '#f5f3ff',
+    chipBorder: '#ddd6fe',
+    chipText: '#4338ca',
+    chipRemove: '#6366f1',
+    badgeBg: '#4f46e5',
+    focusGlow: 'rgba(79, 70, 229, 0.12)'
+  } : {
+    accent: '#2563eb',
+    chipBg: '#eff6ff',
+    chipBorder: '#bfdbfe',
+    chipText: '#1d4ed8',
+    chipRemove: '#3b82f6',
+    badgeBg: '#2563eb',
+    focusGlow: 'rgba(37, 99, 235, 0.12)'
+  };
+
+  return (
+    <div className="las-multiselect-container" ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+        <label className="las-label" style={{ margin: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          {IconComponent && <IconComponent size={14} color={theme.accent} />}
+          <span>{label}</span>
+          <span style={{
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            padding: '1px 7px',
+            borderRadius: '999px',
+            background: selectedValues.length > 0 ? theme.badgeBg : '#e2e8f0',
+            color: selectedValues.length > 0 ? '#ffffff' : '#64748b'
+          }}>
+            {selectedValues.length}
+          </span>
+        </label>
+        {selectedValues.length > 0 && onClearAll && (
+          <button
+            type="button"
+            onClick={onClearAll}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              fontSize: '0.72rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              padding: 0
+            }}
+            title={`Clear all selected ${label.toLowerCase()}`}
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      {/* Trigger Button */}
+      <div
+        className={`las-select ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          minHeight: '42px',
+          padding: '0.5rem 0.85rem',
+          borderRadius: '8px',
+          border: isOpen ? `1.5px solid ${theme.accent}` : '1px solid #cbd5e1',
+          background: '#ffffff',
+          cursor: 'pointer',
+          boxSizing: 'border-box',
+          boxShadow: isOpen ? `0 0 0 3px ${theme.focusGlow}` : 'none',
+          transition: 'all 0.15s ease'
+        }}
+      >
+        <span style={{
+          fontSize: '0.86rem',
+          color: selectedValues.length > 0 ? '#0f172a' : '#94a3b8',
+          fontWeight: selectedValues.length > 0 ? 600 : 450,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          paddingRight: '6px'
+        }}>
+          {selectedValues.length === 0 
+            ? placeholder 
+            : `${selectedValues.length} ${label} selected (click to edit)`}
+        </span>
+        <ChevronDown 
+          size={15} 
+          color="#64748b" 
+          style={{ 
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+            transition: 'transform 0.18s ease',
+            flexShrink: 0
+          }} 
+        />
+      </div>
+
+      {/* Popover Dropdown */}
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 6px)',
+            left: 0,
+            right: 0,
+            background: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '10px',
+            boxShadow: '0 16px 36px -6px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08)',
+            zIndex: 220,
+            padding: '0.65rem',
+            boxSizing: 'border-box'
+          }}
+        >
+          {/* Search box inside dropdown */}
+          <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+            <Search 
+              size={14} 
+              color="#94a3b8" 
+              style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} 
+            />
+            <input
+              type="text"
+              autoFocus
+              placeholder={`Search ${label.toLowerCase()} or type custom...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  e.preventDefault();
+                  onSelect(searchQuery.trim());
+                  setSearchQuery('');
+                }
+              }}
+              style={{
+                width: '100%',
+                height: '35px',
+                padding: '0 0.75rem 0 2rem',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.82rem',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          {/* Quick Add Custom Button */}
+          {canAddCustom && (
+            <button
+              type="button"
+              onClick={() => {
+                onSelect(searchQuery.trim());
+                setSearchQuery('');
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.45rem 0.65rem',
+                marginBottom: '0.45rem',
+                borderRadius: '6px',
+                background: theme.chipBg,
+                border: `1px dashed ${theme.chipBorder}`,
+                color: theme.chipText,
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <Plus size={14} />
+              <span>Add "{searchQuery.trim()}" as custom {label.toLowerCase()}</span>
+            </button>
+          )}
+
+          {/* Options Checklist */}
+          <div style={{ maxHeight: '190px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {filteredOptions.map((opt, idx) => {
+              const checked = isSelected(opt);
+              return (
+                <div
+                  key={`${opt}-${idx}`}
+                  onClick={() => handleToggle(opt)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.42rem 0.65rem',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    background: checked ? theme.chipBg : 'transparent',
+                    transition: 'background 0.12s ease',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!checked) e.currentTarget.style.background = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!checked) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', width: '100%', margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {}} // handled by parent div onClick
+                      style={{ cursor: 'pointer', accentColor: theme.accent }}
+                    />
+                    <span style={{
+                      fontSize: '0.84rem',
+                      fontWeight: checked ? 700 : 500,
+                      color: checked ? theme.chipText : '#334155'
+                    }}>
+                      {prefix}{opt}
+                    </span>
+                  </label>
+                  {checked && <Check size={14} color={theme.accent} />}
+                </div>
+              );
+            })}
+            {filteredOptions.length === 0 && !canAddCustom && (
+              <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', color: '#94a3b8' }}>
+                No {label.toLowerCase()} found
+              </div>
+            )}
+          </div>
+
+          {/* Dropdown Footer */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: '0.5rem',
+            marginTop: '0.45rem',
+            borderTop: '1px solid #f1f5f9'
+          }}>
+            <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+              {selectedValues.length} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              style={{
+                padding: '0.3rem 0.85rem',
+                borderRadius: '6px',
+                background: theme.accent,
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Chips Bar */}
+      {selectedValues.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.45rem' }}>
+          {selectedValues.map((val, idx) => (
+            <span
+              key={`${val}-${idx}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: theme.chipBg,
+                border: `1px solid ${theme.chipBorder}`,
+                color: theme.chipText,
+                padding: '2px 8px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700
+              }}
+            >
+              <span>{prefix}{val}</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(val);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: theme.chipRemove,
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title={`Remove ${val}`}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LiveArticleStudio({
   article = null,
@@ -122,23 +516,31 @@ export default function LiveArticleStudio({
   topics: propTopics = [],
   tags: propTags = []
 }) {
-  // View & Split layout state
-  const [viewMode, setViewMode] = useState('split'); // 'split' | 'edit' | 'preview'
-  const [previewDevice, setPreviewDevice] = useState('desktop'); // 'desktop' | 'mobile'
+  // View mode layout state ('edit' | 'preview')
+  const [viewMode, setViewMode] = useState('edit');
 
-  // Advanced metadata collapse toggle
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Advanced metadata collapse toggle (always open by default)
+  const [showAdvanced, setShowAdvanced] = useState(true);
+
 
   // Hidden file inputs for direct PC upload
   const coverFileInputRef = useRef(null);
   const blockFileInputRef = useRef(null);
+  const multiImageFileInputRef = useRef(null);
+  const sectionImageFileInputRef = useRef(null);
+  const titleTextareaRef = useRef(null);
   const targetBlockIdRef = useRef(null);
+  const [targetSectionId, setTargetSectionId] = useState(null);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingBlockImage, setUploadingBlockImage] = useState(false);
+  const [uploadingMultipleImages, setUploadingMultipleImages] = useState(false);
+  const [uploadingSectionImage, setUploadingSectionImage] = useState(false);
+  const [selectedMediaItems, setSelectedMediaItems] = useState([]);
 
-  // Categories, Authors & Tags
+  // Categories, Authors, Topics & Tags
   const [categories, setCategories] = useState(propCategories);
   const [authors, setAuthors] = useState(propAuthors);
+  const [availableTopics, setAvailableTopics] = useState(propTopics);
   const [availableTags, setAvailableTags] = useState(propTags);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -189,6 +591,7 @@ export default function LiveArticleStudio({
         isBreaking: Boolean(article.isBreaking),
         tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
         topics: Array.isArray(article.topics) ? article.topics : ['Startups'],
+        titleAlign: article.titleAlign || 'left',
         seo: {
           title: article.seo?.title || article.title || '',
           description: article.seo?.description || article.subtitle || article.excerpt || '',
@@ -227,13 +630,14 @@ export default function LiveArticleStudio({
       isBreaking: false,
       tags: '',
       topics: ['Startups'],
+      titleAlign: 'left',
       seo: {
         title: '',
         description: '',
         keywords: '',
         ogImage: ''
       },
-      contentBlocks: [{ id: 'blk_sec_' + Date.now().toString(36), type: 'section', heading: '', content: '' }]
+      contentBlocks: [{ id: 'blk_sec_' + Date.now().toString(36), type: 'section', heading: '', content: '', images: [] }]
     };
   });
 
@@ -263,6 +667,24 @@ export default function LiveArticleStudio({
         }).catch(() => {});
       });
     }
+    if (availableTopics.length === 0) {
+      TaxonomyService.getAdminTopics().then(res => {
+        const list = Array.isArray(res) ? res : (res?.data || []);
+        if (list.length > 0) {
+          setAvailableTopics(list);
+        } else {
+          TaxonomyService.getTopics().then(tRes => {
+            const tList = Array.isArray(tRes) ? tRes : (tRes?.data || []);
+            setAvailableTopics(tList);
+          }).catch(() => {});
+        }
+      }).catch(() => {
+        TaxonomyService.getTopics().then(tRes => {
+          const tList = Array.isArray(tRes) ? tRes : (tRes?.data || []);
+          setAvailableTopics(tList);
+        }).catch(() => {});
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -271,6 +693,48 @@ export default function LiveArticleStudio({
     }
   }, [propTags]);
 
+  useEffect(() => {
+    if (propTopics && propTopics.length > 0) {
+      setAvailableTopics(propTopics);
+    }
+  }, [propTopics]);
+
+  // Current selected topics array
+  const currentTopics = useMemo(() => {
+    if (!formData.topics) return [];
+    if (Array.isArray(formData.topics)) {
+      return formData.topics.map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
+    }
+    if (typeof formData.topics === 'string') {
+      return formData.topics.split(',').map(t => t.trim()).filter(Boolean);
+    }
+    return [];
+  }, [formData.topics]);
+
+  const handleSelectTopic = (topicName) => {
+    if (!topicName) return;
+    const clean = topicName.trim();
+    if (!clean) return;
+    if (currentTopics.some(t => t.toLowerCase() === clean.toLowerCase())) return;
+    const updated = [...currentTopics, clean];
+    setFormData(prev => ({
+      ...prev,
+      topics: updated
+    }));
+  };
+
+  const handleRemoveTopic = (topicNameToRemove) => {
+    const updated = currentTopics.filter(t => t.toLowerCase() !== topicNameToRemove.toLowerCase());
+    setFormData(prev => ({
+      ...prev,
+      topics: updated
+    }));
+  };
+
+  const handleClearAllTopics = () => {
+    setFormData(prev => ({ ...prev, topics: [] }));
+  };
+
   // Current selected tags array
   const currentTags = useMemo(() => {
     if (!formData.tags) return [];
@@ -278,7 +742,7 @@ export default function LiveArticleStudio({
     return formData.tags.split(',').map(t => t.trim()).filter(Boolean);
   }, [formData.tags]);
 
-  const handleSelectTagFromDropdown = (tagName) => {
+  const handleSelectTag = (tagName) => {
     if (!tagName) return;
     const cleanTag = tagName.trim();
     if (!cleanTag) return;
@@ -299,6 +763,175 @@ export default function LiveArticleStudio({
     }));
   };
 
+  const handleClearAllTags = () => {
+    setFormData(prev => ({ ...prev, tags: '' }));
+  };
+
+  // Auto-resize headline textarea dynamically
+  useEffect(() => {
+    if (titleTextareaRef.current) {
+      titleTextareaRef.current.style.height = 'auto';
+      titleTextareaRef.current.style.height = `${Math.max(48, titleTextareaRef.current.scrollHeight)}px`;
+    }
+  }, [formData.title]);
+
+  // Rich formatting actions for headline
+  const applyHeadlineFormat = (action) => {
+    const el = titleTextareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const text = formData.title || '';
+
+    if (action === 'align-left') {
+      setFormData(prev => ({ ...prev, titleAlign: 'left' }));
+      return;
+    }
+    if (action === 'align-center') {
+      setFormData(prev => ({ ...prev, titleAlign: 'center' }));
+      return;
+    }
+
+    if (start !== end) {
+      const selected = text.substring(start, end);
+      let transformed = selected;
+
+      if (action === 'bold') {
+        transformed = selected.startsWith('<strong>') && selected.endsWith('</strong>')
+          ? selected.slice(8, -9)
+          : `<strong>${selected}</strong>`;
+      } else if (action === 'italic') {
+        transformed = selected.startsWith('<em>') && selected.endsWith('</em>')
+          ? selected.slice(4, -5)
+          : `<em>${selected}</em>`;
+      } else if (action === 'underline') {
+        transformed = selected.startsWith('<u>') && selected.endsWith('</u>')
+          ? selected.slice(3, -4)
+          : `<u>${selected}</u>`;
+      } else if (action === 'title-case') {
+        transformed = selected.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+      } else if (action === 'uppercase') {
+        transformed = selected.toUpperCase();
+      } else if (action === 'lowercase') {
+        transformed = selected.toLowerCase();
+      } else if (action === 'clear') {
+        transformed = selected.replace(/<[^>]*>/g, '');
+      }
+
+      const nextTitle = text.substring(0, start) + transformed + text.substring(end);
+      setFormData(prev => ({
+        ...prev,
+        title: nextTitle,
+        slug: !prev._id ? slugify(nextTitle.replace(/<[^>]*>/g, '')) : prev.slug
+      }));
+
+      setTimeout(() => {
+        el.focus();
+        el.setSelectionRange(start, start + transformed.length);
+      }, 0);
+    } else {
+      if (action === 'title-case') {
+        const nextTitle = text.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+        setFormData(prev => ({ ...prev, title: nextTitle }));
+      } else if (action === 'uppercase') {
+        setFormData(prev => ({ ...prev, title: text.toUpperCase() }));
+      } else if (action === 'lowercase') {
+        setFormData(prev => ({ ...prev, title: text.toLowerCase() }));
+      } else if (action === 'clear') {
+        const nextTitle = text.replace(/<[^>]*>/g, '');
+        setFormData(prev => ({ ...prev, title: nextTitle }));
+      }
+    }
+  };
+
+  // Rich formatting actions for Section Headings
+  const applySectionHeadingFormat = (blockId, action) => {
+    const block = (formData.contentBlocks || []).find(b => b.id === blockId);
+    if (!block) return;
+    const text = block.heading || '';
+
+    if (action === 'h2' || action === 'h3') {
+      const level = action === 'h2' ? 2 : 3;
+      handleUpdateBlock(blockId, { headingLevel: level });
+      return;
+    }
+
+    if (action === 'align-left') {
+      handleUpdateBlock(blockId, { headingAlign: 'left' });
+      return;
+    }
+    if (action === 'align-center') {
+      handleUpdateBlock(blockId, { headingAlign: 'center' });
+      return;
+    }
+
+    const inputEl = document.getElementById(`las-heading-input-${blockId}`);
+    const start = inputEl ? inputEl.selectionStart : 0;
+    const end = inputEl ? inputEl.selectionEnd : text.length;
+
+    if (inputEl && start !== end) {
+      const selected = text.substring(start, end);
+      let transformed = selected;
+
+      if (action === 'bold') {
+        transformed = selected.startsWith('<strong>') && selected.endsWith('</strong>')
+          ? selected.slice(8, -9)
+          : `<strong>${selected}</strong>`;
+      } else if (action === 'italic') {
+        transformed = selected.startsWith('<em>') && selected.endsWith('</em>')
+          ? selected.slice(4, -5)
+          : `<em>${selected}</em>`;
+      } else if (action === 'underline') {
+        transformed = selected.startsWith('<u>') && selected.endsWith('</u>')
+          ? selected.slice(3, -4)
+          : `<u>${selected}</u>`;
+      } else if (action === 'title-case') {
+        transformed = selected.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+      } else if (action === 'uppercase') {
+        transformed = selected.toUpperCase();
+      } else if (action === 'lowercase') {
+        transformed = selected.toLowerCase();
+      } else if (action === 'clear') {
+        transformed = selected.replace(/<[^>]*>/g, '');
+      }
+
+      const nextHeading = text.substring(0, start) + transformed + text.substring(end);
+      handleUpdateBlock(blockId, { heading: nextHeading });
+
+      setTimeout(() => {
+        if (inputEl) {
+          inputEl.focus();
+          inputEl.setSelectionRange(start, start + transformed.length);
+        }
+      }, 0);
+    } else {
+      if (action === 'bold') {
+        const nextHeading = text.startsWith('<strong>') && text.endsWith('</strong>')
+          ? text.slice(8, -9)
+          : (text ? `<strong>${text}</strong>` : '');
+        handleUpdateBlock(blockId, { heading: nextHeading });
+      } else if (action === 'italic') {
+        const nextHeading = text.startsWith('<em>') && text.endsWith('</em>')
+          ? text.slice(4, -5)
+          : (text ? `<em>${text}</em>` : '');
+        handleUpdateBlock(blockId, { heading: nextHeading });
+      } else if (action === 'underline') {
+        const nextHeading = text.startsWith('<u>') && text.endsWith('</u>')
+          ? text.slice(3, -4)
+          : (text ? `<u>${text}</u>` : '');
+        handleUpdateBlock(blockId, { heading: nextHeading });
+      } else if (action === 'title-case') {
+        handleUpdateBlock(blockId, { heading: text.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase()) });
+      } else if (action === 'uppercase') {
+        handleUpdateBlock(blockId, { heading: text.toUpperCase() });
+      } else if (action === 'lowercase') {
+        handleUpdateBlock(blockId, { heading: text.toLowerCase() });
+      } else if (action === 'clear') {
+        handleUpdateBlock(blockId, { heading: text.replace(/<[^>]*>/g, '') });
+      }
+    }
+  };
+
   // Compute Word Count & Estimated Read Time
   const stats = useMemo(() => {
     let text = (formData.title || '') + ' ' + (formData.subtitle || '') + ' ';
@@ -309,15 +942,23 @@ export default function LiveArticleStudio({
       if (b.quote) text += b.quote + ' ';
       if (Array.isArray(b.items)) text += b.items.join(' ') + ' ';
     });
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const cleanText = text.replace(/<[^>]*>/g, ' ');
+    const words = cleanText.trim().split(/\s+/).filter(Boolean).length;
     const minutes = Math.max(1, Math.ceil(words / 200));
     return { words, minutes };
   }, [formData.title, formData.subtitle, formData.contentBlocks]);
 
-  // Update reading time automatically
+  // Track if reading time was manually edited by the user
+  const [isReadingTimeCustom, setIsReadingTimeCustom] = useState(() => {
+    return Boolean(article?.readingTime || article?.readTime);
+  });
+
+  // Update reading time automatically unless user manually customized it
   useEffect(() => {
-    setFormData(prev => ({ ...prev, readingTime: `${stats.minutes} min read` }));
-  }, [stats.minutes]);
+    if (!isReadingTimeCustom) {
+      setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
+    }
+  }, [stats.minutes, isReadingTimeCustom]);
 
   // Direct PC Image Upload Handler (Cover)
   const handleCoverFileUpload = async (e) => {
@@ -387,6 +1028,143 @@ export default function LiveArticleStudio({
     }
   };
 
+  // Direct PC Multiple Images Upload Handler
+  const handleMultiImageFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploadingMultipleImages(true);
+    if (onShowToast) onShowToast(`Uploading ${files.length} images...`);
+
+    try {
+      const uploadedBlocks = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const res = await MediaService.uploadFile(file);
+          const finalUrl = res && (res.url || res.path) ? (res.url || res.path) : '';
+          if (finalUrl) {
+            uploadedBlocks.push({
+              id: 'blk_img_' + Date.now().toString(36) + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
+              type: 'image',
+              url: finalUrl,
+              alt: file.name.replace(/\.[^/.]+$/, ''),
+              caption: '',
+              credit: 'GoReadPost Media',
+              layout: 'standard'
+            });
+          }
+        } catch (uploadErr) {
+          console.warn(`Failed to upload ${file.name}:`, uploadErr);
+        }
+      }
+
+      if (uploadedBlocks.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          contentBlocks: [...prev.contentBlocks, ...uploadedBlocks]
+        }));
+        if (onShowToast) onShowToast(`Successfully added ${uploadedBlocks.length} images to article!`);
+      }
+    } finally {
+      setUploadingMultipleImages(false);
+      if (multiImageFileInputRef.current) multiImageFileInputRef.current.value = '';
+    }
+  };
+
+  // Direct PC Section Image Upload Trigger & Handlers
+  const triggerSectionImageUpload = (blockId) => {
+    setTargetSectionId(blockId);
+    if (sectionImageFileInputRef.current) {
+      sectionImageFileInputRef.current.click();
+    }
+  };
+
+  const handleSectionImageFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    const blockId = targetSectionId;
+    if (files.length === 0 || !blockId) return;
+
+    setUploadingSectionImage(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const uploaded = await MediaService.uploadFile(file);
+          const finalUrl = uploaded && (uploaded.url || uploaded.path) ? (uploaded.url || uploaded.path) : '';
+          if (finalUrl) {
+            const newImg = {
+              url: finalUrl,
+              caption: '',
+              credit: 'GoReadPost Media',
+              alt: file.name.replace(/\.[^/.]+$/, '')
+            };
+            setFormData(prev => ({
+              ...prev,
+              contentBlocks: prev.contentBlocks.map(b => {
+                if (b.id !== blockId) return b;
+                const existingImages = Array.isArray(b.images) && b.images.length > 0
+                  ? b.images
+                  : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
+                return {
+                  ...b,
+                  image: newImg,
+                  images: [...existingImages, newImg]
+                };
+              })
+            }));
+          }
+        } catch (err) {
+          console.warn('Failed to upload section image:', err);
+        }
+      }
+      if (onShowToast) onShowToast(files.length > 1 ? `Added ${files.length} images to section` : 'Section image uploaded');
+    } finally {
+      setUploadingSectionImage(false);
+      setTargetSectionId(null);
+      if (sectionImageFileInputRef.current) sectionImageFileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveSectionImage = (blockId, imageIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.map(b => {
+        if (b.id !== blockId) return b;
+        const existing = Array.isArray(b.images) ? [...b.images] : (b.image ? [b.image] : []);
+        const updated = existing.filter((_, idx) => idx !== imageIndex);
+        return {
+          ...b,
+          image: updated.length > 0 ? updated[0] : null,
+          images: updated
+        };
+      })
+    }));
+  };
+
+  const handleUpdateSectionImage = (blockId, imageIndex, updates) => {
+    setFormData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.map(b => {
+        if (b.id !== blockId) return b;
+        const existing = Array.isArray(b.images) && b.images.length > 0 
+          ? [...b.images] 
+          : (b.image ? [{ ...b.image }] : []);
+        if (!existing[imageIndex]) existing[imageIndex] = { url: '' };
+        existing[imageIndex] = { ...existing[imageIndex], ...updates };
+        return {
+          ...b,
+          image: existing[0],
+          images: existing
+        };
+      })
+    }));
+  };
+
+  const handleToggleSectionImagePosition = (blockId, pos) => {
+    handleUpdateBlock(blockId, { imagePosition: pos });
+  };
+
   // ── Block Operations ──
   const handleAddBlock = (type) => {
     const id = 'blk_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
@@ -397,7 +1175,8 @@ export default function LiveArticleStudio({
         id,
         type: 'section',
         heading: '',
-        content: ''
+        content: '',
+        images: []
       };
     } else if (type === 'image') {
       newBlock = {
@@ -450,12 +1229,41 @@ export default function LiveArticleStudio({
       if (b.type === 'section') {
         let sectionHtml = '';
         if (b.heading && b.heading.trim()) {
-          sectionHtml += `<h2 class="map-body-heading">${b.heading.trim()}</h2>\n`;
+          const level = b.headingLevel || 2;
+          const align = b.headingAlign ? ` style="text-align: ${b.headingAlign};"` : '';
+          sectionHtml += `<h${level} class="map-body-heading"${align}>${b.heading.trim()}</h${level}>\n`;
         }
+
+        // Section Images
+        const secImages = Array.isArray(b.images) && b.images.length > 0
+          ? b.images
+          : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
+
+        const imagesHtml = secImages.map(img => {
+          const captionHtml = (img.caption || img.credit)
+            ? `<figcaption class="map-inline-caption">${img.caption || ''} ${img.credit ? `(Photo: ${img.credit})` : ''}</figcaption>`
+            : '';
+          return `<figure class="map-inline-figure standard"><img src="${img.url || img}" alt="${img.caption || img.alt || 'Section image'}" />${captionHtml}</figure>`;
+        }).join('\n');
+
+        if (b.imagePosition !== 'bottom' && imagesHtml) {
+          sectionHtml += imagesHtml + '\n';
+        }
+
         if (b.content && b.content.trim()) {
-          const paras = b.content.split('\n').filter(p => p.trim().length > 0);
-          sectionHtml += paras.map(p => `<p>${p.trim()}</p>`).join('\n');
+          const hasHtml = /<[a-z][\s\S]*>/i.test(b.content);
+          if (hasHtml) {
+            sectionHtml += b.content.trim() + '\n';
+          } else {
+            const paras = b.content.split('\n').filter(p => p.trim().length > 0);
+            sectionHtml += paras.map(p => `<p>${p.trim()}</p>`).join('\n');
+          }
         }
+
+        if (b.imagePosition === 'bottom' && imagesHtml) {
+          sectionHtml += imagesHtml + '\n';
+        }
+
         return sectionHtml;
       }
       if (b.type === 'heading') {
@@ -492,13 +1300,43 @@ export default function LiveArticleStudio({
     setSaving(true);
     try {
       const compiledHtml = compileBlocksToHtml(formData.contentBlocks);
-      const cleanSlug = formData.slug ? slugify(formData.slug) : slugify(formData.title);
+      const cleanSlug = formData.slug ? slugify(formData.slug) : slugify(formData.title.replace(/<[^>]*>/g, ''));
+
+      // Auto-derive excerpt from first substantial paragraph if not manually entered
+      let derivedExcerpt = (formData.excerpt || '').trim() || (formData.subtitle || '').trim();
+      if (!derivedExcerpt && Array.isArray(formData.contentBlocks)) {
+        const titleNorm = (formData.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (const b of formData.contentBlocks) {
+          const raw = b.content || b.text || '';
+          if (raw) {
+            const clean = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            const cleanNorm = clean.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (clean && clean.length > 20 && !cleanNorm.startsWith(titleNorm) && !titleNorm.startsWith(cleanNorm)) {
+              derivedExcerpt = clean.slice(0, 240);
+              break;
+            }
+          }
+        }
+        if (!derivedExcerpt) {
+          for (const b of formData.contentBlocks) {
+            const raw = b.content || b.text || '';
+            if (raw) {
+              const clean = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+              if (clean && clean.length > 15) {
+                derivedExcerpt = clean.slice(0, 240);
+                break;
+              }
+            }
+          }
+        }
+      }
 
       const payload = {
         title: formData.title.trim(),
         slug: cleanSlug,
         subtitle: formData.subtitle.trim(),
-        excerpt: formData.excerpt.trim() || formData.subtitle.trim(),
+        titleAlign: formData.titleAlign || 'left',
+        excerpt: derivedExcerpt,
         contentType: formData.contentType || 'article',
         brand: formData.brand || 'GoReadPost',
         categoryName: formData.categoryName || 'Startups',
@@ -507,10 +1345,10 @@ export default function LiveArticleStudio({
         authorTitle: formData.authorTitle || 'Senior Staff Reporter',
         authorAvatar: formData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
         featuredImage: {
-          url: formData.featuredImage.url,
-          alt: formData.featuredImage.alt || formData.title,
-          caption: formData.featuredImage.caption || '',
-          credit: formData.featuredImage.credit || 'GoReadPost Bureau'
+          url: formData.featuredImage?.url || (formData.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || (typeof formData.contentBlocks?.find(b => b.image)?.image === 'string' ? formData.contentBlocks?.find(b => b.image)?.image : formData.contentBlocks?.find(b => b.image)?.image?.url) || '',
+          alt: formData.featuredImage?.alt || formData.title,
+          caption: formData.featuredImage?.caption || '',
+          credit: formData.featuredImage?.credit || 'GoReadPost Bureau'
         },
         readingTime: formData.readingTime || `${stats.minutes} min read`,
         status: targetStatus,
@@ -567,6 +1405,7 @@ export default function LiveArticleStudio({
   // Media Library Picking
   const openMediaPicker = (target) => {
     setMediaPickerTarget(target);
+    setSelectedMediaItems([]);
     setIsMediaPickerOpen(true);
     setMediaLoading(true);
     MediaService.getMedia()
@@ -590,18 +1429,74 @@ export default function LiveArticleStudio({
           credit: file.credit || 'GoReadPost Media'
         }
       }));
+      setIsMediaPickerOpen(false);
     } else if (mediaPickerTarget.type === 'blockImage') {
       handleUpdateBlock(mediaPickerTarget.blockId, {
         url: file.url,
         alt: file.altText || file.originalName || 'Blog Image',
         credit: file.credit || 'GoReadPost Media'
       });
+      setIsMediaPickerOpen(false);
+    } else if (mediaPickerTarget.type === 'sectionImage') {
+      const blockId = mediaPickerTarget.blockId;
+      const newImg = {
+        url: file.url,
+        caption: '',
+        credit: file.credit || 'GoReadPost Media',
+        alt: file.altText || file.originalName || 'Section Image'
+      };
+      setFormData(prev => ({
+        ...prev,
+        contentBlocks: prev.contentBlocks.map(b => {
+          if (b.id !== blockId) return b;
+          const existingImages = Array.isArray(b.images) && b.images.length > 0
+            ? b.images
+            : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
+          return {
+            ...b,
+            image: newImg,
+            images: [...existingImages, newImg]
+          };
+        })
+      }));
+      setIsMediaPickerOpen(false);
+      if (onShowToast) onShowToast('Image added to section');
     } else if (mediaPickerTarget.type === 'testimonialAvatar') {
       handleUpdateBlock(mediaPickerTarget.blockId, {
         avatar: file.url
       });
+      setIsMediaPickerOpen(false);
+    } else if (mediaPickerTarget.type === 'multiImage') {
+      setSelectedMediaItems(prev => {
+        const exists = prev.some(item => (item._id || item.url) === (file._id || file.url));
+        if (exists) {
+          return prev.filter(item => (item._id || item.url) !== (file._id || file.url));
+        } else {
+          return [...prev, file];
+        }
+      });
     }
+  };
+
+  const handleInsertMultipleFromMediaPicker = () => {
+    if (selectedMediaItems.length === 0) return;
+    const newBlocks = selectedMediaItems.map((file, i) => ({
+      id: 'blk_img_' + Date.now().toString(36) + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
+      type: 'image',
+      url: file.url,
+      alt: file.altText || file.originalName || 'Article Image',
+      caption: '',
+      credit: file.credit || 'GoReadPost Media',
+      layout: 'standard'
+    }));
+
+    setFormData(prev => ({
+      ...prev,
+      contentBlocks: [...prev.contentBlocks, ...newBlocks]
+    }));
+    if (onShowToast) onShowToast(`Added ${newBlocks.length} images from Media Library`);
     setIsMediaPickerOpen(false);
+    setSelectedMediaItems([]);
   };
 
   // Live article simulation object matching public ArticlePage structure
@@ -611,7 +1506,7 @@ export default function LiveArticleStudio({
       subtitle: formData.subtitle || '',
       categoryName: (formData.categoryName || 'STARTUPS').toUpperCase(),
       categorySlug: slugify(formData.categoryName || 'startups'),
-      image: formData.featuredImage?.url || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80',
+      image: formData.featuredImage?.url || (formData.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || (typeof formData.contentBlocks?.find(b => b.image)?.image === 'string' ? formData.contentBlocks?.find(b => b.image)?.image : formData.contentBlocks?.find(b => b.image)?.image?.url) || '',
       photoCredit: formData.featuredImage?.caption || formData.featuredImage?.credit || '',
       authorName: formData.authorName || 'Editorial Desk',
       authorAvatar: formData.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
@@ -622,6 +1517,37 @@ export default function LiveArticleStudio({
       contentBlocks: formData.contentBlocks
     };
   }, [formData, stats.minutes]);
+
+  // Check if liveArticle.image is already rendered in any content section
+  const isCoverRenderedInBody = useMemo(() => {
+    if (!liveArticle?.image || !Array.isArray(formData?.contentBlocks)) return false;
+    const cleanCover = liveArticle.image.trim().replace(/^https?:\/\/[^\/]+/, '').split('?')[0];
+    if (!cleanCover) return false;
+
+    for (const block of formData.contentBlocks) {
+      if (!block) continue;
+      if (block.type === 'section') {
+        if (Array.isArray(block.images)) {
+          for (const img of block.images) {
+            const u = (img?.url || (typeof img === 'string' ? img : '')).trim();
+            if (u && (u === liveArticle.image || u.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover)) {
+              return true;
+            }
+          }
+        }
+        const singleSecImg = (block.image?.url || (typeof block.image === 'string' ? block.image : '')).trim();
+        if (singleSecImg && (singleSecImg === liveArticle.image || singleSecImg.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover)) {
+          return true;
+        }
+      } else if (block.type === 'image' && block.url) {
+        const u = block.url.trim();
+        if (u === liveArticle.image || u.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [liveArticle?.image, formData?.contentBlocks]);
 
   return (
     <div className="las-studio-container">
@@ -641,9 +1567,6 @@ export default function LiveArticleStudio({
               <span className="las-studio-title">
                 {formData._id ? `Edit: ${formData.title}` : 'Add New Article'}
               </span>
-              <span className={`las-status-tag ${formData.status}`}>
-                {formData.status}
-              </span>
             </div>
           </div>
         </div>
@@ -655,17 +1578,9 @@ export default function LiveArticleStudio({
               type="button" 
               className={`las-view-btn ${viewMode === 'edit' ? 'active' : ''}`}
               onClick={() => setViewMode('edit')}
-              title="Editor Canvas Only"
+              title="Editor Canvas"
             >
               <span>Editor</span>
-            </button>
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'split' ? 'active' : ''}`}
-              onClick={() => setViewMode('split')}
-              title="Split View (Editor + Live Preview)"
-            >
-              <span>Split Studio</span>
             </button>
             <button 
               type="button" 
@@ -676,27 +1591,6 @@ export default function LiveArticleStudio({
               <span>Live Preview</span>
             </button>
           </div>
-
-          {viewMode !== 'edit' && (
-            <div className="las-view-toggle-group">
-              <button 
-                type="button" 
-                className={`las-view-btn ${previewDevice === 'desktop' ? 'active' : ''}`}
-                onClick={() => setPreviewDevice('desktop')}
-                title="Desktop View"
-              >
-                <span>Desktop</span>
-              </button>
-              <button 
-                type="button" 
-                className={`las-view-btn ${previewDevice === 'mobile' ? 'active' : ''}`}
-                onClick={() => setPreviewDevice('mobile')}
-                title="Mobile Phone View"
-              >
-                <span>Mobile</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Right: Actions */}
@@ -764,23 +1658,142 @@ export default function LiveArticleStudio({
                       <span>Article Details</span>
                     </h3>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-                    {stats.words} words · ~{stats.minutes} min read
+                  <div className="las-stats-badge">
+                    <input 
+                      type="text"
+                      className="las-stats-input"
+                      value={formData.readingTime ?? `~${stats.minutes} min read`}
+                      onChange={(e) => {
+                        setIsReadingTimeCustom(true);
+                        setFormData(prev => ({ ...prev, readingTime: e.target.value }));
+                      }}
+                      title="Click to edit estimated reading time"
+                      placeholder={`~${stats.minutes} min read`}
+                    />
+                    {isReadingTimeCustom && (
+                      <button
+                        type="button"
+                        className="las-stats-reset-btn"
+                        title="Reset to auto-calculated time"
+                        onClick={() => {
+                          setIsReadingTimeCustom(false);
+                          setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
+                        }}
+                      >
+                        ↺ auto
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Headline input */}
-                <input 
-                  type="text" 
+                {/* Rich Headline Formatting Toolbar */}
+                <div className="las-headline-toolbar">
+                  <div className="las-headline-tools-group">
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('bold')}
+                      title="Bold selection (<strong>)"
+                    >
+                      <Bold size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('italic')}
+                      title="Italic selection (<em>)"
+                    >
+                      <Italic size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('underline')}
+                      title="Underline selection (<u>)"
+                    >
+                      <Underline size={15} />
+                    </button>
+                    <span className="las-headline-tool-sep" />
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('title-case')}
+                      title="Title Case (Capitalize Words)"
+                      style={{ fontSize: '0.78rem', fontWeight: 800 }}
+                    >
+                      Aa
+                    </button>
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('uppercase')}
+                      title="UPPERCASE"
+                      style={{ fontSize: '0.74rem', fontWeight: 800 }}
+                    >
+                      AA
+                    </button>
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('lowercase')}
+                      title="lowercase"
+                      style={{ fontSize: '0.74rem', fontWeight: 700 }}
+                    >
+                      aa
+                    </button>
+                    <span className="las-headline-tool-sep" />
+                    <button
+                      type="button"
+                      className={`las-headline-tool-btn ${(formData.titleAlign || 'left') === 'left' ? 'active' : ''}`}
+                      onClick={() => applyHeadlineFormat('align-left')}
+                      title="Align Left"
+                    >
+                      <AlignLeft size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`las-headline-tool-btn ${formData.titleAlign === 'center' ? 'active' : ''}`}
+                      onClick={() => applyHeadlineFormat('align-center')}
+                      title="Align Center"
+                    >
+                      <AlignCenter size={15} />
+                    </button>
+                    <span className="las-headline-tool-sep" />
+                    <button
+                      type="button"
+                      className="las-headline-tool-btn"
+                      onClick={() => applyHeadlineFormat('clear')}
+                      title="Clear HTML tags from title"
+                    >
+                      <RemoveFormatting size={15} />
+                    </button>
+                  </div>
+
+                  <div className="las-headline-counter">
+                    <span>
+                      {(formData.title || '').replace(/<[^>]*>/g, '').length} chars
+                    </span>
+                    <span style={{ color: '#cbd5e1' }}>•</span>
+                    <span>
+                      {(formData.title || '').replace(/<[^>]*>/g, '').trim() ? (formData.title || '').replace(/<[^>]*>/g, '').trim().split(/\s+/).length : 0} words
+                    </span>
+                  </div>
+                </div>
+
+                {/* Auto-expanding Headline Textarea */}
+                <textarea 
+                  ref={titleTextareaRef}
+                  rows={1}
                   className="las-headline-input"
                   placeholder="Enter article title / headline here..."
                   value={formData.title}
+                  style={{ textAlign: formData.titleAlign || 'left' }}
                   onChange={(e) => {
                     const val = e.target.value;
                     setFormData(prev => ({
                       ...prev,
                       title: val,
-                      slug: !prev._id ? slugify(val) : prev.slug
+                      slug: !prev._id ? slugify(val.replace(/<[^>]*>/g, '')) : prev.slug
                     }));
                   }}
                   autoFocus
@@ -854,11 +1867,12 @@ export default function LiveArticleStudio({
                     className="las-advanced-toggle-btn"
                     onClick={() => setShowAdvanced(!showAdvanced)}
                   >
-                    <span>{showAdvanced ? 'Hide Advanced Settings (URL Slug, Tags)' : 'Advanced Settings (Custom URL Slug, Tags)'}</span>
+                    <span>{showAdvanced ? 'Hide Advanced Settings (URL Slug, Topics, Tags)' : 'Advanced Settings (URL Slug, Topics, Tags)'}</span>
                   </button>
 
                   {showAdvanced && (
-                    <div className="las-grid-2" style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0' }}>
+                    <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {/* URL Slug */}
                       <div className="las-form-group">
                         <label className="las-label">URL Slug</label>
                         <input 
@@ -870,232 +1884,45 @@ export default function LiveArticleStudio({
                         />
                       </div>
 
-                      <div className="las-form-group">
-                        <label className="las-label">Tags</label>
-                        
-                        {/* Dropdown displaying all tags from the Tag section */}
-                        <select 
-                          className="las-select"
-                          value=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              handleSelectTagFromDropdown(e.target.value);
-                            }
-                          }}
-                        >
-                          <option value="">
-                            {availableTags.length > 0 
-                              ? `-- Select a tag from Tag section (${availableTags.length} tags) --`
-                              : '-- Select a tag from Tag section --'}
-                          </option>
-                          {availableTags.map(t => {
-                            const tagName = typeof t === 'string' ? t : (t.name || t.slug);
-                            const isSelected = currentTags.some(curr => curr.toLowerCase() === (tagName || '').toLowerCase());
-                            return (
-                              <option 
-                                key={t._id || t.slug || tagName} 
-                                value={tagName}
-                                disabled={isSelected}
-                              >
-                                #{tagName} {isSelected ? '(Already added)' : ''}
-                              </option>
-                            );
-                          })}
-                          {availableTags.length === 0 && (
-                            <>
-                              <option value="Startups">#Startups</option>
-                              <option value="AI">#AI</option>
-                              <option value="Technology">#Technology</option>
-                              <option value="Funding">#Funding</option>
-                              <option value="FinTech">#FinTech</option>
-                              <option value="HerStory">#HerStory</option>
-                              <option value="Enterprise">#Enterprise</option>
-                              <option value="Venture Capital">#Venture Capital</option>
-                            </>
-                          )}
-                        </select>
+                      {/* Topics & Tags Row (Multi-Select) */}
+                      <div className="las-grid-2">
+                        {/* Topics Multi-Select */}
+                        <div className="las-form-group">
+                          <MultiSelectField
+                            label="Topics"
+                            icon={Bookmark}
+                            placeholder="-- Select topics (multi-select) --"
+                            options={availableTopics.length > 0 ? availableTopics : FALLBACK_TOPICS}
+                            selectedValues={currentTopics}
+                            onSelect={handleSelectTopic}
+                            onRemove={handleRemoveTopic}
+                            onClearAll={handleClearAllTopics}
+                            colorTheme="indigo"
+                            prefix=""
+                          />
+                        </div>
 
-                        {/* Selected Tag Chips */}
-                        {currentTags.length > 0 && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.45rem' }}>
-                            {currentTags.map((t, idx) => (
-                              <span 
-                                key={idx}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '5px',
-                                  background: '#eff6ff',
-                                  border: '1px solid #bfdbfe',
-                                  color: '#1d4ed8',
-                                  padding: '2px 8px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 650
-                                }}
-                              >
-                                #{t}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveTag(t)}
-                                  style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: '#3b82f6',
-                                    fontSize: '0.9rem',
-                                    lineHeight: 1,
-                                    padding: '0 2px',
-                                    fontWeight: 700
-                                  }}
-                                  title={`Remove ${t}`}
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Optional text input for direct comma-separated typing */}
-                        <div style={{ marginTop: '0.4rem' }}>
-                          <input 
-                            type="text" 
-                            className="las-input"
-                            value={formData.tags}
-                            onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                            placeholder="Or type tags (comma separated)..."
-                            style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                        {/* Tags Multi-Select */}
+                        <div className="las-form-group">
+                          <MultiSelectField
+                            label="Tags"
+                            icon={Tag}
+                            placeholder={availableTags.length > 0 
+                              ? `-- Select tags (${availableTags.length} tags) --`
+                              : '-- Select tags (multi-select) --'}
+                            options={availableTags.length > 0 ? availableTags : FALLBACK_TAGS}
+                            selectedValues={currentTags}
+                            onSelect={handleSelectTag}
+                            onRemove={handleRemoveTag}
+                            onClearAll={handleClearAllTags}
+                            colorTheme="blue"
+                            prefix="#"
                           />
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* CARD 2: FEATURED COVER IMAGE */}
-              <div className="las-card">
-                <div className="las-card-title-row">
-                  <div>
-                    <h3 className="las-card-title">
-                      <span>Featured Cover Image</span>
-                    </h3>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      type="button" 
-                      className="las-btn las-btn-draft"
-                      onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
-                      disabled={uploadingCover}
-                    >
-                      {uploadingCover ? 'Uploading...' : 'Upload from PC'}
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-btn las-btn-draft"
-                      onClick={() => openMediaPicker({ type: 'featured' })}
-                    >
-                      Browse Media
-                    </button>
-                  </div>
-                </div>
-
-                {formData.featuredImage?.url ? (
-                  <div>
-                    <div className="las-cover-stage">
-                      <img 
-                        src={formData.featuredImage.url} 
-                        alt={formData.featuredImage.alt || 'Cover image'} 
-                        className="las-cover-img"
-                      />
-                      <div className="las-cover-overlay">
-                        <span style={{ fontSize: '0.78rem', color: '#ffffff', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: '4px' }}>
-                          Featured Cover
-                        </span>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button 
-                            type="button" 
-                            className="las-btn las-btn-draft"
-                            onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
-                          >
-                            Change Image
-                          </button>
-                          <button 
-                            type="button" 
-                            className="las-btn las-btn-draft"
-                            style={{ background: '#ef4444', color: '#ffffff', borderColor: '#dc2626' }}
-                            onClick={() => setFormData(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, url: '' } }))}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="las-grid-2" style={{ marginTop: '0.85rem' }}>
-                      <div className="las-form-group">
-                        <label className="las-label">Image URL</label>
-                        <input 
-                          type="text" 
-                          className="las-input"
-                          value={formData.featuredImage.url}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            featuredImage: { ...prev.featuredImage, url: e.target.value }
-                          }))}
-                          placeholder="https://..."
-                        />
-                      </div>
-                      <div className="las-form-group">
-                        <label className="las-label">Photo Credit / Caption</label>
-                        <input 
-                          type="text" 
-                          className="las-input"
-                          value={formData.featuredImage.credit || ''}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            featuredImage: { ...prev.featuredImage, credit: e.target.value, caption: e.target.value }
-                          }))}
-                          placeholder="Photo by / Credit"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="las-upload-box">
-                    <div className="las-upload-box-actions">
-                      <button 
-                        type="button" 
-                        className="las-upload-main-btn"
-                        onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
-                        disabled={uploadingCover}
-                      >
-                        {uploadingCover ? 'Uploading...' : 'Upload Cover from Computer'}
-                      </button>
-                      <button 
-                        type="button" 
-                        className="las-btn las-btn-draft"
-                        onClick={() => openMediaPicker({ type: 'featured' })}
-                      >
-                        Browse Media Library
-                      </button>
-                    </div>
-                    <div style={{ margin: '0.75rem auto 0.5rem auto', maxWidth: '450px' }}>
-                      <input 
-                        type="text" 
-                        className="las-input" 
-                        placeholder="Or paste an image URL directly..." 
-                        value={formData.featuredImage.url}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          featuredImage: { ...prev.featuredImage, url: e.target.value }
-                        }))}
-                        style={{ textAlign: 'center' }}
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* CARD 3: ARTICLE SECTIONS */}
@@ -1107,7 +1934,27 @@ export default function LiveArticleStudio({
                     </h3>
                   </div>
 
-                  {/* Primary Add Action Button */}
+                  {/* Hidden multi-image file input */}
+                  <input
+                    ref={multiImageFileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleMultiImageFileUpload}
+                  />
+
+                  {/* Hidden section image file input */}
+                  <input
+                    ref={sectionImageFileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleSectionImageFileUpload}
+                  />
+
+                  {/* Primary Add Action Toolbar */}
                   <div className="las-add-block-toolbar">
                     <button 
                       type="button" 
@@ -1115,7 +1962,7 @@ export default function LiveArticleStudio({
                       onClick={() => handleAddBlock('section')}
                       title="Add a new Section with Heading & Content"
                     >
-                      + Add Section (Heading & Content)
+                      + Add Section
                     </button>
                   </div>
                 </div>
@@ -1164,36 +2011,150 @@ export default function LiveArticleStudio({
 
                       {/* Block Body Editor */}
                       <div className="las-block-body">
-                        {/* 1. SECTION BLOCK (HEADING + CONTENT) */}
-                        {block.type === 'section' && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                            <div>
-                              <label className="las-label" style={{ color: '#0f172a', fontWeight: 700 }}>
-                                Section Heading
-                              </label>
-                              <input 
-                                type="text"
-                                className="las-section-input"
-                                value={block.heading || ''}
-                                onChange={(e) => handleUpdateBlock(block.id, { heading: e.target.value })}
-                                placeholder="Enter heading..."
-                              />
-                            </div>
+                        {/* 1. SECTION BLOCK (SINGLE UNIFIED EDITABLE CANVAS + INTEGRATED SECTION MEDIA) */}
+                        {block.type === 'section' && (() => {
+                          const secImages = Array.isArray(block.images) && block.images.length > 0
+                            ? block.images
+                            : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
 
-                            <div>
-                              <label className="las-label" style={{ color: '#0f172a', fontWeight: 700 }}>
-                                Section Content
-                              </label>
-                              <textarea 
-                                rows={6}
-                                className="las-section-textarea"
-                                value={block.content || ''}
-                                onChange={(e) => handleUpdateBlock(block.id, { content: e.target.value })}
-                                placeholder="Write or paste your article content here..."
-                              />
+                          return (
+                            <div className="las-section-block-wrapper">
+                              {/* Section Content (TipTap Editor) */}
+                              <div className="las-section-tiptap">
+                                <TipTapEditor
+                                  key={block.id}
+                                  content={block.content ? (block.heading ? `<h2>${block.heading}</h2>\n${block.content}` : block.content) : (block.heading ? `<h2>${block.heading}</h2>` : '')}
+                                  onChange={(html) => handleUpdateBlock(block.id, { content: html, heading: '' })}
+                                  onOpenMediaPicker={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                  placeholder="Write your section content... Use H2 or H3 from the toolbar above for headings, format text, insert images, lists, and quotes."
+                                />
+                              </div>
+
+                              {/* Section Media (Image Attachment) */}
+                              <div className="las-section-media-container">
+                                {secImages.length === 0 ? (
+                                  <div className="las-section-media-empty">
+                                    <div className="las-section-media-empty-info">
+                                      <ImageIcon size={16} className="las-section-media-icon" />
+                                      <span className="las-section-media-empty-text">Section Image (Optional)</span>
+                                    </div>
+                                    <div className="las-section-media-btn-row">
+                                      <button
+                                        type="button"
+                                        className="las-section-media-btn upload"
+                                        onClick={() => triggerSectionImageUpload(block.id)}
+                                        disabled={uploadingSectionImage && targetSectionId === block.id}
+                                        title="Upload image from your computer to this section"
+                                      >
+                                        <UploadCloud size={14} />
+                                        <span>{uploadingSectionImage && targetSectionId === block.id ? 'Uploading...' : 'Add Image (PC)'}</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="las-section-media-btn library"
+                                        onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                        title="Select image from Media Library"
+                                      >
+                                        <FolderOpen size={14} />
+                                        <span>Media Library</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="las-section-media-attached">
+                                    <div className="las-section-media-attached-header">
+                                      <div className="las-section-media-header-left">
+                                        <ImageIcon size={16} className="las-section-media-icon active" />
+                                        <span className="las-section-media-attached-title">
+                                          Section {secImages.length === 1 ? 'Image' : `Images (${secImages.length})`}
+                                        </span>
+                                      </div>
+                                      <div className="las-section-media-header-right">
+                                        <div className="las-section-pos-toggle">
+                                          <span className="las-pos-label">Position:</span>
+                                          <button
+                                            type="button"
+                                            className={`las-pos-btn ${(block.imagePosition || 'top') === 'top' ? 'active' : ''}`}
+                                            onClick={() => handleToggleSectionImagePosition(block.id, 'top')}
+                                            title="Display image at top of section"
+                                          >
+                                            Top
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className={`las-pos-btn ${block.imagePosition === 'bottom' ? 'active' : ''}`}
+                                            onClick={() => handleToggleSectionImagePosition(block.id, 'bottom')}
+                                            title="Display image below section text"
+                                          >
+                                            Bottom
+                                          </button>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          className="las-section-add-more-btn"
+                                          onClick={() => triggerSectionImageUpload(block.id)}
+                                          title="Add another image to this section"
+                                        >
+                                          <Plus size={13} />
+                                          <span>Add Another (PC)</span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="las-section-add-more-btn"
+                                          onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                          title="Add another from Media Library"
+                                        >
+                                          <FolderOpen size={13} />
+                                          <span>Media Library</span>
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    <div className="las-section-images-list">
+                                      {secImages.map((img, imgIdx) => (
+                                        <div key={imgIdx} className="las-section-image-card">
+                                          <div className="las-section-image-thumb-wrap">
+                                            <img 
+                                              src={img.url || img} 
+                                              alt={img.caption || `Section image ${imgIdx + 1}`} 
+                                              className="las-section-image-thumb" 
+                                            />
+                                          </div>
+                                          <div className="las-section-image-meta">
+                                            <div className="las-section-meta-row">
+                                              <input
+                                                type="text"
+                                                className="las-section-meta-input"
+                                                placeholder="Image caption / description..."
+                                                value={img.caption || ''}
+                                                onChange={(e) => handleUpdateSectionImage(block.id, imgIdx, { caption: e.target.value })}
+                                              />
+                                              <input
+                                                type="text"
+                                                className="las-section-meta-input credit"
+                                                placeholder="Photo credit / source..."
+                                                value={img.credit || ''}
+                                                onChange={(e) => handleUpdateSectionImage(block.id, imgIdx, { credit: e.target.value })}
+                                              />
+                                              <button
+                                                type="button"
+                                                className="las-section-img-remove-btn"
+                                                onClick={() => handleRemoveSectionImage(block.id, imgIdx)}
+                                                title="Remove image from section"
+                                              >
+                                                <Trash2 size={14} />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
 
                         {/* 2. BLOG IMAGE BLOCK */}
                         {block.type === 'image' && (
@@ -1233,32 +2194,24 @@ export default function LiveArticleStudio({
                                 </div>
                               </div>
                             ) : (
-                              <div className="las-upload-box" style={{ padding: '1rem', marginBottom: '0.85rem' }}>
-                                <div className="las-upload-box-actions">
-                                  <button
-                                    type="button"
-                                    className="las-upload-main-btn"
-                                    onClick={() => triggerBlockImageUpload(block.id)}
-                                    disabled={uploadingBlockImage}
-                                  >
-                                    <span>{uploadingBlockImage ? 'Uploading...' : 'Upload Image from Computer'}</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="las-btn las-btn-draft"
-                                    onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
-                                  >
-                                    Browse Media
-                                  </button>
-                                </div>
-                                <input 
-                                  type="text" 
-                                  className="las-input" 
-                                  placeholder="Or paste an image URL directly..." 
-                                  value={block.url || ''} 
-                                  onChange={(e) => handleUpdateBlock(block.id, { url: e.target.value })}
-                                  style={{ textAlign: 'center', maxWidth: '420px', margin: '0 auto' }}
-                                />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.5rem 0 0.85rem 0' }}>
+                                <button
+                                  type="button"
+                                  className="las-card-btn-primary"
+                                  onClick={() => triggerBlockImageUpload(block.id)}
+                                  disabled={uploadingBlockImage}
+                                >
+                                  <UploadCloud size={15} />
+                                  <span>{uploadingBlockImage ? 'Uploading...' : 'Upload Image from Computer'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="las-card-btn-secondary"
+                                  onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
+                                >
+                                  <FolderOpen size={15} />
+                                  <span>Browse Media Library</span>
+                                </button>
                               </div>
                             )}
 
@@ -1302,10 +2255,7 @@ export default function LiveArticleStudio({
             <div className="las-preview-header">
               <div className="las-preview-badge">
                 <span className="las-preview-dot" />
-                <span>Live Article View ({previewDevice})</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                Rendering exact public frontend CSS
+                <span>Live Article View</span>
               </div>
             </div>
 
@@ -1313,12 +2263,9 @@ export default function LiveArticleStudio({
               <div 
                 className="modern-article-wrapper" 
                 style={{ 
-                  maxWidth: previewDevice === 'mobile' ? '420px' : '100%', 
+                  maxWidth: '100%', 
                   margin: '0 auto',
-                  boxShadow: previewDevice === 'mobile' ? '0 10px 30px rgba(0,0,0,0.15)' : 'none',
-                  borderRadius: previewDevice === 'mobile' ? '24px' : '0',
-                  padding: previewDevice === 'mobile' ? '1.5rem 1rem' : '2rem 1.5rem',
-                  border: previewDevice === 'mobile' ? '8px solid #0f172a' : 'none'
+                  padding: '2rem 1.5rem'
                 }}
               >
                 {/* Category Badge */}
@@ -1326,8 +2273,8 @@ export default function LiveArticleStudio({
                   {liveArticle.categoryName}
                 </div>
 
-                {/* Featured Cover Banner */}
-                {liveArticle.image && (
+                {/* Featured Cover Banner (Only if not already displayed in sections) */}
+                {liveArticle.image && !isCoverRenderedInBody && (
                   <div className="map-hero-wrapper" style={{ margin: '1.25rem 0' }}>
                     <img 
                       src={liveArticle.image} 
@@ -1338,9 +2285,28 @@ export default function LiveArticleStudio({
                 )}
 
                 {/* Article Headline */}
-                <h1 className="map-title" title={liveArticle.title} style={{ whiteSpace: 'normal' }}>
-                  {liveArticle.title || 'Untitled Headline'}
-                </h1>
+                <h1 
+                  className="map-title" 
+                  title={liveArticle.title} 
+                  style={{ whiteSpace: 'normal', textAlign: formData.titleAlign || 'left' }}
+                  dangerouslySetInnerHTML={{ __html: liveArticle.title || 'Untitled Headline' }}
+                />
+
+                {/* Subtitle / Standfirst */}
+                {liveArticle.subtitle && (
+                  <p 
+                    className="map-subtitle" 
+                    style={{ 
+                      fontSize: '1.18rem', 
+                      color: '#475569', 
+                      lineHeight: 1.5, 
+                      margin: '0.5rem 0 1.25rem',
+                      textAlign: formData.titleAlign || 'left' 
+                    }}
+                  >
+                    {liveArticle.subtitle}
+                  </p>
+                )}
 
                 {/* Author Cluster & Date */}
                 <div className="map-meta-row" style={{ margin: '1.25rem 0 2rem 0' }}>
@@ -1369,16 +2335,54 @@ export default function LiveArticleStudio({
                   {formData.contentBlocks.map((block, idx) => {
                     const key = block.id || idx;
 
-                    // Section (Heading + Content)
+                    // Section (Heading + Image(s) + Content)
                     if (block.type === 'section') {
-                      const paras = (block.content || '').split('\n').filter(p => p.trim().length > 0);
+                      const hasHtml = /<[a-z][\s\S]*>/i.test(block.content || '');
+                      const paras = !hasHtml ? (block.content || '').split('\n').filter(p => p.trim().length > 0) : [];
+                      const secImages = Array.isArray(block.images) && block.images.length > 0
+                        ? block.images
+                        : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+
+                      const renderSecImages = () => (
+                        secImages.map((img, sIdx) => (
+                          <figure key={sIdx} className="map-inline-figure standard" style={{ margin: '1.25rem 0' }}>
+                            <img src={img.url || img} alt={img.caption || 'Section image'} className="map-inline-img" />
+                            {(img.caption || img.credit) && (
+                              <figcaption className="map-inline-caption">
+                                {img.caption} {img.credit ? `(Photo: ${img.credit})` : ''}
+                              </figcaption>
+                            )}
+                          </figure>
+                        ))
+                      );
+
                       return (
                         <div key={key} className="map-body-section" style={{ marginBottom: '1.75rem' }}>
-                          {block.heading && <h2 className="map-body-heading">{block.heading}</h2>}
-                          {paras.map((p, pIdx) => (
-                            <p key={pIdx}>{p}</p>
-                          ))}
-                          {!block.heading && paras.length === 0 && (
+                          {block.heading && (
+                            (block.headingLevel || 2) === 3 ? (
+                              <h3 
+                                className="map-body-heading" 
+                                style={{ textAlign: block.headingAlign || 'left' }}
+                                dangerouslySetInnerHTML={{ __html: block.heading }}
+                              />
+                            ) : (
+                              <h2 
+                                className="map-body-heading" 
+                                style={{ textAlign: block.headingAlign || 'left' }}
+                                dangerouslySetInnerHTML={{ __html: block.heading }}
+                              />
+                            )
+                          )}
+                          {block.imagePosition !== 'bottom' && renderSecImages()}
+                          {hasHtml ? (
+                            <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
+                          ) : (
+                            paras.map((p, pIdx) => (
+                              <p key={pIdx}>{p}</p>
+                            ))
+                          )}
+                          {block.imagePosition === 'bottom' && renderSecImages()}
+                          {!block.heading && secImages.length === 0 && (!block.content || (!hasHtml && paras.length === 0)) && (
                             <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Empty section...</p>
                           )}
                         </div>
@@ -1461,30 +2465,88 @@ export default function LiveArticleStudio({
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                  {mediaFiles.map((f, i) => (
-                    <div 
-                      key={f._id || i}
-                      style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer', background: '#f8fafc' }}
-                      onClick={() => handleSelectMedia(f)}
-                    >
-                      <img src={f.url} alt="" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
-                      <div style={{ padding: '4px 6px', fontSize: '0.72rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {f.originalName || f.filename}
+                  {mediaFiles.map((f, i) => {
+                    const isSelected = selectedMediaItems.some(item => (item._id || item.url) === (f._id || f.url));
+                    return (
+                      <div 
+                        key={f._id || i}
+                        style={{ 
+                          borderRadius: '8px', 
+                          overflow: 'hidden', 
+                          border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                          cursor: 'pointer', 
+                          background: isSelected ? '#eff6ff' : '#f8fafc',
+                          position: 'relative',
+                          boxShadow: isSelected ? '0 0 0 3px rgba(37, 99, 235, 0.2)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onClick={() => handleSelectMedia(f)}
+                      >
+                        <img src={f.url} alt="" style={{ width: '100%', height: '90px', objectFit: 'cover' }} />
+                        {isSelected && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '6px',
+                            right: '6px',
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '50%',
+                            background: '#2563eb',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                          }}>
+                            <Check size={13} strokeWidth={3} />
+                          </div>
+                        )}
+                        <div style={{ padding: '4px 6px', fontSize: '0.72rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: isSelected ? 700 : 500 }}>
+                          {f.originalName || f.filename}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
-              <button 
-                type="button" 
-                className="las-btn las-btn-draft"
-                onClick={() => setIsMediaPickerOpen(false)}
-              >
-                Close Picker
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
+              {mediaPickerTarget.type === 'multiImage' ? (
+                <>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 650, color: '#475569' }}>
+                    {selectedMediaItems.length} images selected (click images to toggle)
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="las-btn las-btn-draft"
+                      onClick={() => setIsMediaPickerOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      className="las-card-btn-primary"
+                      disabled={selectedMediaItems.length === 0}
+                      onClick={handleInsertMultipleFromMediaPicker}
+                    >
+                      Insert Selected Images ({selectedMediaItems.length})
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Click an image to select it</span>
+                  <button 
+                    type="button" 
+                    className="las-btn las-btn-draft"
+                    onClick={() => setIsMediaPickerOpen(false)}
+                  >
+                    Close Picker
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

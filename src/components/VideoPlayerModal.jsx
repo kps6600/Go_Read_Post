@@ -183,13 +183,39 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
         {/* Video Player Cinema Viewport */}
         <div className="cvp-video-screen-wrapper">
           <div className="cvp-video-viewport">
-            <iframe
-              src={currentVideo.youtubeEmbedUrl || "https://www.youtube.com/embed/cKxRvEZd3Mw?autoplay=1&rel=0"}
-              title={currentVideo.title}
-              className="cvp-video-iframe"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+            {(() => {
+              const directSrc = currentVideo.videoUrl || currentVideo.embedUrl || currentVideo.youtubeEmbedUrl || '';
+              const isDirect = typeof directSrc === 'string' && (
+                directSrc.startsWith('blob:') ||
+                directSrc.startsWith('data:video') ||
+                directSrc.includes('/uploads/') ||
+                /\.(mp4|webm|mov|mkv|ogg)(\?.*)?$/i.test(directSrc)
+              );
+
+              if (isDirect) {
+                return (
+                  <video
+                    src={directSrc}
+                    poster={currentVideo.image || currentVideo.guestAvatar}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="cvp-video-iframe"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }}
+                  />
+                );
+              }
+
+              return (
+                <iframe
+                  src={currentVideo.youtubeEmbedUrl || currentVideo.embedUrl || "https://www.youtube.com/embed/cKxRvEZd3Mw?autoplay=1&rel=0"}
+                  title={currentVideo.title}
+                  className="cvp-video-iframe"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              );
+            })()}
           </div>
         </div>
 

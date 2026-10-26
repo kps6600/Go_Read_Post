@@ -7,13 +7,14 @@ import {
   Share2, Hash, Globe, Video, Link2, List, ListOrdered, Quote, Code,
   Heading1, Heading2, Heading3, Bold, Italic, Underline, Upload, CheckSquare, Square, Send,
   Lock, Unlock, Copy, ArrowLeft, Archive, RotateCcw, FileEdit,
-  Star, TrendingUp, Zap, Award
+  Star, TrendingUp, Zap, Award, LayoutGrid, Info
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { MediaService } from '../../services/mediaService';
 import TipTapEditor from './TipTapEditor';
 import LiveArticleStudio from './LiveArticleStudio';
+import './LiveArticleStudio.css';
 
 export const DESKS = [
   { id: 'all', label: 'All Desks' },
@@ -75,6 +76,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const [isSlugExpanded, setIsSlugExpanded] = useState(false);
   const [isExcerptExpanded, setIsExcerptExpanded] = useState(false);
   const [showCustomSeo, setShowCustomSeo] = useState(false);
+  const [viewingArticleDetails, setViewingArticleDetails] = useState(null);
+  const [copiedDetailSlug, setCopiedDetailSlug] = useState(false);
 
   // Rich Text Editor textarea ref for inserting markdown/html tokens
   const contentTextareaRef = useRef(null);
@@ -278,6 +281,22 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   // Selected for bulk
   const [selectedIds, setSelectedIds] = useState(new Set());
 
+  // View Mode: 'cards' | 'list' (defaulting to cards for better user-friendly UI)
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      return localStorage.getItem('admin_articles_view_mode') || 'cards';
+    } catch (e) {
+      return 'cards';
+    }
+  });
+
+  const handleSetViewMode = (mode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('admin_articles_view_mode', mode);
+    } catch (e) {}
+  };
+
   useEffect(() => {
     loadAllData();
   }, []);
@@ -349,6 +368,149 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       .replace(/\-\-+/g, '-')
       .replace(/^-+/, '')
       .replace(/-+$/, '');
+  };
+
+  // Helper for category branding accents & colors
+  const getCategoryMeta = (categoryName) => {
+    const lower = (categoryName || '').toLowerCase();
+    if (lower.includes('tech') || lower.includes('ai') || lower.includes('deeptech') || lower.includes('software')) {
+      return {
+        dotColor: '#38bdf8',
+        bgColor: 'rgba(14, 165, 233, 0.12)',
+        borderColor: 'rgba(56, 189, 248, 0.3)',
+        textColor: '#0284c7'
+      };
+    }
+    if (lower.includes('startup') || lower.includes('fund') || lower.includes('venture') || lower.includes('deal')) {
+      return {
+        dotColor: '#10b981',
+        bgColor: 'rgba(16, 185, 129, 0.12)',
+        borderColor: 'rgba(52, 211, 153, 0.3)',
+        textColor: '#059669'
+      };
+    }
+    if (lower.includes('fintech') || lower.includes('crypto') || lower.includes('bank') || lower.includes('market')) {
+      return {
+        dotColor: '#8b5cf6',
+        bgColor: 'rgba(139, 92, 246, 0.12)',
+        borderColor: 'rgba(167, 139, 250, 0.3)',
+        textColor: '#7c3aed'
+      };
+    }
+    if (lower.includes('herstory') || lower.includes('women') || lower.includes('social')) {
+      return {
+        dotColor: '#ec4899',
+        bgColor: 'rgba(236, 72, 153, 0.12)',
+        borderColor: 'rgba(244, 114, 182, 0.3)',
+        textColor: '#db2777'
+      };
+    }
+    return {
+      dotColor: '#ea580c',
+      bgColor: 'rgba(234, 88, 12, 0.12)',
+      borderColor: 'rgba(251, 146, 60, 0.3)',
+      textColor: '#ea580c'
+    };
+  };
+
+  // Helper for extracting clean topic / tag list from article
+  const getArticleTopics = (art) => {
+    const list = [];
+    if (Array.isArray(art.topics)) {
+      art.topics.forEach(t => {
+        const name = typeof t === 'string' ? t.trim() : (t?.name || '');
+        if (name && !list.includes(name)) list.push(name);
+      });
+    } else if (typeof art.topics === 'string' && art.topics.trim()) {
+      art.topics.split(',').forEach(t => {
+        const clean = t.trim();
+        if (clean && !list.includes(clean)) list.push(clean);
+      });
+    }
+
+    if (Array.isArray(art.tags)) {
+      art.tags.forEach(t => {
+        const name = typeof t === 'string' ? t.trim() : (t?.name || '');
+        if (name && !list.includes(name)) list.push(name);
+      });
+    } else if (typeof art.tags === 'string' && art.tags.trim()) {
+      art.tags.split(',').forEach(t => {
+        const clean = t.trim();
+        if (clean && !list.includes(clean)) list.push(clean);
+      });
+    }
+
+    if (list.length === 0 && (art.categoryName || art.categoryTag || art.category)) {
+      list.push(art.categoryName || art.categoryTag || art.category);
+    }
+    return list;
+  };
+
+
+  // Helper for extracting clean excerpt or snippet from article
+  const getArticleExcerpt = (art) => {
+    if (!art) return '';
+    if (art.excerpt && art.excerpt.trim()) return art.excerpt.trim();
+    if (art.subtitle && art.subtitle.trim()) return art.subtitle.trim();
+    if (art.summary && art.summary.trim()) return art.summary.trim();
+
+    const titleNorm = (art.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0) {
+      for (const b of art.contentBlocks) {
+        const raw = b.content || b.text || '';
+        if (raw) {
+          const clean = raw
+            .replace(/<figcaption[^>]*>.*?<\/figcaption>/gi, ' ')
+            .replace(/<figure[^>]*>.*?<\/figure>/gi, ' ')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          const cleanNorm = clean.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (clean && clean.length > 20 && !cleanNorm.startsWith(titleNorm) && !titleNorm.startsWith(cleanNorm)) {
+            return clean.slice(0, 240);
+          }
+        }
+      }
+
+      for (const b of art.contentBlocks) {
+        const raw = b.content || b.text || '';
+        if (raw) {
+          const clean = raw
+            .replace(/<figcaption[^>]*>.*?<\/figcaption>/gi, ' ')
+            .replace(/<figure[^>]*>.*?<\/figure>/gi, ' ')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (clean && clean.length > 15) return clean.slice(0, 240);
+        }
+      }
+    }
+
+    if (art.content && typeof art.content === 'string') {
+      const clean = art.content
+        .replace(/<figcaption[^>]*>.*?<\/figcaption>/gi, ' ')
+        .replace(/<figure[^>]*>.*?<\/figure>/gi, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (clean) return clean.slice(0, 240);
+    }
+
+    return '';
   };
 
   // Concise SEO slug generator (removes common filler words)
@@ -3094,6 +3256,28 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           >
             <RefreshCw size={15} />
           </button>
+
+          {/* View Mode Toggle: Cards vs Table */}
+          <div className="abv-view-toggle-group">
+            <button
+              type="button"
+              className={`abv-view-btn ${viewMode === 'cards' ? 'active' : ''}`}
+              onClick={() => handleSetViewMode('cards')}
+              title="Cards Grid View"
+            >
+              <LayoutGrid size={15} />
+              <span>Cards</span>
+            </button>
+            <button
+              type="button"
+              className={`abv-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => handleSetViewMode('list')}
+              title="Table View"
+            >
+              <List size={15} />
+              <span>Table</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -3125,38 +3309,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <CheckSquare size={13} />
               <span>{selectedIds.size} Selected</span>
             </div>
-            <span style={{ fontSize: '0.85rem', color: '#881337', fontWeight: 600 }}>
-              {selectedIds.size === filteredArticles.length ? 'All filtered articles selected' : `${selectedIds.size} of ${filteredArticles.length} stories selected`}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)))}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#dc2626',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                textDecoration: 'underline'
-              }}
-            >
-              Select All ({filteredArticles.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                textDecoration: 'underline'
-              }}
-            >
-              Clear Selection
-            </button>
+
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3225,241 +3378,852 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
       )}
 
-      {/* 5. Articles Table */}
-      <div className="abv-table-card">
-        <table className="abv-table">
-          <thead>
-            <tr>
-              <th className="admin-checkbox-cell">
-                <label className="admin-checkbox-wrap" title="Select all articles">
-                  <input 
-                    type="checkbox" 
-                    className="admin-table-checkbox"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
-                      } else {
-                        setSelectedIds(new Set());
-                      }
-                    }}
-                    checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
-                  />
-                </label>
-              </th>
-              <th>Story Title & Excerpt</th>
-              <th>Author</th>
-              <th>Category & Desk</th>
-              <th>Status</th>
-              <th>Published Date</th>
-              <th>Views</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="8" style={{ textAlign: 'center', padding: '3.5rem' }}>
-                  <RefreshCw size={24} color="var(--brand-primary)" className="rotate-icon" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 0.75rem' }} />
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading editorial posts from MongoDB database...</p>
-                </td>
-              </tr>
-            ) : filteredArticles.length === 0 ? (
-              <tr>
-                <td colSpan="8" style={{ textAlign: 'center', padding: '3.5rem' }}>
-                  <BookOpen size={36} color="var(--text-muted)" style={{ margin: '0 auto 0.75rem' }} />
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700 }}>No Posts Found</h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                    {search ? `No articles matching "${search}"` : 'No articles currently in this tab.'}
-                  </p>
-                  <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
-                    <Plus size={15} /> Create First Article
-                  </button>
-                </td>
-              </tr>
-            ) : (
-              filteredArticles.map(article => {
+      {/* 5. Articles Content: Cards View OR Table View */}
+      {viewMode === 'cards' ? (
+        <div>
+          {/* Cards Header: Select All & Count */}
+          <div className="abv-cards-header-bar">
+            <label className="abv-select-all-label" title="Select all articles">
+              <input 
+                type="checkbox" 
+                className="admin-table-checkbox"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
+                  } else {
+                    setSelectedIds(new Set());
+                  }
+                }}
+                checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
+              />
+              <span>Select All</span>
+              {selectedIds.size > 0 && (
+                <span className="abv-selected-pill">
+                  {selectedIds.size} of {filteredArticles.length} selected
+                </span>
+              )}
+            </label>
+            <div className="abv-cards-count-badge">
+              <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border-light)' }}>
+              <RefreshCw size={26} color="var(--brand-primary)" className="rotate-icon" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 0.75rem' }} />
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Loading editorial articles...</p>
+            </div>
+          ) : filteredArticles.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid var(--border-light)' }}>
+              <BookOpen size={40} color="var(--text-muted)" style={{ margin: '0 auto 0.75rem' }} />
+              <h4 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.35rem' }}>No Posts Found</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '1.25rem' }}>
+                {search ? `No articles matching "${search}"` : 'No articles currently in this section.'}
+              </p>
+              <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
+                <Plus size={15} /> Create First Article
+              </button>
+            </div>
+          ) : (
+            <div className="abv-cards-grid">
+              {filteredArticles.map(article => {
                 const id = article._id || article.id;
                 const isSelected = selectedIds.has(id);
                 const slug = article.slug || slugify(article.title);
+                const sectionImg = (article.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || 
+                                   (typeof article.contentBlocks?.find(b => b.image)?.image === 'string' ? article.contentBlocks?.find(b => b.image)?.image : article.contentBlocks?.find(b => b.image)?.image?.url) || 
+                                   '';
+                const coverImage = article.featuredImage?.url || article.image || article.heroImage || sectionImg || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop&q=80';
+                const authorImg = article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+                const authorLabel = article.authorName || article.author?.name || 'Editorial Desk';
+                const categoryLabel = article.categoryName || article.categoryTag || article.category || 'Startups';
+                const deskLabel = article.brand || 'GoReadPost';
+                const viewsCount = article.views || 0;
+                const catMeta = getCategoryMeta(categoryLabel);
+                const cardTopics = getArticleTopics(article);
+                const displayTopics = cardTopics.filter(t => t.toLowerCase() !== categoryLabel.toLowerCase());
+                const cardExcerpt = getArticleExcerpt(article);
 
                 return (
-                  <tr key={id} className={isSelected ? 'selected-row' : ''}>
-                    <td className="admin-checkbox-cell">
-                      <label className="admin-checkbox-wrap">
-                        <input 
-                          type="checkbox"
-                          className="admin-table-checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            const next = new Set(selectedIds);
-                            if (e.target.checked) next.add(id);
-                            else next.delete(id);
-                            setSelectedIds(next);
-                          }}
-                        />
-                      </label>
-                    </td>
+                  <div 
+                    key={id} 
+                    className={`abv-article-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setViewingArticleDetails(article)}
+                  >
+                    {/* 16:9 Cover Media Header */}
+                    <div className="abv-card-media">
+                      <img 
+                        src={coverImage} 
+                        alt={article.title} 
+                        className="abv-card-img" 
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                      <div className="abv-card-media-overlay" />
 
-                    {/* Title, Excerpt, Image */}
-                    <td>
-                      <div className="abv-story-info-cell">
-                        <img 
-                          src={article.featuredImage?.url || article.image || article.heroImage || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=200&auto=format&fit=crop&q=80'} 
-                          alt="" 
-                          className="abv-story-thumb" 
-                        />
-                        <div className="abv-story-meta-col">
-                          <h4 className="abv-story-headline" onClick={() => handleOpenEdit(article)} style={{ cursor: 'pointer' }}>
-                            {article.title}
-                          </h4>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-                            <code style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-tertiary)', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
-                              /article/{slug}
-                            </code>
-                            {article.isFeatured && (
-                              <span style={{ fontSize: '0.65rem', background: 'rgba(234, 88, 12, 0.1)', color: 'var(--brand-primary)', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                                FEATURED
-                              </span>
-                            )}
-                            {article.isTrending && (
-                              <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-emerald)', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                                TRENDING
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
+                      {/* Bulk Select Button */}
+                      <button 
+                        type="button"
+                        className={`abv-card-select-btn ${isSelected ? 'selected' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const next = new Set(selectedIds);
+                          if (isSelected) next.delete(id);
+                          else next.add(id);
+                          setSelectedIds(next);
+                        }}
+                        title={isSelected ? "Deselect article" : "Select article"}
+                        aria-label={isSelected ? "Deselect article" : "Select article"}
+                      >
+                        {isSelected ? (
+                          <Check size={13} strokeWidth={3} className="abv-select-check-icon" />
+                        ) : (
+                          <span className="abv-select-uncheck-ring" />
+                        )}
+                      </button>
 
-                    {/* Author */}
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--bg-tertiary)', overflow: 'hidden', flexShrink: 0 }}>
-                          <img 
-                            src={article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'} 
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        </div>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 650, color: 'var(--text-primary)' }}>
-                          {article.authorName || article.author?.name || 'Staff Reporter'}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Category & Desk */}
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <span className="abv-cat-tag">
-                          {article.categoryName || article.categoryTag || article.category || 'Startups'}
-                        </span>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          {article.brand || 'GoReadPost'}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Status Pill */}
-                    <td>
+                      {/* Status Toggle Badge */}
                       <button
                         type="button"
-                        onClick={() => handleTogglePublish(article)}
-                        style={{
-                          background: article.status === 'published' ? 'rgba(5, 150, 105, 0.12)' : 
-                                      article.status === 'scheduled' ? 'rgba(139, 92, 246, 0.12)' : 
-                                      article.status === 'archived' ? 'rgba(100, 116, 139, 0.15)' : 
-                                      'rgba(217, 119, 6, 0.12)',
-                          color: article.status === 'published' ? 'var(--accent-emerald)' : 
-                                 article.status === 'scheduled' ? '#8b5cf6' : 
-                                 article.status === 'archived' ? '#64748b' : 
-                                 '#d97706',
-                          border: 'none',
-                          padding: '0.25rem 0.65rem',
-                          borderRadius: '999px',
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                          textTransform: 'uppercase'
+                        className={`abv-card-status-badge status-${article.status || 'published'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTogglePublish(article);
                         }}
                         title="Click to toggle publish status"
                       >
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
+                        <span className="abv-status-dot" />
                         {article.status || 'published'}
                       </button>
-                    </td>
 
-                    {/* Published Date */}
-                    <td>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
-                      </span>
-                    </td>
+                      {/* Unified Badges: Category & Trending/Featured together side-by-side */}
+                      <div className="abv-card-media-badges">
+                        {/* Glassmorphic Category Badge with Indicator Dot */}
+                        <div className="abv-card-category-pill">
+                          <span 
+                            className="abv-category-indicator-dot" 
+                            style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                          />
+                          <span>{categoryLabel}</span>
+                        </div>
 
-                    {/* Views */}
-                    <td>
-                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {(article.views || 0).toLocaleString()}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="abv-action-buttons">
-                        <button 
-                          className="abv-action-btn"
-                          onClick={() => window.open(`/article/${slug}`, '_blank')}
-                          title="Preview public article"
-                        >
-                          <ExternalLink size={14} />
-                        </button>
-                        <button 
-                          className="abv-action-btn edit"
-                          onClick={() => handleOpenEdit(article)}
-                          title="Edit article"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        {article.status === 'archived' ? (
-                          <button 
-                            className="abv-action-btn restore"
-                            onClick={() => handleRestoreArticle(article)}
-                            title="Restore to Drafts"
-                            style={{ color: '#059669' }}
-                          >
-                            <RotateCcw size={14} />
-                          </button>
-                        ) : (
-                          <button 
-                            className="abv-action-btn archive"
-                            onClick={() => handleArchiveArticle(article)}
-                            title="Archive story"
-                            style={{ color: '#64748b' }}
-                          >
-                            <Archive size={14} />
-                          </button>
+                        {article.isTrending && (
+                          <span className="abv-flag-badge flag-trending">
+                            <TrendingUp size={10} /> TRENDING
+                          </span>
                         )}
-                        <button 
-                          className="abv-action-btn delete"
-                          onClick={() => setArticleToDelete(article)}
-                          title="Delete article"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {article.isFeatured && (
+                          <span className="abv-flag-badge flag-featured">
+                            <Star size={10} /> FEATURED
+                          </span>
+                        )}
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+
+                    {/* Card Content Body */}
+                    <div className="abv-card-body">
+                      {/* Topics & Read Time Row */}
+                      <div className="abv-card-topics-meta-row">
+                        <div className="abv-card-topics-chips">
+                          {displayTopics.slice(0, 1).map((topic, tIdx) => (
+                            <span key={tIdx} className="abv-card-topic-tag" title={`Topic: ${topic}`}>
+                              <Tag size={10} className="abv-topic-icon" />
+                              <span>{topic}</span>
+                            </span>
+                          ))}
+                          {displayTopics.length > 1 && (
+                            <span className="abv-card-topic-tag more" title={displayTopics.slice(1).join(', ')}>
+                              +{displayTopics.length - 1}
+                            </span>
+                          )}
+                        </div>
+
+                        {article.readingTime && (
+                          <span className="abv-card-readtime-pill">
+                            <Clock size={11} /> {article.readingTime}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="abv-card-title" title={article.title}>
+                        {article.title}
+                      </h3>
+
+                      {/* Excerpt preview if available */}
+                      {cardExcerpt && (
+                        <p className="abv-card-excerpt" title={cardExcerpt}>
+                          {cardExcerpt}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="abv-card-footer">
+                      <div className="abv-card-author-meta">
+                        <img 
+                          src={authorImg} 
+                          alt=""
+                          className="abv-card-author-img"
+                        />
+                        <div className="abv-card-author-text">
+                          <span className="abv-card-author-name">
+                            {authorLabel}
+                          </span>
+                          <span className="abv-card-date">
+                            <Calendar size={11} />
+                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="abv-card-actions-meta">
+                        <div className="abv-card-views" title={`${viewsCount.toLocaleString()} views`}>
+                          <Eye size={13} />
+                          <span>{viewsCount.toLocaleString()}</span>
+                        </div>
+
+                        <div className="abv-card-actions">
+                          <button 
+                            type="button"
+                            className="abv-action-btn delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setArticleToDelete(article);
+                            }}
+                            title="Delete article"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="abv-table-card">
+          <table className="abv-table">
+            <colgroup>
+              <col style={{ width: '44px' }} />
+              <col style={{ width: 'auto' }} />
+              <col style={{ width: '150px' }} />
+              <col style={{ width: '120px' }} />
+              <col style={{ width: '135px' }} />
+              <col style={{ width: '115px' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th className="admin-checkbox-cell">
+                  <label className="admin-checkbox-wrap" title="Select all articles">
+                    <input 
+                      type="checkbox" 
+                      className="admin-table-checkbox"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
+                        } else {
+                          setSelectedIds(new Set());
+                        }
+                      }}
+                      checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
+                    />
+                  </label>
+                </th>
+                <th>Article</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Date & Views</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '3.5rem' }}>
+                    <RefreshCw size={24} color="var(--brand-primary)" className="rotate-icon" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 0.75rem' }} />
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading editorial posts from MongoDB database...</p>
+                  </td>
+                </tr>
+              ) : filteredArticles.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '3.5rem' }}>
+                    <BookOpen size={36} color="var(--text-muted)" style={{ margin: '0 auto 0.75rem' }} />
+                    <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700 }}>No Posts Found</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                      {search ? `No articles matching "${search}"` : 'No articles currently in this tab.'}
+                    </p>
+                    <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
+                      <Plus size={15} /> Create First Article
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                filteredArticles.map(article => {
+                  const id = article._id || article.id;
+                  const isSelected = selectedIds.has(id);
+                  const slug = article.slug || slugify(article.title);
+
+                  return (
+                    <tr key={id} className={isSelected ? 'selected-row' : ''}>
+                      <td className="admin-checkbox-cell">
+                        <label className="admin-checkbox-wrap">
+                          <input 
+                            type="checkbox"
+                            className="admin-table-checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const next = new Set(selectedIds);
+                              if (e.target.checked) next.add(id);
+                              else next.delete(id);
+                              setSelectedIds(next);
+                            }}
+                          />
+                        </label>
+                      </td>
+
+                      {/* Article (Cover + Category + Headline) - ONLY IMPORTANT DATA */}
+                      <td>
+                        <div className="abv-story-info-cell">
+                          <img 
+                            src={article.featuredImage?.url || article.image || article.heroImage || (article.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&auto=format&fit=crop&q=80'}
+                            alt="" 
+                            className="abv-story-thumb" 
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&auto=format&fit=crop&q=80';
+                            }}
+                          />
+                          <div className="abv-story-meta-col">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.25rem' }}>
+                              <span className="abv-cat-tag-pill">
+                                {article.categoryName || article.categoryTag || article.category || 'Startups'}
+                              </span>
+                            </div>
+                            <h4 className="abv-story-headline" onClick={() => handleOpenEdit(article)} style={{ cursor: 'pointer' }} title={article.title}>
+                              {article.title}
+                            </h4>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Author */}
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-tertiary)', overflow: 'hidden', flexShrink: 0 }}>
+                            <img 
+                              src={article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'} 
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <span style={{ fontSize: '0.84rem', fontWeight: 650, color: 'var(--text-primary)' }}>
+                            {article.authorName || article.author?.name || 'Staff Reporter'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Status Pill */}
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePublish(article)}
+                          style={{
+                            background: article.status === 'published' ? 'rgba(5, 150, 105, 0.12)' : 
+                                        article.status === 'scheduled' ? 'rgba(139, 92, 246, 0.12)' : 
+                                        article.status === 'archived' ? 'rgba(100, 116, 139, 0.15)' : 
+                                        'rgba(217, 119, 6, 0.12)',
+                            color: article.status === 'published' ? 'var(--accent-emerald)' : 
+                                   article.status === 'scheduled' ? '#8b5cf6' : 
+                                   article.status === 'archived' ? '#64748b' : 
+                                   '#d97706',
+                            border: 'none',
+                            padding: '0.28rem 0.7rem',
+                            borderRadius: '999px',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            textTransform: 'uppercase'
+                          }}
+                          title="Click to toggle publish status"
+                        >
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
+                          {article.status || 'published'}
+                        </button>
+                      </td>
+
+                      {/* Date & Views */}
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Eye size={12} /> {(article.views || 0).toLocaleString()} views
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Actions: "i" button to show details, Edit, Delete */}
+                      <td style={{ textAlign: 'right' }}>
+                        <div className="abv-action-buttons">
+                          <button
+                            type="button"
+                            className={`abv-action-btn visibility-btn ${article.status === 'published' ? 'active' : 'inactive'}`}
+                            onClick={() => handleTogglePublish(article)}
+                            title={article.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
+                          >
+                            {article.status === 'published' ? (
+                              <>
+                                <Eye size={12} />
+                                <span>ON</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff size={12} />
+                                <span>OFF</span>
+                              </>
+                            )}
+                          </button>
+                          <button 
+                            type="button"
+                            className="abv-action-btn view"
+                            onClick={() => setViewingArticleDetails(article)}
+                            title="View full article details"
+                          >
+                            <Eye size={14} />
+                            <span>View</span>
+                          </button>
+                          <button 
+                            type="button"
+                            className="abv-action-btn edit"
+                            onClick={() => handleOpenEdit(article)}
+                            title="Edit article"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button 
+                            type="button"
+                            className="abv-action-btn delete"
+                            onClick={() => setArticleToDelete(article)}
+                            title="Delete article"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* MEDIA LIBRARY SELECTOR MODAL */}
       {renderMediaPickerModal()}
+
+      {/* ARTICLE FULL DETAILS PREVIEW MODAL */}
+      {viewingArticleDetails && (() => {
+        const art = viewingArticleDetails;
+        const coverImg = art.featuredImage?.url || 
+                         (typeof art.featuredImage === 'string' ? art.featuredImage : '') || 
+                         art.image || 
+                         art.heroImage || 
+                         '';
+        const coverCaption = art.featuredImage?.caption || '';
+        const coverCredit = art.featuredImage?.credit || art.photoCredit || '';
+        const authorImg = art.authorAvatar || art.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+        const authorName = art.authorName || art.author?.name || 'Editorial Desk';
+        const authorTitle = art.authorTitle || art.author?.designation || 'Staff Reporter';
+        const catName = art.categoryName || art.categoryTag || art.category || 'General';
+        const desk = art.brand || 'GoReadPost';
+        const catMeta = getCategoryMeta(catName);
+        const topics = getArticleTopics(art);
+        const detailExcerpt = getArticleExcerpt(art);
+        const tagsList = (typeof art.tags === 'string' 
+          ? art.tags.split(',') 
+          : Array.isArray(art.tags) 
+            ? art.tags 
+            : []
+        ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
+        const pubDate = art.publishedAt 
+          ? new Date(art.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+          : (art.createdAt ? new Date(art.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Draft');
+        const readingTime = art.readingTime || '4 min read';
+        const viewsCount = (art.views || 0).toLocaleString();
+        const articleSlug = art.slug || '';
+        const articleUrl = typeof window !== 'undefined' ? `${window.location.origin}/article/${articleSlug}` : `/article/${articleSlug}`;
+
+        const handleCopyLink = () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(articleUrl);
+            setCopiedDetailSlug(true);
+            setTimeout(() => setCopiedDetailSlug(false), 2200);
+          }
+        };
+
+        return (
+          <div className="abv-modal-backdrop" onClick={() => setViewingArticleDetails(null)}>
+            <div 
+              className="abv-modal-dialog abv-details-dialog" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="abv-modal-header abv-details-header">
+                <div className="abv-modal-title-box">
+                  <div className="abv-details-header-icon">
+                    <FileText size={18} color="#0284c7" />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <h3 className="abv-modal-title" style={{ margin: 0 }}>Article Full Details</h3>
+                      <button
+                        type="button"
+                        className={`abv-action-btn visibility-btn ${art.status === 'published' ? 'active' : 'inactive'}`}
+                        onClick={async () => {
+                          await handleTogglePublish(art);
+                          setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                        }}
+                        style={{ cursor: 'pointer', padding: '0.35rem 0.8rem', fontSize: '0.78rem' }}
+                        title={art.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
+                      >
+                        {art.status === 'published' ? (
+                          <>
+                            <Eye size={13} />
+                            <span>Frontend: ON</span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff size={13} />
+                            <span>Frontend: OFF</span>
+                          </>
+                        )}
+                      </button>
+                      {art.isFeatured && (
+                        <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
+                          <Star size={10} /> FEATURED
+                        </span>
+                      )}
+                      {art.isTrending && (
+                        <span className="abv-flag-badge flag-trending" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
+                          <TrendingUp size={10} /> TRENDING
+                        </span>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="abv-modal-close" 
+                    onClick={() => setViewingArticleDetails(null)}
+                    title="Close preview"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="abv-modal-form abv-details-body">
+                {/* Cover Image Banner (if available) */}
+                {coverImg && (
+                  <div className="abv-detail-cover-wrap">
+                    <img 
+                      src={coverImg} 
+                      alt={art.title || 'Cover image'} 
+                      className="abv-detail-cover-img"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1000&auto=format&fit=crop&q=80';
+                      }}
+                    />
+                    <div className="abv-detail-cover-meta-bar">
+                      <div className="abv-card-category-pill" style={{ margin: 0 }}>
+                        <span 
+                          className="abv-category-indicator-dot" 
+                          style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                        />
+                        <span>{catName}</span>
+                      </div>
+                      <span className="abv-detail-desk-pill">{desk}</span>
+                      {readingTime && (
+                        <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
+                          <Clock size={11} /> {readingTime}
+                        </span>
+                      )}
+                    </div>
+                    {(coverCaption || coverCredit) && (
+                      <div className="abv-detail-cover-caption">
+                        {coverCaption && <span>{coverCaption}</span>}
+                        {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Article Headline */}
+                <h1 className="abv-detail-headline">{art.title}</h1>
+
+                {/* Subtitle if available */}
+                {art.subtitle && (
+                  <h2 className="abv-detail-subtitle">{art.subtitle}</h2>
+                )}
+
+                {/* Quick Metadata Info Strip */}
+                <div className="abv-detail-meta-grid">
+                  {/* Author Card */}
+                  <div className="abv-detail-meta-card">
+                    <img src={authorImg} alt={authorName} className="abv-detail-author-avatar" />
+                    <div>
+                      <div className="abv-detail-meta-label">Author</div>
+                      <div className="abv-detail-meta-val">{authorName}</div>
+                      <div className="abv-detail-meta-sub">{authorTitle}</div>
+                    </div>
+                  </div>
+
+                  {/* Publication & Views */}
+                  <div className="abv-detail-meta-card">
+                    <Calendar size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                    <div>
+                      <div className="abv-detail-meta-label">Published Date</div>
+                      <div className="abv-detail-meta-val">{pubDate}</div>
+                      <div className="abv-detail-meta-sub" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Eye size={12} /> {viewsCount} total views
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Taxonomy / Classification */}
+                  <div className="abv-detail-meta-card">
+                    <Tag size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                    <div>
+                      <div className="abv-detail-meta-label">Category & Type</div>
+                      <div className="abv-detail-meta-val">{catName}</div>
+                      <div className="abv-detail-meta-sub">{art.contentType || 'Article'} • {art.language || 'English'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Excerpt / Summary */}
+                {detailExcerpt && (
+                  <div className="abv-detail-excerpt-box">
+                    <div className="abv-detail-section-title">
+                      <Quote size={14} color="#0284c7" />
+                      <span>Story Excerpt / Executive Summary</span>
+                    </div>
+                    <p className="abv-detail-excerpt-text">{detailExcerpt}</p>
+                  </div>
+                )}
+
+                {/* Topics & Tags */}
+                {(topics.length > 0 || tagsList.length > 0) && (
+                  <div className="abv-detail-taxonomy-box">
+                    {topics.length > 0 && (
+                      <div className="abv-detail-taxonomy-group">
+                        <span className="abv-detail-tax-label">Topics:</span>
+                        <div className="abv-detail-pill-wrap">
+                          {topics.map((top, idx) => (
+                            <span key={idx} className="abv-detail-topic-pill">
+                              <Tag size={10} /> {top}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {tagsList.length > 0 && (
+                      <div className="abv-detail-taxonomy-group">
+                        <span className="abv-detail-tax-label">Tags:</span>
+                        <div className="abv-detail-pill-wrap">
+                          {tagsList.map((tag, idx) => (
+                            <span key={idx} className="abv-detail-tag-pill">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Full Article Content */}
+                <div className="abv-detail-content-section">
+                  <div className="abv-detail-section-title">
+                    <BookOpen size={15} color="#0284c7" />
+                    <span>Full Article Body</span>
+                  </div>
+
+                  {art.contentBlocks && Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0 ? (
+                    <div className="abv-detail-blocks-container">
+                      {art.contentBlocks.map((block, bIdx) => {
+                        if (block.type === 'heading') {
+                          return (
+                            <h3 key={bIdx} className="abv-detail-block-heading">
+                              {block.text}
+                            </h3>
+                          );
+                        }
+                        if (block.type === 'image') {
+                          const bImg = typeof block.image === 'string' ? block.image : (block.url || block.image?.url || '');
+                          return (
+                            <div key={bIdx} className="abv-detail-block-image-wrap">
+                              {bImg && <img src={bImg} alt={block.alt || ''} className="abv-detail-block-img" />}
+                              {(block.caption || block.credit) && (
+                                <p className="abv-detail-block-img-caption">
+                                  {block.caption} {block.credit && `(Credit: ${block.credit})`}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                        if (block.type === 'testimonial' || block.type === 'quote') {
+                          return (
+                            <blockquote key={bIdx} className="abv-detail-block-quote">
+                              <p>"{block.quote || block.text}"</p>
+                              {block.author && <cite>— {block.author} {block.designation ? `(${block.designation})` : ''}</cite>}
+                            </blockquote>
+                          );
+                        }
+                        return (
+                          <div 
+                            key={bIdx} 
+                            className="abv-detail-block-paragraph"
+                            dangerouslySetInnerHTML={{ __html: block.text || block.content || '' }}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : art.content ? (
+                    <div 
+                      className="abv-detail-article-content"
+                      dangerouslySetInnerHTML={{ __html: art.content }}
+                    />
+                  ) : (
+                    <div className="abv-detail-empty-content">
+                      <Info size={16} />
+                      <span>No body content written for this article yet. Click "Edit in Studio" to compose content.</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Permalink & SEO Box */}
+                <div className="abv-detail-slug-box">
+                  <div className="abv-detail-slug-info">
+                    <Globe size={15} color="var(--text-muted)" />
+                    <span className="abv-detail-slug-label">Permalink:</span>
+                    <code className="abv-detail-slug-text">{articleUrl}</code>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="abv-detail-copy-btn"
+                    onClick={handleCopyLink}
+                    title="Copy full public URL"
+                  >
+                    {copiedDetailSlug ? (
+                      <>
+                        <Check size={13} color="#10b981" />
+                        <span style={{ color: '#10b981' }}>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={13} />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="abv-modal-footer abv-details-footer">
+                <button
+                  type="button"
+                  className="abv-modal-btn"
+                  style={{
+                    background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
+                    color: art.status === 'published' ? '#d97706' : '#059669',
+                    border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
+                    marginRight: 'auto'
+                  }}
+                  onClick={async () => {
+                    await handleTogglePublish(art);
+                    setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                  }}
+                  title={art.status === 'published' ? "Hide article from frontend site" : "Show article on frontend site"}
+                >
+                  {art.status === 'published' ? (
+                    <>
+                      <EyeOff size={14} />
+                      <span>Disable from Frontend</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye size={14} />
+                      <span>Enable on Frontend</span>
+                    </>
+                  )}
+                </button>
+
+                <button 
+                  type="button" 
+                  className="abv-modal-btn cancel" 
+                  onClick={() => setViewingArticleDetails(null)}
+                >
+                  Close
+                </button>
+                
+                {articleSlug && (
+                  <a 
+                    href={`/article/${articleSlug}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="abv-modal-btn"
+                    style={{
+                      background: 'rgba(2, 132, 199, 0.1)',
+                      color: '#0284c7',
+                      border: '1px solid rgba(2, 132, 199, 0.3)',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <ExternalLink size={14} />
+                    <span>View Public Page</span>
+                  </a>
+                )}
+
+                <button 
+                  type="button" 
+                  className="abv-modal-btn"
+                  style={{
+                    background: 'var(--brand-primary)',
+                    color: '#ffffff'
+                  }}
+                  onClick={() => {
+                    const toEdit = viewingArticleDetails;
+                    setViewingArticleDetails(null);
+                    handleOpenEdit(toEdit);
+                  }}
+                >
+                  <Edit2 size={14} />
+                  <span>Edit in Studio</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 8. DELETE CONFIRMATION MODAL */}
       {articleToDelete && (

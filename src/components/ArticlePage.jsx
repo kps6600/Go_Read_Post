@@ -401,11 +401,15 @@ export default function ArticlePage({
   const current = useMemo(() => {
     if (!article) return null;
     const catName = article.categoryName || article.categoryLabel || article.category || 'TECHNOLOGY';
+    const sectionImg = (article.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || 
+                       (typeof article.contentBlocks?.find(b => b.image)?.image === 'string' ? article.contentBlocks?.find(b => b.image)?.image : article.contentBlocks?.find(b => b.image)?.image?.url) || 
+                       '';
     const rawImg = article.featuredImage?.url || 
                    (typeof article.featuredImage === 'string' ? article.featuredImage : null) || 
                    article.image || 
                    article.heroImage || 
-                   'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80';
+                   sectionImg ||
+                   '';
 
     const authorName = article.authorName || 
                        (typeof article.author === 'string' ? article.author : article.author?.name) || 
@@ -446,6 +450,44 @@ export default function ArticlePage({
         : (Array.isArray(article.topicIds) ? article.topicIds.map(t => (typeof t === 'object' && t ? t.name : t)).filter(Boolean) : (article.topic ? [article.topic] : []))
     };
   }, [article]);
+
+  // Check if current.image is already rendered inside the article body/sections
+  const isCoverRenderedInBody = useMemo(() => {
+    if (!current?.image || !Array.isArray(current?.contentBlocks)) return false;
+    const cleanCover = current.image.trim().replace(/^https?:\/\/[^\/]+/, '').split('?')[0];
+    if (!cleanCover) return false;
+
+    for (const block of current.contentBlocks) {
+      if (!block) continue;
+      if (block.type === 'section') {
+        if (Array.isArray(block.images)) {
+          for (const img of block.images) {
+            const u = (img?.url || (typeof img === 'string' ? img : '')).trim();
+            if (u && (u === current.image || u.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover)) {
+              return true;
+            }
+          }
+        }
+        const singleSecImg = (block.image?.url || (typeof block.image === 'string' ? block.image : '')).trim();
+        if (singleSecImg && (singleSecImg === current.image || singleSecImg.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover)) {
+          return true;
+        }
+      } else if (block.type === 'image' && block.url) {
+        const u = block.url.trim();
+        if (u === current.image || u.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover) {
+          return true;
+        }
+      } else if (block.type === 'gallery' && Array.isArray(block.images)) {
+        for (const img of block.images) {
+          const u = (img?.url || (typeof img === 'string' ? img : '')).trim();
+          if (u && (u === current.image || u.replace(/^https?:\/\/[^\/]+/, '').split('?')[0] === cleanCover)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }, [current?.image, current?.contentBlocks]);
 
   // Helper for category normalization and matching
   const normalizeCat = (cat) => {
@@ -829,15 +871,17 @@ export default function ArticlePage({
              ════════════════════════════════════════════════ */}
           <main className="modern-article-main">
             
-            {/* Featured Image */}
-            <div className="map-hero-wrapper">
-              <img 
-                src={current.image} 
-                alt={current.title} 
-                className="map-hero-img"
-                loading="eager"
-              />
-            </div>
+            {/* Featured Image (Only rendered if not already in content blocks) */}
+            {current.image && !isCoverRenderedInBody ? (
+              <div className="map-hero-wrapper">
+                <img 
+                  src={current.image} 
+                  alt={current.title} 
+                  className="map-hero-img"
+                  loading="eager"
+                />
+              </div>
+            ) : null}
 
             {/* Article Headline with Show Full Text Button */}
             <div className="map-title-row">
@@ -959,9 +1003,25 @@ export default function ArticlePage({
                   if (!block) return null;
                   const key = block.id || idx;
 
-                  // Combined Section (Heading + Multiple Paragraphs)
+                  // Combined Section (Heading + Image(s) + Multiple Paragraphs)
                   if (block.type === 'section') {
-                    const paragraphs = (block.content || '').split('\n').filter(p => p.trim());
+                    const hasHtml = /<[a-z][\s\S]*>/i.test(block.content || '');
+                    const paragraphs = !hasHtml ? (block.content || '').split('\n').filter(p => p.trim()) : [];
+                    const secImages = Array.isArray(block.images) && block.images.length > 0
+                      ? block.images
+                      : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+
+                    const renderSecImages = () => secImages.map((img, sIdx) => (
+                      <figure key={sIdx} className="map-inline-figure standard" style={{ margin: '1.25rem 0' }}>
+                        <img src={img.url || img} alt={img.caption || img.alt || 'Section illustration'} className="map-inline-img" />
+                        {(img.caption || img.credit) && (
+                          <figcaption className="map-inline-caption">
+                            {img.caption} {img.credit ? `(Photo: ${img.credit})` : ''}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ));
+
                     return (
                       <div key={key} className="map-section-group" style={{ margin: '1.75rem 0' }}>
                         {block.heading && (
@@ -969,13 +1029,17 @@ export default function ArticlePage({
                             {block.heading}
                           </h2>
                         )}
-                        {paragraphs.length > 0 ? (
+                        {block.imagePosition !== 'bottom' && renderSecImages()}
+                        {hasHtml ? (
+                          <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
+                        ) : paragraphs.length > 0 ? (
                           paragraphs.map((p, pIdx) => (
                             <p key={pIdx} dangerouslySetInnerHTML={{ __html: p }} />
                           ))
                         ) : (
                           block.text && <p dangerouslySetInnerHTML={{ __html: block.text }} />
                         )}
+                        {block.imagePosition === 'bottom' && renderSecImages()}
                       </div>
                     );
                   }

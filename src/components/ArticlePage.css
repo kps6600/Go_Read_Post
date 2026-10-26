@@ -92,8 +92,8 @@
 /* ── 2. Two-Column Layout ── */
 .modern-article-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 390px;
-  gap: 3.5rem;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 2.5rem;
   align-items: start;
   width: 100%;
   box-sizing: border-box;
@@ -101,22 +101,22 @@
 
 @media (min-width: 1600px) {
   .modern-article-grid {
-    grid-template-columns: minmax(0, 1fr) 430px;
-    gap: 4.5rem;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 3rem;
   }
 }
 
 @media (max-width: 1024px) {
   .modern-article-grid {
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 1.75rem;
   }
 }
 
 @media (max-width: 860px) {
   .modern-article-grid {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 2rem;
   }
 }
 
@@ -633,15 +633,15 @@
 .sidebar-widget {
   display: flex;
   flex-direction: column;
-  margin-bottom: 2.25rem;
+  margin-bottom: 1.85rem;
 }
 
 .sidebar-widget-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.65rem;
+  margin-bottom: 0.95rem;
+  padding-bottom: 0.5rem;
   border-bottom: 2px solid #f1f5f9;
 }
 
@@ -654,10 +654,10 @@
 }
 
 .sidebar-widget-title {
-  font-size: 1.45rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #1e293b;
-  margin: 0 0 1.25rem 0;
+  margin: 0 0 0.85rem 0;
   letter-spacing: -0.015em;
 }
 
@@ -672,10 +672,10 @@
   background: transparent;
   border: none;
   color: var(--brand-primary, #dc2626);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 750;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 6px;
   transition: all 0.2s ease;
 }
@@ -721,13 +721,13 @@
 .sidebar-related-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.8rem;
 }
 
 .sidebar-related-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -739,9 +739,9 @@
 }
 
 .sidebar-related-img {
-  width: 86px;
-  height: 86px;
-  border-radius: 10px;
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
   background: #f1f5f9;
@@ -751,14 +751,15 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
 .sidebar-related-title {
-  font-size: 1.15rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #1e293b;
-  line-height: 1.38;
-  margin: 0 0 0.45rem 0;
+  line-height: 1.32;
+  margin: 0 0 0.25rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -771,11 +772,11 @@
 }
 
 .sidebar-related-meta {
-  font-size: 0.86rem;
+  font-size: 0.68rem;
   color: #64748b;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .sidebar-related-meta span.cat {
@@ -786,15 +787,15 @@
 .sidebar-trending-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .sidebar-trending-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.95rem;
+  gap: 0.75rem;
   cursor: pointer;
-  padding: 0.4rem 0;
+  padding: 0.25rem 0;
   transition: opacity 0.15s ease;
 }
 
@@ -803,26 +804,30 @@
 }
 
 .sidebar-trending-badge {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #dc2626;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .sidebar-trending-title {
-  font-size: 1.12rem;
+  font-size: 0.88rem;
   font-weight: 650;
   color: #1e293b;
-  line-height: 1.4;
+  line-height: 1.35;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   transition: color 0.15s ease;
 }
 
@@ -1467,8 +1472,8 @@
 }
 
 .sidebar-related-save-btn {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 1px solid var(--border-light, #e2e8f0);
   background: var(--bg-card, #ffffff);

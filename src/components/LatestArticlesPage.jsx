@@ -8,6 +8,8 @@ import {
 import './LatestArticlesPage.css';
 import { NewsletterService } from '../services/newsletterService';
 import { PageService } from '../services/pageService';
+import { ArticleService } from '../services/articleService';
+import { StoryService } from '../services/storyService';
 import { ALL_STORIES } from '../data/storiesData';
 import NewsletterBanner from './NewsletterBanner';
 
@@ -149,8 +151,135 @@ const getStoryAvatar = (s) => {
   return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
 };
 
-const getStoryDate = (s) => s?.publishedAt || s?.date || s?.formattedDate || 'Today';
+// Extract timestamp in ms from any story/article format for chronological sorting
+const getStoryTime = (s) => {
+  if (!s) return 0;
+  // 1. Direct parseable dates
+  const candidates = [s.createdAt, s.publishedAt, s.date, s.updatedAt];
+  for (const c of candidates) {
+    if (c) {
+      const t = new Date(c).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+  }
+
+  // 2. MongoDB ObjectId (24 hex characters, first 8 chars = hex unix epoch in seconds)
+  if (s._id && typeof s._id === 'string' && /^[0-9a-fA-F]{24}$/.test(s._id)) {
+    try {
+      const t = parseInt(s._id.substring(0, 8), 16) * 1000;
+      if (!isNaN(t) && t > 0) return t;
+    } catch (e) {}
+  }
+
+  // 3. ID containing unix timestamp (e.g., art_178... or 178...)
+  if (s.id && typeof s.id === 'string') {
+    const match = s.id.match(/(\d{10,13})/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > 1000000000) {
+        return num < 10000000000 ? num * 1000 : num;
+      }
+    }
+  }
+
+  // 4. Relative time strings fallback
+  if (typeof s.publishedAt === 'string') {
+    const lower = s.publishedAt.toLowerCase().trim();
+    if (lower === 'just now' || lower === 'now') return Date.now();
+    if (lower === 'today') return Date.now() - 3600000 * 2;
+    if (lower === 'yesterday') return Date.now() - 86400000;
+    const hoursMatch = lower.match(/(\d+)\s*h(?:our)?s?\s*ago/);
+    if (hoursMatch) return Date.now() - parseInt(hoursMatch[1], 10) * 3600000;
+    const daysMatch = lower.match(/(\d+)\s*d(?:ay)?s?\s*ago/);
+    if (daysMatch) return Date.now() - parseInt(daysMatch[1], 10) * 86400000;
+  }
+
+  return 0;
+};
+
+// Check if story was added recently (within the last 72 hours)
+const isNewlyAdded = (s) => {
+  if (s?.isNewlyAdded) return true;
+  const t = getStoryTime(s);
+  if (!t) return false;
+  const diffHours = (Date.now() - t) / (1000 * 60 * 60);
+  return diffHours >= 0 && diffHours <= 72;
+};
+
+// Human-friendly date representation with relative freshness
+const getStoryDate = (s) => {
+  const raw = s?.publishedAt || s?.date || s?.formattedDate || s?.createdAt;
+  if (!raw) return 'Today';
+  const d = new Date(raw);
+  if (!isNaN(d.getTime())) {
+    const now = Date.now();
+    const diffMs = now - d.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffMinutes >= 0 && diffMinutes < 60) {
+      return diffMinutes <= 1 ? 'Just now' : `${diffMinutes}m ago`;
+    }
+    if (diffHours >= 1 && diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+    if (diffHours >= 24 && diffHours < 48) {
+      return 'Yesterday';
+    }
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  return typeof raw === 'string' ? raw : 'Today';
+};
+
 const getStoryReadTime = (s) => s?.readTime || (s?.readingTime ? `${s.readingTime} min read` : '5 min read');
+
+// Safe normalizer for raw MongoDB Article records into uniform story shapes
+const normalizeMongoArticle = (art) => {
+  if (!art) return null;
+  let img = '';
+  if (typeof art.featuredImage === 'string') {
+    img = art.featuredImage;
+  } else if (art.featuredImage?.url) {
+    img = art.featuredImage.url;
+  } else if (art.image) {
+    img = art.image;
+  }
+
+  return {
+    _id: art._id,
+    id: art._id || art.slug,
+    title: art.title,
+    subtitle: art.subtitle || '',
+    summary: art.excerpt || art.subtitle || (typeof art.content === 'string' ? art.content.replace(/<[^>]+>/g, '').trim().slice(0, 160) : ''),
+    brand: art.brand || 'GoReadPost',
+    category: (art.categoryName || 'startups').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    categoryTag: art.categoryName || 'Startups',
+    categoryName: art.categoryName || 'Startups',
+    categoryLabel: art.categoryName || 'Startups',
+    tag: art.isFeatured ? 'FEATURED' : art.isBreaking ? 'BREAKING' : art.isTrending ? 'TRENDING' : 'LATEST',
+    image: img || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
+    fallbackImage: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
+    author: {
+      name: art.authorName || 'Editorial Desk',
+      title: art.authorTitle || 'Staff Reporter',
+      avatar: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'
+    },
+    authorName: art.authorName || 'Editorial Desk',
+    authorAvatar: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80' || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+    readTime: art.readingTime || '4 min read',
+    readingTime: art.readingTime || '4 min read',
+    publishedAt: art.publishedAt || art.createdAt || new Date().toISOString(),
+    createdAt: art.createdAt || art.publishedAt || new Date().toISOString(),
+    content: art.content || '',
+    contentBlocks: Array.isArray(art.contentBlocks) ? art.contentBlocks : [],
+    tags: Array.isArray(art.tags) ? art.tags : (art.tags ? [art.tags] : []),
+    topics: Array.isArray(art.topics) ? art.topics : [],
+    slug: art.slug,
+    views: art.views || 0,
+    claps: art.claps || 0,
+    status: art.status || 'published',
+    isNewlyAdded: true
+  };
+};
 
 export default function LatestArticlesPage({
   stories = [],
@@ -168,10 +297,60 @@ export default function LatestArticlesPage({
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [pageConfig, setPageConfig] = useState(null);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const [liveArticles, setLiveArticles] = useState([]);
 
   const CARDS_PER_PAGE = 16;
 
-  // Check admin session and fetch latest page model from MongoDB
+  // Fetch live articles from MongoDB backend (both Article API and Story API)
+  const fetchLiveArticles = async () => {
+    try {
+      let combinedLive = [];
+      const map = new Map();
+
+      // 1. Fetch from /api/articles (MongoDB Article collection)
+      try {
+        const artRes = await ArticleService.getArticles({ limit: 100 });
+        if (artRes && artRes.success && Array.isArray(artRes.data)) {
+          artRes.data.forEach(item => {
+            const normalized = normalizeMongoArticle(item);
+            if (normalized) {
+              const key = String(normalized._id || normalized.id || normalized.slug);
+              map.set(key, normalized);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('Could not fetch articles from /api/articles:', e);
+      }
+
+      // 2. Fetch from /api/stories (MongoDB Story collection / synced cache)
+      try {
+        const storyRes = await StoryService.getStories({ limit: 100 });
+        if (storyRes && Array.isArray(storyRes.data)) {
+          storyRes.data.forEach(s => {
+            const key = String(s._id || s.id || s.slug);
+            if (!map.has(key)) {
+              map.set(key, s);
+            } else {
+              // Merge rich properties if present
+              map.set(key, { ...s, ...map.get(key) });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('Could not fetch stories from /api/stories:', e);
+      }
+
+      combinedLive = Array.from(map.values());
+      if (combinedLive.length > 0) {
+        setLiveArticles(combinedLive);
+      }
+    } catch (err) {
+      console.warn('Could not load live latest articles:', err);
+    }
+  };
+
+  // Check admin session, fetch latest page config, and fetch live articles on mount
   useEffect(() => {
     try {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
@@ -191,10 +370,25 @@ export default function LatestArticlesPage({
         console.warn('Could not load dynamic latest page config:', err);
       }
     };
-    loadLatestConfig();
 
+    loadLatestConfig();
+    fetchLiveArticles();
+
+    const handleArticleOrStoryChange = () => {
+      fetchLiveArticles();
+    };
+
+    window.addEventListener('article:change', handleArticleOrStoryChange);
+    window.addEventListener('story:change', handleArticleOrStoryChange);
+    window.addEventListener('homepage:change', handleArticleOrStoryChange);
     window.addEventListener('page:change', loadLatestConfig);
-    return () => window.removeEventListener('page:change', loadLatestConfig);
+
+    return () => {
+      window.removeEventListener('article:change', handleArticleOrStoryChange);
+      window.removeEventListener('story:change', handleArticleOrStoryChange);
+      window.removeEventListener('homepage:change', handleArticleOrStoryChange);
+      window.removeEventListener('page:change', loadLatestConfig);
+    };
   }, []);
 
   // Section reference for custom title, subtitle, and curated articles
@@ -209,26 +403,50 @@ export default function LatestArticlesPage({
     return pageConfig.sections.find(s => s.type === 'newsletter' || s.id === 'latest_newsletter');
   }, [pageConfig]);
 
-  // Real content master pool (prioritizes admin curated articles if configured)
+  // Real content master pool (chronologically sorted so newly added articles are placed at the front)
   const pool = useMemo(() => {
+    const map = new Map();
+
+    const addStory = (s) => {
+      if (!s) return;
+      const key = String(s._id || s.id || s.slug || '');
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, s);
+      } else {
+        const existing = map.get(key);
+        map.set(key, { ...existing, ...s });
+      }
+    };
+
+    // 1. Live fetched articles from MongoDB (newest live articles)
+    (liveArticles || []).forEach(addStory);
+
+    // 2. Stories passed via props from App
+    (stories || []).forEach(addStory);
+
+    // 3. Articles from dynamic page config if configured
     if (feedSec?.data) {
       if (Array.isArray(feedSec.data.articles) && feedSec.data.articles.length > 0) {
-        return feedSec.data.articles;
+        feedSec.data.articles.forEach(addStory);
       }
       if (Array.isArray(feedSec.data.articleIds) && feedSec.data.articleIds.length > 0) {
-        const sourceStories = (stories && stories.length > 0) ? stories : ALL_STORIES;
-        const mapped = feedSec.data.articleIds
-          .map(id => sourceStories.find(a => (a.id === id || a._id === id || a.slug === id)))
-          .filter(Boolean);
-        if (mapped.length > 0) return mapped;
+        const sourceList = (stories && stories.length > 0) ? stories : ALL_STORIES;
+        feedSec.data.articleIds.forEach(id => {
+          const match = sourceList.find(a => (a.id === id || a._id === id || a.slug === id));
+          if (match) addStory(match);
+        });
       }
     }
 
-    if (stories && Array.isArray(stories) && stories.length > 0) {
-      return stories;
-    }
-    return ALL_STORIES;
-  }, [stories, feedSec]);
+    // 4. Default seed stories
+    (ALL_STORIES || []).forEach(addStory);
+
+    const allList = Array.from(map.values());
+
+    // Sort strictly newest first (highest timestamp to lowest)
+    return allList.sort((a, b) => getStoryTime(b) - getStoryTime(a));
+  }, [liveArticles, stories, feedSec]);
 
   // Dynamically extract categories with real story counts
   const categoryStats = useMemo(() => {
@@ -423,6 +641,11 @@ export default function LatestArticlesPage({
                         }}
                         loading="lazy"
                       />
+                      {isNewlyAdded(story) && (
+                        <span className="lap-badge-new">
+                          <span className="lap-badge-new-dot" /> NEW
+                        </span>
+                      )}
                       <span className="lap-category-on-image">
                         {storyCat}
                       </span>

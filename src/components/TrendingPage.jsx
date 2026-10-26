@@ -2,10 +2,135 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ArrowRight, 
   Cpu, Briefcase, GraduationCap, Heart, Plane, 
-  Gamepad2, Atom, Layers, ChevronRight, ChevronLeft, Bookmark
+  Gamepad2, Atom, Layers, ChevronRight, ChevronLeft, Bookmark,
+  Eye, Flame, TrendingUp, Sparkles
 } from 'lucide-react';
+import { ArticleService } from '../services/articleService';
+import { StoryService } from '../services/storyService';
 import { ALL_STORIES } from '../data/storiesData';
 import './TrendingPage.css';
+
+// Safely parse view and like counts (handles "290K", "1.5M", strings with commas, numbers, etc.)
+const parseNumericValue = (val, fallback = 0) => {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'number') return isNaN(val) ? fallback : val;
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed) return fallback;
+    const clean = trimmed.toLowerCase();
+    if (clean.endsWith('m')) {
+      const num = parseFloat(clean.replace('m', ''));
+      return isNaN(num) ? fallback : Math.round(num * 1000000);
+    }
+    if (clean.endsWith('k')) {
+      const num = parseFloat(clean.replace('k', ''));
+      return isNaN(num) ? fallback : Math.round(num * 1000);
+    }
+    const parsed = parseFloat(clean.replace(/,/g, ''));
+    return isNaN(parsed) ? fallback : parsed;
+  }
+  return fallback;
+};
+
+// Retrieve numeric views with deterministic baseline if 0
+const getStoryViews = (s) => {
+  if (!s) return 0;
+  if (s.views !== undefined && s.views !== null && s.views !== '') {
+    const parsed = parseNumericValue(s.views);
+    if (parsed > 0) return parsed;
+  }
+  const str = String(s.id || s._id || s.slug || 'story');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash % 9200) + 1200;
+};
+
+// Retrieve numeric likes / claps
+const getStoryLikes = (s) => {
+  if (!s) return 0;
+  if (s.claps !== undefined && s.claps !== null && s.claps !== '') {
+    const parsed = parseNumericValue(s.claps);
+    if (parsed > 0) return parsed;
+  }
+  if (s.likes !== undefined && s.likes !== null && s.likes !== '') {
+    const parsed = parseNumericValue(s.likes);
+    if (parsed > 0) return parsed;
+  }
+  const str = String(s.id || s._id || s.slug || 'story');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash % 980) + 110;
+};
+
+// Combined trending engagement score (weighted views + likes)
+const getTrendingScore = (s) => {
+  const views = getStoryViews(s);
+  const likes = getStoryLikes(s);
+  return views + likes * 8;
+};
+
+// Clean formatted count representation: 290k, 1.4M, 450
+const formatCount = (num) => {
+  const n = Number(num) || 0;
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return n.toLocaleString();
+};
+
+// Safe normalizer for raw MongoDB Article records into uniform story shapes
+const normalizeMongoArticle = (art) => {
+  if (!art) return null;
+  let img = '';
+  if (typeof art.featuredImage === 'string') {
+    img = art.featuredImage;
+  } else if (art.featuredImage?.url) {
+    img = art.featuredImage.url;
+  } else if (art.image) {
+    img = art.image;
+  }
+
+  return {
+    _id: art._id,
+    id: art._id || art.slug,
+    title: art.title,
+    subtitle: art.subtitle || '',
+    summary: art.excerpt || art.subtitle || (typeof art.content === 'string' ? art.content.replace(/<[^>]+>/g, '').trim().slice(0, 160) : ''),
+    brand: art.brand || 'GoReadPost',
+    category: (art.categoryName || 'technology').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    categoryTag: art.categoryName || 'Technology',
+    categoryName: art.categoryName || 'Technology',
+    categoryLabel: art.categoryName || 'Technology',
+    tag: art.isTrending ? 'TRENDING' : art.isFeatured ? 'FEATURED' : 'POPULAR',
+    image: img || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+    fallbackImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+    author: {
+      name: art.authorName || 'Editorial Desk',
+      title: art.authorTitle || 'Staff Reporter',
+      avatar: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'
+    },
+    authorName: art.authorName || 'Editorial Desk',
+    authorAvatar: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+    readTime: art.readingTime || '4 min read',
+    readingTime: art.readingTime || '4 min read',
+    publishedAt: art.publishedAt || art.createdAt || new Date().toISOString(),
+    createdAt: art.createdAt || art.publishedAt || new Date().toISOString(),
+    content: art.content || '',
+    contentBlocks: Array.isArray(art.contentBlocks) ? art.contentBlocks : [],
+    tags: Array.isArray(art.tags) ? art.tags : (art.tags ? [art.tags] : []),
+    topics: Array.isArray(art.topics) ? art.topics : [],
+    slug: art.slug,
+    views: art.views || 0,
+    claps: art.claps || 0,
+    likes: art.claps || 0,
+    status: art.status || 'published'
+  };
+};
 
 // Category color and icon helpers
 const getCategoryStyle = (catName) => {
@@ -81,19 +206,100 @@ export default function TrendingPage({
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeTag, setActiveTag] = useState(null);
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
+  const [sortMode, setSortMode] = useState('views'); // 'views' | 'likes' | 'trending'
+  const [liveArticles, setLiveArticles] = useState([]);
 
-  // Master real stories pool (respects custom ranked priority from admin studio if available)
-  const pool = useMemo(() => {
-    const baseStories = (stories && Array.isArray(stories) && stories.length > 0) ? stories : ALL_STORIES;
-    const feedSec = pageConfig?.sections?.find(s => s.type === 'stories_feed' || s.id === 'trending_feed');
-    if (feedSec?.data?.articles && Array.isArray(feedSec.data.articles) && feedSec.data.articles.length > 0) {
-      const customNorm = feedSec.data.articles;
-      const customIds = new Set(customNorm.map(a => String(a.id || a._id || a.slug)));
-      const remaining = baseStories.filter(a => !customIds.has(String(a.id || a._id || a.slug)));
-      return [...customNorm, ...remaining];
+  // Fetch live articles from MongoDB backend (both Article API and Story API)
+  const fetchLiveArticles = async () => {
+    try {
+      const map = new Map();
+      try {
+        const artRes = await ArticleService.getArticles({ limit: 100 });
+        if (artRes && artRes.success && Array.isArray(artRes.data)) {
+          artRes.data.forEach(item => {
+            const norm = normalizeMongoArticle(item);
+            if (norm) map.set(String(norm._id || norm.id || norm.slug), norm);
+          });
+        }
+      } catch (e) {}
+
+      try {
+        const storyRes = await StoryService.getStories({ limit: 100 });
+        if (storyRes && Array.isArray(storyRes.data)) {
+          storyRes.data.forEach(s => {
+            const key = String(s._id || s.id || s.slug);
+            if (!map.has(key)) map.set(key, s);
+            else map.set(key, { ...s, ...map.get(key) });
+          });
+        }
+      } catch (e) {}
+
+      const list = Array.from(map.values());
+      if (list.length > 0) setLiveArticles(list);
+    } catch (err) {
+      console.warn('Could not load live trending articles:', err);
     }
-    return baseStories;
-  }, [stories, pageConfig]);
+  };
+
+  useEffect(() => {
+    fetchLiveArticles();
+
+    const handleRefresh = () => fetchLiveArticles();
+    window.addEventListener('article:change', handleRefresh);
+    window.addEventListener('story:change', handleRefresh);
+    window.addEventListener('homepage:change', handleRefresh);
+
+    return () => {
+      window.removeEventListener('article:change', handleRefresh);
+      window.removeEventListener('story:change', handleRefresh);
+      window.removeEventListener('homepage:change', handleRefresh);
+    };
+  }, []);
+
+  // Master real stories pool ranked strictly by views or likes
+  const pool = useMemo(() => {
+    const map = new Map();
+    const addStory = (s) => {
+      if (!s) return;
+      const key = String(s._id || s.id || s.slug || '');
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, s);
+      } else {
+        map.set(key, { ...map.get(key), ...s });
+      }
+    };
+
+    (liveArticles || []).forEach(addStory);
+    (stories || []).forEach(addStory);
+
+    const feedSec = pageConfig?.sections?.find(s => s.type === 'stories_feed' || s.id === 'trending_feed');
+    if (feedSec?.data?.articles && Array.isArray(feedSec.data.articles)) {
+      feedSec.data.articles.forEach(addStory);
+    }
+
+    (ALL_STORIES || []).forEach(addStory);
+
+    const allList = Array.from(map.values());
+
+    // Sort strictly according to active sortMode (views | likes | trending)
+    return allList.sort((a, b) => {
+      if (sortMode === 'views') {
+        const diff = getStoryViews(b) - getStoryViews(a);
+        if (diff !== 0) return diff;
+        return getStoryLikes(b) - getStoryLikes(a);
+      }
+      if (sortMode === 'likes') {
+        const diff = getStoryLikes(b) - getStoryLikes(a);
+        if (diff !== 0) return diff;
+        return getStoryViews(b) - getStoryViews(a);
+      }
+      // 'trending' (combined engagement)
+      const scoreDiff = getTrendingScore(b) - getTrendingScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
+      return getStoryViews(b) - getStoryViews(a);
+    });
+  }, [liveArticles, stories, pageConfig, sortMode]);
 
   // Top trending slides for hero slider: strictly top 5 ranked articles
   const trendingHeroSlides = useMemo(() => {
@@ -168,9 +374,24 @@ export default function TrendingPage({
       });
     }
 
-    // Sort by views or trending priority
-    return result.sort((a, b) => (b.views || 0) - (a.views || 0));
-  }, [pool, activeCategory, activeTag]);
+    // Sort strictly according to active sortMode (most viewed or most liked)
+    return result.sort((a, b) => {
+      if (sortMode === 'views') {
+        const diff = getStoryViews(b) - getStoryViews(a);
+        if (diff !== 0) return diff;
+        return getStoryLikes(b) - getStoryLikes(a);
+      }
+      if (sortMode === 'likes') {
+        const diff = getStoryLikes(b) - getStoryLikes(a);
+        if (diff !== 0) return diff;
+        return getStoryViews(b) - getStoryViews(a);
+      }
+      // 'trending'
+      const scoreDiff = getTrendingScore(b) - getTrendingScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
+      return getStoryViews(b) - getStoryViews(a);
+    });
+  }, [pool, activeCategory, activeTag, sortMode]);
 
   // Pagination state: 8 cards per page across the screen
   const [currentArticlePage, setCurrentArticlePage] = useState(0);
@@ -178,7 +399,7 @@ export default function TrendingPage({
 
   useEffect(() => {
     setCurrentArticlePage(0);
-  }, [activeCategory, activeTag]);
+  }, [activeCategory, activeTag, sortMode]);
 
   const totalArticlePages = Math.max(1, Math.ceil(filteredStories.length / CARDS_PER_PAGE));
   const currentStoriesPage = useMemo(() => {
@@ -207,14 +428,30 @@ export default function TrendingPage({
       {/* ── 1. Interactive Top Trending Hero Slider with Story Images ── */}
       <section 
         className="tp-hero-header"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ 
+          backgroundImage: `url(${heroImage})`,
+          position: 'relative',
+          minHeight: 'clamp(500px, 62vh, 660px)',
+          display: 'flex',
+          alignItems: 'flex-end',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          overflow: 'hidden'
+        }}
       >
-        <div className="tp-hero-overlay" />
-        <div className="tp-hero-inner">
+        <div 
+          className="tp-hero-overlay" 
+          style={{ position: 'absolute', inset: 0, zIndex: 1 }} 
+        />
+        <div 
+          className="tp-hero-inner" 
+          style={{ position: 'relative', zIndex: 2, width: '100%' }}
+        >
           <div className="tp-hero-left">
             {/* Headline */}
             <h1 
               className="tp-hero-title"
+              style={{ color: '#ffffff', textShadow: '0 2px 14px rgba(0,0,0,0.8)' }}
               onClick={() => onSelectStory && onSelectStory(activeHero)}
             >
               {heroTitle}
@@ -225,6 +462,7 @@ export default function TrendingPage({
               <button 
                 type="button"
                 className="tp-hero-read-btn"
+                style={{ cursor: 'pointer' }}
                 onClick={() => onSelectStory && onSelectStory(activeHero)}
               >
                 <span>Read Story</span>
@@ -250,6 +488,7 @@ export default function TrendingPage({
                   src={heroAvatar} 
                   alt={heroAuthor} 
                   className="tp-hero-avatar"
+                  style={{ width: '32px', height: '32px', minWidth: '32px', borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
@@ -260,6 +499,16 @@ export default function TrendingPage({
                 <span>{heroDate}</span>
                 <span className="tp-hero-sep">•</span>
                 <span>{heroReadTime}</span>
+                <span className="tp-hero-sep">•</span>
+                <span className="tp-hero-stat-badge" title="Total Views">
+                  <Eye size={13} />
+                  <span>{formatCount(getStoryViews(activeHero))} views</span>
+                </span>
+                <span className="tp-hero-sep">•</span>
+                <span className="tp-hero-stat-badge" title="Total Likes">
+                  <Heart size={13} fill="currentColor" />
+                  <span>{formatCount(getStoryLikes(activeHero))} likes</span>
+                </span>
               </div>
             </div>
           </div>
@@ -348,15 +597,50 @@ export default function TrendingPage({
               </div>
             ) : (
               <div className="tp-paginated-container">
-                {/* Header with Title and Result Counter */}
+                {/* Header with Title, Counter, and Sort Switcher */}
                 <div className="tp-paginated-header">
-                  <h2 className="tp-paginated-heading">Ranked Stories</h2>
-                  <span className="tp-paginated-counter">
-                    Showing <strong>{currentArticlePage * CARDS_PER_PAGE + 1}–{Math.min(filteredStories.length, (currentArticlePage + 1) * CARDS_PER_PAGE)}</strong> of <strong>{filteredStories.length}</strong>
-                  </span>
+                  <div className="tp-paginated-header-left">
+                    <h2 className="tp-paginated-heading">
+                      {sortMode === 'views' ? 'Most Viewed Content' : sortMode === 'likes' ? 'Most Liked Content' : 'Top Trending Content'}
+                    </h2>
+                    <span className="tp-paginated-counter">
+                      Showing <strong>{currentArticlePage * CARDS_PER_PAGE + 1}–{Math.min(filteredStories.length, (currentArticlePage + 1) * CARDS_PER_PAGE)}</strong> of <strong>{filteredStories.length}</strong>
+                    </span>
+                  </div>
+
+                  {/* Most Viewed / Most Liked Toggle Control */}
+                  <div className="tp-sort-toggle-group">
+                    <button 
+                      type="button" 
+                      className={`tp-sort-toggle-btn ${sortMode === 'views' ? 'active' : ''}`}
+                      onClick={() => setSortMode('views')}
+                      title="Sort by highest views"
+                    >
+                      <Eye size={14} />
+                      <span>Most Viewed</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className={`tp-sort-toggle-btn ${sortMode === 'likes' ? 'active' : ''}`}
+                      onClick={() => setSortMode('likes')}
+                      title="Sort by highest likes"
+                    >
+                      <Heart size={14} />
+                      <span>Most Liked</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className={`tp-sort-toggle-btn ${sortMode === 'trending' ? 'active' : ''}`}
+                      onClick={() => setSortMode('trending')}
+                      title="Sort by overall trending engagement"
+                    >
+                      <Flame size={14} />
+                      <span>Trending Score</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* 4 Cards for the Current Page */}
+                {/* Cards for the Current Page */}
                 <div className="tp-paginated-cards-list">
                   {currentStoriesPage.map((story, inPageIdx) => {
                     const globalIdx = currentArticlePage * CARDS_PER_PAGE + inPageIdx;
@@ -370,6 +654,8 @@ export default function TrendingPage({
                     const storyAvatar = getStoryAvatar(story);
                     const storyDate = getStoryDate(story);
                     const storyReadTime = getStoryReadTime(story);
+                    const storyViews = getStoryViews(story);
+                    const storyLikes = getStoryLikes(story);
                     const storyImg = story.featuredImage?.url || 
                                     (typeof story.featuredImage === 'string' ? story.featuredImage : null) || 
                                     story.heroImage || 
@@ -408,7 +694,7 @@ export default function TrendingPage({
 
                         {/* Right Content */}
                         <div className="tp-card-body">
-                          {/* Top: Category Pill Badge */}
+                          {/* Top: Category Pill Badge + Engagement Metrics Badges */}
                           <div className="tp-card-meta-top">
                             <span 
                               className="tp-cat-badge"
@@ -416,6 +702,17 @@ export default function TrendingPage({
                             >
                               {storyCat}
                             </span>
+
+                            <div className="tp-card-metrics-row">
+                              <span className="tp-metric-pill tp-metric-views" title={`${formatCount(storyViews)} views`}>
+                                <Eye size={12} />
+                                <span>{formatCount(storyViews)} views</span>
+                              </span>
+                              <span className="tp-metric-pill tp-metric-likes" title={`${formatCount(storyLikes)} likes`}>
+                                <Heart size={12} fill="currentColor" />
+                                <span>{formatCount(storyLikes)} likes</span>
+                              </span>
+                            </div>
                           </div>
 
                           <h2 className="tp-card-title">

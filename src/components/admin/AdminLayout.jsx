@@ -58,7 +58,24 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => AuthService.isAdminAuthenticated());
   const [adminUser, setAdminUser] = useState(() => AuthService.getAdminUser());
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('admin_sidebar_open');
+    if (saved !== null) return saved === 'true';
+    return true; // Default open
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(prev => {
+      const next = !prev;
+      localStorage.setItem('admin_sidebar_open', String(next));
+      return next;
+    });
+  };
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    localStorage.setItem('admin_sidebar_open', 'false');
+  };
 
   // Sync with browser back/forward buttons
   useEffect(() => {
@@ -106,7 +123,9 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
     window.history.pushState(null, '', path);
     setCurrentPath(path);
-    setIsMobileSidebarOpen(false);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -444,22 +463,24 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
   );
 
   return (
-    <div className="admin-cms-wrapper">
+    <div className={`admin-cms-wrapper ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
       <AdminSidebar 
         currentPath={currentPath}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
         onViewSite={() => handleNavigate('/')}
         adminUser={adminUser}
-        isOpenMobile={isMobileSidebarOpen}
-        onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+        onToggle={handleToggleSidebar}
         siteSettings={siteSettings}
       />
 
       <div className="admin-main-stage">
         <AdminTopNavbar 
           currentPath={currentPath}
-          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
           onViewSite={() => handleNavigate('/')}
           adminUser={adminUser}
         />

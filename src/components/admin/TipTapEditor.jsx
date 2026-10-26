@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -7,12 +7,15 @@ import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table
 import Youtube from '@tiptap/extension-youtube';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import { Highlight } from '@tiptap/extension-highlight';
 import { 
   Heading1, Heading2, Heading3, Heading4, Bold, Italic, Strikethrough, Underline as UnderlineIcon,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Quote, Code, Link as LinkIcon, 
-  Image as ImageIcon, Video, Table as TableIcon, 
-  Undo, Redo, Pilcrow, Minus, RemoveFormatting, Sparkles
+  Undo, Redo, Pilcrow, Minus, RemoveFormatting, Sparkles,
+  Baseline, Highlighter, Palette
 } from 'lucide-react';
 
 export default function TipTapEditor({ 
@@ -30,6 +33,9 @@ export default function TipTapEditor({
         }
       }),
       Underline,
+      TextStyle,
+      Color,
+      Highlight.configure({ multicolor: true }),
       TextAlign.configure({
         types: ['heading', 'paragraph']
       }),
@@ -85,6 +91,52 @@ export default function TipTapEditor({
     }
   }, [content, editor]);
 
+  // Color pickers popover state
+  const [showTextColor, setShowTextColor] = useState(false);
+  const [showBgColor, setShowBgColor] = useState(false);
+  const textColorRef = useRef(null);
+  const bgColorRef = useRef(null);
+
+  // Close color popovers when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (textColorRef.current && !textColorRef.current.contains(e.target)) {
+        setShowTextColor(false);
+      }
+      if (bgColorRef.current && !bgColorRef.current.contains(e.target)) {
+        setShowBgColor(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  const TEXT_COLORS = [
+    { label: 'Default', hex: '#0f172a' },
+    { label: 'Brand Red', hex: '#dc2626' },
+    { label: 'Orange', hex: '#ea580c' },
+    { label: 'Amber', hex: '#d97706' },
+    { label: 'Emerald', hex: '#059669' },
+    { label: 'Cyan', hex: '#0891b2' },
+    { label: 'Blue', hex: '#2563eb' },
+    { label: 'Indigo', hex: '#4f46e5' },
+    { label: 'Purple', hex: '#7c3aed' },
+    { label: 'Muted Slate', hex: '#64748b' }
+  ];
+
+  const BG_COLORS = [
+    { label: 'Yellow', hex: '#fef08a' },
+    { label: 'Green', hex: '#bbf7d0' },
+    { label: 'Blue', hex: '#bfdbfe' },
+    { label: 'Purple', hex: '#e9d5ff' },
+    { label: 'Pink', hex: '#fbcfe8' },
+    { label: 'Orange', hex: '#fed7aa' },
+    { label: 'Cyan', hex: '#a5f3fc' },
+    { label: 'Rose', hex: '#fecdd3' },
+    { label: 'Lime', hex: '#d9f99d' },
+    { label: 'Light Slate', hex: '#e2e8f0' }
+  ];
+
   if (!editor) {
     return (
       <div className="aem-tiptap-loading-skeleton">
@@ -93,6 +145,9 @@ export default function TipTapEditor({
       </div>
     );
   }
+
+  const currentTextColor = editor.getAttributes('textStyle')?.color || '#0f172a';
+  const currentBgColor = editor.getAttributes('highlight')?.color || null;
 
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href;
@@ -228,6 +283,149 @@ export default function TipTapEditor({
 
         <span className="aem-tool-separator" />
 
+        {/* Text Color & Background Highlight Controls */}
+        <div className="aem-tiptap-group">
+          {/* Text Color Button */}
+          <div ref={textColorRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowTextColor(prev => !prev);
+                setShowBgColor(false);
+              }}
+              className={`aem-tool-btn ${editor.isActive('textStyle') ? 'active' : ''}`}
+              title="Text Color"
+              style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Baseline size={15} />
+              <span 
+                style={{ 
+                  display: 'block', 
+                  width: '14px', 
+                  height: '3px', 
+                  borderRadius: '2px', 
+                  backgroundColor: currentTextColor || '#0f172a' 
+                }} 
+              />
+            </button>
+
+            {showTextColor && (
+              <div className="aem-color-popover" onClick={(e) => e.stopPropagation()}>
+                <div className="aem-color-popover-title">Text Color</div>
+                <div className="aem-color-palette">
+                  {TEXT_COLORS.map(c => (
+                    <button
+                      key={c.hex}
+                      type="button"
+                      className="aem-color-swatch"
+                      style={{ backgroundColor: c.hex }}
+                      title={c.label}
+                      onClick={() => {
+                        editor.chain().focus().setColor(c.hex).run();
+                        setShowTextColor(false);
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="aem-color-custom-row">
+                  <label className="aem-color-custom-label">
+                    <Palette size={13} /> Custom Color:
+                  </label>
+                  <input
+                    type="color"
+                    className="aem-color-picker-input"
+                    value={currentTextColor || '#0f172a'}
+                    onChange={(e) => {
+                      editor.chain().focus().setColor(e.target.value).run();
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="aem-color-reset-btn"
+                  onClick={() => {
+                    editor.chain().focus().unsetColor().run();
+                    setShowTextColor(false);
+                  }}
+                >
+                  Reset to Default
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Background / Highlight Color Button */}
+          <div ref={bgColorRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowBgColor(prev => !prev);
+                setShowTextColor(false);
+              }}
+              className={`aem-tool-btn ${editor.isActive('highlight') ? 'active' : ''}`}
+              title="Background / Highlight Color"
+              style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Highlighter size={15} />
+              <span 
+                style={{ 
+                  display: 'block', 
+                  width: '14px', 
+                  height: '3px', 
+                  borderRadius: '2px', 
+                  backgroundColor: currentBgColor || '#fef08a' 
+                }} 
+              />
+            </button>
+
+            {showBgColor && (
+              <div className="aem-color-popover" onClick={(e) => e.stopPropagation()}>
+                <div className="aem-color-popover-title">Highlight Color</div>
+                <div className="aem-color-palette">
+                  {BG_COLORS.map(c => (
+                    <button
+                      key={c.hex}
+                      type="button"
+                      className="aem-color-swatch"
+                      style={{ backgroundColor: c.hex }}
+                      title={c.label}
+                      onClick={() => {
+                        editor.chain().focus().toggleHighlight({ color: c.hex }).run();
+                        setShowBgColor(false);
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="aem-color-custom-row">
+                  <label className="aem-color-custom-label">
+                    <Palette size={13} /> Custom Highlight:
+                  </label>
+                  <input
+                    type="color"
+                    className="aem-color-picker-input"
+                    value={currentBgColor || '#fef08a'}
+                    onChange={(e) => {
+                      editor.chain().focus().toggleHighlight({ color: e.target.value }).run();
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="aem-color-reset-btn"
+                  onClick={() => {
+                    editor.chain().focus().unsetHighlight().run();
+                    setShowBgColor(false);
+                  }}
+                >
+                  Remove Highlight
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <span className="aem-tool-separator" />
+
         {/* Text Alignment */}
         <div className="aem-tiptap-group">
           <button
@@ -312,7 +510,7 @@ export default function TipTapEditor({
 
         <span className="aem-tool-separator" />
 
-        {/* Media & Embeds */}
+        {/* Links */}
         <div className="aem-tiptap-group">
           <button
             type="button"
@@ -321,30 +519,6 @@ export default function TipTapEditor({
             title="Insert or Edit Link"
           >
             <LinkIcon size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={handleImageClick}
-            className="aem-tool-btn"
-            title="Insert Image (Media Library or URL)"
-          >
-            <ImageIcon size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={addYoutube}
-            className="aem-tool-btn"
-            title="Embed YouTube Video"
-          >
-            <Video size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={insertTable}
-            className="aem-tool-btn"
-            title="Insert Table (3x3)"
-          >
-            <TableIcon size={15} />
           </button>
         </div>
 
@@ -390,13 +564,6 @@ export default function TipTapEditor({
 
       {/* Modern Status Footer */}
       <div className="aem-tiptap-statusbar">
-        <div className="aem-tiptap-status-left">
-          <span className="aem-tiptap-status-pill">
-            <span className="aem-status-pulse-dot" />
-            TipTap Visual Studio
-          </span>
-          <span className="aem-tiptap-status-sub">Rich Typography &amp; Embeds</span>
-        </div>
         <div className="aem-tiptap-status-right">
           <span><strong>{wordCount}</strong> words</span>
           <span className="aem-tiptap-dot">•</span>

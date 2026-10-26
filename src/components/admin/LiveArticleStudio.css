@@ -331,42 +331,189 @@
   margin-top: 2px;
 }
 
+/* ── Word Count & Reading Time Editable Pill ── */
+.las-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.las-stats-badge:hover,
+.las-stats-badge:focus-within {
+  background: #f0f9ff;
+  border-color: #7dd3fc;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.1);
+}
+
+.las-stats-sep {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.las-stats-input {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #0284c7;
+  font-weight: 700;
+  font-size: 0.8rem;
+  font-family: inherit;
+  padding: 1px 4px;
+  border-radius: 4px;
+  width: 95px;
+  outline: none;
+  cursor: text;
+  transition: all 0.15s ease;
+}
+
+.las-stats-input:hover {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.las-stats-input:focus {
+  background: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+  color: #0369a1;
+  width: 105px;
+}
+
+.las-stats-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  color: #0284c7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.las-stats-reset-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
 /* ── Headline & Deck Inputs ── */
+.las-headline-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.las-headline-tools-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.las-headline-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.las-headline-tool-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.las-headline-tool-btn.active {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+
+.las-headline-tool-sep {
+  width: 1px;
+  height: 18px;
+  background: #cbd5e1;
+  margin: 0 4px;
+}
+
+.las-headline-counter {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .las-headline-input {
   width: 100%;
-  font-size: 1.95rem;
+  font-size: 1.85rem;
   font-weight: 850;
-  line-height: 1.25;
+  line-height: 1.28;
   color: var(--text-primary, #0f172a);
   border: none;
   outline: none;
   background: transparent;
-  padding: 0.5rem 0;
-  margin-bottom: 0.75rem;
+  padding: 0.25rem 0 0.5rem 0;
+  margin-bottom: 0.25rem;
   font-family: inherit;
   letter-spacing: -0.02em;
+  resize: none;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .las-headline-input::placeholder {
   color: #94a3b8;
 }
 
+.las-subtitle-wrapper {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
 .las-subtitle-input {
   width: 100%;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 450;
   line-height: 1.5;
   color: var(--text-secondary, #475569);
   border: none;
   outline: none;
   background: transparent;
-  padding: 0.35rem 0;
+  padding: 0.25rem 0;
   font-family: inherit;
-  resize: none;
+  box-sizing: border-box;
 }
 
 .las-subtitle-input::placeholder {
-  color: #cbd5e1;
+  color: #94a3b8;
 }
 
 /* ── Form Grids & Fields ── */
@@ -420,6 +567,124 @@
 .las-input:focus, .las-select:focus, .las-textarea:focus {
   border-color: #ea580c;
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+/* ── Card Action Buttons (Light Card Context) ── */
+.las-card-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.55rem 1.15rem;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.las-card-btn-primary:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.las-card-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.55rem 1.1rem;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.las-card-btn-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.las-card-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 0.9rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.las-card-btn-danger:hover:not(:disabled) {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+/* ── Cover Image Dropzone (Empty State) ── */
+.las-cover-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.las-cover-dropzone:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.las-cover-dropzone-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.las-cover-dropzone-title {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+}
+
+.las-cover-dropzone-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+  max-width: 440px;
+}
+
+.las-cover-dropzone-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 /* ── Featured Image Stage ── */
@@ -714,7 +979,7 @@
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
 }
 
 .las-upload-main-btn {
@@ -822,4 +1087,340 @@
 .las-advanced-toggle-btn:hover {
   color: #ea580c;
 }
+
+/* ── Section Block TipTap Customization ── */
+.las-section-tiptap {
+  width: 100%;
+}
+
+.las-section-tiptap .aem-tiptap-studio-card {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.las-section-tiptap .aem-tiptap-studio-card:focus-within {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.las-section-tiptap .aem-tiptap-toolbar {
+  padding: 0.45rem 0.65rem;
+  background: #f8fafc;
+  gap: 0.25rem;
+}
+
+.las-section-tiptap .aem-tiptap-canvas-body {
+  min-height: 180px;
+}
+
+.las-section-tiptap .aem-tiptap-prosemirror-wrap .ProseMirror {
+  min-height: 160px;
+  padding: 1rem 1.25rem;
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.las-section-tiptap .aem-tiptap-statusbar {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+}
+
+/* Preview pane rich content formatting */
+.map-body-rich-content {
+  font-size: 1.08rem;
+  line-height: 1.85;
+  color: #1e293b;
+}
+
+.map-body-rich-content p {
+  margin-bottom: 1.2rem;
+}
+
+.map-body-rich-content h1,
+.map-body-rich-content h2,
+.map-body-rich-content h3 {
+  font-weight: 800;
+  color: #0f172a;
+  margin: 1.5rem 0 0.8rem;
+}
+
+.map-body-rich-content ul,
+.map-body-rich-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.map-body-rich-content blockquote {
+  border-left: 4px solid #ea580c;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #475569;
+  margin: 1.2rem 0;
+}
+
+/* ── Section Block Unified Wrapper & Integrated Media ── */
+.las-section-block-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.las-section-media-container {
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.las-section-media-container:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.las-section-media-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.las-section-media-empty-info {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.las-section-media-icon {
+  color: #94a3b8;
+}
+
+.las-section-media-icon.active {
+  color: #ea580c;
+}
+
+.las-section-media-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.las-section-media-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.las-section-media-btn.upload {
+  background: #ea580c;
+  color: #ffffff;
+  border-color: #ea580c;
+}
+
+.las-section-media-btn.upload:hover {
+  background: #c2410c;
+}
+
+.las-section-media-btn.library:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Attached Media Container */
+.las-section-media-attached {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.las-section-media-attached-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.las-section-media-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.las-section-media-attached-title {
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: #0f172a;
+}
+
+.las-section-media-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.las-section-pos-toggle {
+  display: flex;
+  align-items: center;
+  background: #e2e8f0;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.las-pos-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0 4px;
+}
+
+.las-pos-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.las-pos-btn.active {
+  background: #ffffff;
+  color: #ea580c;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.las-section-add-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.las-section-add-more-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.las-section-images-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.las-section-image-card {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.las-section-image-thumb-wrap {
+  width: 95px;
+  height: 65px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0f172a;
+  flex-shrink: 0;
+  border: 1px solid #cbd5e1;
+}
+
+.las-section-image-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.las-section-image-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.las-section-meta-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.las-section-meta-input {
+  flex: 1;
+  min-width: 0;
+  height: 35px;
+  padding: 0 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.83rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.las-section-meta-input:focus {
+  border-color: #ea580c;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.1);
+}
+
+.las-section-meta-input.credit {
+  max-width: 230px;
+}
+
+.las-section-img-remove-btn {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fee2e2;
+  background: #fff5f5;
+  color: #ef4444;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.las-section-img-remove-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
 

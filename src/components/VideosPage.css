@@ -1,4 +1,4 @@
-﻿/* ═════════════════════════════════════════════════════════════════════
+/* ═════════════════════════════════════════════════════════════════════
    GOREADPOST STUDIOS - DEDICATED VIDEOS DESTINATION PAGE
    ═════════════════════════════════════════════════════════════════════ */
 
@@ -439,117 +439,73 @@
    Filter Bar & Omnibar
    ────────────────────────────────────────────────────────────────── */
 .vpage-filter-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.25rem;
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-light, #e2e8f0);
-  border-radius: 16px;
-  padding: 1.25rem 1.35rem;
-  box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.04);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.06);
 }
 
-.vpage-filter-header {
+.vpage-omnibar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.vpage-filter-tabs {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-
-.vpage-filter-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.vpage-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  background: var(--bg-secondary, #f8fafc);
-  border: 1px solid var(--border-light, #e2e8f0);
-  color: var(--text-secondary, #475569);
-  font-size: 0.84rem;
-  font-weight: 750;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.vpage-filter-pill:hover {
-  border-color: #cbd5e1;
-  color: var(--text-primary, #0f172a);
-  background: var(--bg-card, #ffffff);
-}
-
-.vpage-filter-pill.active {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  color: #ffffff;
-  border-color: #dc2626;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-}
-
-.vpage-filter-count {
-  font-size: 0.72rem;
-  font-weight: 800;
-  opacity: 0.85;
-  background: rgba(0, 0, 0, 0.08);
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-}
-
-.vpage-filter-pill.active .vpage-filter-count {
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  position: relative;
+  width: 100%;
 }
 
 .vpage-search-box {
   position: relative;
-  min-width: 260px;
   flex: 1;
-  max-width: 360px;
+  min-width: 0;
 }
 
 .vpage-search-icon {
   position: absolute;
-  left: 0.95rem;
+  left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted, #94a3b8);
   pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.vpage-search-box:focus-within .vpage-search-icon {
+  color: #dc2626;
 }
 
 .vpage-search-input {
   width: 100%;
-  padding: 0.58rem 2.2rem 0.58rem 2.5rem;
-  border-radius: 999px;
-  border: 1px solid var(--border-light, #e2e8f0);
+  height: 54px;
+  padding: 0 3.2rem 0 3.35rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-light, #e2e8f0);
   background: var(--bg-secondary, #f8fafc);
   color: var(--text-primary, #0f172a);
-  font-size: 0.86rem;
+  font-size: 1.02rem;
   font-weight: 500;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  letter-spacing: -0.01em;
+}
+
+.vpage-search-input::placeholder {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.98rem;
 }
 
 .vpage-search-input:focus {
   border-color: #dc2626;
   background: var(--bg-card, #ffffff);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
 }
 
 .vpage-search-clear {
   position: absolute;
-  right: 0.8rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -559,24 +515,344 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
 }
 
 .vpage-search-clear:hover {
   color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
 }
 
-.vpage-results-indicator {
-  margin-top: 1rem;
+/* Filter Dropdown Container - Positioned on Right Side */
+.vpage-filter-dropdown-container {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.vpage-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 54px;
+  padding: 0 1.45rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-light, #e2e8f0);
+  background: var(--bg-secondary, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vpage-filter-btn:hover {
+  background: var(--bg-card, #ffffff);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.vpage-filter-btn.active,
+.vpage-filter-btn.open {
+  border-color: #dc2626;
+  background: var(--bg-card, #ffffff);
+  color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+}
+
+.vpage-filter-btn-icon {
+  color: var(--text-muted, #64748b);
+  transition: color 0.2s ease;
+}
+
+.vpage-filter-btn.active .vpage-filter-btn-icon,
+.vpage-filter-btn.open .vpage-filter-btn-icon {
+  color: #dc2626;
+}
+
+.vpage-filter-btn-label {
+  font-weight: 700;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vpage-filter-btn-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--text-secondary, #475569);
+  line-height: 1;
+}
+
+.vpage-filter-btn.active .vpage-filter-btn-badge {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.vpage-filter-btn-chevron {
+  color: var(--text-muted, #94a3b8);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.vpage-filter-btn-chevron.rotated {
+  transform: rotate(180deg);
+  color: #dc2626;
+}
+
+/* Dropdown Menu Popover - Anchored to Right */
+.vpage-filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  left: auto;
+  width: 310px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2), 0 6px 16px rgba(15, 23, 42, 0.08);
+  z-index: 120;
+  padding: 0.75rem 0.6rem;
+  animation: vpageDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+@keyframes vpageDropdownFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.vpage-filter-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem 0.65rem;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+  margin-bottom: 0.35rem;
+}
+
+.vpage-filter-dropdown-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #64748b);
+}
+
+.vpage-filter-reset-link {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.vpage-filter-reset-link:hover {
+  text-decoration: underline;
+}
+
+.vpage-filter-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.vpage-filter-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.vpage-filter-option:hover {
+  background: var(--bg-secondary, #f8fafc);
+}
+
+.vpage-filter-option.selected {
+  background: rgba(220, 38, 38, 0.07);
+}
+
+.vpage-option-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.vpage-option-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-medium, #cbd5e1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.vpage-option-radio.selected {
+  border-color: #dc2626;
+  background: #dc2626;
+}
+
+.vpage-option-radio-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.vpage-option-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vpage-filter-option.selected .vpage-option-label {
+  color: #dc2626;
+  font-weight: 750;
+}
+
+.vpage-option-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-secondary, #f1f5f9);
+  color: var(--text-muted, #64748b);
+  flex-shrink: 0;
+}
+
+.vpage-option-count.has-items {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary, #334155);
+}
+
+.vpage-filter-option.selected .vpage-option-count {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Active Filter Chips & Feedback Bar */
+.vpage-active-filters-bar {
+  margin-top: 0.95rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--border-light, #f1f5f9);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.vpage-active-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.vpage-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #991b1b;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.vpage-active-chip button {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.vpage-active-chip button:hover {
+  background: rgba(220, 38, 38, 0.18);
+}
+
+.vpage-results-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-size: 0.82rem;
   color: var(--text-secondary, #64748b);
-  flex-wrap: wrap;
-  gap: 0.5rem;
+}
+
+.vpage-reset-all-btn {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.vpage-reset-all-btn:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .vpage-omnibar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vpage-filter-dropdown-container {
+    width: 100%;
+  }
+  .vpage-filter-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .vpage-filter-dropdown-menu {
+    width: 100%;
+    right: 0;
+    left: 0;
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────────

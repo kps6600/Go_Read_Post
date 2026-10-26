@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Play, Tv, ArrowLeft, Eye, Clock, Share2, Sparkles, X, 
-  Search, Check, User, ChevronRight, ChevronLeft, ThumbsUp, Flame, Radio
+  Search, Check, User, ChevronRight, ChevronLeft, ThumbsUp, Flame, Radio,
+  Filter, SlidersHorizontal, ChevronDown
 } from 'lucide-react';
 import { VIDEO_EPISODES, VIDEO_CATEGORIES, getStoredVideos } from '../data/videoData';
 import { VideoService } from '../services/videoService';
@@ -11,11 +12,25 @@ import './VideosPage.css';
 export default function VideosPage({ onBackToHome, onSelectVideo }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
   const [playingVideo, setPlayingVideo] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [heroIndex, setHeroIndex] = useState(0);
   const [allVideos, setAllVideos] = useState(() => getStoredVideos());
   const [isHeroHovered, setIsHeroHovered] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(e.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen]);
 
   useEffect(() => {
     VideoService.getVideos().then(dbVideos => {
@@ -67,6 +82,10 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
     });
     return counts;
   }, [allVideos]);
+
+  const activeCategoryObj = useMemo(() => {
+    return VIDEO_CATEGORIES.find(c => c.id === activeCategory) || VIDEO_CATEGORIES[0];
+  }, [activeCategory]);
 
   // Filter videos by category and search keyword
   const filteredVideos = useMemo(() => {
@@ -226,33 +245,16 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
         </div>
       </section>
 
-      {/* Filter and Search Omnibar */}
+      {/* User-Friendly Filter & Search Omnibar */}
       <section className="vpage-filter-section">
-        <div className="vpage-filter-header">
-          <div className="vpage-filter-tabs">
-            {VIDEO_CATEGORIES.map(cat => {
-              const count = categoryCounts[cat.id] || 0;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`vpage-filter-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat.id)}
-                >
-                  <span>{cat.label}</span>
-                  <span className="vpage-filter-count">{count}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search Box */}
+        <div className="vpage-omnibar">
+          {/* Search Box (Expanded Size) */}
           <div className="vpage-search-box">
-            <Search size={15} className="vpage-search-icon" />
+            <Search size={20} className="vpage-search-icon" />
             <input 
               type="text" 
               className="vpage-search-input"
-              placeholder="Search episodes, guests, founders..."
+              placeholder="Search episodes, guests, series, founders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -262,27 +264,126 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
                 className="vpage-search-clear" 
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search"
+                title="Clear search"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
+            )}
+          </div>
+
+          {/* Filter Button & Dropdown (Right Side) */}
+          <div className="vpage-filter-dropdown-container" ref={filterDropdownRef}>
+            <button
+              type="button"
+              className={`vpage-filter-btn ${activeCategory !== 'all' ? 'active' : ''} ${isFilterOpen ? 'open' : ''}`}
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              aria-expanded={isFilterOpen}
+              aria-label="Filter episodes by series"
+            >
+              <SlidersHorizontal size={17} className="vpage-filter-btn-icon" />
+              <span className="vpage-filter-btn-label">
+                {activeCategory === 'all' ? 'Filter by Series' : activeCategoryObj.label}
+              </span>
+              <span className="vpage-filter-btn-badge">
+                {categoryCounts[activeCategory] || 0}
+              </span>
+              <ChevronDown size={15} className={`vpage-filter-btn-chevron ${isFilterOpen ? 'rotated' : ''}`} />
+            </button>
+
+            {isFilterOpen && (
+              <div className="vpage-filter-dropdown-menu">
+                <div className="vpage-filter-dropdown-header">
+                  <span className="vpage-filter-dropdown-title">Filter by Series</span>
+                  {activeCategory !== 'all' && (
+                    <button 
+                      type="button" 
+                      className="vpage-filter-reset-link"
+                      onClick={() => {
+                        setActiveCategory('all');
+                        setIsFilterOpen(false);
+                      }}
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <div className="vpage-filter-options-list">
+                  {VIDEO_CATEGORIES.map(cat => {
+                    const count = categoryCounts[cat.id] || 0;
+                    const isSelected = activeCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        className={`vpage-filter-option ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          setActiveCategory(cat.id);
+                          setIsFilterOpen(false);
+                        }}
+                      >
+                        <div className="vpage-option-left">
+                          <span className={`vpage-option-radio ${isSelected ? 'selected' : ''}`}>
+                            {isSelected && <span className="vpage-option-radio-dot" />}
+                          </span>
+                          <span className="vpage-option-label">{cat.label}</span>
+                        </div>
+                        <span className={`vpage-option-count ${count > 0 ? 'has-items' : 'zero'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Results indicator */}
+        {/* Active Filter Chips & Feedback Bar */}
         {(activeCategory !== 'all' || searchQuery.trim()) && (
-          <div className="vpage-results-indicator">
-            <span>Showing {filteredVideos.length} episode{filteredVideos.length === 1 ? '' : 's'}{searchQuery.trim() ? ` matching "${searchQuery}"` : ''}</span>
-            <button 
-              type="button"
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem' }}
-              onClick={() => {
-                setActiveCategory('all');
-                setSearchQuery('');
-              }}
-            >
-              Reset Filters
-            </button>
+          <div className="vpage-active-filters-bar">
+            <div className="vpage-active-chips">
+              {activeCategory !== 'all' && (
+                <div className="vpage-active-chip">
+                  <span>Series: <strong>{activeCategoryObj.label}</strong></span>
+                  <button 
+                    type="button" 
+                    onClick={() => setActiveCategory('all')} 
+                    title="Remove series filter"
+                    aria-label="Remove series filter"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+              {searchQuery.trim() && (
+                <div className="vpage-active-chip">
+                  <span>Keyword: "<strong>{searchQuery}</strong>"</span>
+                  <button 
+                    type="button" 
+                    onClick={() => setSearchQuery('')} 
+                    title="Remove keyword filter"
+                    aria-label="Remove keyword filter"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="vpage-results-meta">
+              <span>Showing <strong>{filteredVideos.length}</strong> episode{filteredVideos.length === 1 ? '' : 's'}</span>
+              <button 
+                type="button"
+                className="vpage-reset-all-btn"
+                onClick={() => {
+                  setActiveCategory('all');
+                  setSearchQuery('');
+                }}
+              >
+                Reset All
+              </button>
+            </div>
           </div>
         )}
       </section>
