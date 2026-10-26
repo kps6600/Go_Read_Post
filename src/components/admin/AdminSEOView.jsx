@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Search, Globe, Share2, Code, Save, CheckCircle, 
   AlertCircle, RefreshCw, Eye, Sparkles, Check, ExternalLink
@@ -82,14 +82,14 @@ export default function AdminSEOView({ onShowToast }) {
             alignItems: 'center',
             gap: '8px',
             padding: '9px 20px',
-            background: 'var(--brand-primary, #e11d48)',
+            background: 'var(--brand-primary, #dc2626)',
             color: '#fff',
             border: 'none',
             borderRadius: '8px',
             fontWeight: '600',
             fontSize: '0.88rem',
             cursor: saving ? 'not-allowed' : 'pointer',
-            boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)'
+            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)'
           }}
         >
           <Save size={15} />

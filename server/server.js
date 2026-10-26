@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { connectDB } from './db.js';
+import { connectDB, isDbConnected } from './db.js';
+import Article from './models/Article.js';
 import storiesRouter from './routes/stories.js';
 import menuRouter from './routes/menu.js';
 import navigationRouter, { adminNavigationRouter } from './routes/navigation.js';
@@ -87,10 +88,63 @@ app.use('/api/admin/videos', adminVideosRouter);
 app.use('/api/submissions', submissionsRouter);
 app.use('/api/admin/submissions', adminSubmissionsRouter);
 
+// Dynamic XML Sitemap for SEO & Search Engine Crawlers
+app.get(['/sitemap.xml', '/api/sitemap.xml'], async (req, res) => {
+  try {
+    const baseUrl = process.env.SITE_URL || 'https://goreadpost.com';
+    let articles = [];
+
+    if (isDbConnected()) {
+      articles = await Article.find({ 
+        status: 'published',
+        publishedAt: { $lte: new Date() }
+      }).select('slug updatedAt publishedAt').lean();
+    } else {
+      const fallbackPath = path.join(__dirname, 'articles_data_store.json');
+      if (fs.existsSync(fallbackPath)) {
+        const list = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+        articles = list.filter(a => a.status === 'published');
+      }
+    }
+
+    const staticRoutes = [
+      '',
+      '/latest',
+      '/trending',
+      '/categories',
+      '/about',
+      '/contact',
+      '/advertise',
+      '/videos'
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    // Static pages
+    for (const r of staticRoutes) {
+      xml += `  <url>\n    <loc>${baseUrl}${r}</loc>\n    <changefreq>daily</changefreq>\n    <priority>${r === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
+    }
+
+    // Published articles only (drafts & scheduled posts are strictly excluded)
+    for (const art of articles) {
+      const lastMod = new Date(art.updatedAt || art.publishedAt || Date.now()).toISOString();
+      xml += `  <url>\n    <loc>${baseUrl}/blog/${art.slug}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
 // Start Server immediately so port 5000 is open without waiting for DB/migrations
 app.listen(PORT, () => {
   console.log(`🚀 Express Server running on http://localhost:${PORT}`);
   console.log(`📡 Articles API active at http://localhost:${PORT}/api/articles`);
+  console.log(`🗺️ Sitemap active at http://localhost:${PORT}/sitemap.xml`);
   console.log(`🧭 Navigation API active at http://localhost:${PORT}/api/navigation`);
   console.log(`🏠 Homepage CMS API active at http://localhost:${PORT}/api/homepage`);
   console.log(`📺 Videos API active at http://localhost:${PORT}/api/videos`);
@@ -111,6 +165,28 @@ app.listen(PORT, () => {
     await migrateStoriesToArticles();
     await ensureVideosSeeded();
     await ensureSubmissionsSeeded();
+
+    // Reliable Scheduled Publication Background Worker
+    setInterval(async () => {
+      try {
+        if (isDbConnected()) {
+          const now = new Date();
+          const dueArticles = await Article.find({
+            status: 'scheduled',
+            scheduledAt: { $lte: now }
+          });
+
+          for (const art of dueArticles) {
+            art.status = 'published';
+            art.publishedAt = now;
+            await art.save();
+            console.log(`⏰ Scheduled article published automatically: "${art.title}" (${art.slug})`);
+          }
+        }
+      } catch (err) {
+        console.warn('Scheduled publisher worker error:', err?.message);
+      }
+    }, 30000); // Poll every 30 seconds
   } catch (err) {
     console.error('Database initialization warning:', err?.message || err);
   }

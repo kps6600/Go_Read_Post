@@ -123,7 +123,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
     const name = (cat?.name || '').toLowerCase();
     
     if (slug.includes('startup') || name.includes('startup')) {
-      return { icon: Rocket, color: '#e11d48', bg: '#fff1f2' };
+      return { icon: Rocket, color: '#dc2626', bg: '#fff1f2' };
     }
     if ((slug.includes('tech') && !slug.includes('deeptech')) || name === 'technology') {
       return { icon: Cpu, color: '#2563eb', bg: '#eff6ff' };
@@ -246,7 +246,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/videos')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
+          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
             <Tv size={22} />
           </div>
           <div className="adv-stat-content">
@@ -523,13 +523,13 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
           <div className="adv-panel-card">
             <div className="adv-panel-header">
               <div>
-                <h3 className="adv-panel-title">Dynamic CMS Pages</h3>
+                <h3 className="adv-panel-title">Editable Site Pages ({pages.length})</h3>
               </div>
               <button 
                 className="adv-btn-sm" 
-                onClick={() => onNavigate('/admin/pages/create')}
+                onClick={() => onNavigate('/admin/pages')}
               >
-                + New Page
+                Manage Pages
               </button>
             </div>
 
@@ -541,16 +541,37 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
             ) : pages.length === 0 ? (
               <div className="adv-empty-box">
                 <FileText size={36} color="var(--admin-text-faint)" />
-                <p>No dynamic pages created yet.</p>
-                <button className="adv-btn-primary" onClick={() => onNavigate('/admin/pages/create')}>
-                  Create Dynamic Page
+                <p>No site pages found.</p>
+                <button className="adv-btn-primary" onClick={() => onNavigate('/admin/pages')}>
+                  Go to Pages CMS
                 </button>
               </div>
             ) : (
               <div className="adv-pages-list">
                 {pages.slice(0, 7).map((page) => {
-                  const cleanSlug = (page.slug || '').replace(/^\/+/, '');
-                  const pageUrl = `/${cleanSlug}`;
+                  const pageType = (page.id === 'home' || page.slug === '' || page.slug === 'home') ? 'home'
+                    : (page.id === 'category' || page.slug === 'categories' || page.slug === 'category') ? 'category'
+                    : (page.id === 'contact' || page.slug === 'contact') ? 'contact'
+                    : (page.id === 'about' || page.slug === 'about') ? 'about'
+                    : (page.id === 'page_advertise' || page.id === 'advertise' || page.slug === 'advertise') ? 'advertise'
+                    : page.id;
+
+                  let pageUrl = '/';
+                  if (pageType === 'category') pageUrl = '/categories';
+                  else if (pageType === 'contact') pageUrl = '/contact';
+                  else if (pageType === 'about') pageUrl = '/about';
+                  else if (pageType === 'advertise') pageUrl = '/advertise';
+                  else pageUrl = '/';
+
+                  const handleEdit = () => {
+                    if (pageType === 'home') onNavigate('/admin/homepage');
+                    else if (pageType === 'category') onNavigate('/admin/category');
+                    else if (pageType === 'about') onNavigate('/admin/about');
+                    else if (pageType === 'contact') onNavigate('/admin/pages/contact/edit');
+                    else if (pageType === 'advertise') onNavigate('/admin/pages/page_advertise/edit');
+                    else onNavigate(`/admin/pages/${page._id || page.id}/edit`);
+                  };
+
                   return (
                     <div key={page._id || page.id} className="adv-page-row-modern">
                       <div className="adv-page-icon-wrap">
@@ -558,13 +579,13 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
                       </div>
                       <div className="adv-page-info-modern">
                         <div className="adv-page-title-modern">{page.title}</div>
-                        <div className="adv-page-path-pill">/{cleanSlug}</div>
+                        <div className="adv-page-path-pill">{pageUrl}</div>
                       </div>
                       <div className="adv-page-actions-modern">
                         <span className={`adv-status-dot ${page.status === 'published' ? 'published' : 'draft'}`} title={page.status} />
                         <button 
                           className="adv-btn-edit-action"
-                          onClick={() => onNavigate(`/admin/pages/${page._id || page.id}/edit`)}
+                          onClick={handleEdit}
                           title="Edit Page"
                         >
                           Edit

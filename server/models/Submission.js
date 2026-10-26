@@ -4,7 +4,7 @@ const submissionSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['pitch', 'contact', 'lead'],
+      enum: ['pitch', 'contact', 'lead', 'advertising', 'inquiry'],
       default: 'pitch',
       index: true
     },

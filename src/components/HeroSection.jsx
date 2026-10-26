@@ -138,7 +138,7 @@ export default function HeroSection({
                           background: 'none',
                           border: 'none',
                           cursor: 'pointer',
-                          color: isSaved && isSaved(pick.id) ? '#ea580c' : 'var(--text-muted)',
+                          color: isSaved && isSaved(pick.id) ? 'var(--brand-primary, #dc2626)' : 'var(--text-muted)',
                           padding: '2px',
                           display: 'flex',
                           alignItems: 'center'

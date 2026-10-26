@@ -47,13 +47,24 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
     }
   ]);
 
+  // Helper to safely parse likes from number, string, or undefined
+  const parseLikesCount = (val) => {
+    if (typeof val === 'number' && !isNaN(val)) return val;
+    if (typeof val === 'string') {
+      const trimmed = val.trim();
+      const num = parseFloat(trimmed.replace(/[^0-9.]/g, ''));
+      if (!isNaN(num)) {
+        return trimmed.toLowerCase().includes('k') ? Math.round(num * 1000) : Math.round(num);
+      }
+    }
+    return 18400;
+  };
+
   // Sync state if prop changes
   useEffect(() => {
     if (video) {
       setCurrentVideo(video);
-      // Parse initial like count if available
-      const rawLikes = parseInt(video.likes?.replace(/[^0-9]/g, '') || '18') * 1000;
-      setLikeCount(rawLikes || 18400);
+      setLikeCount(parseLikesCount(video.likes));
       setIsLiked(false);
       setSelectedChapter(null);
     }
@@ -73,9 +84,13 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
   if (!currentVideo) return null;
 
   const handleSwitchVideo = (newVid) => {
+    if (!newVid) return;
     setCurrentVideo(newVid);
     if (onSelectVideo) onSelectVideo(newVid);
-    window.history.replaceState(null, '', `/videos?id=${newVid.id}`);
+    const vId = newVid.id || newVid._id || newVid.slug;
+    if (vId) {
+      window.history.replaceState(null, '', `/videos?id=${encodeURIComponent(vId)}`);
+    }
     setSelectedChapter(null);
   };
 
@@ -90,7 +105,8 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/videos?id=${currentVideo.id}`;
+    const vId = currentVideo?.id || currentVideo?._id || currentVideo?.slug;
+    const url = vId ? `${window.location.origin}/videos?id=${encodeURIComponent(vId)}` : window.location.href;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setIsCopied(true);

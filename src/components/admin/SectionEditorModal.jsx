@@ -2,22 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Plus, Trash2, Sparkles } from 'lucide-react';
 
 export const SECTION_DEFINITIONS = [
-  { type: 'hero', label: 'Hero Banner', desc: 'Main top header with headline, subhead, background image and CTA button.' },
-  { type: 'stories_feed', label: 'Article & Story Feed', desc: 'Dynamic or curated editorial news grid with category filter and view-all link.' },
-  { type: 'trending', label: 'Trending News Feed', desc: 'High-velocity popular and trending startup dispatches.' },
-  { type: 'spotlight', label: 'Tech & Startup Spotlight', desc: 'Spotlight block focusing on deep tech, AI, and emerging ventures.' },
-  { type: 'newsletter', label: 'Newsletter Subscription', desc: 'Opt-in email newsletter subscription callout banner.' },
-  { type: 'text', label: 'Text / About Block', desc: 'Heading, narrative text body, and optional badge.' },
-  { type: 'image_text', label: 'Image + Text Split', desc: 'Two-column layout pairing a visual banner with text content.' },
-  { type: 'services', label: 'Services Grid', desc: 'Cards listing offerings with icons, descriptions, and action links.' },
-  { type: 'portfolio', label: 'Portfolio & Projects', desc: 'Showcase grid displaying work samples, case studies, or projects.' },
-  { type: 'testimonials', label: 'Testimonials & Reviews', desc: 'Client endorsements with quotes, author names, roles, and ratings.' },
-  { type: 'features', label: 'Features Grid', desc: 'Multi-column list highlighting core capabilities or benefits.' },
-  { type: 'stats', label: 'Key Metrics & Numbers', desc: 'Bold metric numbers with labels and growth badges.' },
-  { type: 'faq', label: 'Frequently Asked Questions', desc: 'Accordion list of common questions and answers.' },
-  { type: 'cta', label: 'Call to Action (CTA)', desc: 'Full-width banner driving user conversions, inquiries, or signups.' },
-  { type: 'contact', label: 'Contact Details', desc: 'Contact inquiry block with email, phone, location address, and socials.' },
-  { type: 'brands', label: 'Client / Brand Logos', desc: 'Carousel or grid of partner companies and featured logos.' }
+  // 1. Video & Multimedia Sections
+  { type: 'video_section', label: 'Video Stories & Masterclasses', desc: 'Watch exclusive boardroom dialogues, deep tech demonstrations, and founder masterclasses.' },
+  { type: 'video_shows', label: 'GoReadPost Originals & Shows', desc: 'Founder interviews, video shows, and executive masterclass episodes.' },
+
+  // 2. Core Editorial Feeds & Hero
+  { type: 'hero', label: 'Hero Banner & Lead Stories', desc: 'Primary lead dispatch hero slider (left) and top 5 ranked articles sidebar (right).' },
+  { type: 'stories_feed', label: 'Latest from the Blog (Feed)', desc: 'Real-time dispatches and latest editorial reporting across the ecosystem.' },
+  { type: 'trending', label: 'Trending Now (Viral Feed)', desc: 'High-velocity stories capturing builder attention and social virality.' },
+  { type: 'popular_editors', label: "Most Popular & Editor's Picks", desc: "Curated editorial picks with an Editor's Choice highlight badge." },
+  { type: 'spotlight', label: 'Tech & Startup Spotlight', desc: 'Focus on deep tech breakthroughs, artificial intelligence, and new ventures.' },
+
+  // 3. Category Newsroom Desks
+  { type: 'category_startups', label: 'Category Desk: Startups & Capital', desc: 'Early-stage fundraising, venture deals, term sheets, and founder dispatches.' },
+  { type: 'category_technology', label: 'Category Desk: Technology & Cloud', desc: 'Frontier tech, software architectures, enterprise IT, and compute.' },
+  { type: 'category_ai', label: 'Category Desk: AI & DeepTech', desc: 'Foundation models, autonomous agents, robotics, and generative AI revolutions.' },
+  { type: 'category_fintech', label: 'Category Desk: FinTech & Web3', desc: 'Digital payments, UPI infra, digital banking, credit, and Web3.' },
+  { type: 'category_enterprise', label: 'Category Desk: Enterprise & SaaS', desc: 'B2B SaaS growth, annual recurring revenue (ARR), and enterprise scaling.' },
+  { type: 'category_herstory', label: 'Category Desk: HerStory', desc: 'Celebrating women entrepreneurs, corporate executives, and changemakers.' },
+  { type: 'category_smbstory', label: 'Category Desk: SMBStory (MSME & D2C)', desc: 'Traditional business icons, retail brands, manufacturing, and D2C heroes.' },
+  { type: 'category_socialstory', label: 'Category Desk: SocialStory (Impact)', desc: 'Grassroots movements, sustainability, climate tech, and social enterprises.' },
+
+  // 4. Site Architecture & Conversion Sections
+  { type: 'newsletter', label: 'Newsletter Subscription Banner', desc: 'Full-width newsletter opt-in banner driving daily reader subscriptions.' },
+  { type: 'about', label: 'About Us & Mission Manifesto', desc: 'Our mission, journalistic independence charter, and newsroom metrics.' },
+  { type: 'contact', label: 'Newsroom Bureaus & Contact Details', desc: 'Editorial desks, news tips email, office locations, and phone numbers.' },
+  { type: 'advertise', label: 'Advertise With Us & Media Kit', desc: 'Media kit stats, audience demographics, and partnership sponsorship tiers.' }
 ];
 
 const CATEGORY_CHOICES = [
@@ -29,8 +39,7 @@ const CATEGORY_CHOICES = [
   { value: 'FinTech', label: 'FinTech & Web3' },
   { value: 'HerStory', label: 'HerStory (Women Leaders)' },
   { value: 'SMBStory', label: 'SMBStory (MSME & D2C)' },
-  { value: 'SocialStory', label: 'SocialStory (Impact)' },
-  { value: 'Hindi', label: 'YS Hindi Edition' }
+  { value: 'SocialStory', label: 'SocialStory (Impact)' }
 ];
 
 export default function SectionEditorModal({ section, isOpen, onClose, onSave, onOpenLiveStudio }) {
@@ -1602,6 +1611,225 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* 16. CATEGORY NEWSROOM DESK / EDITORIAL FEEDS */}
+          {(section.type.startsWith('category_') || section.type === 'stories_feed' || section.type === 'trending' || section.type === 'spotlight' || section.type === 'popular_editors') && (
+            <div className="form-fields-group">
+              <div className="form-row-two-col">
+                <div className="form-group">
+                  <label>Section Display Title *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Startups & Capital Desk"
+                    value={formData.title || formData.heading || ''}
+                    onChange={(e) => {
+                      handleChange('title', e.target.value);
+                      handleChange('heading', e.target.value);
+                    }}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Newsroom Category Beat</label>
+                  <select
+                    value={formData.category || ''}
+                    onChange={(e) => handleChange('category', e.target.value)}
+                  >
+                    {CATEGORY_CHOICES.map(c => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Subtitle / Beat Focus Note</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Real-time reporting on venture rounds, term sheets, and founders"
+                  value={formData.subtitle || formData.subheading || ''}
+                  onChange={(e) => {
+                    handleChange('subtitle', e.target.value);
+                    handleChange('subheading', e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="form-row-three-col">
+                <div className="form-group">
+                  <label>Max Stories Limit</label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="24"
+                    value={formData.limit || 8}
+                    onChange={(e) => handleChange('limit', parseInt(e.target.value, 10) || 8)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>"View All" Button Label</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Explore Beat"
+                    value={formData.viewAllText || 'View All Articles'}
+                    onChange={(e) => handleChange('viewAllText', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>"View All" Destination URL</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. /category/startups"
+                    value={formData.viewAllUrl || '/latest'}
+                    onChange={(e) => handleChange('viewAllUrl', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 17. VIDEO & MULTIMEDIA SHOWS */}
+          {(section.type === 'video_section' || section.type === 'video_shows') && (
+            <div className="form-fields-group">
+              <div className="form-group">
+                <label>Section Display Title *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Video Stories & Masterclasses"
+                  value={formData.title || formData.heading || ''}
+                  onChange={(e) => {
+                    handleChange('title', e.target.value);
+                    handleChange('heading', e.target.value);
+                  }}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Subtitle / Description</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Watch exclusive boardroom dialogues, deep tech demonstrations, and founder masterclasses."
+                  value={formData.subtitle || formData.subheading || ''}
+                  onChange={(e) => {
+                    handleChange('subtitle', e.target.value);
+                    handleChange('subheading', e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="form-row-two-col">
+                <div className="form-group">
+                  <label>"View All" Button Label</label>
+                  <input
+                    type="text"
+                    placeholder="Explore All Videos"
+                    value={formData.viewAllText || 'Explore All Videos'}
+                    onChange={(e) => handleChange('viewAllText', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>"View All" Destination URL</label>
+                  <input
+                    type="text"
+                    placeholder="/videos"
+                    value={formData.viewAllUrl || '/videos'}
+                    onChange={(e) => handleChange('viewAllUrl', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 18. ABOUT US / MISSION */}
+          {section.type === 'about' && (
+            <div className="form-fields-group">
+              <div className="form-group">
+                <label>Section Heading *</label>
+                <input
+                  type="text"
+                  placeholder="About Us & Mission Manifesto"
+                  value={formData.title || formData.heading || ''}
+                  onChange={(e) => {
+                    handleChange('title', e.target.value);
+                    handleChange('heading', e.target.value);
+                  }}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Subtitle / Tagline</label>
+                <input
+                  type="text"
+                  placeholder="The Definitive Journal of Innovation, Capital & Builders"
+                  value={formData.subtitle || ''}
+                  onChange={(e) => handleChange('subtitle', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Manifesto Content</label>
+                <textarea
+                  rows={6}
+                  placeholder="Our journalistic manifesto and mission..."
+                  value={formData.content || ''}
+                  onChange={(e) => handleChange('content', e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 19. ADVERTISE WITH US */}
+          {section.type === 'advertise' && (
+            <div className="form-fields-group">
+              <div className="form-group">
+                <label>Section Title *</label>
+                <input
+                  type="text"
+                  placeholder="Advertise With Us & Media Kit"
+                  value={formData.title || formData.heading || ''}
+                  onChange={(e) => {
+                    handleChange('title', e.target.value);
+                    handleChange('heading', e.target.value);
+                  }}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Subtitle / Value Proposition</label>
+                <input
+                  type="text"
+                  placeholder="Reach over 500,000 monthly founders, enterprise leaders, and investors."
+                  value={formData.subtitle || formData.description || ''}
+                  onChange={(e) => {
+                    handleChange('subtitle', e.target.value);
+                    handleChange('description', e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="form-row-two-col">
+                <div className="form-group">
+                  <label>Primary Button Text</label>
+                  <input
+                    type="text"
+                    value={formData.primaryBtnText || 'Download Media Kit'}
+                    onChange={(e) => handleChange('primaryBtnText', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Primary Button URL</label>
+                  <input
+                    type="text"
+                    value={formData.primaryBtnUrl || '/advertise'}
+                    onChange={(e) => handleChange('primaryBtnUrl', e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           )}

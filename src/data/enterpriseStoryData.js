@@ -6,7 +6,6 @@ export const ENTERPRISE_SUB_NAV = [
   { id: 'premium-post', label: 'Premium Post', hasDropdown: true },
   { id: 'leaders', label: 'Leaders', hasDropdown: true },
   { id: 'trends', label: 'Trends', hasDropdown: true },
-  { id: 'resources', label: 'Resources', hasDropdown: true },
   { id: 'ystv', label: 'YSTV', hasDropdown: true },
   { id: 'websparks', label: 'WebSparks', hasDropdown: false },
   { id: 'newsletters', label: 'Newsletters', hasDropdown: true },

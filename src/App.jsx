@@ -21,22 +21,20 @@ import HerStoryPage from './components/HerStoryPage';
 import SocialStoryPage from './components/SocialStoryPage';
 import SMBStoryPage from './components/SMBStoryPage';
 import EnterpriseStoryPage from './components/EnterpriseStoryPage';
-import HindiStoryPage from './components/HindiStoryPage';
 import AdminLayout from './components/admin/AdminLayout';
 import ArticlePage from './components/ArticlePage';
 import CategoryContentPage from './components/CategoryContentPage';
 import DynamicEntityPage from './components/DynamicEntityPage';
 import SearchPage from './components/SearchPage';
-import TechSparksPage from './components/TechSparksPage';
 import FounderFirstPage from './components/FounderFirstPage';
-import BrandsHubPage from './components/BrandsHubPage';
 import YSTVPage from './components/YSTVPage';
 import VideoSection from './components/VideoSection';
 import VideosPage from './components/VideosPage';
 import VideoPlayerModal from './components/VideoPlayerModal';
-import ResourcesPage from './components/ResourcesPage';
 import NewsletterPage from './components/NewsletterPage';
 import AboutSection from './components/AboutSection';
+import ContactPage from './components/ContactPage';
+import AdvertisePage from './components/AdvertisePage';
 import TopicsPage from './components/TopicsPage';
 import DynamicPageRenderer from './components/DynamicPageRenderer';
 import NotFoundPage from './components/NotFoundPage';
@@ -60,7 +58,6 @@ import {
   AI_STORIES
 } from './data/storiesData';
 import { ALL_ENTERPRISE_STORIES } from './data/enterpriseStoryData';
-import { ALL_HINDI_STORIES } from './data/hindiStoryData';
 import { ALL_SMB_STORIES, SMB_STORY_PROFILES } from './data/smbStoryData';
 import { ALL_HER_STORIES, HER_STORY_PROFILES } from './data/herStoryData';
 
@@ -74,7 +71,6 @@ const findStoryById = (id, dynamicStories = []) => {
     (HER_STORY_PROFILES && HER_STORY_PROFILES[id]) ||
     ALL_HER_STORIES.find(s => s.id === id || s._id === id || s.slug === id) ||
     ALL_ENTERPRISE_STORIES.find(s => s.id === id || s._id === id || s.slug === id) ||
-    ALL_HINDI_STORIES.find(s => s.id === id || s._id === id || s.slug === id) ||
     ALL_SMB_STORIES.find(s => s.id === id || s._id === id || s.slug === id) ||
     ALL_STORIES.find(s => s.id === id || s._id === id || s.slug === id) ||
     null
@@ -115,10 +111,12 @@ export const parseCurrentRoute = () => {
       return { route: 'brand', slug: 'enterprise' };
     }
     if (pathname === '/hindi' || pathname.startsWith('/hindi') || pathname === '/ys-hindi' || pathname === '/yshindi') {
-      return { route: 'brand', slug: 'hindi' };
+      try { window.history.replaceState(null, '', '/'); } catch (e) {}
+      return { route: 'home' };
     }
     if (pathname === '/techsparks' || pathname.startsWith('/techsparks')) {
-      return { route: 'techsparks' };
+      try { window.history.replaceState(null, '', '/'); } catch (e) {}
+      return { route: 'home' };
     }
     if (pathname === '/founder-first' || pathname.startsWith('/founder-first')) {
       return { route: 'founder-first' };
@@ -126,14 +124,26 @@ export const parseCurrentRoute = () => {
     if (pathname === '/about' || pathname === '/about-us' || pathname.startsWith('/about')) {
       return { route: 'about' };
     }
-    if (pathname === '/brands' || pathname.startsWith('/brands')) {
-      return { route: 'brands' };
+    if (pathname === '/contact' || pathname === '/contact-us' || pathname.startsWith('/contact')) {
+      return { route: 'contact' };
+    }
+    if (pathname === '/advertise' || pathname === '/advertise-with-us' || pathname.startsWith('/advertise')) {
+      return { route: 'advertise' };
+    }
+    if (pathname === '/brands' || pathname.startsWith('/brands') || pathname === '/hindi' || pathname.startsWith('/hindi')) {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
     }
     if (pathname === '/videos' || pathname.startsWith('/videos') || pathname === '/video' || pathname.startsWith('/video') || pathname === '/ystv' || pathname.startsWith('/ystv')) {
       return { route: 'videos' };
     }
     if (pathname === '/resources' || pathname.startsWith('/resources')) {
-      return { route: 'resources' };
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
     }
     if (pathname === '/newsletter' || pathname.startsWith('/newsletter')) {
       return { route: 'newsletter' };
@@ -150,6 +160,14 @@ export const parseCurrentRoute = () => {
       const slug = pathname.replace('/post/', '').split('/')[0].split('?')[0];
       if (slug) return { route: 'article', slug };
     }
+    if (pathname.startsWith('/blog/')) {
+      const slug = pathname.replace('/blog/', '').split('/')[0].split('?')[0];
+      if (slug) return { route: 'article', slug };
+    }
+    if (pathname.startsWith('/blogs/')) {
+      const slug = pathname.replace('/blogs/', '').split('/')[0].split('?')[0];
+      if (slug) return { route: 'article', slug };
+    }
     if (pathname.startsWith('/story/')) {
       const slug = pathname.replace('/story/', '').split('/')[0].split('?')[0];
       if (slug) return { route: 'article', slug };
@@ -158,10 +176,19 @@ export const parseCurrentRoute = () => {
       return { route: 'category', slug: 'content' };
     }
     if (pathname === '/topics' || pathname === '/topics/' || pathname === '/tags' || pathname === '/tags/') {
-      return { route: 'topics' };
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
     }
     if (pathname.startsWith('/category/') || pathname.startsWith('/cotegory/')) {
       const slug = pathname.replace(/^\/(category|cotegory)\//, '').split('/')[0].split('?')[0];
+      if (slug === 'hindi' || slug === 'ys-hindi' || slug === 'yshindi') {
+        if (typeof window !== 'undefined') {
+          window.history.replaceState(null, '', '/');
+        }
+        return { route: 'home' };
+      }
       if (slug) return { route: 'category', slug };
     }
     if (pathname.startsWith('/categories/')) {
@@ -197,17 +224,24 @@ export const parseCurrentRoute = () => {
       return { route: 'category', slug: 'latest' };
     }
     const brand = params.get('brand');
-    if (brand === 'techsparks') return { route: 'techsparks' };
-    if (brand === 'brands') return { route: 'brands' };
-    if (brand === 'ystv' || brand === 'videos' || brand === 'video') return { route: 'videos' };
-    if (brand === 'resources') return { route: 'resources' };
+    if (brand === 'brands' || brand === 'resources') {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
+    }
     if (brand === 'newsletter') return { route: 'newsletter' };
     if (brand === 'ai-story' || brand === 'aistory' || brand === 'ai') return { route: 'category', slug: 'ai' };
     if (brand === 'her-story' || brand === 'herstory') return { route: 'category', slug: 'herstory' };
     if (brand === 'social-story' || brand === 'socialstory') return { route: 'category', slug: 'social-story' };
     if (brand === 'smbstory' || brand === 'smb-story' || brand === 'smb') return { route: 'category', slug: 'smbstory' };
     if (brand === 'enterprise' || brand === 'enterprisestory' || brand === 'enterprise-story') return { route: 'category', slug: 'enterprise' };
-    if (brand === 'hindi' || brand === 'ys-hindi' || brand === 'yshindi') return { route: 'category', slug: 'hindi' };
+    if (brand === 'hindi' || brand === 'ys-hindi' || brand === 'yshindi') {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
+    }
 
     const art = params.get('article');
     if (art) return { route: 'article', slug: art };
@@ -294,8 +328,18 @@ export default function App() {
       if (pathname === '/videos' || pathname.startsWith('/videos') || pathname === '/video' || pathname.startsWith('/video') || pathname === '/ystv' || pathname.startsWith('/ystv')) {
         return 'videos';
       }
+      if (pathname === '/advertise' || pathname.startsWith('/advertise') || pathname === '/advertise-with-us') {
+        return 'advertise';
+      }
+      if (pathname === '/about' || pathname.startsWith('/about') || pathname === '/about-us') {
+        return 'about';
+      }
+      if (pathname === '/founder-first' || pathname.startsWith('/founder-first')) {
+        return 'founder-first';
+      }
       if (pathname.startsWith('/category/') || pathname.startsWith('/cotegory/')) {
         const catSlug = pathname.replace(/^\/(category|cotegory)\//, '').split('/')[0].split('?')[0];
+        if (catSlug === 'hindi' || catSlug === 'ys-hindi' || catSlug === 'yshindi') return 'all';
         if (catSlug) return catSlug.toLowerCase();
       }
       const params = new URLSearchParams(window.location.search);
@@ -324,25 +368,25 @@ export default function App() {
         return 'enterprise';
       }
       if (brand && (brand.toLowerCase() === 'hindi' || brand.toLowerCase() === 'ys-hindi' || brand.toLowerCase() === 'yshindi')) {
-        return 'hindi';
-      }
-      if (brand && (brand.toLowerCase() === 'techsparks' || brand.toLowerCase() === 'techsparks-2026')) {
-        return 'techsparks';
+        return 'all';
       }
       if (brand && brand.toLowerCase() === 'founder-first') {
         return 'founder-first';
       }
       if (brand && brand.toLowerCase() === 'brands') {
-        return 'brands';
+        return 'all';
       }
       if (brand && (brand.toLowerCase() === 'ystv' || brand.toLowerCase() === 'videos' || brand.toLowerCase() === 'video')) {
         return 'videos';
       }
       if (brand && brand.toLowerCase() === 'resources') {
-        return 'resources';
+        return 'all';
       }
       if (brand && brand.toLowerCase() === 'newsletter') {
         return 'newsletter';
+      }
+      if (brand && (brand.toLowerCase() === 'advertise' || brand.toLowerCase() === 'advertise-with-us')) {
+        return 'advertise';
       }
     } catch (e) {}
     return 'all';
@@ -793,11 +837,15 @@ export default function App() {
         } else if (route.route === 'techsparks') {
           setActiveCategory('techsparks');
         } else if (route.route === 'brands') {
-          setActiveCategory('brands');
+          setActiveCategory('all');
         } else if (route.route === 'resources') {
-          setActiveCategory('resources');
+          setActiveCategory('all');
         } else if (route.route === 'newsletter') {
           setActiveCategory('newsletter');
+        } else if (route.route === 'about') {
+          setActiveCategory('about');
+        } else if (route.route === 'advertise') {
+          setActiveCategory('advertise');
         } else if (categoryParam) {
           setActiveCategory(categoryParam.toLowerCase());
         } else if (tag && (tag.toLowerCase() === 'just in' || tag.toLowerCase() === 'just-in' || tag.toLowerCase() === 'latest')) {
@@ -816,15 +864,15 @@ export default function App() {
         } else if (brand && (brand.toLowerCase() === 'enterprise' || brand.toLowerCase() === 'enterprisestory' || brand.toLowerCase() === 'enterprise-story')) {
           setActiveCategory('enterprise');
         } else if (brand && (brand.toLowerCase() === 'hindi' || brand.toLowerCase() === 'ys-hindi' || brand.toLowerCase() === 'yshindi')) {
-          setActiveCategory('hindi');
+          setActiveCategory('all');
         } else if (brand && (brand.toLowerCase() === 'techsparks' || brand.toLowerCase() === 'techsparks-2026')) {
           setActiveCategory('techsparks');
         } else if (brand && brand.toLowerCase() === 'brands') {
-          setActiveCategory('brands');
+          setActiveCategory('all');
         } else if (brand && (brand.toLowerCase() === 'ystv' || brand.toLowerCase() === 'videos' || brand.toLowerCase() === 'video')) {
           setActiveCategory('videos');
         } else if (brand && brand.toLowerCase() === 'resources') {
-          setActiveCategory('resources');
+          setActiveCategory('all');
         } else if (brand && brand.toLowerCase() === 'newsletter') {
           setActiveCategory('newsletter');
         } else {
@@ -1053,6 +1101,18 @@ export default function App() {
           } else if (['videos', 'ystv', 'video'].includes(catId)) {
             window.history.pushState(null, '', '/videos');
             setCurrentRoute({ route: 'videos' });
+          } else if (catId === 'advertise' || catId === 'advertise-with-us') {
+            window.history.pushState(null, '', '/advertise');
+            setCurrentRoute({ route: 'advertise' });
+          } else if (catId === 'about' || catId === 'about-us') {
+            window.history.pushState(null, '', '/about');
+            setCurrentRoute({ route: 'about' });
+          } else if (catId === 'contact' || catId === 'contact-us') {
+            window.history.pushState(null, '', '/contact');
+            setCurrentRoute({ route: 'contact' });
+          } else if (catId === 'founder-first') {
+            window.history.pushState(null, '', '/founder-first');
+            setCurrentRoute({ route: 'founder-first' });
           } else {
             window.history.pushState(null, '', `/category/${catId}`);
             setCurrentRoute({ route: 'category', slug: catId });
@@ -1156,29 +1216,54 @@ export default function App() {
             onShowToast={showToast}
           />
         ) : (
-          currentRoute.route === 'topics' || 
-          currentRoute.route === 'topic' || 
-          activeCategory === 'topics' || 
-          (activeCategory && activeCategory.startsWith('topic:'))
+          (currentRoute.route === 'topic' && currentRoute.slug) || 
+          (activeCategory && activeCategory.startsWith('topic:') && activeCategory !== 'topic:')
         ) && !searchQuery.trim() ? (
           <TopicsPage 
             topicSlug={
               currentRoute.route === 'topic' 
                 ? currentRoute.slug 
-                : (activeCategory && activeCategory.startsWith('topic:') ? activeCategory.replace('topic:', '') : null)
+                : activeCategory.replace('topic:', '')
             }
             onSelectStory={handleSelectStory}
             onBackToHome={handleBackToHome}
             onNavigateTopic={(slug) => {
-              window.history.pushState(null, '', slug ? `/topic/${slug}` : '/topics');
-              setCurrentRoute({ route: slug ? 'topic' : 'topics', slug });
-              setActiveCategory(slug ? `topic:${slug}` : 'topics');
+              if (slug) {
+                window.history.pushState(null, '', `/topic/${slug}`);
+                setCurrentRoute({ route: 'topic', slug });
+                setActiveCategory(`topic:${slug}`);
+              } else {
+                window.history.pushState(null, '', '/');
+                setCurrentRoute({ route: 'home' });
+                setActiveCategory('all');
+              }
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
             onShareStory={handleShareStory}
             onShowToast={showToast}
+          />
+        ) : (currentRoute.route === 'advertise' || activeCategory === 'advertise') && !searchQuery.trim() ? (
+          <AdvertisePage 
+            onBackToHome={handleBackToHome}
+            onShowToast={showToast}
+          />
+        ) : (currentRoute.route === 'about' || activeCategory === 'about') && !searchQuery.trim() ? (
+          <AboutSection />
+        ) : (currentRoute.route === 'contact' || activeCategory === 'contact') && !searchQuery.trim() ? (
+          <ContactPage 
+            onBackToHome={handleBackToHome}
+            onShowToast={showToast}
+          />
+        ) : (currentRoute.route === 'founder-first' || activeCategory === 'founder-first') && !searchQuery.trim() ? (
+          <FounderFirstPage 
+            onBackToHome={handleBackToHome}
+            onSelectStory={handleSelectStory}
+            onOpenPitchModal={() => setIsPitchModalOpen(true)}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
+            onShareStory={handleShareStory}
           />
         ) : (currentRoute.route === 'category' || (
           activeCategory && 
@@ -1188,8 +1273,15 @@ export default function App() {
           !activeCategory.startsWith('author:') &&
           activeCategory !== 'topics' &&
           activeCategory !== 'about' &&
+          activeCategory !== 'contact' &&
+          activeCategory !== 'advertise' &&
+          activeCategory !== 'founder-first' &&
+          currentRoute.route !== 'advertise' &&
+          currentRoute.route !== 'about' &&
+          currentRoute.route !== 'contact' &&
+          currentRoute.route !== 'founder-first' &&
           !searchQuery.trim() && 
-          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'brands', 'resources', 'newsletter', 'about', 'topics'].includes(activeCategory)
+          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'newsletter', 'about', 'contact', 'advertise', 'founder-first', 'topics'].includes(activeCategory)
         )) ? (
           <CategoryContentPage 
             slug={currentRoute.route === 'category' ? (currentRoute.slug || 'content') : activeCategory}
@@ -1326,51 +1418,6 @@ export default function App() {
             }}
             onShowToast={showToast}
             onOpenAuthModal={(mode) => setAuthModal({ isOpen: true, mode: mode || 'login' })}
-          />
-        ) : (activeCategory === 'hindi' || activeCategory === 'ys-hindi' || activeCategory === 'yshindi') && !searchQuery.trim() ? (
-          <HindiStoryPage 
-            onSelectStory={handleSelectStory}
-            isSaved={isSaved}
-            onToggleSave={handleToggleSave}
-            onShareStory={handleShareStory}
-            onBackToHome={() => {
-              setActiveCategory('all');
-              setSearchQuery('');
-              window.history.pushState(null, '', window.location.pathname);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onShowToast={showToast}
-            onOpenAuthModal={(mode) => setAuthModal({ isOpen: true, mode: mode || 'login' })}
-          />
-        ) : (currentRoute.route === 'techsparks' || activeCategory === 'techsparks') && !searchQuery.trim() ? (
-          <TechSparksPage 
-            onBackToHome={handleBackToHome}
-            onSelectStory={handleSelectStory}
-          />
-        ) : (currentRoute.route === 'founder-first' || activeCategory === 'founder-first') && !searchQuery.trim() ? (
-          <FounderFirstPage 
-            onBackToHome={handleBackToHome}
-            onSelectStory={handleSelectStory}
-            onOpenPitchModal={() => setIsPitchModalOpen(true)}
-            isSaved={isSaved}
-            onToggleSave={handleToggleSave}
-            onShareStory={handleShareStory}
-          />
-        ) : (currentRoute.route === 'about' || activeCategory === 'about') && !searchQuery.trim() ? (
-          <AboutSection />
-        ) : (currentRoute.route === 'brands' || activeCategory === 'brands') && !searchQuery.trim() ? (
-          <BrandsHubPage 
-            onBackToHome={handleBackToHome}
-            onNavigateBrand={(brandId) => {
-              setActiveCategory(brandId);
-              setSearchQuery('');
-              window.history.pushState(null, '', `?brand=${brandId}`);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        ) : (currentRoute.route === 'resources' || activeCategory === 'resources') && !searchQuery.trim() ? (
-          <ResourcesPage 
-            onBackToHome={handleBackToHome}
           />
         ) : (currentRoute.route === 'newsletter' || activeCategory === 'newsletter') && !searchQuery.trim() ? (
           <NewsletterPage 

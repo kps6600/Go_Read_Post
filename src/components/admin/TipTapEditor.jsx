@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import Youtube from '@tiptap/extension-youtube';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 import { 
-  Heading1, Heading2, Heading3, Bold, Italic, Strikethrough,
+  Heading1, Heading2, Heading3, Heading4, Bold, Italic, Strikethrough, Underline as UnderlineIcon,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Quote, Code, Link as LinkIcon, 
   Image as ImageIcon, Video, Table as TableIcon, 
   Undo, Redo, Pilcrow, Minus, RemoveFormatting, Sparkles
@@ -23,8 +26,12 @@ export default function TipTapEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3]
+          levels: [1, 2, 3, 4]
         }
+      }),
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph']
       }),
       Link.configure({
         openOnClick: false,
@@ -81,7 +88,7 @@ export default function TipTapEditor({
   if (!editor) {
     return (
       <div className="aem-tiptap-loading-skeleton">
-        <Sparkles size={20} className="rotate-icon" style={{ color: 'var(--brand-primary, #e11d48)' }} />
+        <Sparkles size={20} className="rotate-icon" style={{ color: 'var(--brand-primary, #dc2626)' }} />
         <span>Initializing Editorial Studio Engine...</span>
       </div>
     );
@@ -163,6 +170,14 @@ export default function TipTapEditor({
           >
             <Heading3 size={16} />
           </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            className={`aem-tool-btn ${editor.isActive('heading', { level: 4 }) ? 'active' : ''}`}
+            title="Heading 4 (Sub-heading)"
+          >
+            <Heading4 size={16} />
+          </button>
         </div>
 
         <span className="aem-tool-separator" />
@@ -187,6 +202,14 @@ export default function TipTapEditor({
           </button>
           <button
             type="button"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={`aem-tool-btn ${editor.isActive('underline') ? 'active' : ''}`}
+            title="Underline (Ctrl+U)"
+          >
+            <UnderlineIcon size={15} />
+          </button>
+          <button
+            type="button"
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={`aem-tool-btn ${editor.isActive('strike') ? 'active' : ''}`}
             title="Strikethrough"
@@ -200,6 +223,44 @@ export default function TipTapEditor({
             title="Inline Code"
           >
             <Code size={15} />
+          </button>
+        </div>
+
+        <span className="aem-tool-separator" />
+
+        {/* Text Alignment */}
+        <div className="aem-tiptap-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            className={`aem-tool-btn ${editor.isActive({ textAlign: 'left' }) ? 'active' : ''}`}
+            title="Align Left"
+          >
+            <AlignLeft size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            className={`aem-tool-btn ${editor.isActive({ textAlign: 'center' }) ? 'active' : ''}`}
+            title="Align Center"
+          >
+            <AlignCenter size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            className={`aem-tool-btn ${editor.isActive({ textAlign: 'right' }) ? 'active' : ''}`}
+            title="Align Right"
+          >
+            <AlignRight size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+            className={`aem-tool-btn ${editor.isActive({ textAlign: 'justify' }) ? 'active' : ''}`}
+            title="Justify"
+          >
+            <AlignJustify size={15} />
           </button>
         </div>
 

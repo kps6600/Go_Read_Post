@@ -1,7 +1,6 @@
 import { ALL_STORIES } from '../data/storiesData';
 import { ALL_ENTERPRISE_STORIES } from '../data/enterpriseStoryData';
 import { ALL_SMB_STORIES } from '../data/smbStoryData';
-import { ALL_HINDI_STORIES } from '../data/hindiStoryData';
 import { ALL_HER_STORIES } from '../data/herStoryData';
 import { SOCIAL_HERO_STORY, SOCIAL_GRID_STORIES, SOCIAL_LATEST_STORIES, SOCIAL_HERO_SIDEBAR_STORIES } from '../data/socialStoryData';
 
@@ -14,7 +13,6 @@ export function getDefaultSeedStories() {
     ...ALL_STORIES.map(s => ({ ...s, brand: s.brand || 'GoReadPost' })),
     ...ALL_ENTERPRISE_STORIES.map(s => ({ ...s, brand: 'EnterpriseStory', category: 'enterprise' })),
     ...ALL_SMB_STORIES.map(s => ({ ...s, brand: 'SMBStory', category: 'smbstory' })),
-    ...ALL_HINDI_STORIES.map(s => ({ ...s, brand: 'YS हिंदी', category: 'hindi' })),
     ...(ALL_HER_STORIES || []).map(s => ({ ...s, brand: 'HerStory', category: 'herstory' })),
     { ...SOCIAL_HERO_STORY, brand: 'SocialStory', category: 'social-story' },
     ...(SOCIAL_GRID_STORIES || []).map(s => ({ ...s, brand: 'SocialStory', category: 'social-story' })),

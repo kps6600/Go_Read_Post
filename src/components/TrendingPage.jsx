@@ -9,41 +9,19 @@ import './TrendingPage.css';
 
 // Category color and icon helpers
 const getCategoryStyle = (catName) => {
-  const clean = (catName || '').toLowerCase();
-  if (clean.includes('tech') || clean.includes('ai')) {
-    return { color: '#6366f1', bg: '#e0e7ff', badgeBg: '#4f46e5' };
-  }
-  if (clean.includes('business') || clean.includes('startup')) {
-    return { color: '#059669', bg: '#d1fae5', badgeBg: '#059669' };
-  }
-  if (clean.includes('edu') || clean.includes('study')) {
-    return { color: '#8b5cf6', bg: '#ede9fe', badgeBg: '#7c3aed' };
-  }
-  if (clean.includes('health') || clean.includes('food')) {
-    return { color: '#e11d48', bg: '#ffe4e6', badgeBg: '#e11d48' };
-  }
-  if (clean.includes('travel')) {
-    return { color: '#ea580c', bg: '#ffedd5', badgeBg: '#ea580c' };
-  }
-  if (clean.includes('science')) {
-    return { color: '#2563eb', bg: '#dbeafe', badgeBg: '#2563eb' };
-  }
-  if (clean.includes('life') || clean.includes('social')) {
-    return { color: '#0891b2', bg: '#cffafe', badgeBg: '#0891b2' };
-  }
-  return { color: '#4f46e5', bg: '#e0e7ff', badgeBg: '#4f46e5' };
+  return { color: '#dc2626', bg: '#fee2e2', badgeBg: 'var(--brand-primary, #dc2626)' };
 };
 
-// Rank badge tint colors
+// Rank badge tint colors - all use pure red highlights
 const RANK_COLORS = [
-  { text: '#e11d48', bg: '#ffe4e6' }, // 1 - Rose
-  { text: '#2563eb', bg: '#dbeafe' }, // 2 - Blue
-  { text: '#7c3aed', bg: '#ede9fe' }, // 3 - Purple
-  { text: '#059669', bg: '#d1fae5' }, // 4 - Emerald
-  { text: '#0284c7', bg: '#e0f2fe' }, // 5 - Sky
-  { text: '#ea580c', bg: '#ffedd5' }, // 6 - Orange
-  { text: '#db2777', bg: '#fce7f3' }, // 7 - Pink
-  { text: '#4f46e5', bg: '#e0e7ff' }, // 8 - Indigo
+  { text: '#dc2626', bg: '#fee2e2' }, // 1 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 2 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 3 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 4 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 5 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 6 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 7 - Red
+  { text: '#dc2626', bg: '#fee2e2' }, // 8 - Red
 ];
 
 const getStoryAuthor = (s) => {
@@ -70,6 +48,25 @@ const formatStoryDate = (dateStr) => {
 };
 const getStoryDate = (s) => formatStoryDate(s?.publishedAt || s?.date || s?.formattedDate || 'Apr 25, 2026');
 const getStoryReadTime = (s) => s?.readTime || (s?.readingTime ? `${s.readingTime} min read` : '5 min read');
+
+const getStoryExcerpt = (s) => {
+  if (!s) return '';
+  if (typeof s.summary === 'string' && s.summary.trim()) return s.summary.trim();
+  if (typeof s.excerpt === 'string' && s.excerpt.trim()) return s.excerpt.trim();
+  if (typeof s.subtitle === 'string' && s.subtitle.trim()) return s.subtitle.trim();
+  if (typeof s.metaDescription === 'string' && s.metaDescription.trim()) return s.metaDescription.trim();
+  if (typeof s.description === 'string' && s.description.trim()) return s.description.trim();
+  if (typeof s.content === 'string' && s.content.trim()) {
+    const clean = s.content.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (clean) return clean.slice(0, 150) + '...';
+  }
+  if (Array.isArray(s.content) && s.content.length > 0 && typeof s.content[0] === 'string') {
+    const clean = s.content[0].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (clean) return clean.slice(0, 150) + '...';
+  }
+  const cat = s.categoryName || s.categoryLabel || s.category || 'technology';
+  return `An in-depth editorial analysis exploring strategic growth, key market shifts, and emerging breakthroughs across ${cat}.`;
+};
 
 export default function TrendingPage({
   stories = [],
@@ -365,7 +362,7 @@ export default function TrendingPage({
                     const globalIdx = currentArticlePage * CARDS_PER_PAGE + inPageIdx;
                     const storyId = story.id || story._id || story.slug;
                     const storyTitle = story.title;
-                    const storyExcerpt = story.excerpt || story.metaDescription || story.subtitle || (typeof story.content === 'string' ? story.content.slice(0, 140) + '...' : '');
+                    const storyExcerpt = getStoryExcerpt(story);
                     const storyCat = (story.categoryName || story.categoryLabel || story.category || 'Technology');
                     const catStyle = getCategoryStyle(storyCat);
                     const rankColor = RANK_COLORS[globalIdx % RANK_COLORS.length];
@@ -393,7 +390,7 @@ export default function TrendingPage({
                           {globalIdx + 1}
                         </div>
 
-                        {/* Left Column: Thumbnail Image + Author Meta Below Image */}
+                        {/* Left Column: Clean Proportional Thumbnail Image */}
                         <div className="tp-card-thumb-column">
                           <div className="tp-card-thumb-wrap">
                             <img 
@@ -407,37 +404,19 @@ export default function TrendingPage({
                               loading="lazy"
                             />
                           </div>
-
-                          {/* Author & Date Meta Placed Below the Image */}
-                          <div className="tp-author-cluster-below-img">
-                            <img 
-                              src={storyAvatar} 
-                              alt={storyAuthor} 
-                              className="tp-author-avatar"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-                              }}
-                            />
-                            <div className="tp-author-info-box">
-                              <span className="tp-author-name" title={storyAuthor}>{storyAuthor}</span>
-                              <div className="tp-author-sub">
-                                <span>{storyDate}</span>
-                                <span className="tp-sep">•</span>
-                                <span>{storyReadTime}</span>
-                              </div>
-                            </div>
-                          </div>
                         </div>
 
                         {/* Right Content */}
                         <div className="tp-card-body">
-                          <span 
-                            className="tp-cat-badge"
-                            style={{ background: catStyle.badgeBg }}
-                          >
-                            {storyCat}
-                          </span>
+                          {/* Top: Category Pill Badge */}
+                          <div className="tp-card-meta-top">
+                            <span 
+                              className="tp-cat-badge"
+                              style={{ background: catStyle.badgeBg }}
+                            >
+                              {storyCat}
+                            </span>
+                          </div>
 
                           <h2 className="tp-card-title">
                             {storyTitle}
@@ -449,7 +428,25 @@ export default function TrendingPage({
                             </p>
                           )}
 
-                          <div className="tp-card-footer" style={{ marginTop: 'auto', justifyContent: 'flex-end' }}>
+                          {/* Bottom Footer: Author Info on Left + Actions on Right */}
+                          <div className="tp-card-footer">
+                            <div className="tp-author-cluster">
+                              <img 
+                                src={storyAvatar} 
+                                alt={storyAuthor} 
+                                className="tp-author-avatar"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                                }}
+                              />
+                              <span className="tp-author-name" title={storyAuthor}>{storyAuthor}</span>
+                              <span className="tp-sep">•</span>
+                              <span className="tp-date-text">{storyDate}</span>
+                              <span className="tp-sep">•</span>
+                              <span className="tp-read-text">{storyReadTime}</span>
+                            </div>
+
                             <div className="tp-card-actions-row">
                               <button 
                                 type="button" 

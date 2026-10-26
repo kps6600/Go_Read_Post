@@ -3,7 +3,6 @@ export const NAV_LINKS = [
   { id: "latest", label: "Latest", hasDropdown: false, url: "/latest" },
   { id: "trending", label: "Trending", hasDropdown: false, url: "/trending" },
   { id: "categories", label: "Categories", hasDropdown: true, url: "/category/startups" },
-  { id: "topics", label: "Topics", hasDropdown: true, url: "/topic/artificial-intelligence" },
   { id: "videos", label: "Videos", hasDropdown: false, url: "/videos" },
   { id: "newsletter", label: "Newsletter", hasDropdown: false, url: "/newsletter" }
 ];
@@ -61,17 +60,13 @@ export const NAV_DROPDOWNS_DATA = {
           { label: 'Founder Stories', url: '/category/startups' },
           { label: 'HerStory (Women Pioneers)', url: '/category/her-story', badge: 'Pioneers' },
           { label: 'SMBStory (MSME & D2C)', url: '/category/smbstory' },
-          { label: 'SocialStory (Impact & Climate)', url: '/category/social-story' },
-          { label: 'Hindi / Regional Edition', url: '/category/hindi' }
+          { label: 'SocialStory (Impact & Climate)', url: '/category/social-story' }
         ]
       },
       {
         title: 'MULTIMEDIA & HUBS',
         items: [
-          { label: 'Videos & Studio Shows', url: '/videos', badge: 'Watch' },
-          { label: 'TechSparks Summit', url: '/techsparks', badge: '2026' },
-          { label: 'Brands Hub', url: '/brands' },
-          { label: 'Research & Sector Reports', url: '/resources' }
+          { label: 'Videos & Studio Shows', url: '/videos', badge: 'Watch' }
         ]
       }
     ]
@@ -129,14 +124,6 @@ export const BRANDS_MENU_DATA = [
     storyTitle: "Four Indian brands putting a new spin on khadi",
     image: "https://images.yourstory.com/cs/4/8e7cc4102d6c11e9aa979329348d4c3e/ModernKhadi1600x900-1790843426768.jpg?ar=16%3A9&mode=crop&crop=faces&format=auto&w=256&q=75",
     fallbackImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&auto=format&fit=crop&q=80"
-  },
-  {
-    col: 1,
-    title: "Hindi",
-    categoryId: "hindi",
-    storyTitle: "TechSparks 2024: 'The New Tech Order' में शिरकत करेंगे देश-विदेश के दिग्गज टेक लीडर्स",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=320&auto=format&fit=crop&q=80",
-    fallbackImage: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&auto=format&fit=crop&q=80"
   },
   // Column 2
   {

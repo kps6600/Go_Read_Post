@@ -24,7 +24,6 @@ const INITIAL_TAXONOMY = {
     { _id: 'cat_smbstory', name: 'SMBStory', slug: 'smbstory', description: 'MSME, D2C, and Indian manufacturing', order: 5, isActive: true },
     { _id: 'cat_herstory', name: 'HerStory', slug: 'her-story', description: 'Women founders, leaders, and change-makers', order: 6, isActive: true },
     { _id: 'cat_socialstory', name: 'SocialStory', slug: 'social-story', description: 'Impact, sustainability, and grassroots innovation', order: 7, isActive: true },
-    { _id: 'cat_hindi', name: 'YS हिंदी', slug: 'hindi', description: 'Hindi language stories and regional entrepreneurship', order: 8, isActive: true },
     { _id: 'cat_fintech', name: 'FinTech', slug: 'fintech', description: 'Payments, banking, wealthtech, and regulatory tech', order: 9, isActive: true }
   ],
   authors: [

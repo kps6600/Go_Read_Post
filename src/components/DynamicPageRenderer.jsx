@@ -13,6 +13,8 @@ import DynamicFeatures from './dynamic/DynamicFeatures';
 import DynamicStats from './dynamic/DynamicStats';
 import DynamicBrands from './dynamic/DynamicBrands';
 import AboutSection from './AboutSection';
+import ContactPage from './ContactPage';
+import AdvertisePage from './AdvertisePage';
 import NotFoundPage from './NotFoundPage';
 import { ArrowLeft, RefreshCw, Sparkles } from 'lucide-react';
 
@@ -128,6 +130,10 @@ export default function DynamicPageRenderer({
           />
         ) : (slug === 'about' || page?.slug === 'about' || slug === '/about' || slug === 'about-us' || page?.slug === 'about-us' || slug === '/about-us') ? (
           <AboutSection page={page} />
+        ) : (slug === 'advertise' || page?.slug === 'advertise' || slug === '/advertise' || slug === 'advertise-with-us' || page?.id === 'page_advertise') ? (
+          <AdvertisePage page={page} onBackToHome={onBackToHome} onShowToast={onShowToast} />
+        ) : (slug === 'contact' || page?.slug === 'contact' || slug === '/contact' || slug === 'contact-us' || page?.slug === 'contact-us' || slug === '/contact-us') ? (
+          <ContactPage onBackToHome={onBackToHome} onShowToast={onShowToast} />
         ) : (
           <div className="dynamic-page-sections" style={{ width: '100%', maxWidth: '100%', margin: 0, padding: 0 }}>
             {activeSections.length > 0 ? (

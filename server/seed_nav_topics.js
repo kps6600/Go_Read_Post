@@ -8,7 +8,7 @@ const NAV_TOPICS = [
   {
     name: 'Digital Public Infrastructure (DPI)',
     slug: 'dpi',
-    description: 'UPI 2.0 rails, DigiLocker data standards, Account Aggregator frameworks, open health protocols, and sovereign identity stacks transforming Bharat.',
+    description: '',
     categorySlug: 'technology',
     badge: 'Sovereign'
   },

@@ -51,7 +51,7 @@ function findFallbackPage(list, param) {
 export const DEFAULT_PAGES = [
   {
     id: "home",
-    title: "Homepage - Live Portal",
+    title: "Homepage",
     slug: "",
     brand: "GoReadPost",
     description: "Main portal covering startup dispatches, fundraises, playbooks, and leadership features.",
@@ -66,153 +66,11 @@ export const DEFAULT_PAGES = [
       description: "Leading media platform delivering unfiltered reporting on startups, funding, and deep tech.",
       keywords: ["startups", "venture capital", "deeptech", "entrepreneurship"]
     },
-    sections: [
-      {
-        id: "sec_hero",
-        type: "hero",
-        order: 1,
-        enabled: true,
-        data: {
-          heading: "Stories That Matter in Indian & Global Startups",
-          subheading: "Unfiltered founder playbooks, deep tech breakthroughs, and capital movements.",
-          buttonText: "Explore Stories",
-          buttonUrl: "#top",
-          image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80"
-        }
-      }
-    ]
-  },
-  {
-    id: "latest",
-    title: "Latest Stories",
-    slug: "latest",
-    brand: "GoReadPost",
-    description: "Real-time dispatches, breaking news, and latest stories across the ecosystem.",
-    heroHeadline: "Latest Dispatches & Breaking News",
-    heroSubhead: "Unfiltered minute-by-minute reporting from startup newsrooms and global bureaus.",
-    heroBanner: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&auto=format&fit=crop&q=80",
-    status: "published",
-    showInNav: true,
-    order: 2,
-    seo: {
-      title: "Latest Stories | GoReadPost",
-      description: "Discover the latest articles, startup developments, and venture capital updates.",
-      keywords: ["latest news", "breaking news", "startups"]
-    },
-    sections: []
-  },
-  {
-    id: "trending",
-    title: "Trending Stories",
-    slug: "trending",
-    brand: "GoReadPost",
-    description: "Most read, viral, and trending startup stories.",
-    heroHeadline: "Trending in Technology & Business",
-    heroSubhead: "Stories capturing the attention of founders, engineers, and market leaders today.",
-    heroBanner: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1200&auto=format&fit=crop&q=80",
-    status: "published",
-    showInNav: true,
-    order: 3,
-    seo: {
-      title: "Trending Stories | GoReadPost",
-      description: "Explore the most read and viral startup dispatches.",
-      keywords: ["trending", "viral stories", "startup trends"]
-    },
-    sections: [
-      {
-        id: "trending_hero",
-        type: "hero",
-        order: 1,
-        enabled: true,
-        data: {
-          title: "Top Trending Hero Slider",
-          heading: "Top Trending Hero Slider",
-          headline: "Discover the Top Trending Insights",
-          subheadline: "Explore trending stories and verified updates across the business and startup ecosystem.",
-          badge: "TRENDING NOW",
-          primaryBtnText: "Read Story",
-          primaryBtnUrl: "/latest",
-          slideLimit: 5,
-          autoPlayInterval: 7,
-          heroSource: "custom",
-          showPopular: false
-        }
-      },
-      {
-        id: "trending_feed",
-        type: "stories_feed",
-        order: 2,
-        enabled: true,
-        data: {
-          title: "Ranked Trending Stories Feed",
-          heading: "Ranked Stories",
-          subtitle: "Real-time popularity index based on reader engagement and viral velocity",
-          category: "",
-          limit: 4,
-          badgeText: "POPULAR NOW",
-          viewAllText: "View All Trending",
-          viewAllUrl: "/trending"
-        }
-      },
-      {
-        id: "trending_sidebar",
-        type: "newsletter",
-        order: 3,
-        enabled: true,
-        data: {
-          title: "Trending Sidebar & Newsletter Banner",
-          heading: "Stay Updated",
-          headline: "Stay Updated",
-          subtitle: "Get the latest trending articles, insights and updates delivered to your inbox.",
-          buttonText: "Subscribe",
-          placeholder: "Enter your email address",
-          sidebarTitle: "Trending Now",
-          tags: ["AI", "Web Development", "React", "Next.js", "Python", "JavaScript", "DSA", "Career", "Productivity", "Investing", "Startups", "Technology"]
-        }
-      }
-    ]
-  },
-  {
-    id: "videos",
-    title: "Video Shows (YSTV)",
-    slug: "videos",
-    brand: "GoReadPost",
-    description: "Original studio video shows, founder interviews, and video dispatches.",
-    heroHeadline: "Studio Broadcasts & Founder Interviews",
-    heroSubhead: "High-impact visual journalism with visionary founders and investors.",
-    heroBanner: "https://images.unsplash.com/photo-1579208575657-c595a05383b7?w=1200&auto=format&fit=crop&q=80",
-    status: "published",
-    showInNav: true,
-    order: 4,
-    seo: {
-      title: "Video Shows & Studio Broadcasts | GoReadPost",
-      description: "Watch exclusive founder interviews and studio sessions.",
-      keywords: ["videos", "interviews", "shows"]
-    },
-    sections: []
-  },
-  {
-    id: "newsletter",
-    title: "Newsletter & Dispatches",
-    slug: "newsletter",
-    brand: "GoReadPost",
-    description: "Curated weekly and daily dispatches delivered directly to founders and investors.",
-    heroHeadline: "The Executive Morning Briefing",
-    heroSubhead: "The smartest 5-minute daily breakdown of capital movements and startup strategies.",
-    heroBanner: "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=1200&auto=format&fit=crop&q=80",
-    status: "published",
-    showInNav: true,
-    order: 5,
-    seo: {
-      title: "Newsletter Subscription | GoReadPost",
-      description: "Subscribe to GoReadPost daily dispatches and intelligence briefs.",
-      keywords: ["newsletter", "daily brief", "subscriptions"]
-    },
     sections: []
   },
   {
     id: "category",
-    title: "Category Content & Desks",
+    title: "Category Page & Desks",
     slug: "categories",
     brand: "GoReadPost",
     description: "Comprehensive reporting, strategic perspectives, and startup breakdowns across all editorial categories and desks.",
@@ -260,6 +118,83 @@ export const DEFAULT_PAGES = [
           showPills: true,
           showHero: true,
           curation: {}
+        }
+      }
+    ]
+  },
+  {
+    id: "contact",
+    title: "Contact Us",
+    slug: "contact",
+    brand: "GoReadPost",
+    description: "Get in touch with GoReadPost editorial newsroom, bureaus, and reader support.",
+    heroHeadline: "Get in Touch With Our Newsroom & Team",
+    heroSubhead: "Have a breaking story scoop, an editorial pitch, an advertising partnership inquiry, or reader feedback? Our editors and correspondents are ready to connect.",
+    heroBanner: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80",
+    status: "published",
+    showInNav: true,
+    order: 3,
+    seo: {
+      title: "Contact Us | GoReadPost — Editorial Newsroom & Support",
+      description: "Get in touch with GoReadPost. Pitch a startup story, explore advertising partnerships, report editorial corrections, or reach out to our Bengaluru, Mumbai, and Delhi bureaus.",
+      keywords: ["contact", "editorial pitch", "newsroom", "support"]
+    },
+    sections: [
+      {
+        id: "sec_contact_hero",
+        type: "hero",
+        order: 1,
+        enabled: true,
+        data: {
+          badge: "CONNECT & COLLABORATE",
+          heading: "Get in Touch With Our Newsroom & Team",
+          subheadline: "Have a breaking story scoop, an editorial pitch, an advertising partnership inquiry, or reader feedback? Our editors and correspondents are ready to connect.",
+          responseNotice: "⚡ Average response time: Under 2 business hours (09:00 - 18:30 IST)"
+        }
+      },
+      {
+        id: "sec_contact_channels",
+        type: "contact",
+        order: 2,
+        enabled: true,
+        data: {
+          title: "Direct Newsroom Channels & Bureaus",
+          subtitle: "Connect directly with our central desks in Bengaluru, Mumbai, and Delhi.",
+          phone: "+91 928 933 8990",
+          email: "contact@goreadpost.com",
+          address: "GoReadPost Media Network, Indiranagar, Bengaluru, Karnataka 560038",
+          workingHours: "Monday – Friday, 9:00 AM – 6:30 PM IST"
+        }
+      },
+      {
+        id: "sec_contact_departments",
+        type: "services",
+        order: 3,
+        enabled: true,
+        data: {
+          title: "Editorial & Specialized Desks",
+          subtitle: "Select the specific bureau for your inquiry to ensure immediate review.",
+          services: [
+            { title: "Editorial & Story Pitches", description: "Exclusive funding announcements, founder scoops, and news tips.", icon: "PenTool" },
+            { title: "Brand Solutions & Ads", description: "Sponsored content, brand storytelling series, and newsletter ads.", icon: "Megaphone" },
+            { title: "Press & Media Relations", description: "Interviews with correspondents, citations, and republishing.", icon: "Building2" },
+            { title: "Reader Support & Feedback", description: "Bug reports, article corrections, or general queries.", icon: "HelpCircle" }
+          ]
+        }
+      },
+      {
+        id: "sec_contact_faq",
+        type: "faq",
+        order: 4,
+        enabled: true,
+        data: {
+          title: "Frequently Asked Questions",
+          subtitle: "Quick answers about pitching stories, media partnerships, and corrections.",
+          faqs: [
+            { question: "How do I pitch a startup story or funding announcement?", answer: "Send your pitch deck or press release to editorial@goreadpost.com with embargo details if applicable." },
+            { question: "What is your editorial policy regarding sponsored coverage?", answer: "GoReadPost maintains complete separation between editorial reporting and brand sponsorships. Editorial stories cannot be purchased." },
+            { question: "How can I advertise or sponsor a newsletter dispatch?", answer: "Reach out to advertise@goreadpost.com to request our 2026 Media Kit and rate card." }
+          ]
         }
       }
     ]
@@ -431,28 +366,6 @@ export const DEFAULT_PAGES = [
         }
       }
     ]
-  },
-  {
-    id: "founder-first",
-    slug: "founder-first",
-    title: "Founder First - Zero to One Playbooks",
-    brand: "GoReadPost",
-    description: "Curated founder playbooks, bootstrapping miracles, and startup scaling blueprints from India's audacious builders.",
-    heroHeadline: "Founder First Desk",
-    heroSubhead: "Unfiltered founder playbooks, bootstrapping lessons, and scaling blueprints from India’s audacious builders.",
-    heroBanner: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-    status: "published",
-    showInNav: true,
-    order: 5,
-    sections: [
-      { id: "founder_playbooks", type: "stories", order: 1, enabled: true, title: "Founder Playbooks" },
-      { id: "founder_cta", type: "cta", order: 2, enabled: true, title: "Pitch Callout Banner" }
-    ],
-    seo: {
-      title: "Founder First | Zero-to-One Playbooks & Builder Journeys",
-      description: "Unfiltered founder playbooks, bootstrapping lessons, and scaling blueprints from India’s audacious builders.",
-      keywords: ["startups", "founder stories", "zero to one", "bootstrapped", "playbooks"]
-    }
   }
 ];
 

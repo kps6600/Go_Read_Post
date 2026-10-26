@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Rocket, Plus, Trash2, Edit2, ArrowUp, ArrowDown, ArrowLeft,
   ArrowRight, Eye, Check, RefreshCw, Sparkles, Send, 
@@ -869,7 +869,7 @@ export default function AdminFounderView({ onShowToast, onNavigate }) {
               {articles.length > 0 && (
                 <div className="afv-field-group" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <label className="afv-label" style={{ color: '#0f172a' }}>
-                    <Sparkles size={13} color="#e11d48" />
+                    <Sparkles size={13} color="#dc2626" />
                     <span>Auto-Fill from Existing Published Article</span>
                   </label>
                   <select 

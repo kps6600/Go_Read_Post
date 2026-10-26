@@ -227,6 +227,38 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       );
     }
 
+    // 6d. About Us Studio: /admin/about
+    if (currentPath === '/admin/about' || currentPath.startsWith('/admin/about')) {
+      return (
+        <AdminAboutView 
+          onShowToast={onShowToast} 
+          onNavigate={handleNavigate} 
+        />
+      );
+    }
+
+    // 6e. Contact Us Studio: /admin/contact
+    if (currentPath === '/admin/contact' || currentPath.startsWith('/admin/contact')) {
+      return (
+        <AdminPageEditor 
+          pageId="contact" 
+          onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
+        />
+      );
+    }
+
+    // 6f. Advertise With Us Studio: /admin/advertise
+    if (currentPath === '/admin/advertise' || currentPath.startsWith('/admin/advertise')) {
+      return (
+        <AdminPageEditor 
+          pageId="page_advertise" 
+          onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
+        />
+      );
+    }
+
     // 7. Users & Roles: /admin/users or /admin/roles
     if (currentPath === '/admin/users' || currentPath === '/admin/roles') {
       return <AdminUsersView onShowToast={onShowToast} />;
@@ -282,25 +314,18 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       const parts = cleanPath.split('/');
       const editIndex = parts.indexOf('edit');
       const pageId = editIndex > 0 ? parts[editIndex - 1] : null;
-      if (pageId === 'trending') {
+      if (pageId === 'home') {
         return (
-          <AdminTrendingView 
-            onShowToast={onShowToast} 
+          <AdminPageEditor 
+            pageId="home" 
             onNavigate={handleNavigate} 
+            onShowToast={onShowToast} 
           />
         );
       }
       if (pageId === 'category' || pageId === 'categories') {
         return (
           <AdminCategoryStudioView 
-            onShowToast={onShowToast} 
-            onNavigate={handleNavigate} 
-          />
-        );
-      }
-      if (pageId === 'videos') {
-        return (
-          <AdminVideosView 
             onShowToast={onShowToast} 
             onNavigate={handleNavigate} 
           />
@@ -314,11 +339,21 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
           />
         );
       }
-      if (pageId === 'founder' || pageId === 'founder-first') {
+      if (pageId === 'contact' || pageId === 'contact-us') {
         return (
-          <AdminFounderView 
-            onShowToast={onShowToast} 
+          <AdminPageEditor 
+            pageId="contact" 
             onNavigate={handleNavigate} 
+            onShowToast={onShowToast} 
+          />
+        );
+      }
+      if (pageId === 'advertise' || pageId === 'page_advertise' || pageId === 'advertise-with-us') {
+        return (
+          <AdminPageEditor 
+            pageId="page_advertise" 
+            onNavigate={handleNavigate} 
+            onShowToast={onShowToast} 
           />
         );
       }

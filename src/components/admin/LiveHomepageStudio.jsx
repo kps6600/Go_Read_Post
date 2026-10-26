@@ -206,7 +206,7 @@ export default function LiveHomepageStudio({
 
     try {
       const payload = {
-        title: 'Homepage - Live Portal',
+        title: 'Homepage',
         slug: '',
         description: 'Comprehensive reporting on technology, startups, AI, and business.',
         status: 'published',
@@ -1314,7 +1314,6 @@ export default function LiveHomepageStudio({
                                       <span>{artDate}</span>
                                     </div>
                                     <h3 className="mhp-blog-card-title">{artTitle}</h3>
-                                    {art.excerpt && <p className="mhp-blog-excerpt">{art.excerpt}</p>}
                                     <div className="mhp-blog-footer-row">
                                       <span className="mhp-blog-readmore-btn">
                                         <span>READ MORE</span>

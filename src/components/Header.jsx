@@ -309,18 +309,6 @@ export default function Header({
         return activeCategory === 'newsletter' || normCurrent === '/newsletter';
       }
 
-      if (normLink === '/resources') {
-        return activeCategory === 'resources' || normCurrent === '/resources';
-      }
-
-      if (normLink === '/brands') {
-        return activeCategory === 'brands' || normCurrent === '/brands';
-      }
-
-      if (normLink === '/techsparks') {
-        return activeCategory === 'techsparks' || normCurrent === '/techsparks';
-      }
-
 
       return normCurrent === normLink;
     }
@@ -462,24 +450,15 @@ export default function Header({
       }
 
       if (directUrl === '/resources') {
-        setActiveCategory('resources');
+        setActiveCategory('all');
         setSearchQuery('');
-        window.history.pushState(null, '', directUrl);
+        window.history.pushState(null, '', '/');
         window.dispatchEvent(new Event('popstate'));
-        setCurrentPath(directUrl);
+        setCurrentPath('/');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
-      if (directUrl === '/techsparks') {
-        setActiveCategory('techsparks');
-        setSearchQuery('');
-        window.history.pushState(null, '', directUrl);
-        window.dispatchEvent(new Event('popstate'));
-        setCurrentPath(directUrl);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
 
       if (directUrl === '/founder-first') {
         setActiveCategory('startups');
@@ -491,12 +470,12 @@ export default function Header({
         return;
       }
 
-      if (directUrl === '/brands') {
-        setActiveCategory('brands');
+      if (directUrl === '/brands' || directUrl === '/category/hindi' || directUrl === '/hindi' || directUrl === '/category/ys-hindi') {
+        setActiveCategory('all');
         setSearchQuery('');
-        window.history.pushState(null, '', directUrl);
+        window.history.pushState(null, '', '/');
         window.dispatchEvent(new Event('popstate'));
-        setCurrentPath(directUrl);
+        setCurrentPath('/');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
@@ -550,7 +529,7 @@ export default function Header({
     }
 
     // Known brand & category desks
-    if (['startups', 'technology', 'ai-deeptech', 'ai', 'enterprise', 'fintech', 'leadership', 'ai-story', 'her-story', 'herstory', 'social-story', 'smbstory', 'smb-story', 'hindi'].includes(targetDesk)) {
+    if (['startups', 'technology', 'ai-deeptech', 'ai', 'enterprise', 'fintech', 'leadership', 'ai-story', 'her-story', 'herstory', 'social-story', 'smbstory', 'smb-story'].includes(targetDesk)) {
       if (e) e.preventDefault();
       setActiveCategory(targetDesk);
       setSearchQuery('');
@@ -561,13 +540,46 @@ export default function Header({
       return;
     }
 
-    if (['techsparks', 'brands', 'resources', 'newsletter'].includes(targetDesk)) {
+    if (targetDesk === 'hindi' || targetDesk === 'ys-hindi' || targetDesk === 'yshindi') {
       if (e) e.preventDefault();
-      setActiveCategory(targetDesk);
+      setActiveCategory('all');
       setSearchQuery('');
-      window.history.pushState(null, '', `/${targetDesk}`);
+      window.history.pushState(null, '', '/');
       window.dispatchEvent(new Event('popstate'));
-      setCurrentPath(`/${targetDesk}`);
+      setCurrentPath('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (targetDesk === 'resources') {
+      if (e) e.preventDefault();
+      setActiveCategory('all');
+      setSearchQuery('');
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new Event('popstate'));
+      setCurrentPath('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (targetDesk === 'brands') {
+      if (e) e.preventDefault();
+      setActiveCategory('all');
+      setSearchQuery('');
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new Event('popstate'));
+      setCurrentPath('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (targetDesk === 'newsletter') {
+      if (e) e.preventDefault();
+      setActiveCategory('newsletter');
+      setSearchQuery('');
+      window.history.pushState(null, '', '/newsletter');
+      window.dispatchEvent(new Event('popstate'));
+      setCurrentPath('/newsletter');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -724,9 +736,9 @@ export default function Header({
       catKey === 'hindi' || 
       (item.label && item.label.toLowerCase().includes('hindi'))
     ) {
-      setActiveCategory('hindi');
+      setActiveCategory('all');
       setSearchQuery('');
-      window.history.pushState(null, '', '/category/hindi');
+      window.history.pushState(null, '', '/');
       window.dispatchEvent(new Event('popstate'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveDropdown(null);
@@ -1031,7 +1043,7 @@ export default function Header({
                     width: '24px',
                     height: '24px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--brand-primary, #ea580c)',
+                    backgroundColor: 'var(--brand-primary, #dc2626)',
                     color: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -1063,7 +1075,7 @@ export default function Header({
                     color: 'var(--text-primary, #111827)'
                   }}>
                     <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--border-color, #f3f4f6)', marginBottom: '8px' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser.name || currentUser.username}</div>
+                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser.name || currentUser.username}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
                       <div style={{ marginTop: '6px' }}>
                         <span style={{
@@ -1072,8 +1084,8 @@ export default function Header({
                           fontWeight: 700,
                           padding: '2px 8px',
                           borderRadius: '10px',
-                          backgroundColor: AuthService.isStaff(currentUser) ? 'rgba(234, 88, 12, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                          color: AuthService.isStaff(currentUser) ? '#ea580c' : '#2563eb',
+                          backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                          color: '#dc2626',
                           textTransform: 'uppercase'
                         }}>
                           {currentUser.role || 'READER'}
@@ -1098,13 +1110,13 @@ export default function Header({
                           border: 'none',
                           borderRadius: '6px',
                           cursor: 'pointer',
-                          color: '#ea580c',
+                          color: '#dc2626',
                           fontWeight: 600,
                           fontSize: '0.85rem',
                           textAlign: 'left'
                         }}
                       >
-                        <LayoutDashboard size={15} color="#ea580c" />
+                        <LayoutDashboard size={15} color="#dc2626" />
                         <span>Admin Console</span>
                       </button>
                     )}
@@ -1560,11 +1572,11 @@ export default function Header({
                                     justifyContent: 'space-between',
                                     width: '100%',
                                     textDecoration: 'none',
-                                    color: isLinkActive ? 'var(--primary-color, #e11d48)' : 'inherit',
+                                    color: isLinkActive ? 'var(--primary-color, #dc2626)' : 'inherit',
                                     fontWeight: isLinkActive ? 650 : 500,
                                     padding: '7px 10px',
                                     borderRadius: '6px',
-                                    background: isLinkActive ? 'rgba(225, 29, 72, 0.08)' : 'transparent',
+                                    background: isLinkActive ? 'rgba(220, 38, 38, 0.08)' : 'transparent',
                                     transition: 'all 0.15s ease'
                                   }}
                                 >

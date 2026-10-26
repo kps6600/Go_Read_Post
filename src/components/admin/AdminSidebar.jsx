@@ -45,12 +45,12 @@ export const ADMIN_NAV_GROUPS = [
   {
     group: 'SITE ARCHITECTURE & CMS',
     items: [
-      { id: 'homepage', path: '/admin/homepage', label: 'Homepage Live Studio', icon: Sparkles, badge: 'LIVE' },
-      { id: 'trending', path: '/admin/trending', label: 'Trending Page Studio', icon: Flame, badge: 'LIVE' },
+      { id: 'homepage', path: '/admin/homepage', label: 'Homepage Studio', icon: Sparkles, badge: 'LIVE' },
       { id: 'category', path: '/admin/category', label: 'Category Page Studio', icon: Layers, badge: 'LIVE' },
-      { id: 'founder', path: '/admin/founder', label: 'Founder First Studio', icon: Rocket, badge: 'LIVE' },
+      { id: 'contact', path: '/admin/pages/contact/edit', label: 'Contact Us Studio', icon: Mail, badge: 'LIVE' },
       { id: 'about', path: '/admin/about', label: 'About Us Studio', icon: Compass, badge: 'LIVE' },
-      { id: 'pages', path: '/admin/pages', label: 'Pages & Legal CMS', icon: FileText },
+      { id: 'advertise', path: '/admin/pages/page_advertise/edit', label: 'Advertise With Us', icon: Newspaper, badge: 'LIVE' },
+      { id: 'pages', path: '/admin/pages', label: 'Editable Pages CMS (5)', icon: FileText },
       { id: 'navigation', path: '/admin/navigation', label: 'Navigation CMS', icon: MenuIcon },
       { id: 'footer', path: '/admin/footer', label: 'Footer CMS', icon: PanelBottom },
     ]

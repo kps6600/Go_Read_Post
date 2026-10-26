@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Flame, Sparkles, Plus, Trash2, ArrowLeft, ArrowRight, 
   ChevronLeft, ChevronRight, Search, RefreshCw, Layers, 
@@ -15,7 +15,7 @@ import './AdminTrendingView.css';
 
 // Rank color helpers matching TrendingPage
 const RANK_COLORS = [
-  { text: '#e11d48', bg: '#ffe4e6' }, // 1 - Rose
+  { text: '#dc2626', bg: '#ffe4e6' }, // 1 - Rose
   { text: '#2563eb', bg: '#dbeafe' }, // 2 - Blue
   { text: '#7c3aed', bg: '#ede9fe' }, // 3 - Purple
   { text: '#059669', bg: '#d1fae5' }, // 4 - Emerald
@@ -29,7 +29,7 @@ const CATEGORY_STYLES = {
   technology: { bg: '#4f46e5' },
   business: { bg: '#059669' },
   education: { bg: '#7c3aed' },
-  health: { bg: '#e11d48' },
+  health: { bg: '#dc2626' },
   travel: { bg: '#ea580c' },
   science: { bg: '#2563eb' },
   lifestyle: { bg: '#0891b2' },
@@ -757,7 +757,9 @@ export default function AdminTrendingView({ onShowToast, onNavigate }) {
             const artId = article.id || article._id || `art-${inPageIdx}`;
             const artTitle = article.title || 'Untitled Article';
             const artCat = article.categoryName || article.categoryLabel || article.category || 'Technology';
-            const artExcerpt = article.excerpt || article.subtitle || article.summary || article.description || '';
+            const artExcerpt = article.excerpt || article.subtitle || article.summary || article.description || 
+              (typeof article.content === 'string' && article.content.trim() ? article.content.replace(/<[^>]+>/g, '').trim().slice(0, 140) + '...' : '') || 
+              `An in-depth editorial analysis exploring strategic growth, key market shifts, and emerging breakthroughs across ${artCat}.`;
             const artImg = article.image || article.featuredImage?.url || (typeof article.featuredImage === 'string' ? article.featuredImage : null) || article.heroImage || article.coverImage || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80';
             const artAuthor = article.authorName || (typeof article.author === 'object' && article.author ? article.author.name : (article.author || 'Editorial Bureau'));
             const artAvatar = article.authorAvatar || (typeof article.author === 'object' ? article.author?.avatar : null) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';

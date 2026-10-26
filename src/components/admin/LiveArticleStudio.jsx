@@ -1,11 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  ArrowLeft, Save, Send, Trash2, Eye, Edit3, Image as ImageIcon, 
-  Heading1, Heading2, Heading3, Quote, List, Sparkles, Check, 
-  Plus, ChevronUp, ChevronDown, Copy, ExternalLink, Calendar, 
-  Clock, User, Tag, Layers, Globe, Star, AlertCircle, RefreshCw,
-  Layout, Monitor, Smartphone, X, Upload, MessageSquare, BookOpen
-} from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { MediaService } from '../../services/mediaService';
@@ -19,7 +12,6 @@ export const DESKS = [
   { id: 'HerStory', label: 'HerStory' },
   { id: 'SMBStory', label: 'SMBStory' },
   { id: 'EnterpriseStory', label: 'EnterpriseStory' },
-  { id: 'YS हिंदी', label: 'YS हिंदी' },
   { id: 'SocialStory', label: 'SocialStory' }
 ];
 
@@ -110,59 +102,13 @@ function parseHtmlToBlocks(html) {
   return [{ id: 'blk_initial', type: 'paragraph', text: html }];
 }
 
-// Default blocks for newly created stories
+// Default initial block for newly created stories: single clean section
 const DEFAULT_INITIAL_BLOCKS = [
   {
-    id: 'blk_h1',
-    type: 'heading',
-    level: 2,
-    text: '1. The Rise of New Opportunities in the Ecosystem'
-  },
-  {
-    id: 'blk_p1',
-    type: 'paragraph',
-    text: 'Modern founders and industry leaders are adopting agile strategies to accelerate business transformation. By integrating cutting-edge solutions, organizations are expanding their market footprint, unlocking scalable operational efficiencies, and reaching wider audiences than ever before.'
-  },
-  {
-    id: 'blk_img1',
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1200&auto=format&fit=crop&q=80',
-    caption: 'Founders collaborate on emerging operational frameworks and scalable customer strategies.',
-    credit: 'GoReadPost Editorial Studio / Unsplash',
-    alt: 'Founders collaboration',
-    layout: 'standard'
-  },
-  {
-    id: 'blk_quote1',
-    type: 'testimonial',
-    quote: 'Innovation is not merely adopting the latest technology — it is about creating meaningful solutions that scale and sustainably solve real customer pain points.',
-    author: 'Aarav Mehta',
-    designation: 'Co-Founder & CEO',
-    company: 'Apex Innovations',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
-    rating: 5
-  },
-  {
-    id: 'blk_h2',
-    type: 'heading',
-    level: 2,
-    text: '2. Key Strategic Takeaways & Growth Drivers'
-  },
-  {
-    id: 'blk_takeaways',
-    type: 'takeaways',
-    title: 'Key Highlights & Strategic Insights',
-    items: [
-      'Automation & Efficiency: Drastically cuts routine administrative overhead by over 40%.',
-      'Hyper-Personalized Customer Journeys: Delivers tailored interactions across mobile and web touchpoints.',
-      'Data-Backed Decision Making: Empowers product teams with actionable, real-time analytics.',
-      'Scalable Unit Economics: Maximizes lifetime customer value while optimizing acquisition costs.'
-    ]
-  },
-  {
-    id: 'blk_p2',
-    type: 'paragraph',
-    text: 'As the market ecosystem matures, startups that balance sustainable unit economics with high-velocity innovation will lead the next wave of global enterprise growth.'
+    id: 'blk_sec_1',
+    type: 'section',
+    heading: '',
+    content: ''
   }
 ];
 
@@ -180,9 +126,20 @@ export default function LiveArticleStudio({
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'edit' | 'preview'
   const [previewDevice, setPreviewDevice] = useState('desktop'); // 'desktop' | 'mobile'
 
-  // Categories & Authors
+  // Advanced metadata collapse toggle
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Hidden file inputs for direct PC upload
+  const coverFileInputRef = useRef(null);
+  const blockFileInputRef = useRef(null);
+  const targetBlockIdRef = useRef(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingBlockImage, setUploadingBlockImage] = useState(false);
+
+  // Categories, Authors & Tags
   const [categories, setCategories] = useState(propCategories);
   const [authors, setAuthors] = useState(propAuthors);
+  const [availableTags, setAvailableTags] = useState(propTags);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -220,17 +177,17 @@ export default function LiveArticleStudio({
         authorTitle: article.authorTitle || article.author?.title || 'Staff Reporter',
         authorAvatar: article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
         featuredImage: {
-          url: article.featuredImage?.url || (typeof article.featuredImage === 'string' ? article.featuredImage : '') || article.image || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80',
+          url: article.featuredImage?.url || (typeof article.featuredImage === 'string' ? article.featuredImage : '') || article.image || '',
           alt: article.featuredImage?.alt || article.title || 'Featured story image',
           caption: article.featuredImage?.caption || '',
-          credit: article.featuredImage?.credit || article.photoCredit || 'GoReadPost Bureau'
+          credit: article.featuredImage?.credit || article.photoCredit || ''
         },
-        readingTime: article.readingTime || article.readTime || '4 min read',
+        readingTime: article.readingTime || article.readTime || '1 min read',
         status: article.status || 'published',
         isFeatured: Boolean(article.isFeatured),
         isTrending: Boolean(article.isTrending),
         isBreaking: Boolean(article.isBreaking),
-        tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || 'startups, technology, growth'),
+        tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
         topics: Array.isArray(article.topics) ? article.topics : ['Startups'],
         seo: {
           title: article.seo?.title || article.title || '',
@@ -242,13 +199,13 @@ export default function LiveArticleStudio({
       };
     }
 
-    // Brand new story template
+    // Brand new clean story for easy editing
     return {
       _id: null,
-      title: 'How Next-Gen Founders Are Redefining Modern Growth & Market Innovation',
-      slug: 'how-next-gen-founders-are-redefining-modern-growth',
-      subtitle: 'From intelligent automation to high-velocity distribution, startups are executing sustainable strategies to dominate emerging verticals.',
-      excerpt: 'Explore the key playbooks, founder perspectives, and market forces driving high-impact innovation across global ecosystems.',
+      title: '',
+      slug: '',
+      subtitle: '',
+      excerpt: '',
       contentType: 'article',
       brand: 'GoReadPost',
       categoryId: '',
@@ -258,29 +215,29 @@ export default function LiveArticleStudio({
       authorTitle: 'Senior Tech Reporter',
       authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
       featuredImage: {
-        url: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80',
-        alt: 'High-growth business ecosystem',
-        caption: 'Strategic innovation and cross-functional teams in modern startup hubs.',
-        credit: 'GoReadPost Bureau / Unsplash'
+        url: '',
+        alt: '',
+        caption: '',
+        credit: ''
       },
-      readingTime: '4 min read',
+      readingTime: '1 min read',
       status: 'published',
       isFeatured: false,
       isTrending: true,
       isBreaking: false,
-      tags: 'startups, tech, growth, funding, innovation',
+      tags: '',
       topics: ['Startups'],
       seo: {
         title: '',
         description: '',
-        keywords: 'startups, business, innovation, technology',
+        keywords: '',
         ogImage: ''
       },
-      contentBlocks: [...DEFAULT_INITIAL_BLOCKS]
+      contentBlocks: [{ id: 'blk_sec_' + Date.now().toString(36), type: 'section', heading: '', content: '' }]
     };
   });
 
-  // Load taxonomies if not provided
+  // Load taxonomies (Categories, Authors, Tags) if not provided
   useEffect(() => {
     if (categories.length === 0) {
       TaxonomyService.getCategories().then(res => res && setCategories(Array.isArray(res) ? res : res.data || [])).catch(() => {});
@@ -288,12 +245,66 @@ export default function LiveArticleStudio({
     if (authors.length === 0) {
       TaxonomyService.getAuthors().then(res => res && setAuthors(Array.isArray(res) ? res : res.data || [])).catch(() => {});
     }
+    if (availableTags.length === 0) {
+      TaxonomyService.getAdminTags().then(res => {
+        const list = Array.isArray(res) ? res : (res?.data || []);
+        if (list.length > 0) {
+          setAvailableTags(list);
+        } else {
+          TaxonomyService.getTags().then(tRes => {
+            const tList = Array.isArray(tRes) ? tRes : (tRes?.data || []);
+            setAvailableTags(tList);
+          }).catch(() => {});
+        }
+      }).catch(() => {
+        TaxonomyService.getTags().then(tRes => {
+          const tList = Array.isArray(tRes) ? tRes : (tRes?.data || []);
+          setAvailableTags(tList);
+        }).catch(() => {});
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    if (propTags && propTags.length > 0) {
+      setAvailableTags(propTags);
+    }
+  }, [propTags]);
+
+  // Current selected tags array
+  const currentTags = useMemo(() => {
+    if (!formData.tags) return [];
+    if (Array.isArray(formData.tags)) return formData.tags.map(t => t.trim()).filter(Boolean);
+    return formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+  }, [formData.tags]);
+
+  const handleSelectTagFromDropdown = (tagName) => {
+    if (!tagName) return;
+    const cleanTag = tagName.trim();
+    if (!cleanTag) return;
+    const exists = currentTags.some(t => t.toLowerCase() === cleanTag.toLowerCase());
+    if (exists) return;
+    const updated = [...currentTags, cleanTag];
+    setFormData(prev => ({
+      ...prev,
+      tags: updated.join(', ')
+    }));
+  };
+
+  const handleRemoveTag = (tagNameToRemove) => {
+    const updated = currentTags.filter(t => t.toLowerCase() !== tagNameToRemove.toLowerCase());
+    setFormData(prev => ({
+      ...prev,
+      tags: updated.join(', ')
+    }));
+  };
 
   // Compute Word Count & Estimated Read Time
   const stats = useMemo(() => {
-    let text = formData.title + ' ' + formData.subtitle + ' ';
-    formData.contentBlocks.forEach(b => {
+    let text = (formData.title || '') + ' ' + (formData.subtitle || '') + ' ';
+    (formData.contentBlocks || []).forEach(b => {
+      if (b.heading) text += b.heading + ' ';
+      if (b.content) text += b.content + ' ';
       if (b.text) text += b.text + ' ';
       if (b.quote) text += b.quote + ' ';
       if (Array.isArray(b.items)) text += b.items.join(' ') + ' ';
@@ -308,55 +319,95 @@ export default function LiveArticleStudio({
     setFormData(prev => ({ ...prev, readingTime: `${stats.minutes} min read` }));
   }, [stats.minutes]);
 
+  // Direct PC Image Upload Handler (Cover)
+  const handleCoverFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: { ...prev.featuredImage, url: reader.result }
+        }));
+      };
+      reader.readAsDataURL(file);
+
+      const uploaded = await MediaService.uploadFile(file);
+      if (uploaded && (uploaded.url || uploaded.path)) {
+        const finalUrl = uploaded.url || uploaded.path;
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: { ...prev.featuredImage, url: finalUrl }
+        }));
+      }
+      if (onShowToast) onShowToast('Cover image updated');
+    } catch (err) {
+      console.warn('Cover upload fallback:', err);
+    } finally {
+      setUploadingCover(false);
+      if (coverFileInputRef.current) coverFileInputRef.current.value = '';
+    }
+  };
+
+  // Direct PC Image Upload Trigger & Handler (Inline Block)
+  const triggerBlockImageUpload = (blockId) => {
+    targetBlockIdRef.current = blockId;
+    if (blockFileInputRef.current) {
+      blockFileInputRef.current.click();
+    }
+  };
+
+  const handleBlockImageFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    const targetId = targetBlockIdRef.current;
+    if (!file || !targetId) return;
+
+    setUploadingBlockImage(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        handleUpdateBlock(targetId, { url: reader.result });
+      };
+      reader.readAsDataURL(file);
+
+      const uploaded = await MediaService.uploadFile(file);
+      if (uploaded && (uploaded.url || uploaded.path)) {
+        const finalUrl = uploaded.url || uploaded.path;
+        handleUpdateBlock(targetId, { url: finalUrl });
+      }
+      if (onShowToast) onShowToast('Image uploaded');
+    } catch (err) {
+      console.warn('Block image upload fallback:', err);
+    } finally {
+      setUploadingBlockImage(false);
+      targetBlockIdRef.current = null;
+      if (blockFileInputRef.current) blockFileInputRef.current.value = '';
+    }
+  };
+
   // ── Block Operations ──
   const handleAddBlock = (type) => {
     const id = 'blk_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
     let newBlock = null;
 
-    if (type === 'heading') {
-      newBlock = { id, type: 'heading', level: 2, text: 'New Section Heading' };
-    } else if (type === 'paragraph') {
-      newBlock = { id, type: 'paragraph', text: 'Write your insightful paragraph here. You can detail key arguments, market figures, and background context...' };
+    if (type === 'section') {
+      newBlock = {
+        id,
+        type: 'section',
+        heading: '',
+        content: ''
+      };
     } else if (type === 'image') {
       newBlock = {
         id,
         type: 'image',
-        url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1000&auto=format&fit=crop&q=80',
-        caption: 'Add caption describing this image...',
-        credit: 'Photo: Unsplash',
-        alt: 'Editorial visual illustration',
+        url: '',
+        caption: '',
+        credit: '',
+        alt: '',
         layout: 'standard'
-      };
-    } else if (type === 'gallery') {
-      newBlock = {
-        id,
-        type: 'gallery',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80', caption: 'Workshop and team sessions' },
-          { url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop&q=80', caption: 'Product strategy presentation' }
-        ]
-      };
-    } else if (type === 'testimonial') {
-      newBlock = {
-        id,
-        type: 'testimonial',
-        quote: '“Focusing on user value before vanity metrics was the single most pivotal decision for our company.”',
-        author: 'Rhea Sen',
-        designation: 'Founder & Managing Director',
-        company: 'Vanguard Ventures',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
-        rating: 5
-      };
-    } else if (type === 'takeaways') {
-      newBlock = {
-        id,
-        type: 'takeaways',
-        title: 'Key Takeaways & Highlights',
-        items: [
-          'High adaptability drives long-term customer retention.',
-          'Early team alignment minimizes strategic pivots later.',
-          'Robust technology infrastructure guarantees 99.9% customer reliability.'
-        ]
       };
     }
 
@@ -365,7 +416,7 @@ export default function LiveArticleStudio({
         ...prev,
         contentBlocks: [...prev.contentBlocks, newBlock]
       }));
-      if (onShowToast) onShowToast(`Added new ${type} block`);
+      if (onShowToast) onShowToast(type === 'section' ? 'Added new Section' : 'Added new Image');
     }
   };
 
@@ -393,21 +444,20 @@ export default function LiveArticleStudio({
     setFormData(prev => ({ ...prev, contentBlocks: blocks }));
   };
 
-  const handleDuplicateBlock = (block) => {
-    const clone = {
-      ...block,
-      id: 'blk_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4)
-    };
-    const idx = formData.contentBlocks.findIndex(b => b.id === block.id);
-    const updated = [...formData.contentBlocks];
-    updated.splice(idx + 1, 0, clone);
-    setFormData(prev => ({ ...prev, contentBlocks: updated }));
-    if (onShowToast) onShowToast(`Duplicated ${block.type} block`);
-  };
-
   // Compile blocks into semantic HTML string for database & public feed
   const compileBlocksToHtml = (blocks) => {
     return blocks.map(b => {
+      if (b.type === 'section') {
+        let sectionHtml = '';
+        if (b.heading && b.heading.trim()) {
+          sectionHtml += `<h2 class="map-body-heading">${b.heading.trim()}</h2>\n`;
+        }
+        if (b.content && b.content.trim()) {
+          const paras = b.content.split('\n').filter(p => p.trim().length > 0);
+          sectionHtml += paras.map(p => `<p>${p.trim()}</p>`).join('\n');
+        }
+        return sectionHtml;
+      }
       if (b.type === 'heading') {
         return `<h${b.level || 2} class="map-body-heading">${b.text}</h${b.level || 2}>`;
       }
@@ -584,13 +634,12 @@ export default function LiveArticleStudio({
             onClick={onClose}
             title="Return to articles table"
           >
-            <ArrowLeft size={16} />
-            <span>Articles</span>
+            ← Articles
           </button>
           <div className="las-title-meta">
             <div className="las-studio-badge-row">
               <span className="las-studio-title">
-                {formData._id ? `Edit: ${formData.title}` : 'Add New Article / Blog'}
+                {formData._id ? `Edit: ${formData.title}` : 'Add New Article'}
               </span>
               <span className={`las-status-tag ${formData.status}`}>
                 {formData.status}
@@ -608,7 +657,6 @@ export default function LiveArticleStudio({
               onClick={() => setViewMode('edit')}
               title="Editor Canvas Only"
             >
-              <Edit3 size={14} />
               <span>Editor</span>
             </button>
             <button 
@@ -617,7 +665,6 @@ export default function LiveArticleStudio({
               onClick={() => setViewMode('split')}
               title="Split View (Editor + Live Preview)"
             >
-              <Layout size={14} />
               <span>Split Studio</span>
             </button>
             <button 
@@ -626,7 +673,6 @@ export default function LiveArticleStudio({
               onClick={() => setViewMode('preview')}
               title="Full Live Public Preview"
             >
-              <Eye size={14} />
               <span>Live Preview</span>
             </button>
           </div>
@@ -639,7 +685,7 @@ export default function LiveArticleStudio({
                 onClick={() => setPreviewDevice('desktop')}
                 title="Desktop View"
               >
-                <Monitor size={14} />
+                <span>Desktop</span>
               </button>
               <button 
                 type="button" 
@@ -647,7 +693,7 @@ export default function LiveArticleStudio({
                 onClick={() => setPreviewDevice('mobile')}
                 title="Mobile Phone View"
               >
-                <Smartphone size={14} />
+                <span>Mobile</span>
               </button>
             </div>
           )}
@@ -663,7 +709,6 @@ export default function LiveArticleStudio({
               disabled={deleting || saving}
               title="Permanently remove from database"
             >
-              <Trash2 size={15} />
               <span>Delete</span>
             </button>
           )}
@@ -675,7 +720,6 @@ export default function LiveArticleStudio({
             disabled={saving}
             title="Save as Draft (Ctrl+S)"
           >
-            <Save size={15} />
             <span>Save Draft</span>
           </button>
 
@@ -685,7 +729,6 @@ export default function LiveArticleStudio({
             onClick={() => handleSaveArticle('published')}
             disabled={saving}
           >
-            <Send size={15} />
             <span>{saving ? 'Publishing...' : formData._id ? 'Update Story' : 'Publish Story'}</span>
           </button>
         </div>
@@ -697,18 +740,29 @@ export default function LiveArticleStudio({
         {viewMode !== 'preview' && (
           <div className="las-editor-pane">
             <div className="las-editor-inner">
+              {/* Hidden file inputs for direct PC upload */}
+              <input
+                ref={coverFileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleCoverFileUpload}
+              />
+              <input
+                ref={blockFileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleBlockImageFileUpload}
+              />
 
-              {/* CARD 1: STORY ESSENTIALS */}
+              {/* CARD 1: ARTICLE DETAILS */}
               <div className="las-card">
                 <div className="las-card-title-row">
                   <div>
                     <h3 className="las-card-title">
-                      <BookOpen size={18} color="#ea580c" />
-                      <span>Story Essentials</span>
+                      <span>Article Details</span>
                     </h3>
-                    <div className="las-card-subtitle">
-                      Headline, deck, author desk, and content classification
-                    </div>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
                     {stats.words} words · ~{stats.minutes} min read
@@ -719,7 +773,7 @@ export default function LiveArticleStudio({
                 <input 
                   type="text" 
                   className="las-headline-input"
-                  placeholder="Enter compelling headline for this story..."
+                  placeholder="Enter article title / headline here..."
                   value={formData.title}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -732,32 +786,10 @@ export default function LiveArticleStudio({
                   autoFocus
                 />
 
-                {/* Subtitle / Standfirst */}
-                <textarea 
-                  rows={2}
-                  className="las-subtitle-input"
-                  placeholder="Add an engaging standfirst or subtitle beneath the headline..."
-                  value={formData.subtitle}
-                  onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
-                />
-
-                {/* Metadata Row */}
-                <div className="las-grid-3" style={{ marginTop: '1.25rem' }}>
+                {/* Metadata Row: Category & Author */}
+                <div className="las-grid-2" style={{ marginTop: '1rem' }}>
                   <div className="las-form-group">
-                    <label className="las-label"><Layers size={13} /> Desk / Brand</label>
-                    <select 
-                      className="las-select"
-                      value={formData.brand}
-                      onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
-                    >
-                      {DESKS.filter(d => d.id !== 'all').map(d => (
-                        <option key={d.id} value={d.id}>{d.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="las-form-group">
-                    <label className="las-label"><Tag size={13} /> Category Desk</label>
+                    <label className="las-label">Category</label>
                     <select 
                       className="las-select"
                       value={formData.categoryName}
@@ -786,7 +818,7 @@ export default function LiveArticleStudio({
                   </div>
 
                   <div className="las-form-group">
-                    <label className="las-label"><User size={13} /> Author Byline</label>
+                    <label className="las-label">Author Byline</label>
                     <select 
                       className="las-select"
                       value={formData.authorName}
@@ -815,166 +847,275 @@ export default function LiveArticleStudio({
                   </div>
                 </div>
 
-                {/* Slug & Tags row */}
-                <div className="las-grid-2" style={{ marginTop: '0.5rem' }}>
-                  <div className="las-form-group">
-                    <label className="las-label"><Globe size={13} /> URL Slug</label>
-                    <input 
-                      type="text" 
-                      className="las-input"
-                      value={formData.slug}
-                      onChange={(e) => setFormData(prev => ({ ...prev, slug: slugify(e.target.value) }))}
-                      placeholder="custom-story-slug"
-                    />
-                  </div>
+                {/* Collapsible Advanced Toggle */}
+                <div style={{ marginTop: '0.85rem' }}>
+                  <button
+                    type="button"
+                    className="las-advanced-toggle-btn"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                  >
+                    <span>{showAdvanced ? 'Hide Advanced Settings (URL Slug, Tags)' : 'Advanced Settings (Custom URL Slug, Tags)'}</span>
+                  </button>
 
-                  <div className="las-form-group">
-                    <label className="las-label"><Tag size={13} /> Tags (comma separated)</label>
-                    <input 
-                      type="text" 
-                      className="las-input"
-                      value={formData.tags}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                      placeholder="startups, ai, technology, funding"
-                    />
-                  </div>
+                  {showAdvanced && (
+                    <div className="las-grid-2" style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0' }}>
+                      <div className="las-form-group">
+                        <label className="las-label">URL Slug</label>
+                        <input 
+                          type="text" 
+                          className="las-input"
+                          value={formData.slug}
+                          onChange={(e) => setFormData(prev => ({ ...prev, slug: slugify(e.target.value) }))}
+                          placeholder="custom-story-slug"
+                        />
+                      </div>
+
+                      <div className="las-form-group">
+                        <label className="las-label">Tags</label>
+                        
+                        {/* Dropdown displaying all tags from the Tag section */}
+                        <select 
+                          className="las-select"
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleSelectTagFromDropdown(e.target.value);
+                            }
+                          }}
+                        >
+                          <option value="">
+                            {availableTags.length > 0 
+                              ? `-- Select a tag from Tag section (${availableTags.length} tags) --`
+                              : '-- Select a tag from Tag section --'}
+                          </option>
+                          {availableTags.map(t => {
+                            const tagName = typeof t === 'string' ? t : (t.name || t.slug);
+                            const isSelected = currentTags.some(curr => curr.toLowerCase() === (tagName || '').toLowerCase());
+                            return (
+                              <option 
+                                key={t._id || t.slug || tagName} 
+                                value={tagName}
+                                disabled={isSelected}
+                              >
+                                #{tagName} {isSelected ? '(Already added)' : ''}
+                              </option>
+                            );
+                          })}
+                          {availableTags.length === 0 && (
+                            <>
+                              <option value="Startups">#Startups</option>
+                              <option value="AI">#AI</option>
+                              <option value="Technology">#Technology</option>
+                              <option value="Funding">#Funding</option>
+                              <option value="FinTech">#FinTech</option>
+                              <option value="HerStory">#HerStory</option>
+                              <option value="Enterprise">#Enterprise</option>
+                              <option value="Venture Capital">#Venture Capital</option>
+                            </>
+                          )}
+                        </select>
+
+                        {/* Selected Tag Chips */}
+                        {currentTags.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.45rem' }}>
+                            {currentTags.map((t, idx) => (
+                              <span 
+                                key={idx}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  background: '#eff6ff',
+                                  border: '1px solid #bfdbfe',
+                                  color: '#1d4ed8',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 650
+                                }}
+                              >
+                                #{t}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveTag(t)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#3b82f6',
+                                    fontSize: '0.9rem',
+                                    lineHeight: 1,
+                                    padding: '0 2px',
+                                    fontWeight: 700
+                                  }}
+                                  title={`Remove ${t}`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Optional text input for direct comma-separated typing */}
+                        <div style={{ marginTop: '0.4rem' }}>
+                          <input 
+                            type="text" 
+                            className="las-input"
+                            value={formData.tags}
+                            onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                            placeholder="Or type tags (comma separated)..."
+                            style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* CARD 2: FEATURED HERO BANNER */}
+              {/* CARD 2: FEATURED COVER IMAGE */}
               <div className="las-card">
                 <div className="las-card-title-row">
                   <div>
                     <h3 className="las-card-title">
-                      <ImageIcon size={18} color="#ea580c" />
                       <span>Featured Cover Image</span>
                     </h3>
-                    <div className="las-card-subtitle">
-                      Main display banner for article header, homepage spotlights, and social sharing
-                    </div>
                   </div>
-                  <button 
-                    type="button" 
-                    className="las-btn las-btn-draft"
-                    onClick={() => openMediaPicker({ type: 'featured' })}
-                  >
-                    <Upload size={14} /> Browse Media
-                  </button>
-                </div>
-
-                <div className="las-cover-stage">
-                  <img 
-                    src={formData.featuredImage.url} 
-                    alt={formData.featuredImage.alt} 
-                    className="las-cover-img"
-                  />
-                  <div className="las-cover-overlay">
-                    <span style={{ fontSize: '0.78rem', color: '#ffffff', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: '4px' }}>
-                      16:9 Featured Cover
-                    </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="las-btn las-btn-draft"
+                      onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
+                      disabled={uploadingCover}
+                    >
+                      {uploadingCover ? 'Uploading...' : 'Upload from PC'}
+                    </button>
                     <button 
                       type="button" 
                       className="las-btn las-btn-draft"
                       onClick={() => openMediaPicker({ type: 'featured' })}
                     >
-                      <ImageIcon size={13} /> Change Cover
+                      Browse Media
                     </button>
                   </div>
                 </div>
 
-                <div className="las-grid-2" style={{ marginTop: '1rem' }}>
-                  <div className="las-form-group">
-                    <label className="las-label">Image URL</label>
-                    <input 
-                      type="text" 
-                      className="las-input"
-                      value={formData.featuredImage.url}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        featuredImage: { ...prev.featuredImage, url: e.target.value }
-                      }))}
-                      placeholder="https://images.unsplash.com/..."
-                    />
-                  </div>
+                {formData.featuredImage?.url ? (
+                  <div>
+                    <div className="las-cover-stage">
+                      <img 
+                        src={formData.featuredImage.url} 
+                        alt={formData.featuredImage.alt || 'Cover image'} 
+                        className="las-cover-img"
+                      />
+                      <div className="las-cover-overlay">
+                        <span style={{ fontSize: '0.78rem', color: '#ffffff', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: '4px' }}>
+                          Featured Cover
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button 
+                            type="button" 
+                            className="las-btn las-btn-draft"
+                            onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
+                          >
+                            Change Image
+                          </button>
+                          <button 
+                            type="button" 
+                            className="las-btn las-btn-draft"
+                            style={{ background: '#ef4444', color: '#ffffff', borderColor: '#dc2626' }}
+                            onClick={() => setFormData(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, url: '' } }))}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div className="las-form-group">
-                    <label className="las-label">Photo Credit / Caption</label>
-                    <input 
-                      type="text" 
-                      className="las-input"
-                      value={formData.featuredImage.credit}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        featuredImage: { ...prev.featuredImage, credit: e.target.value, caption: e.target.value }
-                      }))}
-                      placeholder="Photo: Unsplash / Editorial Studio"
-                    />
+                    <div className="las-grid-2" style={{ marginTop: '0.85rem' }}>
+                      <div className="las-form-group">
+                        <label className="las-label">Image URL</label>
+                        <input 
+                          type="text" 
+                          className="las-input"
+                          value={formData.featuredImage.url}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            featuredImage: { ...prev.featuredImage, url: e.target.value }
+                          }))}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div className="las-form-group">
+                        <label className="las-label">Photo Credit / Caption</label>
+                        <input 
+                          type="text" 
+                          className="las-input"
+                          value={formData.featuredImage.credit || ''}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            featuredImage: { ...prev.featuredImage, credit: e.target.value, caption: e.target.value }
+                          }))}
+                          placeholder="Photo by / Credit"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="las-upload-box">
+                    <div className="las-upload-box-actions">
+                      <button 
+                        type="button" 
+                        className="las-upload-main-btn"
+                        onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
+                        disabled={uploadingCover}
+                      >
+                        {uploadingCover ? 'Uploading...' : 'Upload Cover from Computer'}
+                      </button>
+                      <button 
+                        type="button" 
+                        className="las-btn las-btn-draft"
+                        onClick={() => openMediaPicker({ type: 'featured' })}
+                      >
+                        Browse Media Library
+                      </button>
+                    </div>
+                    <div style={{ margin: '0.75rem auto 0.5rem auto', maxWidth: '450px' }}>
+                      <input 
+                        type="text" 
+                        className="las-input" 
+                        placeholder="Or paste an image URL directly..." 
+                        value={formData.featuredImage.url}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          featuredImage: { ...prev.featuredImage, url: e.target.value }
+                        }))}
+                        style={{ textAlign: 'center' }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* CARD 3: RICH STORY CONTENT & MULTIPLE BLOCKS */}
+              {/* CARD 3: ARTICLE SECTIONS */}
               <div className="las-blocks-section">
                 <div className="las-blocks-header">
                   <div>
                     <h3 className="las-card-title">
-                      <Sparkles size={18} color="#ea580c" />
-                      <span>Story Content & Multi-Media Blocks</span>
+                      <span>Article Sections</span>
                     </h3>
-                    <div className="las-card-subtitle">
-                      Add multiple headings, multiple blog images with captions, founder testimonials, and takeaways
-                    </div>
                   </div>
 
-                  {/* Add Block Toolbar */}
+                  {/* Primary Add Action Button */}
                   <div className="las-add-block-toolbar">
                     <button 
                       type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('heading')}
-                      title="Add Heading 2 or Heading 3"
+                      className="las-add-block-btn primary"
+                      onClick={() => handleAddBlock('section')}
+                      title="Add a new Section with Heading & Content"
                     >
-                      <Heading2 size={14} /> + Heading
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('paragraph')}
-                      title="Add Paragraph text"
-                    >
-                      <Edit3 size={14} /> + Paragraph
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('image')}
-                      title="Add blog image with caption & credit"
-                    >
-                      <ImageIcon size={14} /> + Blog Image
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('gallery')}
-                      title="Add 2-column or 3-column image gallery"
-                    >
-                      <Layout size={14} /> + Photo Gallery
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('testimonial')}
-                      title="Add founder or customer quote testimonial"
-                    >
-                      <Quote size={14} /> + Testimonial
-                    </button>
-                    <button 
-                      type="button" 
-                      className="las-add-block-btn"
-                      onClick={() => handleAddBlock('takeaways')}
-                      title="Add bulleted key takeaways box"
-                    >
-                      <Sparkles size={14} /> + Takeaways
+                      + Add Section (Heading & Content)
                     </button>
                   </div>
                 </div>
@@ -986,13 +1127,9 @@ export default function LiveArticleStudio({
                       {/* Block Item Header */}
                       <div className="las-block-header">
                         <span className="las-block-type-badge">
-                          {block.type === 'heading' && <Heading2 size={13} />}
-                          {block.type === 'paragraph' && <Edit3 size={13} />}
-                          {block.type === 'image' && <ImageIcon size={13} />}
-                          {block.type === 'gallery' && <Layout size={13} />}
-                          {block.type === 'testimonial' && <Quote size={13} />}
-                          {block.type === 'takeaways' && <Sparkles size={13} />}
-                          <span>{block.type} Block #{index + 1}</span>
+                          <span style={{ fontWeight: 750 }}>
+                            {block.type === 'section' ? `Section #${index + 1}` : `Image #${index + 1}`}
+                          </span>
                         </span>
 
                         <div className="las-block-actions">
@@ -1001,112 +1138,131 @@ export default function LiveArticleStudio({
                             className="las-block-action-btn"
                             disabled={index === 0}
                             onClick={() => handleMoveBlock(index, -1)}
-                            title="Move Block Up"
+                            title="Move Up"
                           >
-                            <ChevronUp size={14} />
+                            Move Up
                           </button>
                           <button 
                             type="button" 
                             className="las-block-action-btn"
                             disabled={index === formData.contentBlocks.length - 1}
                             onClick={() => handleMoveBlock(index, 1)}
-                            title="Move Block Down"
+                            title="Move Down"
                           >
-                            <ChevronDown size={14} />
-                          </button>
-                          <button 
-                            type="button" 
-                            className="las-block-action-btn"
-                            onClick={() => handleDuplicateBlock(block)}
-                            title="Duplicate Block"
-                          >
-                            <Copy size={13} />
+                            Move Down
                           </button>
                           <button 
                             type="button" 
                             className="las-block-action-btn delete"
                             onClick={() => handleRemoveBlock(block.id)}
-                            title="Delete Block"
+                            title="Delete"
                           >
-                            <Trash2 size={13} />
+                            Delete
                           </button>
                         </div>
                       </div>
 
                       {/* Block Body Editor */}
                       <div className="las-block-body">
-                        {/* 1. HEADING BLOCK */}
-                        {block.type === 'heading' && (
-                          <div className="las-grid-2">
-                            <div className="las-form-group" style={{ gridColumn: 'span 2' }}>
-                              <label className="las-label">Heading Text</label>
+                        {/* 1. SECTION BLOCK (HEADING + CONTENT) */}
+                        {block.type === 'section' && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                            <div>
+                              <label className="las-label" style={{ color: '#0f172a', fontWeight: 700 }}>
+                                Section Heading
+                              </label>
                               <input 
                                 type="text"
-                                className="las-input"
-                                value={block.text}
-                                onChange={(e) => handleUpdateBlock(block.id, { text: e.target.value })}
-                                placeholder="Enter section heading..."
+                                className="las-section-input"
+                                value={block.heading || ''}
+                                onChange={(e) => handleUpdateBlock(block.id, { heading: e.target.value })}
+                                placeholder="Enter heading..."
                               />
                             </div>
-                            <div className="las-form-group">
-                              <label className="las-label">Heading Level</label>
-                              <select 
-                                className="las-select"
-                                value={block.level || 2}
-                                onChange={(e) => handleUpdateBlock(block.id, { level: Number(e.target.value) })}
-                              >
-                                <option value={2}>Heading 2 (H2 - Major Section)</option>
-                                <option value={3}>Heading 3 (H3 - Subsection)</option>
-                              </select>
+
+                            <div>
+                              <label className="las-label" style={{ color: '#0f172a', fontWeight: 700 }}>
+                                Section Content
+                              </label>
+                              <textarea 
+                                rows={6}
+                                className="las-section-textarea"
+                                value={block.content || ''}
+                                onChange={(e) => handleUpdateBlock(block.id, { content: e.target.value })}
+                                placeholder="Write or paste your article content here..."
+                              />
                             </div>
                           </div>
                         )}
 
-                        {/* 2. PARAGRAPH BLOCK */}
-                        {block.type === 'paragraph' && (
-                          <div className="las-form-group" style={{ margin: 0 }}>
-                            <label className="las-label">Paragraph Content</label>
-                            <textarea 
-                              rows={4}
-                              className="las-textarea"
-                              value={block.text}
-                              onChange={(e) => handleUpdateBlock(block.id, { text: e.target.value })}
-                              placeholder="Write your editorial analysis or paragraph story..."
-                            />
-                          </div>
-                        )}
-
-                        {/* 3. BLOG IMAGE BLOCK (MULTIPLE IMAGES) */}
+                        {/* 2. BLOG IMAGE BLOCK */}
                         {block.type === 'image' && (
                           <div>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
-                              <img 
-                                src={block.url} 
-                                alt={block.caption || 'Blog image preview'} 
-                                style={{ width: '140px', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', flexShrink: 0 }} 
-                              />
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <label className="las-label">Image Source URL</label>
-                                <div style={{ display: 'flex', gap: '6px' }}>
+                            {block.url ? (
+                              <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
+                                <img 
+                                  src={block.url} 
+                                  alt={block.caption || 'Blog image preview'} 
+                                  style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #cbd5e1', flexShrink: 0 }} 
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ display: 'flex', gap: '8px', marginBottom: '0.5rem' }}>
+                                    <button
+                                      type="button"
+                                      className="las-btn las-btn-draft"
+                                      onClick={() => triggerBlockImageUpload(block.id)}
+                                      disabled={uploadingBlockImage}
+                                    >
+                                      {uploadingBlockImage ? 'Uploading...' : 'Change Image (PC)'}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="las-btn las-btn-draft"
+                                      onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
+                                    >
+                                      Media Library
+                                    </button>
+                                  </div>
                                   <input 
                                     type="text" 
                                     className="las-input" 
                                     value={block.url} 
                                     onChange={(e) => handleUpdateBlock(block.id, { url: e.target.value })} 
-                                    placeholder="https://..." 
+                                    placeholder="Image URL..." 
                                   />
-                                  <button 
-                                    type="button" 
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="las-upload-box" style={{ padding: '1rem', marginBottom: '0.85rem' }}>
+                                <div className="las-upload-box-actions">
+                                  <button
+                                    type="button"
+                                    className="las-upload-main-btn"
+                                    onClick={() => triggerBlockImageUpload(block.id)}
+                                    disabled={uploadingBlockImage}
+                                  >
+                                    <span>{uploadingBlockImage ? 'Uploading...' : 'Upload Image from Computer'}</span>
+                                  </button>
+                                  <button
+                                    type="button"
                                     className="las-btn las-btn-draft"
                                     onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
                                   >
-                                    <ImageIcon size={14} />
+                                    Browse Media
                                   </button>
                                 </div>
+                                <input 
+                                  type="text" 
+                                  className="las-input" 
+                                  placeholder="Or paste an image URL directly..." 
+                                  value={block.url || ''} 
+                                  onChange={(e) => handleUpdateBlock(block.id, { url: e.target.value })}
+                                  style={{ textAlign: 'center', maxWidth: '420px', margin: '0 auto' }}
+                                />
                               </div>
-                            </div>
+                            )}
 
-                            <div className="las-grid-3">
+                            <div className="las-grid-2">
                               <div className="las-form-group">
                                 <label className="las-label">Caption</label>
                                 <input 
@@ -1114,7 +1270,7 @@ export default function LiveArticleStudio({
                                   className="las-input"
                                   value={block.caption || ''}
                                   onChange={(e) => handleUpdateBlock(block.id, { caption: e.target.value })}
-                                  placeholder="Photo caption..."
+                                  placeholder="Caption describing this photo..."
                                 />
                               </div>
                               <div className="las-form-group">
@@ -1127,214 +1283,7 @@ export default function LiveArticleStudio({
                                   placeholder="e.g. Photo by Unsplash"
                                 />
                               </div>
-                              <div className="las-form-group">
-                                <label className="las-label">Layout</label>
-                                <select 
-                                  className="las-select"
-                                  value={block.layout || 'standard'}
-                                  onChange={(e) => handleUpdateBlock(block.id, { layout: e.target.value })}
-                                >
-                                  <option value="standard">Standard Article Width</option>
-                                  <option value="full-width">Full-Width Feature Display</option>
-                                </select>
-                              </div>
                             </div>
-                          </div>
-                        )}
-
-                        {/* 4. GALLERY BLOCK */}
-                        {block.type === 'gallery' && (
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-                              <label className="las-label">Multiple Gallery Images</label>
-                              <button 
-                                type="button" 
-                                className="las-btn las-btn-draft"
-                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
-                                onClick={() => {
-                                  const updated = [...(block.images || []), { url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80', caption: 'New photo' }];
-                                  handleUpdateBlock(block.id, { images: updated });
-                                }}
-                              >
-                                <Plus size={12} /> Add Photo
-                              </button>
-                            </div>
-
-                            {(block.images || []).map((img, i) => (
-                              <div key={i} className="las-gallery-item-row">
-                                <img src={img.url} alt="" className="las-gallery-thumb" />
-                                <input 
-                                  type="text" 
-                                  className="las-input" 
-                                  style={{ flex: 2 }}
-                                  value={img.url} 
-                                  onChange={(e) => {
-                                    const nextImgs = [...block.images];
-                                    nextImgs[i] = { ...nextImgs[i], url: e.target.value };
-                                    handleUpdateBlock(block.id, { images: nextImgs });
-                                  }}
-                                  placeholder="Image URL"
-                                />
-                                <input 
-                                  type="text" 
-                                  className="las-input" 
-                                  style={{ flex: 1 }}
-                                  value={img.caption || ''} 
-                                  onChange={(e) => {
-                                    const nextImgs = [...block.images];
-                                    nextImgs[i] = { ...nextImgs[i], caption: e.target.value };
-                                    handleUpdateBlock(block.id, { images: nextImgs });
-                                  }}
-                                  placeholder="Caption"
-                                />
-                                <button 
-                                  type="button" 
-                                  className="las-block-action-btn delete"
-                                  onClick={() => {
-                                    const nextImgs = block.images.filter((_, idx) => idx !== i);
-                                    handleUpdateBlock(block.id, { images: nextImgs });
-                                  }}
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* 5. TESTIMONIAL / QUOTE BLOCK */}
-                        {block.type === 'testimonial' && (
-                          <div>
-                            <div className="las-form-group">
-                              <label className="las-label"><Quote size={13} /> Quote Statement</label>
-                              <textarea 
-                                rows={3}
-                                className="las-textarea"
-                                value={block.quote}
-                                onChange={(e) => handleUpdateBlock(block.id, { quote: e.target.value })}
-                                placeholder="Enter impactful quote statement or leader perspective..."
-                              />
-                            </div>
-
-                            <div className="las-grid-3">
-                              <div className="las-form-group">
-                                <label className="las-label">Speaker / Founder Name</label>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={block.author}
-                                  onChange={(e) => handleUpdateBlock(block.id, { author: e.target.value })}
-                                  placeholder="e.g. Sridhar Vembu"
-                                />
-                              </div>
-                              <div className="las-form-group">
-                                <label className="las-label">Designation & Company</label>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={block.designation}
-                                  onChange={(e) => handleUpdateBlock(block.id, { designation: e.target.value })}
-                                  placeholder="Co-founder & CEO, Zoho"
-                                />
-                              </div>
-                              <div className="las-form-group">
-                                <label className="las-label">Rating (Stars)</label>
-                                <select 
-                                  className="las-select"
-                                  value={block.rating || 5}
-                                  onChange={(e) => handleUpdateBlock(block.id, { rating: Number(e.target.value) })}
-                                >
-                                  <option value={5}>5 Stars ★★★★★</option>
-                                  <option value={4}>4 Stars ★★★★</option>
-                                  <option value={3}>3 Stars ★★★</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div className="las-form-group">
-                              <label className="las-label">Avatar Image URL</label>
-                              <div style={{ display: 'flex', gap: '8px' }}>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={block.avatar || ''}
-                                  onChange={(e) => handleUpdateBlock(block.id, { avatar: e.target.value })}
-                                  placeholder="https://..."
-                                />
-                                <button 
-                                  type="button" 
-                                  className="las-btn las-btn-draft"
-                                  onClick={() => openMediaPicker({ type: 'testimonialAvatar', blockId: block.id })}
-                                >
-                                  <ImageIcon size={14} />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="las-testimonial-preview-box">
-                              <div style={{ fontSize: '0.92rem', fontStyle: 'italic', color: '#0c4a6e', marginBottom: '0.45rem' }}>
-                                “{block.quote}”
-                              </div>
-                              <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0284c7' }}>
-                                — {block.author} <span style={{ color: '#64748b', fontWeight: 500 }}>({block.designation})</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* 6. TAKEAWAYS / HIGHLIGHTS BLOCK */}
-                        {block.type === 'takeaways' && (
-                          <div>
-                            <div className="las-form-group">
-                              <label className="las-label">Card Title</label>
-                              <input 
-                                type="text" 
-                                className="las-input"
-                                value={block.title || ''}
-                                onChange={(e) => handleUpdateBlock(block.id, { title: e.target.value })}
-                                placeholder="Key Highlights & Takeaways"
-                              />
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                              <label className="las-label">Takeaway Points</label>
-                              <button 
-                                type="button" 
-                                className="las-btn las-btn-draft"
-                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
-                                onClick={() => {
-                                  const updated = [...(block.items || []), 'New strategic takeaway point'];
-                                  handleUpdateBlock(block.id, { items: updated });
-                                }}
-                              >
-                                <Plus size={12} /> Add Point
-                              </button>
-                            </div>
-
-                            {(block.items || []).map((it, i) => (
-                              <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={it}
-                                  onChange={(e) => {
-                                    const next = [...block.items];
-                                    next[i] = e.target.value;
-                                    handleUpdateBlock(block.id, { items: next });
-                                  }}
-                                />
-                                <button 
-                                  type="button" 
-                                  className="las-block-action-btn delete"
-                                  onClick={() => {
-                                    const next = block.items.filter((_, idx) => idx !== i);
-                                    handleUpdateBlock(block.id, { items: next });
-                                  }}
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            ))}
                           </div>
                         )}
                       </div>
@@ -1377,18 +1326,6 @@ export default function LiveArticleStudio({
                   {liveArticle.categoryName}
                 </div>
 
-                {/* Article Headline */}
-                <h1 className="map-title" title={liveArticle.title} style={{ whiteSpace: 'normal' }}>
-                  {liveArticle.title}
-                </h1>
-
-                {/* Subtitle / Standfirst */}
-                {liveArticle.subtitle && (
-                  <p className="map-subtitle">
-                    {liveArticle.subtitle}
-                  </p>
-                )}
-
                 {/* Featured Cover Banner */}
                 {liveArticle.image && (
                   <div className="map-hero-wrapper" style={{ margin: '1.25rem 0' }}>
@@ -1397,13 +1334,13 @@ export default function LiveArticleStudio({
                       alt={liveArticle.title} 
                       className="map-hero-img"
                     />
-                    {liveArticle.photoCredit && (
-                      <p className="map-hero-caption">
-                        {liveArticle.photoCredit}
-                      </p>
-                    )}
                   </div>
                 )}
+
+                {/* Article Headline */}
+                <h1 className="map-title" title={liveArticle.title} style={{ whiteSpace: 'normal' }}>
+                  {liveArticle.title || 'Untitled Headline'}
+                </h1>
 
                 {/* Author Cluster & Date */}
                 <div className="map-meta-row" style={{ margin: '1.25rem 0 2rem 0' }}>
@@ -1416,8 +1353,8 @@ export default function LiveArticleStudio({
                     <div className="map-author-info">
                       <div className="map-author-name-row">
                         <span>By {liveArticle.authorName}</span>
-                        <span className="map-verified-badge">
-                          <Check size={12} strokeWidth={3} />
+                        <span className="map-verified-badge" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          ✓
                         </span>
                       </div>
                       <div className="map-date-read-row">
@@ -1432,101 +1369,39 @@ export default function LiveArticleStudio({
                   {formData.contentBlocks.map((block, idx) => {
                     const key = block.id || idx;
 
-                    // Heading
-                    if (block.type === 'heading') {
-                      if (block.level === 3) {
-                        return <h3 key={key} className="map-body-subheading">{block.text}</h3>;
-                      }
-                      return <h2 key={key} className="map-body-heading">{block.text}</h2>;
-                    }
-
-                    // Paragraph
-                    if (block.type === 'paragraph') {
-                      return <p key={key} dangerouslySetInnerHTML={{ __html: block.text }} />;
+                    // Section (Heading + Content)
+                    if (block.type === 'section') {
+                      const paras = (block.content || '').split('\n').filter(p => p.trim().length > 0);
+                      return (
+                        <div key={key} className="map-body-section" style={{ marginBottom: '1.75rem' }}>
+                          {block.heading && <h2 className="map-body-heading">{block.heading}</h2>}
+                          {paras.map((p, pIdx) => (
+                            <p key={pIdx}>{p}</p>
+                          ))}
+                          {!block.heading && paras.length === 0 && (
+                            <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Empty section...</p>
+                          )}
+                        </div>
+                      );
                     }
 
                     // Multiple Images
                     if (block.type === 'image') {
                       return (
                         <figure key={key} className={`map-inline-figure ${block.layout || 'standard'}`}>
-                          <img src={block.url} alt={block.caption || ''} className="map-inline-img" />
+                          {block.url ? (
+                            <img src={block.url} alt={block.caption || ''} className="map-inline-img" />
+                          ) : (
+                            <div style={{ padding: '2rem', background: '#f1f5f9', textAlign: 'center', color: '#94a3b8', borderRadius: '8px' }}>
+                              No image chosen
+                            </div>
+                          )}
                           {(block.caption || block.credit) && (
                             <figcaption className="map-inline-caption">
                               {block.caption} {block.credit && <span className="map-photo-credit">· Photo: {block.credit}</span>}
                             </figcaption>
                           )}
                         </figure>
-                      );
-                    }
-
-                    // Gallery Grid
-                    if (block.type === 'gallery') {
-                      const imgs = Array.isArray(block.images) ? block.images : [];
-                      return (
-                        <div key={key} className={`map-gallery-grid cols-${imgs.length > 2 ? 3 : 2}`}>
-                          {imgs.map((img, i) => (
-                            <figure key={i} className="map-gallery-item">
-                              <img src={img.url || img} alt="" />
-                              {img.caption && <figcaption className="map-gallery-caption">{img.caption}</figcaption>}
-                            </figure>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    // Testimonial / Founder Pullquote
-                    if (block.type === 'testimonial') {
-                      return (
-                        <div key={key} className="map-quote-card map-testimonial-card">
-                          <div className="map-quote-icon-wrap">
-                            <Quote size={20} />
-                          </div>
-                          <blockquote className="map-quote-text">
-                            “{block.quote}”
-                          </blockquote>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginTop: '1.15rem' }}>
-                            {block.avatar && (
-                              <img 
-                                src={block.avatar} 
-                                alt={block.author} 
-                                style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} 
-                              />
-                            )}
-                            <div>
-                              <div className="map-quote-author" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
-                                {block.author}
-                              </div>
-                              <div style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                                {block.designation} {block.company ? `· ${block.company}` : ''}
-                              </div>
-                            </div>
-                            {block.rating && (
-                              <div style={{ marginLeft: 'auto', color: '#f59e0b', fontSize: '1rem', letterSpacing: '2px' }}>
-                                {'★'.repeat(block.rating)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // Takeaways Card
-                    if (block.type === 'takeaways') {
-                      const items = Array.isArray(block.items) ? block.items : [];
-                      return (
-                        <div key={key} className="map-takeaways-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', margin: '2.25rem 0' }}>
-                          <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 800, color: '#dc2626' }}>
-                            <Sparkles size={18} /> {block.title || 'Key Highlights & Takeaways'}
-                          </h4>
-                          <ul className="map-checklist">
-                            {items.map((it, i) => (
-                              <li key={i} className="map-checklist-item">
-                                <span className="map-check-badge"><Check size={13} strokeWidth={3} /></span>
-                                <div>{it}</div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
                       );
                     }
 
@@ -1563,7 +1438,6 @@ export default function LiveArticleStudio({
           >
             <div className="las-card-title-row">
               <h3 className="las-card-title">
-                <ImageIcon size={18} color="#ea580c" />
                 <span>Media Library Asset Picker</span>
               </h3>
               <button 
@@ -1571,19 +1445,17 @@ export default function LiveArticleStudio({
                 className="las-block-action-btn"
                 onClick={() => setIsMediaPickerOpen(false)}
               >
-                <X size={16} />
+                Close
               </button>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0' }}>
               {mediaLoading ? (
                 <div style={{ padding: '3rem', textAlign: 'center' }}>
-                  <RefreshCw size={28} className="spin" color="#ea580c" style={{ animation: 'spin 1s linear infinite' }} />
                   <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: '#64748b' }}>Loading media files...</p>
                 </div>
               ) : mediaFiles.length === 0 ? (
                 <div style={{ padding: '3rem', textAlign: 'center' }}>
-                  <ImageIcon size={38} color="#94a3b8" style={{ margin: '0 auto 0.75rem' }} />
                   <p style={{ fontWeight: 700, color: '#334155' }}>No media files uploaded yet</p>
                   <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Enter an image URL directly into the URL input field.</p>
                 </div>
@@ -1622,14 +1494,11 @@ export default function LiveArticleStudio({
       {showDeleteModal && (
         <div className="las-modal-backdrop" onClick={() => !deleting && setShowDeleteModal(false)}>
           <div className="las-delete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="las-delete-icon-box">
-              <Trash2 size={28} />
-            </div>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 850, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
               Permanently Delete Article?
             </h3>
-            <p style={{ fontSize: '0.92rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-              Are you sure you want to permanently delete <strong>"{formData.title}"</strong>? This will permanently remove the article from the MongoDB database, clear it from homepage spots, and unpublish all associated stories. This action cannot be undone.
+            <p style={{ fontSize: '0.92rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
+              Are you sure you want to permanently delete <strong>"{formData.title}"</strong>? This action cannot be undone.
             </p>
             <div className="las-modal-actions">
               <button 

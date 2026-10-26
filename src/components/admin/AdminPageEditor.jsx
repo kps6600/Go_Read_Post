@@ -79,6 +79,39 @@ const CANONICAL_SECTION_META = {
   }
 };
 
+export const isBannerSection = (sec) => {
+  if (!sec) return false;
+  const type = (sec.type || '').toLowerCase();
+  const id = (sec.id || '').toLowerCase();
+  const title = (sec.data?.heading || sec.data?.title || sec.data?.headline || sec.title || '').toLowerCase();
+  return (
+    type === 'hero' ||
+    type === 'banner' ||
+    type === 'hero_popular' ||
+    id === 'hero_popular' ||
+    id.includes('hero') ||
+    id.includes('banner') ||
+    title.includes('hero') ||
+    title.includes('banner')
+  );
+};
+
+export const isCoreFeedSection = (sec) => {
+  const id = (sec?.id || '').toLowerCase();
+  const type = (sec?.type || '').toLowerCase();
+  return (
+    id === 'trending' ||
+    id === 'latest_blogs' ||
+    id === 'spotlight' ||
+    id === 'newsletter' ||
+    id === 'popular_editors' ||
+    (type === 'trending' && !id.startsWith('sec_')) ||
+    (type === 'spotlight' && !id.startsWith('sec_')) ||
+    (type === 'newsletter' && !id.startsWith('sec_')) ||
+    (type === 'stories_feed' && !id.startsWith('sec_'))
+  );
+};
+
 export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -118,8 +151,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       const data = await PageService.getPageById(pageId);
       if (data) {
         setPage(data);
-        setTitle(data.title || '');
-        setSlug(data.slug || '');
+        const isHome = pageId === 'home' || data.id === 'home' || data.slug === '' || data.slug === '/';
+        const rawTitle = data.title || '';
+        const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
+        setTitle(cleanTitle);
+        setSlug(isHome ? '' : (data.slug || ''));
         setDescription(data.description || '');
         setStatus(data.status || 'draft');
         setSeo({
@@ -181,15 +217,18 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const persistSections = async (updatedSections, successToast = null, publishStatus = null) => {
     setSaving(true);
     try {
+      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
       const targetStatus = publishStatus || status || page?.status || 'published';
-      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const targetSlug = isHome ? '' : (slug || page?.slug || '').trim();
+      const rawTitle = title || page?.title || (isHome ? 'Homepage' : 'Custom Page');
+      const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
       const payload = {
-        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        title: cleanTitle,
         slug: targetSlug,
         description: (description || page?.description || '').trim(),
         status: targetStatus,
         seo: {
-          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          title: (seo?.title || page?.seo?.title || '').trim() || `${cleanTitle} | GoReadPost`,
           description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
           keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
           ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
@@ -207,7 +246,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       }
 
       // If editing homepage, also sync to HomepageService so both endpoints stay 100% aligned
-      if (pageId === 'home' || page?.id === 'home') {
+      if (pageId === 'home' || page?.id === 'home' || isHome) {
         try {
           await HomepageService.updateSections(payload.sections);
         } catch (e) {}
@@ -296,87 +335,21 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       heading: def?.label || `${sectionType.toUpperCase()} Section`
     };
 
-    if (sectionType === 'stories_feed') {
+    if (sectionType === 'video_section') {
       initialData = {
-        title: 'Article & Story Feed',
-        heading: 'Article & Story Feed',
-        subtitle: 'Latest updates and editorial dispatches across the ecosystem',
-        category: '',
-        limit: 4,
-        viewAllText: 'View All',
-        viewAllUrl: '/latest'
+        title: 'Video Stories & Masterclasses',
+        heading: 'Video Stories & Masterclasses',
+        subtitle: 'Watch exclusive boardroom dialogues, deep tech demonstrations, and founder masterclasses.',
+        viewAllText: 'Explore All Videos',
+        viewAllUrl: '/videos'
       };
-    } else if (sectionType === 'trending') {
+    } else if (sectionType === 'video_shows') {
       initialData = {
-        title: 'Trending Now',
-        heading: 'Trending Now',
-        subtitle: 'High-velocity stories capturing builder attention',
-        limit: 8,
-        viewAllUrl: '/trending'
-      };
-    } else if (sectionType === 'spotlight') {
-      initialData = {
-        title: 'Tech & Startup Spotlight',
-        heading: 'Tech & Startup Spotlight',
-        subtitle: 'Deep tech, generative AI, and emerging ventures',
-        category: 'Technology',
-        badgeText: 'DEEPTECH FOCUS',
-        limit: 8,
-        viewAllUrl: '/category/technology'
-      };
-    } else if (sectionType === 'newsletter') {
-      initialData = {
-        title: 'Newsletter Subscription Banner',
-        heading: 'Newsletter Subscription Banner',
-        headline: 'Get the Latest Blogs Delivered to Your Inbox',
-        subtitle: 'Join 100,000+ founders and engineers receiving our daily intelligence briefs.',
-        buttonText: 'Subscribe',
-        placeholder: 'Enter your email address'
-      };
-    } else if (sectionType === 'features') {
-      initialData = {
-        title: 'Key Platform Features',
-        heading: 'Key Platform Features',
-        subtitle: 'Discover what makes our journalism and reporting unique',
-        badge: 'KEY CAPABILITIES',
-        items: [
-          { title: 'Unfiltered Access', description: 'Direct conversations with founders and operators.', icon: 'Zap' },
-          { title: 'Capital Intelligence', description: 'Term sheets, valuations, and market movements.', icon: 'Award' },
-          { title: 'Deep Tech Teardowns', description: 'Technical analysis on AI, chips, and cloud infrastructure.', icon: 'Layers' }
-        ]
-      };
-    } else if (sectionType === 'stats') {
-      initialData = {
-        title: 'Our Impact in Numbers',
-        heading: 'Our Impact in Numbers',
-        subtitle: 'Trusted by founders, angel networks, and venture funds globally',
-        items: [
-          { number: '500K+', label: 'Monthly Readers', meta: 'Founders & Engineers' },
-          { number: '1,200+', label: 'Stories Published', meta: 'In-depth coverage' },
-          { number: '85+', label: 'Unicorns Covered', meta: 'Across Bharat & Global' },
-          { number: '$2.5B+', label: 'Funding Tracked', meta: 'Venture Capital deals' }
-        ]
-      };
-    } else if (sectionType === 'brands') {
-      initialData = {
-        title: 'Featured Across Leading Portals & Partners',
-        heading: 'Featured Across Leading Portals & Partners',
-        items: [
-          { name: 'TechSparks', label: 'TechSparks' },
-          { name: 'Startup Bharat', label: 'Startup Bharat' },
-          { name: 'FoundersHub', label: 'FoundersHub' },
-          { name: 'CapTable Daily', label: 'CapTable Daily' }
-        ]
-      };
-    } else if (sectionType === 'image_text') {
-      initialData = {
-        heading: 'Built for the Next Generation of Builders',
-        description: 'Comprehensive reporting that cuts through the noise. Get actionable frameworks and genuine stories.',
-        image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80',
-        imagePosition: 'left',
-        buttonText: 'Read More',
-        buttonUrl: '/about',
-        badge: 'MISSION & VALUES'
+        title: 'GoReadPost Originals & Shows',
+        heading: 'GoReadPost Originals & Shows',
+        subtitle: 'Founder interviews, video shows, and executive masterclass episodes.',
+        viewAllText: 'View All Shows',
+        viewAllUrl: '/videos'
       };
     } else if (sectionType === 'hero') {
       initialData = {
@@ -389,107 +362,160 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         primaryBtnUrl: '/latest',
         popularTitle: 'Popular Posts'
       };
-    } else if (sectionType === 'services') {
+    } else if (sectionType === 'stories_feed') {
       initialData = {
-        title: 'Specialized Capabilities & Newsroom Desks',
-        heading: 'Specialized Capabilities & Newsroom Desks',
-        subtitle: 'In-depth coverage spanning seed stage to public listing',
-        badge: 'OUR BEATS',
-        items: [
-          { title: 'Venture Capital & Deals', description: 'Real-time intelligence on fundings, valuations, and term sheets.', icon: 'Zap' },
-          { title: 'DeepTech & Generative AI', description: 'Technical tear-downs and market analysis on frontier innovation.', icon: 'Award' },
-          { title: 'Global Enterprise & SaaS', description: 'Cross-border SaaS scaling playbooks and market penetration.', icon: 'Globe' }
-        ]
+        title: 'Latest from the Blog',
+        heading: 'Latest from the Blog',
+        subtitle: 'Real-time reporting and latest editorial dispatches across the ecosystem.',
+        category: '',
+        limit: 8,
+        viewAllText: 'View All Articles',
+        viewAllUrl: '/latest'
       };
-    } else if (sectionType === 'portfolio') {
+    } else if (sectionType === 'trending') {
       initialData = {
-        title: 'Featured Case Studies & High-Impact Stories',
-        heading: 'Featured Case Studies & High-Impact Stories',
-        subtitle: 'Explore our deepest investigative journalism and brand spotlights',
-        items: [
-          {
-            title: 'From Seed to Decacorn: The Playbook',
-            category: 'Deep Dive',
-            image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
-            description: 'How three Bangalore founders built a $10B enterprise engine.',
-            link: '/stories'
-          },
-          {
-            title: 'The AI Silicon Revolution',
-            category: 'Hardware & AI',
-            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
-            description: 'Why fabless chip startups are raising record seed rounds in India.',
-            link: '/stories'
-          }
-        ]
+        title: 'Trending Now',
+        heading: 'Trending Now',
+        subtitle: 'High-velocity stories capturing builder attention and social virality.',
+        limit: 8,
+        viewAllText: 'View All Trending',
+        viewAllUrl: '/trending'
       };
-    } else if (sectionType === 'testimonials') {
+    } else if (sectionType === 'popular_editors') {
       initialData = {
-        title: 'Trusted by Visionary Founders & Operators',
-        heading: 'Trusted by Visionary Founders & Operators',
-        subtitle: 'What ecosystem leaders say about our coverage and reporting',
-        items: [
-          {
-            name: 'Pooja Sharma',
-            role: 'Founder & CEO, ScaleStack',
-            quote: 'GoReadPost has become the definitive morning read for our entire engineering and leadership team.',
-            rating: 5,
-            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Rohan Mehta',
-            role: 'General Partner, Alpha Capital',
-            quote: 'Uncompromising editorial rigor, speed, and genuine market insight.',
-            rating: 5,
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80'
-          }
-        ]
+        title: "Most Popular & Editor's Picks",
+        heading: "Most Popular & Editor's Picks",
+        subtitle: 'Essential reads handpicked by newsroom editors with Editor Choice badges.',
+        badgeText: "Editor's Choice",
+        limit: 8,
+        viewAllText: 'Explore Popular',
+        viewAllUrl: '/category/startups'
       };
-    } else if (sectionType === 'faq') {
+    } else if (sectionType === 'spotlight') {
       initialData = {
-        title: 'Frequently Asked Questions',
-        heading: 'Frequently Asked Questions',
-        subtitle: 'Everything you need to know about our platform, syndicate access, and editorial guidelines',
-        items: [
-          {
-            question: 'How often are stories and breaking news published?',
-            answer: 'Our editorial desk updates continuously throughout the day with breaking news dispatches, deep investigative features, and market analysis.'
-          },
-          {
-            question: 'Can founders submit stories or press releases?',
-            answer: 'Yes! Founders and PR representatives can submit announcements directly through our Submit Story portal for editorial review.'
-          },
-          {
-            question: 'How do I subscribe to the GoReadPost daily digest?',
-            answer: 'Use the newsletter subscription box above or in our footer to receive our curated morning briefs straight to your inbox.'
-          }
-        ]
+        title: 'Tech & Startup Spotlight',
+        heading: 'Tech & Startup Spotlight',
+        subtitle: 'Deep tech breakthroughs, generative AI, and emerging ventures.',
+        category: 'Technology',
+        badgeText: 'DEEPTECH FOCUS',
+        limit: 8,
+        viewAllText: 'Explore Spotlight',
+        viewAllUrl: '/category/technology'
       };
-    } else if (sectionType === 'cta') {
+    } else if (sectionType === 'category_startups') {
       initialData = {
-        title: 'Amplify Your Story With GoReadPost',
-        heading: 'Amplify Your Story With GoReadPost',
-        description: 'Join over 500,000 monthly readers discovering the builders shaping the next economic era.',
-        primaryBtnText: 'Explore Membership',
-        primaryBtnUrl: '/contact',
-        secondaryBtnText: 'Submit Press Release',
-        secondaryBtnUrl: '/submit'
+        title: 'Startups & Capital Desk',
+        heading: 'Startups & Capital Desk',
+        subtitle: 'Early-stage fundraising, venture deals, term sheets, and founder dispatches.',
+        category: 'Startups',
+        limit: 8,
+        viewAllText: 'Explore Startups',
+        viewAllUrl: '/category/startups'
+      };
+    } else if (sectionType === 'category_technology') {
+      initialData = {
+        title: 'Technology & Cloud Desk',
+        heading: 'Technology & Cloud Desk',
+        subtitle: 'Frontier tech, software architectures, enterprise IT, and compute.',
+        category: 'Technology',
+        limit: 8,
+        viewAllText: 'Explore Technology',
+        viewAllUrl: '/category/technology'
+      };
+    } else if (sectionType === 'category_ai') {
+      initialData = {
+        title: 'AI & DeepTech Desk',
+        heading: 'AI & DeepTech Desk',
+        subtitle: 'Foundation models, autonomous agents, robotics, and generative AI revolutions.',
+        category: 'AI',
+        limit: 8,
+        viewAllText: 'Explore AI & DeepTech',
+        viewAllUrl: '/category/ai'
+      };
+    } else if (sectionType === 'category_fintech') {
+      initialData = {
+        title: 'FinTech & Web3 Desk',
+        heading: 'FinTech & Web3 Desk',
+        subtitle: 'Digital payments, UPI infra, digital banking, credit, and Web3.',
+        category: 'FinTech',
+        limit: 8,
+        viewAllText: 'Explore FinTech',
+        viewAllUrl: '/category/fintech'
+      };
+    } else if (sectionType === 'category_enterprise') {
+      initialData = {
+        title: 'Enterprise & SaaS Desk',
+        heading: 'Enterprise & SaaS Desk',
+        subtitle: 'B2B SaaS growth, annual recurring revenue (ARR), and enterprise scaling.',
+        category: 'Enterprise',
+        limit: 8,
+        viewAllText: 'Explore Enterprise',
+        viewAllUrl: '/category/enterprise'
+      };
+    } else if (sectionType === 'category_herstory') {
+      initialData = {
+        title: 'HerStory: Women Leaders',
+        heading: 'HerStory: Women Leaders',
+        subtitle: 'Celebrating women entrepreneurs, corporate executives, and changemakers.',
+        category: 'HerStory',
+        limit: 8,
+        viewAllText: 'Explore HerStory',
+        viewAllUrl: '/category/herstory'
+      };
+    } else if (sectionType === 'category_smbstory') {
+      initialData = {
+        title: 'SMBStory: MSME, Retail & D2C',
+        heading: 'SMBStory: MSME, Retail & D2C',
+        subtitle: 'Traditional business icons, retail brands, manufacturing, and D2C heroes.',
+        category: 'SMBStory',
+        limit: 8,
+        viewAllText: 'Explore SMBStory',
+        viewAllUrl: '/category/smbstory'
+      };
+    } else if (sectionType === 'category_socialstory') {
+      initialData = {
+        title: 'SocialStory: Impact & Climate',
+        heading: 'SocialStory: Impact & Climate',
+        subtitle: 'Grassroots movements, sustainability, climate tech, and social enterprises.',
+        category: 'SocialStory',
+        limit: 8,
+        viewAllText: 'Explore SocialStory',
+        viewAllUrl: '/category/socialstory'
+      };
+    } else if (sectionType === 'newsletter') {
+      initialData = {
+        title: 'Newsletter Subscription Banner',
+        heading: 'Newsletter Subscription Banner',
+        headline: 'Get the Latest Blogs Delivered to Your Inbox',
+        subtitle: 'Join 100,000+ founders and engineers receiving our daily intelligence briefs.',
+        buttonText: 'Subscribe',
+        placeholder: 'Enter your email address'
+      };
+    } else if (sectionType === 'about') {
+      initialData = {
+        title: 'About Us & Mission Manifesto',
+        heading: 'About Us & Mission Manifesto',
+        subtitle: 'The Definitive Journal of Innovation, Capital & Builders',
+        content: '<p>GoReadPost chronicles breakthrough founders, deep technology, AI revolutions, venture capital, and economic innovation across India.</p>'
       };
     } else if (sectionType === 'contact') {
       initialData = {
-        title: 'Get in Touch with our Editorial Bureau',
-        heading: 'Get in Touch with our Editorial Bureau',
-        subtitle: 'Have a breaking tip, partnership proposal, or feedback? We want to hear from you.',
+        title: 'Newsroom Bureaus & Contact Details',
+        heading: 'Newsroom Bureaus & Contact Details',
+        subtitle: 'Have a breaking tip, partnership proposal, or feedback? Get in touch with our editors.',
         email: 'newsroom@goreadpost.com',
         phone: '+91 (080) 4123-5678',
         address: '100ft Road, Indiranagar, Bengaluru, Karnataka 560038'
       };
-    } else if (sectionType === 'text') {
+    } else if (sectionType === 'advertise') {
       initialData = {
-        title: 'About GoReadPost Media',
-        heading: 'About GoReadPost Media',
-        badge: 'OUR MISSION',
-        content: '<p>GoReadPost is India’s premier digital news and storytelling platform dedicated to championing entrepreneurs, innovators, and changemakers. From ground-up grassroots movements to multi-billion dollar tech unicorns, we chronicle the journey of building the future.</p>'
+        title: 'Advertise With Us & Media Kit',
+        heading: 'Advertise With Us & Media Kit',
+        subtitle: 'Reach over 500,000 monthly readers discovering the builders shaping the next economic era.',
+        primaryBtnText: 'Download Media Kit',
+        primaryBtnUrl: '/advertise',
+        secondaryBtnText: 'Contact Partnerships',
+        secondaryBtnUrl: '/contact'
       };
     }
 
@@ -516,12 +542,13 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   // Save changes to backend
   const handleSavePage = async (publishOverride = null) => {
     try {
+      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
       const targetStatus = publishOverride || status;
-      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : slug.trim();
+      const targetSlug = isHome ? '' : slug.trim();
       await persistSections(sections, null, targetStatus);
       onShowToast?.(
         publishOverride === 'published'
-          ? (pageId === 'home' || !targetSlug ? 'Homepage is now published live!' : `Page "/${targetSlug}" is now published live!`)
+          ? (isHome || !targetSlug ? 'Homepage is now published live!' : `Page "/${targetSlug}" is now published live!`)
           : 'Page draft saved successfully.'
       );
     } catch (err) {
@@ -559,8 +586,9 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     );
   }
 
-  // Handlers for Dedicated Full-Page Live Studio
+  // Handlers for Dedicated Full-Page Live Studio (Allowed only for Banner section)
   const handleOpenLiveEditor = (sec) => {
+    if (!isBannerSection(sec)) return;
     setLiveEditingSection(sec);
     try {
       const url = new URL(window.location.href);
@@ -608,14 +636,17 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     setSections(updatedSections);
 
     try {
-      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
+      const targetSlug = isHome ? '' : (slug || page?.slug || '').trim();
+      const rawTitle = title || page?.title || (isHome ? 'Homepage' : 'Custom Page');
+      const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
       const payload = {
-        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        title: cleanTitle,
         slug: targetSlug,
         description: (description || page?.description || '').trim(),
         status: status || page?.status || 'published',
         seo: {
-          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          title: (seo?.title || page?.seo?.title || '').trim() || `${cleanTitle} | GoReadPost`,
           description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
           keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
           ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
@@ -639,14 +670,17 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     handleCloseLiveEditor();
 
     try {
-      const targetSlug = pageId === 'home' || page?.id === 'home' ? '' : (slug || page?.slug || '').trim();
+      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
+      const targetSlug = isHome ? '' : (slug || page?.slug || '').trim();
+      const rawTitle = title || page?.title || (isHome ? 'Homepage' : 'Custom Page');
+      const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
       const payload = {
-        title: (title || page?.title || (pageId === 'home' ? 'Homepage - Live Portal' : 'Custom Page')).trim(),
+        title: cleanTitle,
         slug: targetSlug,
         description: (description || page?.description || '').trim(),
         status: status || page?.status || 'published',
         seo: {
-          title: (seo?.title || page?.seo?.title || '').trim() || `${title || page?.title || 'Page'} | GoReadPost`,
+          title: (seo?.title || page?.seo?.title || '').trim() || `${cleanTitle} | GoReadPost`,
           description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
           keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
           ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
@@ -699,7 +733,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     );
   }
 
+  const isHomepage = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
   const isLive = status === 'published' || status === 'active';
+  const rawTopTitle = title || page?.title || (isHomepage ? 'Homepage' : 'Edit Page');
+  const displayTitle = isHomepage ? rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim();
+  const displaySlug = isHomepage ? '/' : (slug ? `/${slug.replace(/^\/+/, '')}` : (pageId && !pageId.match(/^[0-9a-fA-F]{24}$/) ? `/${pageId}` : '/'));
 
   return (
     <div className="admin-fullpage-root" style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
@@ -719,8 +757,8 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           <div className="atv-topbar-divider" />
 
           <div className="atv-topbar-title-wrap">
-            <span className="atv-topbar-title">{page?.title || title || 'Edit Page'}</span>
-            <span className="atv-topbar-slug">{pageId === 'home' ? '/' : `/${slug || pageId}`}</span>
+            <span className="atv-topbar-title">{displayTitle}</span>
+            <span className="atv-topbar-slug">{displaySlug}</span>
             <span className={`atv-topbar-pill ${isLive ? 'live' : 'draft'}`} style={{
               background: isLive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(148, 163, 184, 0.15)',
               color: isLive ? '#059669' : '#64748b',
@@ -732,7 +770,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         </div>
 
         <div className="atv-topbar-right">
-          {pageId === 'home' && (
+          {(isHomepage || pageId === 'home') && (
             <button
               type="button"
               className="btn-admin-secondary"
@@ -759,7 +797,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           <button
             type="button"
             className="atv-btn-secondary"
-            onClick={() => window.open(pageId === 'home' ? '/' : `/${slug || pageId}`, '_blank')}
+            onClick={() => window.open(displaySlug, '_blank')}
             title="View live public page"
             style={{ borderRadius: '8px', padding: '7px 14px', fontSize: '0.82rem' }}
           >
@@ -901,74 +939,89 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       </div>
                     </div>
 
-                    {/* Section Actions */}
+                    {/* Section Actions: only admin can hide or show, except banner section which has Live Edit */}
                     <div className="section-card-actions">
                       <button
                         type="button"
                         className="btn-section-action"
                         onClick={() => handleToggleSectionEnabled(sec.id)}
-                        title={isEnabled ? 'Disable Section' : 'Enable Section'}
+                        title={isEnabled ? 'Hide section from live page' : 'Show section on live page'}
                       >
                         {isEnabled ? <Eye size={15} /> : <EyeOff size={15} color="var(--text-muted)" />}
                         <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
                       </button>
 
-                      {/* Live Visual WYSIWYG Editor Button (Opens in dedicated page view) */}
-                      <button
-                        type="button"
-                        className="btn-section-action live-edit"
-                        onClick={() => handleOpenLiveEditor(sec)}
-                        style={{
-                          background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                          color: '#ffffff',
-                          border: 'none',
-                          fontWeight: 750,
-                          padding: '6px 14px',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title={`Open Live Visual Editor for "${def.label || sec.type}"`}
-                      >
-                        <Sparkles size={15} />
-                        <span>Live Edit</span>
-                      </button>
+                      {/* Live Visual WYSIWYG Editor Button (ONLY for Hero / Banner section) */}
+                      {isBannerSection(sec) && (
+                        <button
+                          type="button"
+                          className="btn-section-action live-edit"
+                          onClick={() => handleOpenLiveEditor(sec)}
+                          style={{
+                            background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: 750,
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            cursor: 'pointer'
+                          }}
+                          title={`Open Live Visual Editor for "${def.label || sec.type}"`}
+                        >
+                          <Sparkles size={15} />
+                          <span>Live Edit</span>
+                        </button>
+                      )}
 
-                      {/* Quick Open in New Tab Button */}
-                      <a
-                        href={`/admin/pages/${pageId}/edit?liveSection=${encodeURIComponent(sec.id || sec._id || sec.type)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-section-action new-tab"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          color: '#cbd5e1',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          padding: '6px 9px',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          textDecoration: 'none',
-                          cursor: 'pointer'
-                        }}
-                        title="Open Live Editor in New Browser Tab"
-                      >
-                        <ExternalLink size={14} />
-                      </a>
+                      {/* Custom Added Section: Edit and Delete buttons */}
+                      {!isCoreFeedSection(sec) && !isBannerSection(sec) && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-section-action live-edit"
+                            onClick={() => setEditingSection(sec)}
+                            style={{
+                              background: '#2563eb',
+                              color: '#ffffff',
+                              border: 'none',
+                              fontWeight: 750,
+                              padding: '6px 14px',
+                              borderRadius: '8px',
+                              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer'
+                            }}
+                            title={`Edit content for "${def.label || sec.type}"`}
+                          >
+                            <Sparkles size={14} />
+                            <span>Edit</span>
+                          </button>
 
-                      <button
-                        type="button"
-                        className="btn-section-action delete"
-                        onClick={() => handleDeleteSection(sec.id)}
-                        disabled={saving}
-                        title="Permanently delete section"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                          <button
+                            type="button"
+                            className="btn-section-action delete"
+                            onClick={() => handleDeleteSection(sec.id)}
+                            disabled={saving}
+                            title="Delete this section"
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.08)',
+                              color: '#dc2626',
+                              border: '1px solid rgba(239, 68, 68, 0.2)',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -976,19 +1029,33 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             </div>
           )}
 
-          {/* Quick Add Section Button */}
-          {sections.length > 0 && (
-            <div className="add-section-footer-bar">
-              <button
-                type="button"
-                className="btn-admin-secondary"
-                onClick={() => setIsAddSectionOpen(true)}
-              >
-                <Plus size={16} />
-                <span>+ Add Another Section</span>
-              </button>
-            </div>
-          )}
+          {/* Add Another Section Button */}
+          <div className="add-section-footer-bar" style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+            <button
+              type="button"
+              className="btn-admin-secondary"
+              onClick={() => setIsAddSectionOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 28px',
+                borderRadius: '10px',
+                fontSize: '0.92rem',
+                fontWeight: 750,
+                background: '#ffffff',
+                border: '2px dashed #cbd5e1',
+                color: '#0f172a',
+                cursor: 'pointer',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                transition: 'all 0.2s ease'
+              }}
+              title="Add another section to the home page"
+            >
+              <Plus size={18} color="var(--brand-primary)" />
+              <span>+ Add Another Section</span>
+            </button>
+          </div>
         </div>
       )}
 

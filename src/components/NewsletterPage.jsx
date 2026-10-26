@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Mail, ArrowLeft, CheckCircle2, Sparkles, Send, Bell, 
   Users, Zap, ShieldCheck, Flame, BookOpen, Clock, Calendar, 
@@ -17,7 +17,7 @@ const INITIAL_EDITIONS = [
       subscribers: '195,000+',
       openRate: '51.4%',
       tagline: 'The Definitive Daily Briefing',
-      color: '#e11d48',
+      color: '#dc2626',
       desc: 'The 5 most consequential startup funding rounds, founder pivots, and regulatory updates before your morning standup begins.',
       latestIssue: {
         number: '#412',

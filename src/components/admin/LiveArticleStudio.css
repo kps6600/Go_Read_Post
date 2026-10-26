@@ -540,29 +540,39 @@
 }
 
 .las-block-action-btn {
-  width: 28px;
+  width: auto;
+  min-width: 28px;
   height: 28px;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
   border-radius: 6px;
-  color: #64748b;
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .las-block-action-btn:hover:not(:disabled) {
-  background: var(--bg-primary, #ffffff);
+  background: #f1f5f9;
   color: #0f172a;
-  border-color: var(--border-color, #cbd5e1);
+  border-color: #94a3b8;
 }
 
-.las-block-action-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+.las-block-action-btn.delete {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.las-block-action-btn.delete:hover:not(:disabled) {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
 }
 
 .las-block-action-btn:disabled {
@@ -657,3 +667,159 @@
     max-height: 50vh;
   }
 }
+
+/* ── Ultra-Friendly Section & Image Builder Enhancements ── */
+.las-add-block-btn.primary {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #15803d !important;
+  font-weight: 750;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+}
+.las-add-block-btn.primary:hover {
+  background: #15803d !important;
+  transform: translateY(-1px);
+}
+
+.las-add-block-btn.image-action {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0369a1 !important;
+  font-weight: 750;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+.las-add-block-btn.image-action:hover {
+  background: #0369a1 !important;
+  transform: translateY(-1px);
+}
+
+/* Upload Dropzone & Button */
+.las-upload-box {
+  border: 2px dashed #cbd5e1;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  margin-bottom: 0.85rem;
+}
+.las-upload-box:hover {
+  border-color: #ea580c;
+  background: #fff7ed;
+}
+
+.las-upload-box-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.las-upload-main-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.65rem 1.25rem;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+.las-upload-main-btn:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+}
+
+.las-quick-insert-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 1.15rem;
+  background: #f8fafc;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.las-quick-insert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.las-quick-insert-btn:hover {
+  border-color: #0f172a;
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.las-section-input {
+  width: 100%;
+  font-size: 1.08rem;
+  font-weight: 750;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  background: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.las-section-input:focus {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.las-section-textarea {
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+  background: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.las-section-textarea:focus {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.las-advanced-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+.las-advanced-toggle-btn:hover {
+  color: #ea580c;
+}
+

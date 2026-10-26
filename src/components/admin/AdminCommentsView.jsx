@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   MessageSquare, CheckCircle2, XCircle, Clock, Trash2, 
   Search, Filter, RefreshCw, ExternalLink, ThumbsUp, AlertCircle, Eye
@@ -217,7 +217,7 @@ export default function AdminCommentsView({ onShowToast }) {
                         height: '36px',
                         borderRadius: '50%',
                         background: 'var(--brand-light, rgba(225,29,72,0.1))',
-                        color: 'var(--brand-primary, #e11d48)',
+                        color: 'var(--brand-primary, #dc2626)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -294,7 +294,7 @@ export default function AdminCommentsView({ onShowToast }) {
                     background: '#f8fafc',
                     padding: '0.85rem 1rem',
                     borderRadius: '8px',
-                    borderLeft: '3px solid var(--brand-primary, #e11d48)'
+                    borderLeft: '3px solid var(--brand-primary, #dc2626)'
                   }}
                 >
                   "{comment.text}"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Play, Plus, Search, Filter, Trash2, Edit2, RefreshCw, 
   ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronDown, 
@@ -18,7 +18,7 @@ import './AdminVideosView.css';
 
 // Rank color helpers matching Trending Studio & Visual CMS
 const RANK_COLORS = [
-  { text: '#e11d48', bg: '#ffe4e6' }, // 1 - Rose
+  { text: '#dc2626', bg: '#ffe4e6' }, // 1 - Rose
   { text: '#2563eb', bg: '#dbeafe' }, // 2 - Blue
   { text: '#7c3aed', bg: '#ede9fe' }, // 3 - Purple
   { text: '#059669', bg: '#d1fae5' }, // 4 - Emerald
@@ -33,7 +33,7 @@ const CATEGORY_COLORS = {
   masterclass: '#7c3aed', // Purple
   deeptech: '#2563eb',   // Blue
   keynotes: '#059669',   // Emerald
-  market: '#e11d48',     // Rose
+  market: '#dc2626',     // Rose
   all: '#ea580c'
 };
 

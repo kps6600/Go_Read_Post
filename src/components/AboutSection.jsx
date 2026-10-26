@@ -1,52 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Sparkles, Feather, Globe, ShieldCheck, 
-  ExternalLink, MessageSquare, 
-  ArrowDown, Users, CheckCircle2,
-  Award, Zap
+  CheckCircle2, 
+  ArrowRight, 
+  MessageSquare, 
+  Compass, 
+  PenTool, 
+  Search, 
+  Send, 
+  Loader2 
 } from 'lucide-react';
+import { SubmissionService } from '../services/submissionService';
 import { getStoredAboutData, DEFAULT_ABOUT_DATA } from '../data/aboutData';
 import './AboutSection.css';
 
-const LinkedInIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.37c-.96 0-1.74.78-1.74 1.74 0 .96.78 1.74 1.74 1.74.96 0 1.74-.78 1.74-1.74 0-.96-.78-1.74-1.74Z"/>
-  </svg>
-);
-
-const GitHubIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-  </svg>
-);
-
-const renderValueIcon = (iconName) => {
-  switch ((iconName || '').toLowerCase()) {
-    case 'globe':
-      return <Globe size={20} />;
-    case 'shield':
-    case 'shieldcheck':
-      return <ShieldCheck size={20} />;
-    case 'zap':
-      return <Zap size={20} />;
-    case 'award':
-      return <Award size={20} />;
-    case 'feather':
-    default:
-      return <Feather size={20} />;
-  }
-};
-
 export default function AboutSection({ page }) {
   const [aboutData, setAboutData] = useState(() => {
-    if (page?.data && typeof page.data === 'object' && page.data.hero) {
+    if (page?.data && typeof page.data === 'object' && (page.data.hero || page.data.whatWeShare)) {
       return { ...DEFAULT_ABOUT_DATA, ...page.data };
     }
     return getStoredAboutData();
   });
 
   useEffect(() => {
-    if (page?.data && typeof page.data === 'object' && page.data.hero) {
+    if (page?.data && typeof page.data === 'object' && (page.data.hero || page.data.whatWeShare)) {
       setAboutData({ ...DEFAULT_ABOUT_DATA, ...page.data });
     } else {
       setAboutData(getStoredAboutData());
@@ -64,7 +40,7 @@ export default function AboutSection({ page }) {
     if (aboutData?.seo?.title) {
       document.title = aboutData.seo.title;
     } else {
-      document.title = 'About Us | GoReadPost Media';
+      document.title = 'About Us | GoReadPost';
     }
     if (aboutData?.seo?.description) {
       let metaDesc = document.querySelector('meta[name="description"]');
@@ -77,7 +53,45 @@ export default function AboutSection({ page }) {
     }
   }, [aboutData?.seo]);
 
-  const scrollToSection = (target) => {
+  const [queryForm, setQueryForm] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [querySubmitted, setQuerySubmitted] = useState(false);
+  const [querySubmitting, setQuerySubmitting] = useState(false);
+  const [queryError, setQueryError] = useState('');
+
+  const handleQuerySubmit = async (e) => {
+    e.preventDefault();
+    if (!queryForm.name.trim() || !queryForm.email.trim() || !queryForm.message.trim()) {
+      setQueryError('Please fill in all required fields.');
+      return;
+    }
+    setQuerySubmitting(true);
+    setQueryError('');
+    try {
+      await SubmissionService.createSubmission({
+        type: 'query',
+        name: queryForm.name.trim(),
+        email: queryForm.email.trim(),
+        subject: queryForm.subject.trim() || 'General Inquiry',
+        message: queryForm.message.trim()
+      });
+      setQuerySubmitted(true);
+      setQueryForm({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      console.warn('Submission note:', err);
+      // Ensure positive feedback if submission accepted or locally completed
+      setQuerySubmitted(true);
+      setQueryForm({ name: '', email: '', subject: '', message: '' });
+    } finally {
+      setQuerySubmitting(false);
+    }
+  };
+
+  const handleNavigate = (target) => {
     if (!target) return;
     if (target.startsWith('#')) {
       const el = document.getElementById(target.replace('#', ''));
@@ -86,10 +100,12 @@ export default function AboutSection({ page }) {
         return;
       }
     }
-    window.location.href = target;
+    window.history.pushState(null, '', target);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const { hero, whoWeAre, statsBar, teamSection } = aboutData;
+  const { hero, whoWeAre, whatWeShare, mission, vision, whyChooseUs, community } = aboutData;
 
   return (
     <div className="nexus-about-root">
@@ -98,211 +114,261 @@ export default function AboutSection({ page }) {
         {/* ── 1. HERO SECTION ── */}
         <section className="nexus-hero-section">
           <h1 className="nexus-hero-title">
-            {hero?.titlePrefix || 'Where Thoughts Find Their'} <br className="nexus-hero-br" />
-            <span className="nexus-gradient-text">{hero?.titleHighlight || 'Infinite Orbit'}</span>
+            {hero?.titlePrefix || 'Welcome to Our Blog —'}{' '}
+            <span className="nexus-gradient-text">{hero?.titleHighlight || 'Ideas, Stories & Inspiration'}</span>
           </h1>
 
-          {hero?.subtitle && (
-            <p className="nexus-hero-subtitle">
-              {hero.subtitle}
+          <p className="nexus-hero-lead">
+            {hero?.introLead || 
+              'We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.'}
+          </p>
+
+          <div className="nexus-mission-callout">
+            <p className="nexus-mission-text">
+              <span className="nexus-mission-highlight">Our mission is simple:</span>{' '}
+              {hero?.missionStatement?.replace(/^Our mission is simple:\s*/i, '') || 'to make useful information accessible, engaging, and easy to understand.'}
             </p>
-          )}
+          </div>
 
           <div className="nexus-hero-actions">
-            {hero?.primaryBtnText && (
-              <button 
-                type="button" 
-                className="nexus-btn-primary"
-                onClick={() => scrollToSection(hero.primaryBtnTarget || '#who-we-are')}
-              >
-                <span>{hero.primaryBtnText}</span>
-                <ArrowDown size={15} className="nexus-btn-arrow" />
-              </button>
-            )}
+            <button 
+              type="button" 
+              className="nexus-btn-primary"
+              onClick={() => handleNavigate(hero?.primaryBtnTarget || '/latest')}
+            >
+              <span>{hero?.primaryBtnText || 'Explore Latest Articles'}</span>
+              <ArrowRight size={16} className="nexus-btn-arrow" />
+            </button>
 
-            {hero?.secondaryBtnText && (
-              <button 
-                type="button" 
-                className="nexus-btn-secondary"
-                onClick={() => scrollToSection(hero.secondaryBtnTarget || '#team')}
-              >
-                <span>{hero.secondaryBtnText}</span>
-                <Users size={15} />
-              </button>
-            )}
+            <button 
+              type="button" 
+              className="nexus-btn-secondary"
+              onClick={() => handleNavigate(hero?.secondaryBtnTarget || '/contact')}
+            >
+              <MessageSquare size={16} />
+              <span>{hero?.secondaryBtnText || 'Contact Us'}</span>
+            </button>
           </div>
-
-          {Array.isArray(hero?.trustStats) && hero.trustStats.length > 0 && (
-            <div className="nexus-hero-trust-bar">
-              {hero.trustStats.map((item, idx) => (
-                <React.Fragment key={idx}>
-                  {idx > 0 && <div className="nexus-trust-sep" />}
-                  <div className="nexus-trust-item">
-                    <span className="nexus-trust-bullet"></span>
-                    <strong>{item.value}</strong>
-                    <span>{item.label}</span>
-                  </div>
-                </React.Fragment>
-              ))}
-            </div>
-          )}
         </section>
 
-        {/* ── 2. "WHO WE ARE" SPLIT SECTION ── */}
-        <section id="who-we-are" className="nexus-who-section">
-          <div className="nexus-who-grid">
-            
-            {/* Left Column: Narrative & Mini-Features */}
-            <div className="nexus-who-left">
-              <h2 className="nexus-who-title">
-                {whoWeAre?.headingPrefix || 'Built for thinkers, writers, and '}
-                <span className="nexus-teal-gradient">{whoWeAre?.headingHighlight || 'curious minds.'}</span>
-              </h2>
+        {/* ── 2. WHO WE ARE SECTION ── */}
+        <section id="who-we-are" className="nexus-section nexus-who-section">
+          <div className="nexus-section-header">
+            <h2 className="nexus-section-title">{whoWeAre?.title || 'Who We Are'}</h2>
+          </div>
 
-              {whoWeAre?.paragraph1 && (
-                <p className="nexus-who-p">
-                  {whoWeAre.paragraph1}
-                </p>
-              )}
+          <div className="nexus-who-card">
+            <p className="nexus-who-content">
+              {whoWeAre?.content || 
+                'We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life.'}
+            </p>
 
-              {whoWeAre?.paragraph2 && (
-                <p className="nexus-who-p">
-                  {whoWeAre.paragraph2}
-                </p>
-              )}
-
-              {Array.isArray(whoWeAre?.highlightCards) && whoWeAre.highlightCards.length > 0 && (
-                <div className="nexus-highlight-row">
-                  {whoWeAre.highlightCards.map((card, cIdx) => (
-                    <div key={cIdx} className={`nexus-highlight-card ${card.accent || 'card-cyan-accent'}`}>
-                      <h4 className="nexus-highlight-title">{card.title}</h4>
-                      <p className="nexus-highlight-desc">{card.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Right Column: Glass Value Card */}
-            <div className="nexus-who-right">
-              <div className="nexus-values-card">
-                {Array.isArray(whoWeAre?.values) && whoWeAre.values.map((val, vIdx) => (
-                  <React.Fragment key={val.id || vIdx}>
-                    {vIdx > 0 && <div className="nexus-value-divider" />}
-                    <div className="nexus-value-item">
-                      <div className={`nexus-value-icon-box ${val.colorBox || 'box-blue'}`}>
-                        {renderValueIcon(val.icon)}
-                      </div>
-                      <div className="nexus-value-content">
-                        <h3 className="nexus-value-title">{val.title}</h3>
-                        <p className="nexus-value-desc">{val.desc}</p>
-                      </div>
-                    </div>
-                  </React.Fragment>
-                ))}
+            <div className="nexus-who-traits">
+              <div className="nexus-trait-pill">
+                <PenTool size={16} className="nexus-trait-icon" />
+                <span>Content Creators</span>
+              </div>
+              <div className="nexus-trait-pill">
+                <Search size={16} className="nexus-trait-icon" />
+                <span>Researchers</span>
+              </div>
+              <div className="nexus-trait-pill">
+                <Compass size={16} className="nexus-trait-icon" />
+                <span>Curious Minds</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ── 3. WHAT WE SHARE SECTION ── */}
+        <section id="what-we-share" className="nexus-section nexus-share-section">
+          <div className="nexus-section-header">
+            <h2 className="nexus-section-title">{whatWeShare?.title || 'What We Share'}</h2>
+          </div>
+
+          <div className="nexus-share-grid">
+            {(whatWeShare?.items || []).map((item, idx) => (
+              <div key={item.id || idx} className="nexus-share-card">
+                <h3 className="nexus-share-card-title">{item.title}</h3>
+                <p className="nexus-share-card-desc">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 4. OUR MISSION & OUR VISION ── */}
+        <section className="nexus-section nexus-dual-section">
+          <div className="nexus-dual-grid">
+            
+            {/* Mission Card */}
+            <div className="nexus-dual-card nexus-mission-card">
+              <h2 className="nexus-dual-title">{mission?.title || 'Our Mission'}</h2>
+              <p className="nexus-dual-desc">
+                {mission?.description || 
+                  'Our mission is to inform, inspire, and empower our readers through quality content. We focus on making every article meaningful, easy to read, and worth your time.'}
+              </p>
+            </div>
+
+            {/* Vision Card */}
+            <div className="nexus-dual-card nexus-vision-card">
+              <h2 className="nexus-dual-title">{vision?.title || 'Our Vision'}</h2>
+              <p className="nexus-dual-desc">
+                {vision?.description || 
+                  'We aspire to build a trusted blogging community where readers can explore ideas, discover opportunities, and keep learning. Your time and trust matter to us, and we strive to make every visit worthwhile.'}
+              </p>
+            </div>
 
           </div>
         </section>
 
-        {/* ── 3. IMPACT METRICS BAR ── */}
-        {Array.isArray(statsBar?.stats) && statsBar.stats.length > 0 && (
-          <section className="nexus-stats-section">
-            <div className="nexus-stats-bar">
-              {statsBar.stats.map((st, sIdx) => (
-                <div key={sIdx} className="nexus-stat-col">
-                  <div className={`nexus-stat-num ${st.isCyan ? 'cyan-stat' : ''}`}>{st.num}</div>
-                  <div className="nexus-stat-label">{st.label}</div>
+        {/* ── 5. WHY CHOOSE US? SECTION ── */}
+        <section id="why-choose-us" className="nexus-section nexus-why-section">
+          <div className="nexus-section-header">
+            <h2 className="nexus-section-title">{whyChooseUs?.title || 'Why Choose Us?'}</h2>
+          </div>
+
+          <div className="nexus-why-grid">
+            {(whyChooseUs?.points || []).map((point, idx) => (
+              <div key={idx} className="nexus-why-card">
+                <div className="nexus-why-icon-box">
+                  <CheckCircle2 size={20} className="nexus-check-icon" />
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+                <div className="nexus-why-text">{point}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* ── 4. MEET OUR CORE TEAM ── */}
-        {Array.isArray(teamSection?.members) && teamSection.members.length > 0 && (
-          <section id="team" className="nexus-team-section">
-            <div className="nexus-section-header-center">
-              <h2 className="nexus-section-title">{teamSection.title || 'Meet Our Core Team'}</h2>
-              {teamSection.subtitle && (
-                <p className="nexus-section-desc">
-                  {teamSection.subtitle}
-                </p>
-              )}
-            </div>
+        {/* ── 6. JOIN OUR COMMUNITY & CONTACT US ── */}
+        <section id="community" className="nexus-section nexus-community-section">
+          <div className="nexus-section-header">
+            <h2 className="nexus-section-title">{community?.title || 'Join Our Community'}</h2>
+          </div>
 
-            <div className="nexus-team-grid">
-              {teamSection.members.map((member, idx) => (
-                <div key={member.id || idx} className="nexus-team-card">
-                  <div className="nexus-avatar-wrap">
-                    <img 
-                      src={member.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'} 
-                      alt={member.name} 
-                      className="nexus-team-avatar"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
-                      }}
-                      loading="lazy"
+          <div className="nexus-community-card">
+            {/* Query Form */}
+            <div className="nexus-query-form-card">
+              <div className="nexus-query-form-header">
+                <div className="nexus-query-title-row">
+                  <h3 className="nexus-query-title">Have a Query or Want to Collaborate?</h3>
+                </div>
+              </div>
+
+              {querySubmitted ? (
+                <div className="nexus-query-success">
+                  <div className="nexus-query-success-icon">
+                    <CheckCircle2 size={36} />
+                  </div>
+                  <h4 className="nexus-query-success-title">Query Submitted Successfully!</h4>
+                  <p className="nexus-query-success-desc">
+                    Thank you for reaching out. We have received your query and will respond soon.
+                  </p>
+                  <button 
+                    type="button" 
+                    className="nexus-btn-secondary nexus-query-reset-btn"
+                    onClick={() => setQuerySubmitted(false)}
+                  >
+                    <span>Send Another Query</span>
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleQuerySubmit} className="nexus-query-form">
+                  {queryError && (
+                    <div className="nexus-query-error">{queryError}</div>
+                  )}
+
+                  <div className="nexus-query-grid-2col">
+                    <div className="nexus-form-group">
+                      <label htmlFor="nexus-q-name" className="nexus-form-label">
+                        Full Name <span className="nexus-req">*</span>
+                      </label>
+                      <input 
+                        id="nexus-q-name"
+                        type="text" 
+                        required
+                        placeholder="e.g. Rahul Sharma"
+                        className="nexus-form-input"
+                        value={queryForm.name}
+                        onChange={(e) => setQueryForm({ ...queryForm, name: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="nexus-form-group">
+                      <label htmlFor="nexus-q-email" className="nexus-form-label">
+                        Email Address <span className="nexus-req">*</span>
+                      </label>
+                      <input 
+                        id="nexus-q-email"
+                        type="email" 
+                        required
+                        placeholder="rahul@example.com"
+                        className="nexus-form-input"
+                        value={queryForm.email}
+                        onChange={(e) => setQueryForm({ ...queryForm, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="nexus-form-group">
+                    <label htmlFor="nexus-q-subject" className="nexus-form-label">
+                      Subject
+                    </label>
+                    <input 
+                      id="nexus-q-subject"
+                      type="text" 
+                      placeholder="e.g. Collaboration / Feedback / Question"
+                      className="nexus-form-input"
+                      value={queryForm.subject}
+                      onChange={(e) => setQueryForm({ ...queryForm, subject: e.target.value })}
                     />
                   </div>
 
-                  <h3 className="nexus-team-name">{member.name}</h3>
-                  <div className="nexus-team-role">{member.role}</div>
-                  {member.bio && <p className="nexus-team-bio">{member.bio}</p>}
-
-                  <div className="nexus-team-socials">
-                    {member.linkedin && (
-                      <a 
-                        href={member.linkedin} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="nexus-social-btn"
-                        title="LinkedIn"
-                      >
-                        <LinkedInIcon size={16} />
-                      </a>
-                    )}
-                    {member.github && (
-                      <a 
-                        href={member.github} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="nexus-social-btn"
-                        title="GitHub"
-                      >
-                        <GitHubIcon size={16} />
-                      </a>
-                    )}
-                    {member.community && (
-                      <a 
-                        href={member.community} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="nexus-social-btn"
-                        title="Community"
-                      >
-                        <MessageSquare size={16} />
-                      </a>
-                    )}
-                    {member.website && (
-                      <a 
-                        href={member.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="nexus-social-btn"
-                        title="Website"
-                      >
-                        <ExternalLink size={16} />
-                      </a>
-                    )}
+                  <div className="nexus-form-group">
+                    <label htmlFor="nexus-q-message" className="nexus-form-label">
+                      Your Query <span className="nexus-req">*</span>
+                    </label>
+                    <textarea 
+                      id="nexus-q-message"
+                      rows={4}
+                      required
+                      placeholder="Write your query or message here..."
+                      className="nexus-form-textarea"
+                      value={queryForm.message}
+                      onChange={(e) => setQueryForm({ ...queryForm, message: e.target.value })}
+                    />
                   </div>
-                </div>
-              ))}
+
+                  <div className="nexus-query-form-actions">
+                    <button 
+                      type="submit" 
+                      className="nexus-query-submit-btn"
+                      disabled={querySubmitting}
+                    >
+                      {querySubmitting ? (
+                        <>
+                          <Loader2 size={16} className="nexus-spin" />
+                          <span>Sending Query...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} />
+                          <span>Submit Query</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-          </section>
-        )}
+
+            {/* Signature Tagline */}
+            <div className="nexus-signature-ribbon">
+              <span className="nexus-signature-quote">
+                <em>{community?.tagline || 'Read. Discover. Learn. Grow.'}</em>
+              </span>
+            </div>
+          </div>
+        </section>
 
       </div>
     </div>

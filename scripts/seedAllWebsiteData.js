@@ -16,7 +16,6 @@ import {
 } from '../src/data/storiesData.js';
 import { ALL_ENTERPRISE_STORIES } from '../src/data/enterpriseStoryData.js';
 import { ALL_SMB_STORIES, SMB_STORY_PROFILES } from '../src/data/smbStoryData.js';
-import { ALL_HINDI_STORIES } from '../src/data/hindiStoryData.js';
 import { ALL_HER_STORIES, HER_STORY_PROFILES } from '../src/data/herStoryData.js';
 import { 
   SOCIAL_HERO_STORY, 
@@ -146,9 +145,6 @@ async function run() {
 
   // 4. EnterpriseStory
   (ALL_ENTERPRISE_STORIES || []).forEach(s => add(s, 'EnterpriseStory', 'enterprise'));
-
-  // 5. YS Hindi
-  (ALL_HINDI_STORIES || []).forEach(s => add(s, 'YS हिंदी', 'hindi'));
 
   // 6. SocialStory
   add(SOCIAL_HERO_STORY, 'SocialStory', 'social-story');

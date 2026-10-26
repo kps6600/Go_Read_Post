@@ -8,17 +8,17 @@ export const COMPANY_AND_LEGAL_PAGES = [
     title: "About Us",
     slug: "about",
     brand: "GoReadPost",
-    description: "Learn about GoReadPost's mission, editorial charter, core beats, and global bureaus.",
-    heroHeadline: "Powering the Stories That Build Tomorrow",
-    heroSubhead: "GoReadPost is India's leading digital publication for startup stories, venture capital news, and emerging technology. We bring you insights, analysis, and real stories from the people shaping Bharat's innovation economy.",
+    description: "Welcome to Our Blog — Ideas, Stories & Inspiration. We believe every great idea deserves to be shared.",
+    heroHeadline: "Welcome to Our Blog — Ideas, Stories & Inspiration",
+    heroSubhead: "We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.",
     heroBanner: "",
     status: "published",
     showInNav: false,
     order: 10,
     seo: {
-      title: "About Us | GoReadPost Media",
-      description: "GoReadPost is the premier digital journalism network chronicling breakthrough founders, deep technology, AI revolutions, and venture capital.",
-      keywords: ["about us", "GoReadPost", "editorial", "tech media", "startup journalism"]
+      title: "About Us | GoReadPost",
+      description: "Welcome to Our Blog — Ideas, Stories & Inspiration. We believe every great idea deserves to be shared. Explore informative articles, practical tips, and inspiring stories.",
+      keywords: ["about us", "GoReadPost", "ideas stories inspiration", "informative articles", "tips and guides"]
     },
     sections: [
       {
@@ -756,6 +756,7 @@ export function getFallbackPageBySlug(slug) {
     if ((clean === 'founder' || clean === 'founder-first') && (pSlug === 'founder-first' || p.id === 'founder-first')) return true;
     if ((clean === 'categories' || clean === 'category' || clean === 'content') && (pSlug === 'categories' || p.id === 'category')) return true;
     if (clean === 'about-us' && pSlug === 'about') return true;
+    if ((clean === 'contact' || clean === 'contact-us') && (pSlug === 'pitch' || pSlug === 'contact')) return true;
     if (clean === 'team' && pSlug === 'editorial-team') return true;
     if (clean === 'authors' && pSlug === 'editorial-team') return true;
     if (clean === 'jobs' && pSlug === 'careers') return true;

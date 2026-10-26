@@ -90,8 +90,7 @@ export const DEFAULT_NAVIGATION_ITEMS = [
           { title: 'Founder Stories', slug: 'founder-stories', url: '/category/startups', type: 'link', order: 1 },
           { title: 'HerStory (Women Leaders)', slug: 'her-story', url: '/category/her-story', type: 'link', order: 2 },
           { title: 'SMBStory (MSME & D2C)', slug: 'smbstory', url: '/category/smbstory', type: 'link', order: 3 },
-          { title: 'SocialStory (Impact & Climate)', slug: 'social-story', url: '/category/social-story', type: 'link', order: 4 },
-          { title: 'YS Hindi Edition', slug: 'hindi', url: '/category/hindi', type: 'link', order: 5 }
+          { title: 'SocialStory (Impact & Climate)', slug: 'social-story', url: '/category/social-story', type: 'link', order: 4 }
         ]
       },
       {
@@ -100,10 +99,7 @@ export const DEFAULT_NAVIGATION_ITEMS = [
         type: 'group',
         order: 3,
         children: [
-          { title: 'Videos & Studio Shows', slug: 'videos-hub', url: '/videos', type: 'link', order: 1 },
-          { title: 'TechSparks Summit', slug: 'techsparks-hub', url: '/techsparks', type: 'link', order: 2 },
-          { title: 'Brands Hub', slug: 'brands-hub', url: '/brands', type: 'link', order: 3 },
-          { title: 'Research & Reports', slug: 'resources-hub', url: '/resources', type: 'link', order: 4 }
+          { title: 'Videos & Studio Shows', slug: 'videos-hub', url: '/videos', type: 'link', order: 1 }
         ]
       }
     ]

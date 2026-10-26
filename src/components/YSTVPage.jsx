@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   Play, Video, ArrowLeft, Eye, Clock, Share2, Sparkles, X, 
   ExternalLink, Tv, Radio, Flame, CheckCircle2
@@ -97,7 +97,7 @@ export default function YSTVPage({ onBackToHome }) {
           <span>Back to Frontpage</span>
         </button>
         <div className="ystv-badge-top">
-          <Tv size={14} color="#e11d48" />
+          <Tv size={14} color="#dc2626" />
           <span>YSTV MULTIMEDIA • ORIGINAL STUDIO PRODUCTIONS</span>
         </div>
       </div>
@@ -158,7 +158,6 @@ export default function YSTVPage({ onBackToHome }) {
             <div className="ystv-card-body">
               <span className="ystv-series-tag">{vid.series}</span>
               <h3 className="ystv-card-title">{vid.title}</h3>
-              <p className="ystv-card-desc">{vid.desc}</p>
               <div className="ystv-card-footer">
                 <span>{vid.guest}</span>
                 <span>•</span>
@@ -185,7 +184,7 @@ export default function YSTVPage({ onBackToHome }) {
             <div className="ystv-video-player-mock">
               <img src={playingVideo.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
               <div className="ystv-player-active-overlay">
-                <Play size={48} fill="#e11d48" color="#e11d48" />
+                <Play size={48} fill="#dc2626" color="#dc2626" />
                 <span style={{ color: '#fff', fontWeight: 700, marginTop: '12px' }}>Playing High-Definition Stream</span>
               </div>
             </div>

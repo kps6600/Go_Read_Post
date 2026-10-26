@@ -90,31 +90,10 @@ export const DEFAULT_MENU_ITEMS = [
         title: "Flagship Desks",
         items: [
           { label: "EnterpriseStory", categoryId: "enterprise" },
-          { label: "YS हिंदी", categoryId: "hindi" },
           { label: "SMBStory", categoryId: "smbstory" },
           { label: "AIStory", categoryId: "ai-story" },
           { label: "HerStory", categoryId: "her-story" },
           { label: "SocialStory", categoryId: "social-story" }
-        ]
-      }
-    ]
-  },
-  {
-    id: "resources",
-    label: "Resources",
-    type: "link",
-    target: "resources",
-    hasDropdown: true,
-    isBadge: false,
-    order: 4,
-    visible: true,
-    dropdownColumns: [
-      {
-        title: "Founder Toolkit",
-        items: [
-          { label: "Valuation Benchmark", query: "valuation" },
-          { label: "Pitch Guides", action: "pitch" },
-          { label: "CapTable Deep-dives", categoryId: "captable" }
         ]
       }
     ]

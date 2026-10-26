@@ -6,14 +6,31 @@ import {
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
-const COMPANY_SLUGS = ['about', 'advertise'];
-const PORTAL_SLUGS = ['trending', 'videos', 'newsletter', 'category', 'categories', 'topics', 'topic'];
+export const identifyEditablePage = (page) => {
+  const id = (page?.id || '').toLowerCase();
+  const slug = (page?.slug || '').toLowerCase().replace(/^\/+/, '');
+  const title = (page?.title || '').toLowerCase();
+
+  if (id === 'home' || slug === '' || slug === 'home' || title.startsWith('home')) return 'home';
+  if (id === 'category' || slug === 'categories' || slug === 'category' || title.includes('category')) return 'category';
+  if (id === 'contact' || slug === 'contact' || slug === 'contact-us' || title.includes('contact')) return 'contact';
+  if (id === 'about' || slug === 'about' || slug === 'about-us' || title.includes('about')) return 'about';
+  if (id === 'page_advertise' || id === 'advertise' || slug === 'advertise' || slug === 'advertise-with-us' || title.includes('advertise')) return 'advertise';
+
+  return null;
+};
+
+const EDITABLE_PAGE_GROUPS = {
+  home: { label: 'Primary Landing', color: '#ea580c', bg: 'rgba(234, 88, 12, 0.12)' },
+  category: { label: 'Editorial Feed & Desks', color: '#059669', bg: 'rgba(5, 150, 105, 0.12)' },
+  contact: { label: 'Newsroom & Bureaus', color: '#0284c7', bg: 'rgba(2, 132, 199, 0.12)' },
+  about: { label: 'Company & Mission', color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.12)' },
+  advertise: { label: 'Media Kit & Partnerships', color: '#dc2626', bg: 'rgba(220, 38, 38, 0.12)' }
+};
 
 const getPageGroup = (page) => {
-  const s = (page.slug || page.id || '').toLowerCase().replace(/^\/+/, '');
-  if (COMPANY_SLUGS.includes(s)) return { key: 'company', label: 'Company & Connect', color: '#2563eb', bg: 'rgba(37, 99, 235, 0.12)' };
-  if (PORTAL_SLUGS.includes(s)) return { key: 'feeds', label: 'Editorial Feeds', color: '#059669', bg: 'rgba(5, 150, 105, 0.12)' };
-  return { key: 'portal', label: 'Site Architecture', color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.12)' };
+  const type = identifyEditablePage(page) || 'home';
+  return EDITABLE_PAGE_GROUPS[type] || { label: 'Site Page', color: '#2563eb', bg: 'rgba(37, 99, 235, 0.12)' };
 };
 
 export default function AdminPagesView({ onNavigate, onShowToast, filterCategory }) {
@@ -42,7 +59,27 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     setLoading(true);
     try {
       const data = await PageService.getPages();
-      setPages(data || []);
+      const rawList = Array.isArray(data) ? data : [];
+      const ORDERED_KEYS = ['home', 'category', 'contact', 'about', 'advertise'];
+      const editablePages = [];
+
+      ORDERED_KEYS.forEach((targetKey, idx) => {
+        const found = rawList.find(p => identifyEditablePage(p) === targetKey);
+        if (found) {
+          editablePages.push(found);
+        } else {
+          const fallbackMap = {
+            home: { id: 'home', title: 'Homepage', slug: '', status: 'published', order: 1, sections: [] },
+            category: { id: 'category', title: 'Category Page & Desks', slug: 'categories', status: 'published', order: 2, sections: [] },
+            contact: { id: 'contact', title: 'Contact Us', slug: 'contact', status: 'published', order: 3, sections: [] },
+            about: { id: 'about', title: 'About Us', slug: 'about', status: 'published', order: 4, sections: [] },
+            advertise: { id: 'page_advertise', title: 'Advertise With Us', slug: 'advertise', status: 'published', order: 5, sections: [] }
+          };
+          editablePages.push(fallbackMap[targetKey]);
+        }
+      });
+
+      setPages(editablePages);
     } catch (err) {
       console.error('Failed to load pages:', err);
     } finally {
@@ -303,9 +340,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                 : 'No pages match the active filters.'}
             </p>
             {!searchQuery && (
-              <button className="apv-btn-primary" onClick={() => onNavigate('/admin/pages/create')}>
-                <Plus size={15} />
-                <span>Create New Page</span>
+              <button className="apv-btn-primary" onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}>
+                <span>Reset Filters</span>
               </button>
             )}
           </div>
@@ -328,8 +364,15 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                   const sections = page.sections?.length || 0;
                   const isActing = actionLoadingId === page.id;
                   const grp = getPageGroup(page);
+                  const pageType = identifyEditablePage(page);
                   const targetSlug = page.slug || page.id || '';
-                  const previewUrl = (!targetSlug || targetSlug === 'home' || targetSlug === '/') ? '/' : `/${targetSlug.replace(/^\/+/, '')}`;
+                  
+                  let previewUrl = '/';
+                  if (pageType === 'category') previewUrl = '/categories';
+                  else if (pageType === 'contact') previewUrl = '/contact';
+                  else if (pageType === 'about') previewUrl = '/about';
+                  else if (pageType === 'advertise') previewUrl = '/advertise';
+                  else previewUrl = '/';
 
                   return (
                     <tr key={page.id || page._id || targetSlug} className="apv-tr">
@@ -337,7 +380,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                         <div className="apv-page-cell">
                           <div className="apv-page-info">
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span className="apv-page-title">{page.title}</span>
+                              <span className="apv-page-title">{(page.title || '').replace(/\s*-\s*Live Portal/i, '')}</span>
                               <span 
                                 style={{
                                   fontSize: '0.7rem',
@@ -396,18 +439,16 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                           <button
                             className="apv-action-btn edit"
                             onClick={() => {
-                              if (page.id === 'trending' || targetSlug === 'trending') {
-                                onNavigate('/admin/trending');
-                              } else if (page.id === 'category' || targetSlug === 'category' || targetSlug === 'categories') {
+                              if (pageType === 'home') {
+                                onNavigate('/admin/homepage');
+                              } else if (pageType === 'category') {
                                 onNavigate('/admin/category');
-                              } else if (page.id === 'founder' || page.id === 'founder-first' || targetSlug === 'founder' || targetSlug === 'founder-first') {
-                                onNavigate('/admin/founder');
-                              } else if (page.id === 'videos' || targetSlug === 'videos') {
-                                onNavigate('/admin/videos');
-                              } else if (page.id === 'about' || targetSlug === 'about' || targetSlug === 'about-us') {
+                              } else if (pageType === 'about') {
                                 onNavigate('/admin/about');
-                              } else if (page.id === 'topics' || targetSlug === 'topics') {
-                                onNavigate('/admin/topics');
+                              } else if (pageType === 'contact') {
+                                onNavigate('/admin/pages/contact/edit');
+                              } else if (pageType === 'advertise') {
+                                onNavigate('/admin/pages/page_advertise/edit');
                               } else {
                                 onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`);
                               }

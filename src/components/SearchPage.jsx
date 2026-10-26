@@ -158,7 +158,7 @@ export default function SearchPage({
                 className="ys-brand-pill"
                 style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <Layers size={12} color="var(--brand-primary, #ea580c)" />
+                <Layers size={12} color="var(--brand-primary, #dc2626)" />
                 <span>{c.name} Desk</span>
               </button>
             ))}
@@ -171,7 +171,7 @@ export default function SearchPage({
                 className="ys-brand-pill"
                 style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <Tag size={12} color="var(--brand-primary, #ea580c)" />
+                <Tag size={12} color="var(--brand-primary, #dc2626)" />
                 <span>#{t.name}</span>
               </button>
             ))}
@@ -184,7 +184,7 @@ export default function SearchPage({
                 className="ys-brand-pill"
                 style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <Users size={12} color="var(--brand-primary, #ea580c)" />
+                <Users size={12} color="var(--brand-primary, #dc2626)" />
                 <span>{a.name}</span>
               </button>
             ))}
@@ -194,7 +194,7 @@ export default function SearchPage({
         {/* 4. Loading State */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '5rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-            <RefreshCw size={36} color="var(--brand-primary, #ea580c)" style={{ animation: 'spin 1.2s linear infinite' }} />
+            <RefreshCw size={36} color="var(--brand-primary, #dc2626)" style={{ animation: 'spin 1.2s linear infinite' }} />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
               Searching Editorial Archive...
             </h3>
@@ -224,7 +224,7 @@ export default function SearchPage({
               alignItems: 'center', 
               justifyContent: 'center', 
               margin: '0 auto 1.25rem',
-              color: 'var(--brand-primary, #ea580c)'
+              color: 'var(--brand-primary, #dc2626)'
             }}>
               <Search size={28} />
             </div>
@@ -299,7 +299,7 @@ export default function SearchPage({
                       height: '36px',
                       borderRadius: '8px',
                       border: p === currentPage ? 'none' : '1px solid var(--border-medium, #cbd5e1)',
-                      background: p === currentPage ? 'var(--brand-primary, #ea580c)' : 'var(--bg-secondary, #fff)',
+                      background: p === currentPage ? 'var(--brand-primary, #dc2626)' : 'var(--bg-secondary, #fff)',
                       color: p === currentPage ? '#fff' : 'var(--text-primary)',
                       cursor: 'pointer',
                       fontWeight: '700',

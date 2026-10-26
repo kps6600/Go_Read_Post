@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════════════════════════════════
+﻿/* ══════════════════════════════════════════════════════════════════
    ADMIN VIDEOS PAGE STUDIO (Live Visual CMS for /videos)
    ══════════════════════════════════════════════════════════════════ */
 
@@ -237,13 +237,13 @@
   gap: 8px;
   padding: 9px 18px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #ffffff;
   border: none;
   font-size: 0.86rem;
   font-weight: 750;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
   transition: all 0.2s ease;
   width: fit-content;
   margin-top: 4px;
@@ -251,7 +251,7 @@
 
 .avv-hero-play-btn:hover {
   transform: scale(1.04);
-  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.55);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.55);
 }
 
 /* ── Section Block Container ── */
@@ -716,7 +716,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(225, 29, 72, 0.85);
+  background: rgba(220, 38, 38, 0.85);
   color: #ffffff;
   display: flex;
   align-items: center;

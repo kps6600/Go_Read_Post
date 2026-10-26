@@ -22,6 +22,9 @@ import DynamicImageText from './dynamic/DynamicImageText';
 import DynamicFeatures from './dynamic/DynamicFeatures';
 import DynamicStats from './dynamic/DynamicStats';
 import DynamicBrands from './dynamic/DynamicBrands';
+import VideoSection from './VideoSection';
+import ConversationsSection from './ConversationsSection';
+import AboutSection from './AboutSection';
 
 // Safe extraction helper functions for dynamic story objects
 const getStoryId = (s, fallbackIdx = 0) => s?.id || s?._id || s?.slug || `story-${fallbackIdx}`;
@@ -51,17 +54,81 @@ const getStoryExcerpt = (s) => {
   return '';
 };
 
-const getStoryCategory = (s) => {
-  if (typeof s?.categoryLabel === 'string' && s.categoryLabel) return s.categoryLabel;
-  if (typeof s?.categoryTag === 'string' && s.categoryTag) return s.categoryTag;
-  if (typeof s?.category === 'string' && s.category) return s.category;
-  if (typeof s?.category === 'object' && s.category?.name) return s.category.name;
-  return 'News';
+const getStoryTag = (s) => {
+  const tagList = [];
+  if (Array.isArray(s?.tags)) {
+    s.tags.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  } else if (typeof s?.tags === 'string' && s.tags.trim()) {
+    s.tags.split(',').forEach(t => {
+      const clean = t.trim();
+      if (clean && clean.toLowerCase() !== 'news') tagList.push(clean);
+    });
+  }
+  if (typeof s?.tag === 'string' && s.tag.trim() && s.tag.toLowerCase() !== 'news') {
+    tagList.push(s.tag.trim());
+  }
+  if (Array.isArray(s?.topics)) {
+    s.topics.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  }
+  if (typeof s?.topic === 'string' && s.topic.trim() && s.topic.toLowerCase() !== 'news') {
+    tagList.push(s.topic.trim());
+  }
+  if (typeof s?.categoryName === 'string' && s.categoryName.trim() && s.categoryName.toLowerCase() !== 'news') {
+    tagList.push(s.categoryName.trim());
+  }
+  if (typeof s?.categoryLabel === 'string' && s.categoryLabel.trim() && s.categoryLabel.toLowerCase() !== 'news') {
+    tagList.push(s.categoryLabel.trim());
+  }
+  if (typeof s?.categoryTag === 'string' && s.categoryTag.trim() && s.categoryTag.toLowerCase() !== 'news') {
+    tagList.push(s.categoryTag.trim());
+  }
+  if (typeof s?.category === 'object' && s.category?.name && s.category.name.toLowerCase() !== 'news') {
+    tagList.push(s.category.name.trim());
+  }
+  if (typeof s?.category === 'string' && s.category.trim() && s.category.toLowerCase() !== 'news' && !/^[0-9a-fA-F]{24}$/.test(s.category)) {
+    tagList.push(s.category.trim());
+  }
+
+  const unique = [];
+  const seen = new Set();
+  tagList.forEach(item => {
+    const key = item.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+  });
+
+  if (unique.length > 0) {
+    if (unique.length > 1 && (unique[0].length + unique[1].length <= 16)) {
+      return `${unique[0]} · ${unique[1]}`;
+    }
+    return unique[0];
+  }
+
+  const title = (s?.title || '').toLowerCase();
+  if (title.includes('ai') || title.includes('tech') || title.includes('robot') || title.includes('compute') || title.includes('silicon')) return 'AI & Tech';
+  if (title.includes('startup') || title.includes('founder') || title.includes('bootstrap') || title.includes('pitch')) return 'Startups';
+  if (title.includes('fund') || title.includes('invest') || title.includes('ipo') || title.includes('vc') || title.includes('crore')) return 'Funding';
+  if (title.includes('farmer') || title.includes('rural') || title.includes('grassroot') || title.includes('women')) return 'HerStory';
+  if (title.includes('school') || title.includes('child') || title.includes('library') || title.includes('social')) return 'Social Impact';
+
+  return 'Spotlight';
 };
 
+const getStoryCategory = (s) => getStoryTag(s);
+
 const getStoryCategorySlug = (s) => {
-  const cat = (typeof s?.category === 'string' ? s.category : '') || 
-              (typeof s?.categoryLabel === 'string' ? s.categoryLabel : '') || 'startups';
+  const cat = (typeof s?.category === 'string' && !/^[0-9a-fA-F]{24}$/.test(s.category) ? s.category : '') || 
+              (typeof s?.categoryLabel === 'string' && !/^[0-9a-fA-F]{24}$/.test(s.categoryLabel) ? s.categoryLabel : '') || 'startups';
   return cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'startups';
 };
 
@@ -99,12 +166,11 @@ const getStoryDate = (s) => {
 };
 
 const getStoryReadTime = (s) => {
-  if (typeof s?.readTime === 'string') return s.readTime;
-  if (typeof s?.readingTime === 'number') return `${s.readingTime} min read`;
-  if (typeof s?.readingTime === 'string') {
-    const clean = s.readingTime.trim();
-    if (/min\s*read/i.test(clean)) return clean;
-    return `${clean} min read`;
+  let val = s?.readTime || s?.readingTime || '4 min read';
+  if (typeof val === 'number') return `${val} min read`;
+  if (typeof val === 'string') {
+    const clean = val.replace(/\s*min\s*read\s*/gi, '').trim();
+    return `${clean || '4'} min read`;
   }
   return '4 min read';
 };
@@ -112,15 +178,14 @@ const getStoryReadTime = (s) => {
 const getCategoryBadgeColor = (slug) => {
   const clean = (slug || '').toLowerCase();
   if (clean.includes('startup')) return '#059669';
-  if (clean.includes('tech')) return '#2563eb';
-  if (clean.includes('ai')) return '#4f46e5';
+  if (clean.includes('tech') || clean.includes('ai')) return '#dc2626';
   if (clean.includes('enterprise')) return '#7c3aed';
   if (clean.includes('her') || clean.includes('women')) return '#db2777';
   if (clean.includes('smb') || clean.includes('msme')) return '#ea580c';
   if (clean.includes('leader')) return '#0891b2';
   if (clean.includes('social') || clean.includes('impact')) return '#10b981';
   if (clean.includes('sport')) return '#dc2626';
-  return '#2563eb';
+  return '#dc2626';
 };
 
 export default function ModernHomepageView({ 
@@ -523,11 +588,6 @@ export default function ModernHomepageView({
           >
             {blogTitle}
           </h3>
-          {blogExcerpt && (
-            <p className="mhp-blog-excerpt">
-              {blogExcerpt}
-            </p>
-          )}
 
           <div className="mhp-blog-footer-row">
             <button 
@@ -550,8 +610,8 @@ export default function ModernHomepageView({
                 <Heart 
                   size={14} 
                   className="mhp-like-icon"
-                  fill={isCardLiked ? '#f43f5e' : 'none'} 
-                  color={isCardLiked ? '#f43f5e' : 'currentColor'} 
+                  fill={isCardLiked ? '#ef4444' : 'none'} 
+                  color={isCardLiked ? '#ef4444' : 'currentColor'} 
                 />
                 {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
               </button>
@@ -684,8 +744,8 @@ export default function ModernHomepageView({
     const currentHeroCategory = (typeof activeSlide.category === 'string' ? activeSlide.category : '') || (typeof activeSlide.badge === 'string' ? activeSlide.badge : '') || getStoryCategory(activeSlide) || data.badge || 'HEADLINE';
     const currentHeroAuthor = getStoryAuthor(activeSlide);
     const currentHeroAvatar = activeSlide.authorAvatar || activeSlide.avatar || getStoryAvatar(activeSlide) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-    const currentHeroDate = (typeof activeSlide.date === 'string' ? activeSlide.date : '') || getStoryDate(activeSlide) || 'Today';
-    const currentHeroReadTime = (typeof activeSlide.readTime === 'string' ? activeSlide.readTime : '') || getStoryReadTime(activeSlide) || '4 min read';
+    const currentHeroDate = getStoryDate(activeSlide);
+    const currentHeroReadTime = getStoryReadTime(activeSlide);
     const currentHeroBtnText = activeSlide.primaryBtnText || data.primaryBtnText || data.buttonText || 'Read More';
     const currentHeroBtnUrl = activeSlide.link || activeSlide.primaryBtnUrl || data.primaryBtnUrl || data.buttonUrl;
 
@@ -732,6 +792,7 @@ export default function ModernHomepageView({
             <h1 
               className="mhp-hero-title"
               onClick={handleHeroAction}
+              title={currentHeroTitle}
             >
               {currentHeroTitle}
             </h1>
@@ -1059,14 +1120,7 @@ export default function ModernHomepageView({
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => 
-            renderStoryCard(
-              blog, 
-              idx, 
-              <span className="mhp-spotlight-pill">
-                <Zap size={12} fill="#ffffff" color="#ffffff" />
-                {badgeText}
-              </span>
-            )
+            renderStoryCard(blog, idx)
           )}
         </div>
       </section>
@@ -1076,7 +1130,6 @@ export default function ModernHomepageView({
   // Section 6: Newsletter Banner
   const renderNewsletterSection = (sec) => {
     const headline = sec?.data?.headline || sec?.data?.title || sec?.customConfig?.headline || sec?.title || "Get the Latest Blogs Delivered to Your Inbox";
-    const subtitle = sec?.data?.subtitle || sec?.subtitle;
     const buttonText = sec?.data?.buttonText || sec?.customConfig?.buttonText || "Subscribe";
     const placeholder = sec?.data?.placeholder || "Enter your email address";
 
@@ -1091,11 +1144,6 @@ export default function ModernHomepageView({
               <h2 className="mhp-newsletter-title">
                 {headline}
               </h2>
-              {subtitle && (
-                <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  {subtitle}
-                </p>
-              )}
             </div>
           </div>
 
@@ -1128,6 +1176,61 @@ export default function ModernHomepageView({
     );
   };
 
+  // Section: Category Specific Desk
+  const renderCategorySection = (sec) => {
+    const typeStr = (sec?.type || sec?.sectionKey || sec?.id || '').toLowerCase();
+    let rawCat = sec?.data?.category || '';
+    if (!rawCat) {
+      if (typeStr.includes('startup')) rawCat = 'Startups';
+      else if (typeStr.includes('tech')) rawCat = 'Technology';
+      else if (typeStr.includes('ai')) rawCat = 'AI';
+      else if (typeStr.includes('fintech')) rawCat = 'FinTech';
+      else if (typeStr.includes('enterprise')) rawCat = 'Enterprise';
+      else if (typeStr.includes('herstory')) rawCat = 'HerStory';
+      else if (typeStr.includes('smbstory')) rawCat = 'SMBStory';
+      else if (typeStr.includes('socialstory')) rawCat = 'SocialStory';
+      else if (typeStr.includes('hindi')) rawCat = 'Hindi';
+      else rawCat = typeStr.replace(/^category_/, '');
+    }
+
+    const title = sec?.data?.title || sec?.data?.heading || `${rawCat} Newsroom Desk`;
+    const subtitle = sec?.data?.subtitle || `Latest stories and reporting from the ${rawCat} desk`;
+    const viewAllUrl = sec?.data?.viewAllUrl || `/category/${rawCat.toLowerCase().replace(/\s+/g, '-')}`;
+    const viewAllText = sec?.data?.viewAllText || `Explore ${rawCat}`;
+    const categoryArticles = pool.filter(s => {
+      const c = (s.category || s.categoryLabel || s.categoryName || '').toLowerCase();
+      return c.includes(rawCat.toLowerCase());
+    });
+    const articles = getSectionArticles(sec, categoryArticles.length > 0 ? categoryArticles : pool);
+
+    return (
+      <section key={sec.id || `sec-cat-${rawCat}`} className="mhp-content-section">
+        <div className="mhp-section-header">
+          <div className="mhp-section-header-left">
+            <div className="mhp-section-title-wrap">
+              <span>{title}</span>
+            </div>
+            {subtitle && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0' }}>{subtitle}</p>}
+          </div>
+          <span 
+            className="mhp-view-all-link"
+            onClick={() => {
+              window.history.pushState(null, '', viewAllUrl);
+              window.dispatchEvent(new Event('popstate'));
+              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+            }}
+          >
+            {viewAllText} <ArrowRight size={14} />
+          </span>
+        </div>
+
+        <div className="mhp-blog-cards-grid">
+          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="mhp-container">
       {activeSections.map((sec, idx) => {
@@ -1154,6 +1257,41 @@ export default function ModernHomepageView({
             return <React.Fragment key={key}>{renderSpotlightSection(sec)}</React.Fragment>;
           case 'newsletter':
             return <React.Fragment key={key}>{renderNewsletterSection(sec)}</React.Fragment>;
+          case 'video_section':
+          case 'video':
+          case 'videos':
+            return <VideoSection key={key} onSelectVideo={onSelectStory} />;
+          case 'video_shows':
+          case 'conversations':
+            return <ConversationsSection key={key} />;
+          case 'about':
+            return <AboutSection key={key} />;
+          case 'contact':
+            return <DynamicContact key={key} data={sec.data || {}} />;
+          case 'advertise':
+            return (
+              <DynamicCTA 
+                key={key} 
+                data={{
+                  title: sec.data?.title || 'Advertise & Partner with GoReadPost',
+                  description: sec.data?.subtitle || 'Reach over 500,000 monthly founders, enterprise leaders, and investors.',
+                  primaryBtnText: sec.data?.primaryBtnText || 'Download Media Kit',
+                  primaryBtnUrl: sec.data?.primaryBtnUrl || '/advertise',
+                  secondaryBtnText: sec.data?.secondaryBtnText || 'Contact Partnerships',
+                  secondaryBtnUrl: sec.data?.secondaryBtnUrl || '/contact'
+                }} 
+              />
+            );
+          case 'category_startups':
+          case 'category_technology':
+          case 'category_ai':
+          case 'category_fintech':
+          case 'category_enterprise':
+          case 'category_herstory':
+          case 'category_smbstory':
+          case 'category_socialstory':
+          case 'category_hindi':
+            return <React.Fragment key={key}>{renderCategorySection(sec)}</React.Fragment>;
           case 'text':
             return <DynamicText key={key} data={sec.data || {}} />;
           case 'image_text':
@@ -1174,9 +1312,10 @@ export default function ModernHomepageView({
             return <DynamicTestimonials key={key} data={sec.data || {}} />;
           case 'faq':
             return <DynamicFAQ key={key} data={sec.data || {}} />;
-          case 'contact':
-            return <DynamicContact key={key} data={sec.data || {}} />;
           default:
+            if (type.startsWith('category_')) {
+              return <React.Fragment key={key}>{renderCategorySection(sec)}</React.Fragment>;
+            }
             return <React.Fragment key={key}>{renderLatestBlogsSection(sec)}</React.Fragment>;
         }
       })}

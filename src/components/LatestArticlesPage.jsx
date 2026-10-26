@@ -37,8 +37,77 @@ const getStoryExcerpt = (s) => {
   }
   return '';
 };
+const getStoryTag = (s) => {
+  const tagList = [];
+  if (Array.isArray(s?.tags)) {
+    s.tags.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  } else if (typeof s?.tags === 'string' && s.tags.trim()) {
+    s.tags.split(',').forEach(t => {
+      const clean = t.trim();
+      if (clean && clean.toLowerCase() !== 'news') tagList.push(clean);
+    });
+  }
+  if (typeof s?.tag === 'string' && s.tag.trim() && s.tag.toLowerCase() !== 'news') {
+    tagList.push(s.tag.trim());
+  }
+  if (Array.isArray(s?.topics)) {
+    s.topics.forEach(t => {
+      if (t && typeof t === 'string' && t.trim() && t.toLowerCase() !== 'news') {
+        tagList.push(t.trim());
+      }
+    });
+  }
+  if (typeof s?.topic === 'string' && s.topic.trim() && s.topic.toLowerCase() !== 'news') {
+    tagList.push(s.topic.trim());
+  }
+  if (typeof s?.categoryName === 'string' && s.categoryName.trim() && s.categoryName.toLowerCase() !== 'news') {
+    tagList.push(s.categoryName.trim());
+  }
+  if (typeof s?.categoryLabel === 'string' && s.categoryLabel.trim() && s.categoryLabel.toLowerCase() !== 'news') {
+    tagList.push(s.categoryLabel.trim());
+  }
+  if (typeof s?.categoryTag === 'string' && s.categoryTag.trim() && s.categoryTag.toLowerCase() !== 'news') {
+    tagList.push(s.categoryTag.trim());
+  }
+  if (typeof s?.category === 'object' && s.category?.name && s.category.name.toLowerCase() !== 'news') {
+    tagList.push(s.category.name.trim());
+  }
+  if (typeof s?.category === 'string' && s.category.trim() && s.category.toLowerCase() !== 'news' && !/^[0-9a-fA-F]{24}$/.test(s.category)) {
+    tagList.push(s.category.trim());
+  }
 
-const getStoryCategory = (s) => s?.categoryLabel || s?.categoryTag || s?.category || 'General';
+  const unique = [];
+  const seen = new Set();
+  tagList.forEach(item => {
+    const key = item.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+  });
+
+  if (unique.length > 0) {
+    if (unique.length > 1 && (unique[0].length + unique[1].length <= 16)) {
+      return `${unique[0]} · ${unique[1]}`;
+    }
+    return unique[0];
+  }
+
+  const title = (s?.title || '').toLowerCase();
+  if (title.includes('ai') || title.includes('tech') || title.includes('robot') || title.includes('compute') || title.includes('silicon')) return 'AI & Tech';
+  if (title.includes('startup') || title.includes('founder') || title.includes('bootstrap') || title.includes('pitch')) return 'Startups';
+  if (title.includes('fund') || title.includes('invest') || title.includes('ipo') || title.includes('vc') || title.includes('crore')) return 'Funding';
+  if (title.includes('farmer') || title.includes('rural') || title.includes('grassroot') || title.includes('women')) return 'HerStory';
+  if (title.includes('school') || title.includes('child') || title.includes('library') || title.includes('social')) return 'Social Impact';
+
+  return 'Spotlight';
+};
+
+const getStoryCategory = (s) => getStoryTag(s);
 
 const getStoryCategorySlug = (s) => {
   const cat = s?.category || s?.categoryLabel || 'general';
@@ -47,26 +116,24 @@ const getStoryCategorySlug = (s) => {
 
 const getCategoryBadgeColor = (slug) => {
   const clean = (slug || '').toLowerCase();
-  if (clean.includes('tech')) return '#2563eb';      // Blue
-  if (clean.includes('business') || clean.includes('startup')) return '#059669'; // Green
-  if (clean.includes('edu') || clean.includes('study')) return '#7c3aed';       // Purple
-  if (clean.includes('health')) return '#e11d48';     // Rose
-  if (clean.includes('life')) return '#0891b2';       // Cyan
-  if (clean.includes('travel')) return '#ea580c';     // Orange
-  if (clean.includes('food')) return '#d97706';       // Amber
-  if (clean.includes('science') || clean.includes('ai')) return '#4f46e5';     // Indigo
-  return '#2563eb';
+  if (clean.includes('tech') || clean.includes('science') || clean.includes('ai')) return '#dc2626';
+  if (clean.includes('business') || clean.includes('startup')) return '#059669';
+  if (clean.includes('edu') || clean.includes('study')) return '#7c3aed';
+  if (clean.includes('health')) return '#dc2626';
+  if (clean.includes('life')) return '#0891b2';
+  if (clean.includes('travel')) return '#ea580c';
+  if (clean.includes('food')) return '#d97706';
+  return '#dc2626';
 };
 
 const getCategoryIcon = (slug) => {
   const clean = (slug || '').toLowerCase();
-  if (clean.includes('tech')) return { icon: Cpu, bg: '#eff6ff', color: '#2563eb' };
+  if (clean.includes('tech') || clean.includes('science') || clean.includes('ai')) return { icon: Cpu, bg: '#fee2e2', color: '#dc2626' };
   if (clean.includes('business') || clean.includes('startup')) return { icon: Briefcase, bg: '#ecfdf5', color: '#059669' };
   if (clean.includes('edu') || clean.includes('study')) return { icon: GraduationCap, bg: '#f5f3ff', color: '#7c3aed' };
-  if (clean.includes('health')) return { icon: Heart, bg: '#fff1f2', color: '#e11d48' };
+  if (clean.includes('health')) return { icon: Heart, bg: '#fff1f2', color: '#dc2626' };
   if (clean.includes('travel')) return { icon: Plane, bg: '#fff7ed', color: '#ea580c' };
   if (clean.includes('food')) return { icon: Utensils, bg: '#fffbeb', color: '#d97706' };
-  if (clean.includes('science') || clean.includes('ai')) return { icon: Atom, bg: '#eef2ff', color: '#4f46e5' };
   return { icon: Layers, bg: '#f1f5f9', color: '#475569' };
 };
 
@@ -365,11 +432,6 @@ export default function LatestArticlesPage({
                       <h3 className="lap-card-title">
                         {storyTitle}
                       </h3>
-                      {storyExcerpt && (
-                        <p className="lap-card-excerpt">
-                          {storyExcerpt}
-                        </p>
-                      )}
 
                       <div className="lap-card-meta">
                         <img 

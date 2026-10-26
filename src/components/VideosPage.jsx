@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Play, Tv, ArrowLeft, Eye, Clock, Share2, Sparkles, X, 
   Search, Check, User, ChevronRight, ChevronLeft, ThumbsUp, Flame, Radio
@@ -50,8 +50,8 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
     try {
       const params = new URLSearchParams(window.location.search);
       const videoId = params.get('id') || params.get('v');
-      if (videoId) {
-        const found = allVideos.find(v => v.id === videoId);
+      if (videoId && videoId !== 'undefined' && videoId !== 'null') {
+        const found = allVideos.find(v => String(v.id) === String(videoId) || String(v._id) === String(videoId) || String(v.slug) === String(videoId));
         if (found) {
           handlePlayVideo(found);
         }
@@ -90,8 +90,12 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
   }, [allVideos, activeCategory, searchQuery]);
 
   const handlePlayVideo = (vid) => {
+    if (!vid) return;
+    const vId = vid.id || vid._id || vid.slug;
     try {
-      window.history.replaceState(null, '', `/videos?id=${vid.id}`);
+      if (vId) {
+        window.history.replaceState(null, '', `/videos?id=${encodeURIComponent(vId)}`);
+      }
     } catch (e) {}
     if (onSelectVideo) {
       onSelectVideo(vid);
@@ -102,10 +106,12 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
 
   const handleShareVideo = (e, vid) => {
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/videos?id=${vid.id}`;
+    if (!vid) return;
+    const vId = vid.id || vid._id || vid.slug;
+    const shareUrl = vId ? `${window.location.origin}/videos?id=${encodeURIComponent(vId)}` : window.location.href;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareUrl);
-      setCopiedId(vid.id);
+      setCopiedId(vId || 'copied');
       setTimeout(() => setCopiedId(null), 2500);
     }
   };
@@ -269,7 +275,7 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
             <span>Showing {filteredVideos.length} episode{filteredVideos.length === 1 ? '' : 's'}{searchQuery.trim() ? ` matching "${searchQuery}"` : ''}</span>
             <button 
               type="button"
-              style={{ background: 'none', border: 'none', color: '#e11d48', cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem' }}
+              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem' }}
               onClick={() => {
                 setActiveCategory('all');
                 setSearchQuery('');
@@ -327,7 +333,6 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
                   </div>
 
                   <h3 className="vpage-card-title">{vid.title}</h3>
-                  <p className="vpage-card-desc">{vid.description}</p>
 
                   <div className="vpage-card-footer">
                     <div className="vpage-card-guest">
@@ -345,7 +350,7 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
           </div>
         ) : (
           <div className="vpage-empty-state">
-            <Tv size={42} color="#e11d48" style={{ margin: '0 auto' }} />
+            <Tv size={42} color="#dc2626" style={{ margin: '0 auto' }} />
             <h3>No video episodes match your criteria</h3>
             <p>Try searching for a different founder name, company, topic or reset your filters.</p>
             <button 

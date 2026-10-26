@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Upload, Image as ImageIcon, Trash2, Copy, Check, 
   ExternalLink, Search, RefreshCw, AlertCircle, File, HardDrive, X, CheckSquare
@@ -157,7 +157,7 @@ export default function AdminMediaView({ onShowToast }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               color: '#ffffff',
               padding: '4px 10px',
               borderRadius: '20px',
@@ -176,7 +176,7 @@ export default function AdminMediaView({ onShowToast }) {
             <button
               type="button"
               onClick={() => setSelectedIds(new Set(filteredFiles.map(f => f.filename || f._id)))}
-              style={{ background: 'none', border: 'none', color: '#e11d48', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
+              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
             >
               Select All ({filteredFiles.length})
             </button>
@@ -198,14 +198,14 @@ export default function AdminMediaView({ onShowToast }) {
               alignItems: 'center',
               gap: '6px',
               padding: '7px 14px',
-              backgroundColor: '#e11d48',
+              backgroundColor: '#dc2626',
               border: 'none',
               borderRadius: '6px',
               fontSize: '0.85rem',
               fontWeight: 600,
               color: '#ffffff',
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
             }}
           >
             <Trash2 size={15} />
@@ -238,7 +238,7 @@ export default function AdminMediaView({ onShowToast }) {
                 type="checkbox"
                 checked={filteredFiles.length > 0 && selectedIds.size === filteredFiles.length}
                 onChange={handleSelectAll}
-                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#e11d48' }}
+                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#dc2626' }}
               />
               <span>Select All</span>
             </label>
@@ -255,13 +255,13 @@ export default function AdminMediaView({ onShowToast }) {
             alignItems: 'center',
             gap: '6px',
             padding: '7px 14px',
-            background: 'var(--brand-primary, #e11d48)',
+            background: 'var(--brand-primary, #dc2626)',
             color: '#fff',
             borderRadius: '8px',
             fontSize: '0.84rem',
             fontWeight: 600,
             cursor: uploading ? 'not-allowed' : 'pointer',
-            boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)'
+            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)'
           }}>
             <Upload size={15} />
             <span>{uploading ? 'Uploading...' : 'Upload Image'}</span>
@@ -308,7 +308,7 @@ export default function AdminMediaView({ onShowToast }) {
                 key={file.filename} 
                 className="amv-card"
                 style={{
-                  outline: isSelected ? '2px solid #e11d48' : 'none',
+                  outline: isSelected ? '2px solid #dc2626' : 'none',
                   backgroundColor: isSelected ? '#fff1f2' : undefined,
                   transition: 'outline 0.15s ease'
                 }}
@@ -322,7 +322,7 @@ export default function AdminMediaView({ onShowToast }) {
                       top: '8px',
                       left: '8px',
                       zIndex: 10,
-                      backgroundColor: isSelected ? '#e11d48' : 'rgba(15, 23, 42, 0.65)',
+                      backgroundColor: isSelected ? '#dc2626' : 'rgba(15, 23, 42, 0.65)',
                       borderRadius: '4px',
                       padding: '4px',
                       display: 'flex',
@@ -340,7 +340,7 @@ export default function AdminMediaView({ onShowToast }) {
                         width: '15px', 
                         height: '15px', 
                         cursor: 'pointer',
-                        accentColor: '#e11d48',
+                        accentColor: '#dc2626',
                         margin: 0
                       }}
                     />

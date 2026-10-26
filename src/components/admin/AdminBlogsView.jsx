@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, Search, Filter, Eye, ThumbsUp, 
   ExternalLink, Calendar, User, Tag, CheckCircle, Clock, 
@@ -323,14 +323,14 @@ export default function AdminBlogsView({ onShowToast }) {
             alignItems: 'center',
             gap: '6px',
             padding: '8px 16px',
-            background: 'var(--brand-primary, #e11d48)',
+            background: 'var(--brand-primary, #dc2626)',
             color: '#fff',
             border: 'none',
             borderRadius: '8px',
             fontWeight: '600',
             fontSize: '0.84rem',
             cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(225, 29, 72, 0.25)',
+            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
             marginLeft: 'auto'
           }}
         >

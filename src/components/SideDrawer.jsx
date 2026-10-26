@@ -220,7 +220,7 @@ export default function SideDrawer({
                 />
                 <span style={{ fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', color: '#0f172a' }}>
                   {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
-                  {siteSettings?.brandSuffix ? <span style={{ color: '#ea580c' }}>{siteSettings.brandSuffix}</span> : null}
+                  {siteSettings?.brandSuffix ? <span style={{ color: '#dc2626' }}>{siteSettings.brandSuffix}</span> : null}
                 </span>
               </div>
             ) : (
@@ -228,7 +228,7 @@ export default function SideDrawer({
                 <span style={{
                   width: '28px',
                   height: '28px',
-                  background: '#ea580c',
+                  background: '#dc2626',
                   color: '#ffffff',
                   borderRadius: '6px',
                   display: 'flex',
@@ -241,7 +241,7 @@ export default function SideDrawer({
                 </span>
                 <span style={{ fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
                   {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
-                  {siteSettings?.brandSuffix ? <span style={{ color: '#ea580c' }}>{siteSettings.brandSuffix}</span> : null}
+                  {siteSettings?.brandSuffix ? <span style={{ color: '#dc2626' }}>{siteSettings.brandSuffix}</span> : null}
                 </span>
               </>
             )}
@@ -306,8 +306,8 @@ export default function SideDrawer({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.75rem 1.25rem',
-            background: 'rgba(234, 88, 12, 0.08)',
-            borderBottom: '1px solid rgba(234, 88, 12, 0.15)'
+            background: 'rgba(220, 38, 38, 0.08)',
+            borderBottom: '1px solid rgba(220, 38, 38, 0.15)'
           }}>
             <button
               onClick={() => setNavStack(prev => prev.slice(0, -1))}
@@ -317,7 +317,7 @@ export default function SideDrawer({
                 gap: '6px',
                 background: 'none',
                 border: 'none',
-                color: '#ea580c',
+                color: '#dc2626',
                 fontSize: '0.88rem',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -376,8 +376,8 @@ export default function SideDrawer({
                       fontWeight: 700,
                       padding: '2px 6px',
                       borderRadius: '10px',
-                      background: 'rgba(234, 88, 12, 0.12)',
-                      color: '#ea580c'
+                      background: 'rgba(220, 38, 38, 0.12)',
+                      color: '#dc2626'
                     }}>
                       {item.description}
                     </span>
@@ -385,7 +385,7 @@ export default function SideDrawer({
                 </div>
 
                 {hasChildren ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ea580c' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#dc2626' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700 }}>
                       {item.children.length}
                     </span>
@@ -476,7 +476,7 @@ export default function SideDrawer({
                   <span>Saved Stories</span>
                 </div>
                 {Boolean(currentUser && savedCount > 0) && (
-                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#ea580c', color: '#fff' }}>
+                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#dc2626', color: '#fff' }}>
                     {savedCount}
                   </span>
                 )}
@@ -495,9 +495,9 @@ export default function SideDrawer({
                     gap: '8px',
                     padding: '0.7rem 0.85rem',
                     borderRadius: '8px',
-                    background: 'rgba(234, 88, 12, 0.08)',
-                    border: '1px solid rgba(234, 88, 12, 0.2)',
-                    color: '#ea580c',
+                    background: 'rgba(220, 38, 38, 0.08)',
+                    border: '1px solid rgba(220, 38, 38, 0.2)',
+                    color: '#dc2626',
                     fontWeight: '700',
                     fontSize: '0.85rem',
                     cursor: 'pointer'
@@ -582,8 +582,8 @@ export default function SideDrawer({
                         transition: 'all 0.15s ease'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#ea580c';
-                        e.currentTarget.style.borderColor = '#ea580c';
+                        e.currentTarget.style.color = '#dc2626';
+                        e.currentTarget.style.borderColor = '#dc2626';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.color = 'var(--text-secondary, #4b5563)';
@@ -623,7 +623,7 @@ export default function SideDrawer({
                 gap: '6px',
                 padding: '0.55rem',
                 borderRadius: '6px',
-                background: '#ea580c',
+                background: '#dc2626',
                 color: '#fff',
                 border: 'none',
                 fontWeight: 700,
@@ -651,7 +651,7 @@ export default function SideDrawer({
           alignItems: 'center'
         }}>
           <span>GoReadPost Edition 2026</span>
-          <span style={{ fontWeight: '700', color: '#ea580c' }}>Swipe right to go back</span>
+          <span style={{ fontWeight: '700', color: '#dc2626' }}>Swipe right to go back</span>
         </div>
       </aside>
     </>

@@ -10,7 +10,6 @@ import { SMB_STORY_PROFILES, ALL_SMB_STORIES } from '../data/smbStoryData';
 import { HER_STORY_PROFILES, ALL_HER_STORIES } from '../data/herStoryData';
 import { ALL_STORIES } from '../data/storiesData';
 import { ALL_ENTERPRISE_STORIES } from '../data/enterpriseStoryData';
-import { ALL_HINDI_STORIES } from '../data/hindiStoryData';
 
 export default function FullStoryPage({
   story,
@@ -143,8 +142,7 @@ export default function FullStoryPage({
       ...ALL_STORIES,
       ...ALL_SMB_STORIES,
       ...ALL_HER_STORIES,
-      ...ALL_ENTERPRISE_STORIES,
-      ...ALL_HINDI_STORIES
+      ...ALL_ENTERPRISE_STORIES
     ];
     const seen = new Set();
     const result = [];
@@ -222,7 +220,6 @@ export default function FullStoryPage({
     mergedStory.category === 'her-story' ? 'HerStory' :
     mergedStory.category === 'enterprise' ? 'EnterpriseStory' :
     mergedStory.category === 'ai-story' ? 'AIStory' :
-    mergedStory.category === 'hindi' ? 'YS Hindi' :
     'GoReadPost'
   );
   const subEyebrow = mergedStory.subEyebrow || (
@@ -274,7 +271,7 @@ export default function FullStoryPage({
         particleCount: 55,
         spread: 75,
         origin: { y: 0.75 },
-        colors: ['#ea580c', '#f97316', '#fb923c', '#e11d48', '#ec4899', '#10b981']
+        colors: ['#ea580c', '#f97316', '#fb923c', '#dc2626', '#ec4899', '#10b981']
       });
       if (onShowToast) onShowToast('👏 Applauded story! Shared with GoReadPost community.');
     }
@@ -487,7 +484,7 @@ export default function FullStoryPage({
                 onClick={handleClap}
                 title="Applaud story"
               >
-                <Heart size={14} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                <Heart size={14} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                 <span>{likeCount}</span>
               </button>
 
@@ -720,7 +717,7 @@ export default function FullStoryPage({
                   className={`smb-clap-btn ${liked ? 'active' : ''}`}
                   onClick={handleClap}
                 >
-                  <Heart size={18} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                  <Heart size={18} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                   <span>{liked ? 'Applauded' : 'Clap for Story'}</span>
                   <span className="smb-clap-counter">{likeCount}</span>
                 </button>

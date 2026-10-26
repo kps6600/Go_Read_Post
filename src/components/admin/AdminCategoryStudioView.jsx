@@ -12,7 +12,6 @@ import { ALL_STORIES } from '../../data/storiesData';
 import { ALL_HER_STORIES } from '../../data/herStoryData';
 import { ALL_ENTERPRISE_STORIES } from '../../data/enterpriseStoryData';
 import { ALL_SMB_STORIES } from '../../data/smbStoryData';
-import { ALL_HINDI_STORIES } from '../../data/hindiStoryData';
 import { CORE_CATEGORIES } from '../CategoryContentPage';
 import './AdminCategoryStudioView.css';
 
@@ -111,8 +110,7 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
         ...ALL_STORIES,
         ...ALL_HER_STORIES,
         ...ALL_ENTERPRISE_STORIES,
-        ...ALL_SMB_STORIES,
-        ...ALL_HINDI_STORIES
+        ...ALL_SMB_STORIES
       ];
 
       for (const item of rawPool) {
@@ -443,11 +441,6 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
               <div className="acsv-hero-live-overlay" />
               
               <div className="acsv-hero-live-content">
-                <span className="acsv-hero-badge">
-                  <Sparkles size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                  {heroBadge}
-                </span>
-
                 <h1 className="acsv-hero-headline">
                   {heroHeading}
                 </h1>
@@ -469,10 +462,17 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
                     </div>
                   </div>
 
-                  <button type="button" className="acsv-hero-cta-btn">
-                    <span>{heroBtnText}</span>
-                    <ArrowRight size={16} />
-                  </button>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px' }}>
+                    <span className="acsv-hero-badge" style={{ margin: 0 }}>
+                      <Sparkles size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                      {heroBadge}
+                    </span>
+
+                    <button type="button" className="acsv-hero-cta-btn">
+                      <span>{heroBtnText}</span>
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

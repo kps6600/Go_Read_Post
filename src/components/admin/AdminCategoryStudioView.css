@@ -256,13 +256,22 @@
 }
 
 .acsv-hero-headline {
-  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  font-size: clamp(1.4rem, 2.2vw + 0.5rem, 2.6rem);
   font-weight: 850;
   color: #ffffff;
-  line-height: 1.18;
+  line-height: 1.2;
   margin: 0 0 1rem;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .acsv-hero-headline {
+    white-space: normal;
+  }
 }
 
 .acsv-hero-subhead {

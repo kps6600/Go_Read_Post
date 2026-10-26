@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft, Bookmark, Share2, Heart, Award, Clock, Eye, 
   CheckCircle, Sparkles, Copy, Check, ChevronRight, MessageSquare,
@@ -211,8 +211,8 @@ export default function HerStoryPage({
               >
                 {isPlayingAudio ? (
                   <>
-                    <Pause size={14} color="#e11d48" />
-                    <span style={{ color: '#e11d48', fontWeight: 700 }}>Playing Narration</span>
+                    <Pause size={14} color="#dc2626" />
+                    <span style={{ color: '#dc2626', fontWeight: 700 }}>Playing Narration</span>
                   </>
                 ) : (
                   <>
@@ -248,7 +248,7 @@ export default function HerStoryPage({
                 onClick={handleClap}
                 title="Applaud story"
               >
-                <Heart size={15} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                <Heart size={15} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                 <span>{likeCount}</span>
               </button>
             </div>
@@ -605,7 +605,7 @@ export default function HerStoryPage({
                       className={`grp-clap-btn ${liked ? 'active' : ''}`}
                       onClick={handleClap}
                     >
-                      <Heart size={18} fill={liked ? '#e11d48' : 'none'} color={liked ? '#e11d48' : 'currentColor'} />
+                      <Heart size={18} fill={liked ? '#dc2626' : 'none'} color={liked ? '#dc2626' : 'currentColor'} />
                       <span>{liked ? 'Applauded' : 'Clap for Story'}</span>
                       <span className="grp-clap-counter">{likeCount}</span>
                     </button>
@@ -700,7 +700,7 @@ export default function HerStoryPage({
                         title={isItemSaved ? 'Saved' : 'Save'}
                         aria-label="Bookmark"
                       >
-                        <Bookmark size={14} fill={isItemSaved ? '#e11d48' : 'none'} color={isItemSaved ? '#e11d48' : 'white'} />
+                        <Bookmark size={14} fill={isItemSaved ? '#dc2626' : 'none'} color={isItemSaved ? '#dc2626' : 'white'} />
                       </button>
                     </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
   Trash2, Search, Filter, RefreshCw, ExternalLink, Sparkles, BookOpen, 
@@ -116,7 +116,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       {/* KPI Stats */}
       <div className="adv-stats-row" style={{ marginBottom: '1.5rem' }}>
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48' }}>
+          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
             <Send size={22} />
           </div>
           <div className="adv-stat-content">
@@ -242,8 +242,8 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         width: '38px',
                         height: '38px',
                         borderRadius: '8px',
-                        background: isPitch ? 'rgba(225, 29, 72, 0.1)' : 'rgba(14, 165, 233, 0.1)',
-                        color: isPitch ? '#e11d48' : '#0284c7',
+                        background: isPitch ? 'rgba(220, 38, 38, 0.1)' : 'rgba(14, 165, 233, 0.1)',
+                        color: isPitch ? '#dc2626' : '#0284c7',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -264,7 +264,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                             borderRadius: '4px',
                             textTransform: 'uppercase',
                             background: isPitch ? '#fff1f2' : '#f0f9ff',
-                            color: isPitch ? '#e11d48' : '#0284c7'
+                            color: isPitch ? '#dc2626' : '#0284c7'
                           }}
                         >
                           {isPitch ? 'Startup Pitch' : 'Contact Lead'}

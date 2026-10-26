@@ -15,7 +15,7 @@ const SECTION_META = {
   hero_popular: {
     label: 'Hero Slider & Popular Posts',
     icon: Flame,
-    color: '#e11d48',
+    color: '#dc2626',
     bg: '#ffe4e6',
     defaultDesc: 'Primary hero editorial slider (left) and top 5 ranked articles sidebar (right).'
   },
@@ -177,7 +177,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
           }
         }));
         await PageService.updatePage('home', {
-          title: 'Homepage - Live Portal',
+          title: 'Homepage',
           sections: pageSections
         });
       } catch (e) {
@@ -351,14 +351,14 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
               alignItems: 'center',
               gap: '8px',
               padding: '8px 20px',
-              background: '#e11d48',
+              background: '#dc2626',
               color: '#fff',
               border: 'none',
               borderRadius: '8px',
               fontWeight: 700,
               fontSize: '0.88rem',
               cursor: saving ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 6px rgba(225, 29, 72, 0.3)'
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
             }}
           >
             <Save size={16} />
@@ -461,63 +461,43 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                     </div>
                   </div>
 
-                  {/* Right Actions */}
+                  {/* Right Actions: Only admin can hide or show, except banner section which has Live Edit */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setLiveEditingHomepageSec({
-                        id: sec.sectionKey,
-                        type: sec.sectionKey === 'hero_popular' ? 'hero' : sec.sectionKey === 'newsletter' ? 'newsletter' : 'stories_feed',
-                        enabled: sec.enabled !== false,
-                        data: {
-                          title: sec.title,
-                          heading: sec.title,
-                          subtitle: sec.subtitle,
-                          category: sec.category,
-                          limit: sec.limit,
-                          articleIds: (sec.articleIds || []).map(a => typeof a === 'object' ? a._id : a),
-                          ...(sec.customConfig || {})
-                        }
-                      })}
-                      style={{
-                        padding: '7px 12px',
-                        background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.8rem',
-                        fontWeight: 750,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)'
-                      }}
-                      title={`Open Live Visual Editor for "${meta.label}"`}
-                    >
-                      <Sparkles size={14} />
-                      <span>Live Edit</span>
-                    </button>
-
-                    {sec.sectionKey !== 'newsletter' && (
+                    {sec.sectionKey === 'hero_popular' && (
                       <button
-                        onClick={() => openArticleSelector(sec)}
+                        type="button"
+                        onClick={() => setLiveEditingHomepageSec({
+                          id: sec.sectionKey,
+                          type: 'hero',
+                          enabled: sec.enabled !== false,
+                          data: {
+                            title: sec.title,
+                            heading: sec.title,
+                            subtitle: sec.subtitle,
+                            category: sec.category,
+                            limit: sec.limit,
+                            articleIds: (sec.articleIds || []).map(a => typeof a === 'object' ? a._id : a),
+                            ...(sec.customConfig || {})
+                          }
+                        })}
                         style={{
                           padding: '7px 12px',
-                          border: currentIds.length > 0 ? '1px solid #e11d48' : '1px solid #cbd5e1',
-                          background: currentIds.length > 0 ? '#fff1f2' : '#fff',
+                          background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                          color: '#fff',
+                          border: 'none',
                           borderRadius: '6px',
                           fontSize: '0.8rem',
-                          fontWeight: 700,
-                          color: currentIds.length > 0 ? '#e11d48' : '#334155',
+                          fontWeight: 750,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '6px'
+                          gap: '6px',
+                          boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)'
                         }}
+                        title={`Open Live Visual Editor for "${meta.label}"`}
                       >
-                        <FileText size={14} />
-                        <span>{currentIds.length > 0 ? `${currentIds.length} Pinned Stories` : 'Dynamic Feeds'}</span>
+                        <Sparkles size={14} />
+                        <span>Live Edit</span>
                       </button>
                     )}
 
@@ -536,6 +516,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                         alignItems: 'center',
                         gap: '6px'
                       }}
+                      title={sec.enabled ? 'Click to hide this section' : 'Click to show this section'}
                     >
                       {sec.enabled ? <Eye size={15} /> : <EyeOff size={15} />}
                       <span>{sec.enabled ? 'Live on Site' : 'Hidden'}</span>
@@ -543,96 +524,36 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                   </div>
                 </div>
 
-                {/* ── Form Inputs for Section ── */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                      Section Display Title
-                    </label>
-                    <input
-                      type="text"
-                      value={sec.title || ''}
-                      onChange={e => handleChange(idx, 'title', e.target.value)}
-                      placeholder="e.g. Latest from the Blog"
-                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                    />
+                {/* ── Form Inputs for Section: Only for Hero Banner Section ── */}
+                {sec.sectionKey === 'hero_popular' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
+                        Section Display Title
+                      </label>
+                      <input
+                        type="text"
+                        value={sec.title || ''}
+                        onChange={e => handleChange(idx, 'title', e.target.value)}
+                        placeholder="e.g. Lead Stories & Editorial Hero Slider"
+                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
+                        Subtitle / Brief Note
+                      </label>
+                      <input
+                        type="text"
+                        value={sec.subtitle || ''}
+                        onChange={e => handleChange(idx, 'subtitle', e.target.value)}
+                        placeholder="Optional subtitle or tagline"
+                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
                   </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                      Subtitle / Brief Note
-                    </label>
-                    <input
-                      type="text"
-                      value={sec.subtitle || ''}
-                      onChange={e => handleChange(idx, 'subtitle', e.target.value)}
-                      placeholder="Optional subtitle or tagline"
-                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                    />
-                  </div>
-
-                  {sec.sectionKey !== 'newsletter' && (
-                    <>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                          Feed Category Filter
-                        </label>
-                        <select
-                          value={sec.filterCategory || ''}
-                          onChange={e => handleChange(idx, 'filterCategory', e.target.value)}
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', background: '#fff' }}
-                        >
-                          {CATEGORY_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                          Max Stories Limit
-                        </label>
-                        <input
-                          type="number"
-                          min="2"
-                          max="24"
-                          value={sec.limit || 10}
-                          onChange={e => handleChange(idx, 'limit', Number(e.target.value))}
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                          "View All" Button Label
-                        </label>
-                        <input
-                          type="text"
-                          value={sec.customConfig?.viewAllText || ''}
-                          onChange={e => handleCustomConfigChange(idx, 'viewAllText', e.target.value)}
-                          placeholder="e.g. View All Articles"
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {sec.sectionKey === 'newsletter' && (
-                    <>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
-                          Button CTA Text
-                        </label>
-                        <input
-                          type="text"
-                          value={sec.customConfig?.buttonText || 'Subscribe'}
-                          onChange={e => handleCustomConfigChange(idx, 'buttonText', e.target.value)}
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
+                )}
               </div>
             );
           })}
@@ -677,7 +598,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                     onClick={() => toggleArticleSelection(art._id)}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '8px',
-                      border: isSelected ? '1px solid #e11d48' : '1px solid #e2e8f0',
+                      border: isSelected ? '1px solid #dc2626' : '1px solid #e2e8f0',
                       background: isSelected ? '#fff1f2' : '#fff', cursor: 'pointer'
                     }}
                   >
@@ -685,7 +606,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => {}}
-                      style={{ cursor: 'pointer', accentColor: '#e11d48' }}
+                      style={{ cursor: 'pointer', accentColor: '#dc2626' }}
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>{art.title}</div>
@@ -702,7 +623,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
               </span>
               <button
                 onClick={() => setSelectedSectionForArticles(null)}
-                style={{ padding: '8px 20px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
+                style={{ padding: '8px 20px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
               >
                 Done
               </button>
