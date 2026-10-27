@@ -3245,58 +3245,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       </div>
       )}
 
-      {isDraftsView && (
-      <div className="apv-tabs-row" style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'flex-end', 
-        flexWrap: 'wrap', 
-        gap: '0.75rem', 
-        borderBottom: '1px solid var(--border-light)', 
-        paddingBottom: '0.75rem', 
-        marginBottom: '1rem' 
-      }}>
-        <button 
-          type="button"
-          className="abv-btn-primary" 
-          onClick={() => handleBulkPublish()}
-          disabled={loading || filteredArticles.length === 0}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 20px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: '700',
-            fontSize: '0.88rem',
-            cursor: filteredArticles.length === 0 ? 'not-allowed' : 'pointer',
-            opacity: filteredArticles.length === 0 ? 0.6 : 1,
-            boxShadow: '0 3px 10px rgba(16, 185, 129, 0.35)',
-            transition: 'all 0.15s ease'
-          }}
-          title={
-            selectedIds.size > 0 
-              ? `Post ${selectedIds.size} selected draft article${selectedIds.size > 1 ? 's' : ''} to live site`
-              : filteredArticles.length === 1 
-                ? 'Post this draft article to live site'
-                : 'Post selected or all draft articles to live site'
-          }
-        >
-          <Send size={15} />
-          <span>
-            {selectedIds.size > 0 
-              ? `Post Selected (${selectedIds.size})` 
-              : filteredArticles.length === 1
-                ? 'Post Article'
-                : 'Post Articles'}
-          </span>
-        </button>
-      </div>
-      )}
-
       {/* 4. Controls & Filters Omnibar */}
       <div className="abv-filter-bar abv-controls-panel">
         <div className="abv-search-box">
