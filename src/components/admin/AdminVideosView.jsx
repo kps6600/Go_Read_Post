@@ -193,6 +193,7 @@ const normalizeVideo = (v, index = 0) => {
   const parsed = parseVideoUrl(v.youtubeEmbedUrl || v.videoUrl || '');
   const image = v.image || v.fallbackImage || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80');
   const youtubeEmbedUrl = v.youtubeEmbedUrl || (parsed ? parsed.embedUrl : '');
+  const videoUrl = v.videoUrl || (parsed ? parsed.watchUrl : (v.youtubeEmbedUrl || ''));
   const description = v.description || v.seo?.description || (Array.isArray(v.highlights) && v.highlights[0]) || '';
   const highlights = Array.isArray(v.highlights) ? v.highlights : [];
   const chapters = Array.isArray(v.chapters) ? v.chapters : [];
@@ -2588,6 +2589,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
               const targetIdx = masterRankIdx >= 0 ? masterRankIdx : displayRank;
 
               const vidTitle = video.title || 'Untitled Episode';
+              const vidCat = video.categoryLabel || video.category || 'Founder Interview';
               const vidDesc = video.description || video.seo?.description || (video.highlights && video.highlights[0]) || '';
               const vidImg = video.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80';
               const vidGuest = video.guest || 'Featured Guest';
