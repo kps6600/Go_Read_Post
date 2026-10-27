@@ -952,6 +952,17 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
   };
 
+  const handleDraftSingle = async (article) => {
+    const id = article._id || article.id;
+    try {
+      await ArticleService.unpublishArticle(id);
+      if (onShowToast) onShowToast(`Article "${article.title || 'Untitled'}" moved to Drafts!`);
+      await loadArticles();
+    } catch (err) {
+      alert('Error moving article to draft: ' + err.message);
+    }
+  };
+
   const handleBulkPublish = async (targetIds = null) => {
     const ids = targetIds || Array.from(selectedIds);
     if (ids.length === 0) {
@@ -3542,8 +3553,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         )}
                       </button>
 
-                      {/* Top-Right Post Action Button for Drafts */}
-                      {article.status === 'draft' && (
+                      {/* Top-Right Action Button: Post for drafts, Draft for published */}
+                      {article.status === 'draft' ? (
                         <button 
                           type="button"
                           className="abv-card-top-post-btn"
@@ -3556,7 +3567,20 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           <Send size={11} />
                           <span>Post</span>
                         </button>
-                      )}
+                      ) : article.status === 'published' ? (
+                        <button 
+                          type="button"
+                          className="abv-card-top-draft-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDraftSingle(article);
+                          }}
+                          title="Move this article to Drafts"
+                        >
+                          <FileText size={11} />
+                          <span>Draft</span>
+                        </button>
+                      ) : null}
 
                       {/* Unified Badges: Show only one tag, and another/remaining in numbers */}
                       {mediaTags.length > 0 && (
@@ -3840,7 +3864,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                       {/* Actions: "i" button to show details, Edit, Delete */}
                       <td style={{ textAlign: 'right' }}>
                         <div className="abv-action-buttons">
-                          {article.status === 'draft' && (
+                          {article.status === 'draft' ? (
                             <button
                               type="button"
                               onClick={() => handlePublishSingle(article)}
@@ -3864,7 +3888,31 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                               <Send size={11} />
                               <span>Post</span>
                             </button>
-                          )}
+                          ) : article.status === 'published' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleDraftSingle(article)}
+                              title="Move this article to Drafts"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 9px',
+                                background: '#d97706',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '5px',
+                                fontSize: '0.72rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                marginRight: '4px',
+                                boxShadow: '0 2px 4px rgba(217, 119, 6, 0.25)'
+                              }}
+                            >
+                              <FileText size={11} />
+                              <span>Draft</span>
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             className={`abv-action-btn visibility-btn ${article.status === 'published' ? 'active' : 'inactive'}`}
