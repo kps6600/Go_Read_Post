@@ -3417,11 +3417,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
               />
               <span>Select All</span>
-              {selectedIds.size > 0 && (
-                <span className="abv-selected-pill">
-                  {selectedIds.size} of {filteredArticles.length} selected
-                </span>
-              )}
             </label>
             <div className="abv-cards-count-badge">
               <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
