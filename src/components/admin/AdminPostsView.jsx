@@ -3426,26 +3426,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             </button>
             <button
               type="button"
-              onClick={() => handleBulkStatusChange('draft')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#d97706',
-                cursor: 'pointer'
-              }}
-            >
-              <Clock size={14} /> Set as Draft
-            </button>
-
-            <button
-              type="button"
               onClick={handleBulkDelete}
               disabled={deleting}
               style={{
