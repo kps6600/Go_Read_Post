@@ -3559,20 +3559,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         )}
                       </button>
 
-                      {/* Status Toggle Badge */}
-                      <button
-                        type="button"
-                        className={`abv-card-status-badge status-${article.status || 'published'}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTogglePublish(article);
-                        }}
-                        title="Click to toggle publish status"
-                      >
-                        <span className="abv-status-dot" />
-                        {article.status || 'published'}
-                      </button>
-
                       {/* Unified Badges: Category & Trending/Featured together side-by-side */}
                       <div className="abv-card-media-badges">
                         {/* Glassmorphic Category Badge with Indicator Dot */}
