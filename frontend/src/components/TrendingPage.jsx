@@ -502,12 +502,12 @@ export default function TrendingPage({
                 <span className="tp-hero-sep">•</span>
                 <span className="tp-hero-stat-badge" title="Total Views">
                   <Eye size={13} />
-                  <span>{formatCount(getStoryViews(activeHero))} views</span>
+                  <span>{formatCount(getStoryViews(activeHero))}</span>
                 </span>
                 <span className="tp-hero-sep">•</span>
                 <span className="tp-hero-stat-badge" title="Total Likes">
                   <Heart size={13} fill="currentColor" />
-                  <span>{formatCount(getStoryLikes(activeHero))} likes</span>
+                  <span>{formatCount(getStoryLikes(activeHero))}</span>
                 </span>
               </div>
             </div>
@@ -718,11 +718,11 @@ export default function TrendingPage({
                             <div className="tp-card-metrics-row">
                               <span className="tp-metric-pill tp-metric-views" title={`${formatCount(storyViews)} views`}>
                                 <Eye size={10} />
-                                <span>{formatCount(storyViews)} views</span>
+                                <span>{formatCount(storyViews)}</span>
                               </span>
                               <span className="tp-metric-pill tp-metric-likes" title={`${formatCount(storyLikes)} likes`}>
                                 <Heart size={10} fill="currentColor" />
-                                <span>{formatCount(storyLikes)} likes</span>
+                                <span>{formatCount(storyLikes)}</span>
                               </span>
                             </div>
                           </div>
