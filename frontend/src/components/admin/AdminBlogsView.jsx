@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, Search, Filter, Eye, ThumbsUp, 
   ExternalLink, Calendar, User, Tag, CheckCircle, Clock, 
@@ -310,10 +310,6 @@ export default function AdminBlogsView({ onShowToast }) {
           <option value="published">Live Only</option>
           <option value="draft">Drafts Only</option>
         </select>
-
-        <button className="abv-refresh-btn" onClick={loadStories} title="Reload Data">
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-        </button>
 
         <button 
           className="abv-btn-primary" 

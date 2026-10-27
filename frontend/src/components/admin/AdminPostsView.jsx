@@ -3232,14 +3232,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <option key={c._id || c.slug} value={c.name}>{c.name}</option>
             ))}
           </select>
-
-          <button 
-            className="abv-refresh-btn" 
-            onClick={loadAllData} 
-            title="Refresh database"
-          >
-            <RefreshCw size={15} />
-          </button>
         </div>
       </div>
 
