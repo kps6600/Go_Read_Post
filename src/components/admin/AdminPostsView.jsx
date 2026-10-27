@@ -3148,6 +3148,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
   };
 
+  const isDraftsView = currentPath === '/admin/drafts' || currentPath?.startsWith('/admin/drafts') || activeTab === 'draft' || currentPath?.includes('/draft');
+
   return (
     <div className="abv-container">
       {/* 1. KPI Cards */}
@@ -3175,6 +3177,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       </div>
 
       {/* 2. Top Actions Row */}
+      {!isDraftsView && activeTab !== 'archived' && (
       <div className="apv-tabs-row" style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -3207,6 +3210,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           <Plus size={16} /> Create Article
         </button>
       </div>
+      )}
 
       {/* 4. Controls & Filters Omnibar */}
       <div className="abv-filter-bar abv-controls-panel">
@@ -3420,9 +3424,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '1.25rem' }}>
                 {search ? `No articles matching "${search}"` : 'No articles currently in this section.'}
               </p>
-              <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
-                <Plus size={15} /> Create First Article
-              </button>
+              {!isDraftsView && activeTab !== 'archived' && (
+                <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
+                  <Plus size={15} /> Create First Article
+                </button>
+              )}
             </div>
           ) : (
             <div className="abv-cards-grid">
@@ -3659,9 +3665,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                       {search ? `No articles matching "${search}"` : 'No articles currently in this tab.'}
                     </p>
-                    <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
-                      <Plus size={15} /> Create First Article
-                    </button>
+                    {!isDraftsView && activeTab !== 'archived' && (
+                      <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
+                        <Plus size={15} /> Create First Article
+                      </button>
+                    )}
                   </td>
                 </tr>
               ) : (
