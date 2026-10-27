@@ -192,7 +192,7 @@
   border: 1px solid #e2e8f0;
   color: var(--brand-primary, #dc2626);
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
@@ -273,7 +273,7 @@
   align-items: center;
   gap: 0.45rem;
   font-size: 1.15rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -580,7 +580,7 @@
 
 .map-tags-label {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #1e293b;
   margin-right: 0.35rem;
 }
@@ -599,7 +599,7 @@
 .map-article-tag-pill {
   padding: 0.45rem 1.05rem;
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #475569;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -673,7 +673,7 @@
   border: none;
   color: var(--brand-primary, #dc2626);
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   padding: 3px 6px;
   border-radius: 6px;
@@ -698,7 +698,7 @@
   background: #ffffff;
   color: #0f172a;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -771,6 +771,32 @@
   color: #f1f5f9;
 }
 
+.sidebar-related-save-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-related-save-btn:hover {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  transform: scale(1.1);
+}
+
+.sidebar-related-save-btn.active {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.12);
+}
+
 .sidebar-related-meta {
   font-size: 0.68rem;
   color: #64748b;
@@ -820,7 +846,7 @@
 
 .sidebar-trending-title {
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #1e293b;
   line-height: 1.35;
   margin: 0;
@@ -909,7 +935,7 @@
   width: 100%;
   padding: 0.8rem;
   font-size: 1rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #ffffff;
   background: #0f172a;
   border: none;
@@ -936,7 +962,7 @@
 .sidebar-tag-pill {
   padding: 0.5rem 1.1rem;
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #475569;
   background: #f1f5f9;
   border-radius: 9999px;
@@ -948,7 +974,7 @@
 .sidebar-topic-pill {
   padding: 0.5rem 1.1rem;
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #0f172a;
   background: #fff1f2;
   border-radius: 9999px;
@@ -1080,7 +1106,7 @@
 
 .map-bottom-view-all {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--brand-primary, #dc2626);
   background: none;
   border: none;
@@ -1193,7 +1219,7 @@
 
 .modern-article-wrapper .fs-bubble-name {
   font-size: 1.15rem !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 
 .modern-article-wrapper .fs-bubble-role {
@@ -1258,7 +1284,7 @@
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.6rem;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
@@ -1439,7 +1465,7 @@
   background: rgba(220, 38, 38, 0.12) !important;
   color: var(--brand-primary, #dc2626) !important;
   border-color: rgba(220, 38, 38, 0.4) !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
   box-shadow: 0 1px 4px rgba(220, 38, 38, 0.15);
 }
 
@@ -1680,7 +1706,7 @@
 
 .map-rendered-html-body h3 {
   font-size: 1.45rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #1e293b;
   margin: 2rem 0 0.85rem 0;
 }

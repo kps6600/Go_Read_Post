@@ -115,40 +115,28 @@ export default function ArticlePage({
     const authorVal = currentUser.name || currentUser.username || (newAuthor.trim() || 'Community Reader');
     const roleVal = currentUser.title || currentUser.designation || (currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN' ? 'Editorial Team' : 'Community Member');
 
-    const optimisticId = 'temp_' + Date.now();
-    const optimisticItem = {
-      id: optimisticId,
-      _id: optimisticId,
-      author: authorVal,
-      role: roleVal,
-      time: 'Just now',
-      text: newComment.trim(),
-      likes: 0
-    };
-
-    // Optimistically show in UI
-    setComments(prev => [optimisticItem, ...prev]);
     const submittedText = newComment.trim();
     setNewComment('');
     setIsSubmittingComment(true);
 
     try {
-      const saved = await CommentService.postComment(targetSlug, {
+      const res = await CommentService.postComment(targetSlug, {
         author: authorVal,
         role: roleVal,
         text: submittedText
       });
-      if (saved) {
-        setComments(prev => prev.map(c => (c.id === optimisticId || c._id === optimisticId) ? saved : c));
+      if (onShowToast) {
+        onShowToast(res?.message || 'Thank you! Your perspective has been submitted for editorial review and will appear once approved.');
       }
-      if (onShowToast) onShowToast('Thank you! Your perspective has been saved to the database.');
     } catch (err) {
       console.error('Failed to save comment to database:', err);
+      // Restore text if submission failed
+      setNewComment(submittedText);
       if (err.message && err.message.toLowerCase().includes('sign in')) {
         if (onShowToast) onShowToast(err.message);
         if (onOpenAuthModal) onOpenAuthModal('login');
       } else if (onShowToast) {
-        onShowToast(err.message || 'Failed to post perspective.');
+        onShowToast(err.message || 'Failed to submit perspective.');
       }
     } finally {
       setIsSubmittingComment(false);
@@ -1593,16 +1581,31 @@ export default function ArticlePage({
               </div>
 
               <div className="sidebar-trending-list">
-                {trendingArticles.map((tr, index) => (
-                  <div 
-                    key={tr.id || index} 
-                    className="sidebar-trending-item"
-                    onClick={() => handleArticleClick(tr)}
-                  >
-                    <div className="sidebar-trending-badge">{index + 1}</div>
-                    <p className="sidebar-trending-title">{tr.title}</p>
-                  </div>
-                ))}
+                {trendingArticles.map((tr, index) => {
+                  const isTrSaved = isSaved ? Boolean(isSaved(tr.id || tr._id || tr.slug)) : false;
+                  return (
+                    <div 
+                      key={tr.id || index} 
+                      className="sidebar-trending-item"
+                      onClick={() => handleArticleClick(tr)}
+                    >
+                      <div className="sidebar-trending-badge">{index + 1}</div>
+                      <p className="sidebar-trending-title">{tr.title}</p>
+                      <button
+                        type="button"
+                        className={`sidebar-related-save-btn ${isTrSaved ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(tr);
+                        }}
+                        title={isTrSaved ? 'Remove from reading list' : 'Save to read later'}
+                        aria-label="Save story"
+                      >
+                        <Bookmark size={13} fill={isTrSaved ? 'currentColor' : 'none'} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -1710,10 +1713,10 @@ export default function ArticlePage({
                           e.stopPropagation();
                           if (onToggleSave) onToggleSave(bItem);
                         }}
-                        title={isBottomSaved ? 'Remove from reading list' : 'Save to read later'}
+                        title={isBottomSaved ? 'Remove from saved bookmarks' : 'Save story'}
                         aria-label="Save story"
                       >
-                        <Bookmark size={14} fill={isBottomSaved ? '#ffffff' : 'none'} color={isBottomSaved ? '#ffffff' : 'currentColor'} />
+                        <Bookmark size={14} fill={isBottomSaved ? '#ffffff' : 'none'} color="#ffffff" />
                       </button>
                     </div>
                     <h3 className="map-bottom-card-title">{bItem.title}</h3>

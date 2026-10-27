@@ -281,22 +281,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   // Selected for bulk
   const [selectedIds, setSelectedIds] = useState(new Set());
 
-  // View Mode: 'cards' | 'list' (defaulting to cards for better user-friendly UI)
-  const [viewMode, setViewMode] = useState(() => {
-    try {
-      return localStorage.getItem('admin_articles_view_mode') || 'cards';
-    } catch (e) {
-      return 'cards';
-    }
-  });
-
-  const handleSetViewMode = (mode) => {
-    setViewMode(mode);
-    try {
-      localStorage.setItem('admin_articles_view_mode', mode);
-    } catch (e) {}
-  };
-
   useEffect(() => {
     loadAllData();
   }, []);
@@ -938,68 +922,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       alert('Error saving article: ' + err.message);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handlePublishSingle = async (article) => {
-    const id = article._id || article.id;
-    try {
-      await ArticleService.publishArticle(id);
-      if (onShowToast) onShowToast(`Article "${article.title || 'Draft'}" posted live!`);
-      await loadArticles();
-    } catch (err) {
-      alert('Error posting article: ' + err.message);
-    }
-  };
-
-  const handleDraftSingle = async (article) => {
-    const id = article._id || article.id;
-    try {
-      await ArticleService.unpublishArticle(id);
-      if (onShowToast) onShowToast(`Article "${article.title || 'Untitled'}" moved to Drafts!`);
-      await loadArticles();
-    } catch (err) {
-      alert('Error moving article to draft: ' + err.message);
-    }
-  };
-
-  const handleBulkPublish = async (targetIds = null) => {
-    let ids = targetIds;
-    if (!ids) {
-      const selectedArticles = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
-      const draftsOnly = selectedArticles.filter(a => a.status === 'draft');
-      ids = draftsOnly.map(a => a._id || a.id);
-    }
-
-    if (ids.length === 0) return;
-
-    try {
-      await ArticleService.bulkUpdateStatus(ids, 'published');
-      if (onShowToast) onShowToast(`Successfully posted ${ids.length} ${ids.length === 1 ? 'draft article' : 'draft articles'} live!`);
-      setSelectedIds(new Set());
-      await loadArticles();
-    } catch (err) {
-      alert('Error posting articles: ' + err.message);
-    }
-  };
-
-  const handleBulkDraft = async (targetIds = null) => {
-    let ids = targetIds;
-    if (!ids) {
-      const selectedArticles = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
-      const publishedOnly = selectedArticles.filter(a => a.status === 'published');
-      ids = publishedOnly.map(a => a._id || a.id);
-    }
-
-    if (ids.length === 0) return;
-
-    try {
-      await ArticleService.bulkUpdateStatus(ids, 'draft');
-      if (onShowToast) onShowToast(`Successfully moved ${ids.length} ${ids.length === 1 ? 'article' : 'articles'} to Drafts!`);
-      setSelectedIds(new Set());
-      await loadArticles();
-    } catch (err) {
-      alert('Error moving articles to draft: ' + err.message);
     }
   };
 
@@ -3210,45 +3132,23 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
   };
 
-  const isDraftsView = currentPath === '/admin/drafts' || currentPath?.startsWith('/admin/drafts') || activeTab === 'draft' || currentPath?.includes('/draft');
-
   return (
     <div className="abv-container">
       {/* 1. KPI Cards */}
       <div className="abv-kpi-row" style={{ marginTop: '0.25rem' }}>
-        <div 
-          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'all' ? 'active active-all' : ''}`} 
-          onClick={() => handleTabClick('all')} 
-          style={{ cursor: 'pointer' }}
-          title="Filter: All Posts"
-        >
+        <div className="abv-kpi-card" onClick={() => handleTabClick('all')} style={{ cursor: 'pointer' }}>
           <div className="abv-kpi-num">{articles.length}</div>
           <div className="abv-kpi-label">All Posts</div>
         </div>
-        <div 
-          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'published' ? 'active active-published' : ''}`} 
-          onClick={() => handleTabClick('published')} 
-          style={{ cursor: 'pointer' }}
-          title="Filter: Published (Live) Posts"
-        >
+        <div className="abv-kpi-card" onClick={() => handleTabClick('published')} style={{ cursor: 'pointer' }}>
           <div className="abv-kpi-num" style={{ color: 'var(--accent-emerald)' }}>{publishedCount}</div>
           <div className="abv-kpi-label">Published (Live)</div>
         </div>
-        <div 
-          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'draft' ? 'active active-draft' : ''}`} 
-          onClick={() => handleTabClick('draft')} 
-          style={{ cursor: 'pointer' }}
-          title="Filter: Draft Posts"
-        >
+        <div className="abv-kpi-card" onClick={() => handleTabClick('draft')} style={{ cursor: 'pointer' }}>
           <div className="abv-kpi-num" style={{ color: 'var(--brand-primary)' }}>{draftCount}</div>
           <div className="abv-kpi-label">Drafts</div>
         </div>
-        <div 
-          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'scheduled' ? 'active active-scheduled' : ''}`} 
-          onClick={() => handleTabClick('scheduled')} 
-          style={{ cursor: 'pointer' }}
-          title="Filter: Scheduled Posts"
-        >
+        <div className="abv-kpi-card" onClick={() => handleTabClick('scheduled')} style={{ cursor: 'pointer' }}>
           <div className="abv-kpi-num" style={{ color: '#8b5cf6' }}>{scheduledCount}</div>
           <div className="abv-kpi-label">Scheduled</div>
         </div>
@@ -3259,7 +3159,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       </div>
 
       {/* 2. Top Actions Row */}
-      {!isDraftsView && activeTab !== 'archived' && (
       <div className="apv-tabs-row" style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -3289,10 +3188,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             transition: 'all 0.15s ease'
           }}
         >
-          <Plus size={16} /> Create Article
-        </button>
-      </div>
-      )}
+          <Plus size={16} /> Create Article
+        </button>
+      </div>
 
       {/* 4. Controls & Filters Omnibar */}
       <div className="abv-filter-bar abv-controls-panel">
@@ -3312,174 +3210,138 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
 
         <div className="abv-filter-group">
-          {/* Merged Desk & Category Filter */}
+          {/* Desk Filter */}
           <select 
-            value={selectedDesk !== 'all' ? `desk:${selectedDesk}` : selectedCategory !== 'all' ? `cat:${selectedCategory}` : 'all'} 
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === 'all') {
-                setSelectedDesk('all');
-                setSelectedCategory('all');
-              } else if (val.startsWith('desk:')) {
-                setSelectedDesk(val.slice(5));
-                setSelectedCategory('all');
-              } else if (val.startsWith('cat:')) {
-                setSelectedCategory(val.slice(4));
-                setSelectedDesk('all');
-              }
-            }}
+            value={selectedDesk} 
+            onChange={(e) => setSelectedDesk(e.target.value)}
             className="abv-select"
-            title="Filter by Desk or Category"
           >
-            <option value="all">All Desks & Categories</option>
-            <optgroup label="Editorial Desks">
-              {DESKS.filter(b => b.id !== 'all').map(b => (
-                <option key={`desk:${b.id}`} value={`desk:${b.id}`}>{b.label}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Categories">
-              {categories.map(c => (
-                <option key={`cat:${c._id || c.slug || c.name}`} value={`cat:${c.name}`}>{c.name}</option>
-              ))}
-            </optgroup>
+            {DESKS.map(b => (
+              <option key={b.id} value={b.id}>{b.label}</option>
+            ))}
           </select>
 
-          {/* View Mode Toggle: Cards vs Table (hidden on Drafts page) */}
-          {!isDraftsView && (
-          <div className="abv-view-toggle-group">
-            <button
-              type="button"
-              className={`abv-view-btn ${viewMode === 'cards' ? 'active' : ''}`}
-              onClick={() => handleSetViewMode('cards')}
-              title="Cards Grid View"
-            >
-              <LayoutGrid size={15} />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              className={`abv-view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => handleSetViewMode('list')}
-              title="Table View"
-            >
-              <List size={15} />
-              <span>Table</span>
-            </button>
-          </div>
-          )}
+          {/* Category Filter */}
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="abv-select"
+          >
+            <option value="all">All Categories</option>
+            {categories.map(c => (
+              <option key={c._id || c.slug} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+
+          <button 
+            className="abv-refresh-btn" 
+            onClick={loadAllData} 
+            title="Refresh database"
+          >
+            <RefreshCw size={15} />
+          </button>
         </div>
       </div>
 
       {/* Bulk Action Toolbar */}
-      {selectedIds.size > 0 && (() => {
-        const selectedList = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
-        const selectedDraftsCount = selectedList.filter(a => a.status === 'draft').length;
-        const selectedPublishedCount = selectedList.filter(a => a.status === 'published').length;
+      {selectedIds.size > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: '#fff1f2',
+          border: '1px solid #fecdd3',
+          padding: '12px 18px',
+          borderRadius: '10px',
+          marginBottom: '1rem',
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{
+              backgroundColor: '#dc2626',
+              color: '#fff',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontWeight: '700',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <CheckSquare size={13} />
+              <span>{selectedIds.size} Selected</span>
+            </div>
 
-        return (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '4px 0',
-            marginBottom: '0.75rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <div style={{
-                backgroundColor: '#dc2626',
-                color: '#fff',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontWeight: '700',
-                fontSize: '0.8rem',
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => handleBulkStatusChange('published')}
+              style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
-              }}>
-                <CheckSquare size={13} />
-                <span>{selectedIds.size} Selected</span>
-              </div>
-            </div>
+                gap: '6px',
+                padding: '6px 12px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#059669',
+                cursor: 'pointer'
+              }}
+            >
+              <CheckCircle size={14} /> Publish Selected
+            </button>
+            <button
+              type="button"
+              onClick={() => handleBulkStatusChange('draft')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#d97706',
+                cursor: 'pointer'
+              }}
+            >
+              <Clock size={14} /> Set as Draft
+            </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {selectedDraftsCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => handleBulkPublish()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 14px',
-                    backgroundColor: '#059669',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
-                  }}
-                  title={`Post ${selectedDraftsCount} selected draft article${selectedDraftsCount > 1 ? 's' : ''} to live site`}
-                >
-                  <Send size={14} /> Post Selected ({selectedDraftsCount})
-                </button>
-              )}
-
-              {selectedPublishedCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => handleBulkDraft()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 14px',
-                    backgroundColor: '#d97706',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)'
-                  }}
-                  title={`Move ${selectedPublishedCount} selected published article${selectedPublishedCount > 1 ? 's' : ''} to Drafts`}
-                >
-                  <FileText size={14} /> Move to Draft ({selectedPublishedCount})
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={handleBulkDelete}
-                disabled={deleting}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 14px',
-                  backgroundColor: '#dc2626',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
-                }}
-              >
-                <Trash2 size={15} />
-                {deleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={deleting}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                backgroundColor: '#dc2626',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+              }}
+            >
+              <Trash2 size={15} />
+              {deleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
+            </button>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
-      {/* 5. Articles Content: Cards View OR Table View */}
-      {(isDraftsView || viewMode === 'cards') ? (
-        <div>
+      {/* 5. Articles Content: Cards Grid View */}
+      <div>
           {/* Cards Header: Select All & Count */}
           <div className="abv-cards-header-bar">
             <label className="abv-select-all-label" title="Select all articles">
@@ -3496,6 +3358,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
               />
               <span>Select All</span>
+              {selectedIds.size > 0 && (
+                <span className="abv-selected-pill">
+                  {selectedIds.size} of {filteredArticles.length} selected
+                </span>
+              )}
             </label>
             <div className="abv-cards-count-badge">
               <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
@@ -3514,11 +3381,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '1.25rem' }}>
                 {search ? `No articles matching "${search}"` : 'No articles currently in this section.'}
               </p>
-              {!isDraftsView && activeTab !== 'archived' && (
-                <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
-                  <Plus size={15} /> Create First Article
-                </button>
-              )}
+              <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
+                <Plus size={15} /> Create First Article
+              </button>
             </div>
           ) : (
             <div className="abv-cards-grid">
@@ -3539,49 +3404,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 const cardTopics = getArticleTopics(article);
                 const displayTopics = cardTopics.filter(t => t.toLowerCase() !== categoryLabel.toLowerCase());
                 const cardExcerpt = getArticleExcerpt(article);
-
-                // Media tags/badges: Category + Trending/Featured
-                const mediaTags = [];
-                if (categoryLabel) {
-                  mediaTags.push({
-                    key: 'category',
-                    title: `Category: ${categoryLabel}`,
-                    node: (
-                      <div key="cat" className="abv-card-category-pill">
-                        <span 
-                          className="abv-category-indicator-dot" 
-                          style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
-                        />
-                        <span>{categoryLabel}</span>
-                      </div>
-                    )
-                  });
-                }
-                if (article.isTrending) {
-                  mediaTags.push({
-                    key: 'trending',
-                    title: 'Trending',
-                    node: (
-                      <span key="trending" className="abv-flag-badge flag-trending">
-                        <TrendingUp size={10} /> TRENDING
-                      </span>
-                    )
-                  });
-                }
-                if (article.isFeatured) {
-                  mediaTags.push({
-                    key: 'featured',
-                    title: 'Featured',
-                    node: (
-                      <span key="featured" className="abv-flag-badge flag-featured">
-                        <Star size={10} /> FEATURED
-                      </span>
-                    )
-                  });
-                }
-                const primaryMediaTag = mediaTags[0]?.node || null;
-                const extraMediaCount = mediaTags.length - 1;
-                const extraMediaTitle = mediaTags.slice(1).map(t => t.title).join(', ');
 
                 return (
                   <div 
@@ -3624,36 +3446,42 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         )}
                       </button>
 
-                      {/* Top-Right Action Button: Post for drafts only */}
-                      {article.status === 'draft' && (
-                        <button 
-                          type="button"
-                          className="abv-card-top-post-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePublishSingle(article);
-                          }}
-                          title="Post this draft article to live site"
-                        >
-                          <Send size={11} />
-                          <span>Post</span>
-                        </button>
-                      )}
+                      {/* Status Toggle Badge */}
+                      <button
+                        type="button"
+                        className={`abv-card-status-badge status-${article.status || 'published'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTogglePublish(article);
+                        }}
+                        title="Click to toggle publish status"
+                      >
+                        <span className="abv-status-dot" />
+                        {article.status || 'published'}
+                      </button>
 
-                      {/* Unified Badges: Show only one tag, and another/remaining in numbers */}
-                      {mediaTags.length > 0 && (
-                        <div className="abv-card-media-badges">
-                          {primaryMediaTag}
-                          {extraMediaCount > 0 && (
-                            <span 
-                              className="abv-media-more-pill" 
-                              title={extraMediaTitle}
-                            >
-                              +{extraMediaCount}
-                            </span>
-                          )}
+                      {/* Unified Badges: Category & Trending/Featured together side-by-side */}
+                      <div className="abv-card-media-badges">
+                        {/* Glassmorphic Category Badge with Indicator Dot */}
+                        <div className="abv-card-category-pill">
+                          <span 
+                            className="abv-category-indicator-dot" 
+                            style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                          />
+                          <span>{categoryLabel}</span>
                         </div>
-                      )}
+
+                        {article.isTrending && (
+                          <span className="abv-flag-badge flag-trending">
+                            <TrendingUp size={10} /> TRENDING
+                          </span>
+                        )}
+                        {article.isFeatured && (
+                          <span className="abv-flag-badge flag-featured">
+                            <Star size={10} /> FEATURED
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Card Content Body */}
@@ -3707,11 +3535,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           </span>
                           <span className="abv-card-date">
                             <Calendar size={11} />
-                            {article.status === 'draft' ? (
-                              <span style={{ color: '#d97706', fontWeight: 700 }}>Draft</span>
-                            ) : (
-                              article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Published'
-                            )}
+                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
                           </span>
                         </div>
                       </div>
@@ -3730,7 +3554,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                               e.stopPropagation();
                               handleOpenEdit(article);
                             }}
-                            title="Edit article in Studio"
+                            title="Edit article"
                           >
                             <Edit2 size={13} />
                           </button>
@@ -3754,281 +3578,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             </div>
           )}
         </div>
-      ) : (
-        /* Table View */
-        <div className="abv-table-card">
-          <table className="abv-table">
-            <colgroup>
-              <col style={{ width: '44px' }} />
-              <col style={{ width: 'auto' }} />
-              <col style={{ width: '150px' }} />
-              <col style={{ width: '120px' }} />
-              <col style={{ width: '135px' }} />
-              <col style={{ width: '115px' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="admin-checkbox-cell">
-                  <label className="admin-checkbox-wrap" title="Select all articles">
-                    <input 
-                      type="checkbox" 
-                      className="admin-table-checkbox"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
-                        } else {
-                          setSelectedIds(new Set());
-                        }
-                      }}
-                      checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
-                    />
-                  </label>
-                </th>
-                <th>Article</th>
-                <th>Author</th>
-                <th>Status</th>
-                <th>Date & Views</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '3.5rem' }}>
-                    <RefreshCw size={24} color="var(--brand-primary)" className="rotate-icon" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 0.75rem' }} />
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading editorial posts from MongoDB database...</p>
-                  </td>
-                </tr>
-              ) : filteredArticles.length === 0 ? (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '3.5rem' }}>
-                    <BookOpen size={36} color="var(--text-muted)" style={{ margin: '0 auto 0.75rem' }} />
-                    <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700 }}>No Posts Found</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                      {search ? `No articles matching "${search}"` : 'No articles currently in this tab.'}
-                    </p>
-                    {!isDraftsView && activeTab !== 'archived' && (
-                      <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
-                        <Plus size={15} /> Create First Article
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ) : (
-                filteredArticles.map(article => {
-                  const id = article._id || article.id;
-                  const isSelected = selectedIds.has(id);
-                  const slug = article.slug || slugify(article.title);
-
-                  return (
-                    <tr key={id} className={isSelected ? 'selected-row' : ''}>
-                      <td className="admin-checkbox-cell">
-                        <label className="admin-checkbox-wrap">
-                          <input 
-                            type="checkbox"
-                            className="admin-table-checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              const next = new Set(selectedIds);
-                              if (e.target.checked) next.add(id);
-                              else next.delete(id);
-                              setSelectedIds(next);
-                            }}
-                          />
-                        </label>
-                      </td>
-
-                      {/* Article (Cover + Category + Headline) - ONLY IMPORTANT DATA */}
-                      <td>
-                        <div className="abv-story-info-cell">
-                          <img 
-                            src={article.featuredImage?.url || article.image || article.heroImage || (article.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&auto=format&fit=crop&q=80'}
-                            alt="" 
-                            className="abv-story-thumb" 
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&auto=format&fit=crop&q=80';
-                            }}
-                          />
-                          <div className="abv-story-meta-col">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.25rem' }}>
-                              <span className="abv-cat-tag-pill">
-                                {article.categoryName || article.categoryTag || article.category || 'Startups'}
-                              </span>
-                            </div>
-                            <h4 className="abv-story-headline" onClick={() => handleOpenEdit(article)} style={{ cursor: 'pointer' }} title={article.title}>
-                              {article.title}
-                            </h4>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Author */}
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-tertiary)', overflow: 'hidden', flexShrink: 0 }}>
-                            <img 
-                              src={article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'} 
-                              alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                          </div>
-                          <span style={{ fontSize: '0.84rem', fontWeight: 650, color: 'var(--text-primary)' }}>
-                            {article.authorName || article.author?.name || 'Staff Reporter'}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Status Pill */}
-                      <td>
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePublish(article)}
-                          style={{
-                            background: article.status === 'published' ? 'rgba(5, 150, 105, 0.12)' : 
-                                        article.status === 'scheduled' ? 'rgba(139, 92, 246, 0.12)' : 
-                                        article.status === 'archived' ? 'rgba(100, 116, 139, 0.15)' : 
-                                        'rgba(217, 119, 6, 0.12)',
-                            color: article.status === 'published' ? 'var(--accent-emerald)' : 
-                                   article.status === 'scheduled' ? '#8b5cf6' : 
-                                   article.status === 'archived' ? '#64748b' : 
-                                   '#d97706',
-                            border: 'none',
-                            padding: '0.28rem 0.7rem',
-                            borderRadius: '999px',
-                            fontSize: '0.72rem',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem',
-                            textTransform: 'uppercase'
-                          }}
-                          title="Click to toggle publish status"
-                        >
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
-                          {article.status || 'published'}
-                        </button>
-                      </td>
-
-                      {/* Date & Views */}
-                      <td>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
-                          </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Eye size={12} /> {(article.views || 0).toLocaleString()} views
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Actions: "i" button to show details, Edit, Delete */}
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="abv-action-buttons">
-                          {article.status === 'draft' ? (
-                            <button
-                              type="button"
-                              onClick={() => handlePublishSingle(article)}
-                              title="Post this draft article to live site"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '3px 9px',
-                                background: '#059669',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '5px',
-                                fontSize: '0.72rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                marginRight: '4px',
-                                boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)'
-                              }}
-                            >
-                              <Send size={11} />
-                              <span>Post</span>
-                            </button>
-                          ) : article.status === 'published' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleDraftSingle(article)}
-                              title="Move this article to Drafts"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '3px 9px',
-                                background: '#d97706',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '5px',
-                                fontSize: '0.72rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                marginRight: '4px',
-                                boxShadow: '0 2px 4px rgba(217, 119, 6, 0.25)'
-                              }}
-                            >
-                              <FileText size={11} />
-                              <span>Draft</span>
-                            </button>
-                          ) : null}
-                          <button
-                            type="button"
-                            className={`abv-action-btn visibility-btn ${article.status === 'published' ? 'active' : 'inactive'}`}
-                            onClick={() => handleTogglePublish(article)}
-                            title={article.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
-                          >
-                            {article.status === 'published' ? (
-                              <>
-                                <Eye size={12} />
-                                <span>ON</span>
-                              </>
-                            ) : (
-                              <>
-                                <EyeOff size={12} />
-                                <span>OFF</span>
-                              </>
-                            )}
-                          </button>
-                          <button 
-                            type="button"
-                            className="abv-action-btn view"
-                            onClick={() => setViewingArticleDetails(article)}
-                            title="View full article details"
-                          >
-                            <Eye size={14} />
-                            <span>View</span>
-                          </button>
-                          <button 
-                            type="button"
-                            className="abv-action-btn edit"
-                            onClick={() => handleOpenEdit(article)}
-                            title="Edit article"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button 
-                            type="button"
-                            className="abv-action-btn delete"
-                            onClick={() => setArticleToDelete(article)}
-                            title="Delete article"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {/* MEDIA LIBRARY SELECTOR MODAL */}
       {renderMediaPickerModal()}
 
@@ -4048,86 +3597,14 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         const catName = art.categoryName || art.categoryTag || art.category || 'General';
         const desk = art.brand || 'GoReadPost';
         const catMeta = getCategoryMeta(catName);
-        // --- DEDUPLICATION LOGIC (Eliminates repeated values in modal) ---
-        const stripHtml = (html) => (typeof html === 'string' ? html : '')
-          .replace(/<figcaption[^>]*>.*?<\/figcaption>/gi, ' ')
-          .replace(/<figure[^>]*>.*?<\/figure>/gi, ' ')
-          .replace(/<[^>]*>/g, ' ')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'")
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        const normStr = (str) => stripHtml(str).toLowerCase().replace(/[^a-z0-9]/g, '');
-
-        const rawContent = Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0
-          ? art.contentBlocks.map(b => b.text || b.content || b.quote || '').join(' ')
-          : (art.content || '');
-
-        const normTitle = normStr(art.title);
-        const normContent = normStr(rawContent);
-
-        // Subtitle: only show if distinct from title, content, and excerpt
-        const rawSubtitle = (art.subtitle || '').trim();
-        const normSubtitle = normStr(rawSubtitle);
-
-        // Excerpt: only show if explicit and distinct from title, subtitle & content
-        const rawExcerpt = (art.excerpt || art.summary || '').trim();
-        const normExcerpt = normStr(rawExcerpt);
-
-        const showSubtitle = Boolean(
-          rawSubtitle &&
-          normSubtitle &&
-          normSubtitle !== normTitle &&
-          normSubtitle !== normContent
-        );
-
-        const showExcerptBox = Boolean(
-          rawExcerpt &&
-          normExcerpt &&
-          normExcerpt !== normTitle &&
-          normExcerpt !== normSubtitle &&
-          normExcerpt !== normContent
-        );
-
-        // Deduplicate topics & tags to ensure zero repetition
-        const rawTopics = (
-          Array.isArray(art.topics)
-            ? art.topics
-            : typeof art.topics === 'string' && art.topics.trim()
-              ? art.topics.split(',')
-              : []
+        const topics = getArticleTopics(art);
+        const detailExcerpt = getArticleExcerpt(art);
+        const tagsList = (typeof art.tags === 'string' 
+          ? art.tags.split(',') 
+          : Array.isArray(art.tags) 
+            ? art.tags 
+            : []
         ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
-
-        const rawTags = (
-          typeof art.tags === 'string'
-            ? art.tags.split(',')
-            : Array.isArray(art.tags)
-              ? art.tags
-              : []
-        ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
-
-        const distinctTopics = [];
-        const seenTopicKeys = new Set();
-        rawTopics.forEach(t => {
-          const k = t.toLowerCase().replace(/^#+/, '').trim();
-          if (k && !seenTopicKeys.has(k)) {
-            seenTopicKeys.add(k);
-            distinctTopics.push(t.replace(/^#+/, '').trim());
-          }
-        });
-
-        const distinctTags = [];
-        const seenTagKeys = new Set(seenTopicKeys); // Prevents tags from repeating any topic
-        rawTags.forEach(t => {
-          const k = t.toLowerCase().replace(/^#+/, '').trim();
-          if (k && !seenTagKeys.has(k)) {
-            seenTagKeys.add(k);
-            distinctTags.push(t.replace(/^#+/, '').trim());
-          }
-        });
         const pubDate = art.publishedAt 
           ? new Date(art.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
           : (art.createdAt ? new Date(art.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Draft');
@@ -4159,108 +3636,28 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <h3 className="abv-modal-title" style={{ margin: 0 }}>Article Full Details</h3>
-
-                      {/* Explicit Status Badge */}
-                      {art.status === 'draft' ? (
-                        <span 
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: 'rgba(217, 119, 6, 0.15)',
-                            color: '#d97706',
-                            border: '1px solid rgba(217, 119, 6, 0.4)',
-                            borderRadius: '999px',
-                            fontSize: '0.72rem',
-                            fontWeight: '800',
-                            padding: '0.22rem 0.65rem',
-                            letterSpacing: '0.04em'
-                          }}
-                        >
-                          ● DRAFT
-                        </span>
-                      ) : (
-                        <span 
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: 'rgba(5, 150, 105, 0.15)',
-                            color: '#059669',
-                            border: '1px solid rgba(5, 150, 105, 0.4)',
-                            borderRadius: '999px',
-                            fontSize: '0.72rem',
-                            fontWeight: '800',
-                            padding: '0.22rem 0.65rem',
-                            letterSpacing: '0.04em'
-                          }}
-                        >
-                          ● PUBLISHED
-                        </span>
-                      )}
-
-                      {/* Dedicated Draft / Publish Action in Modal Details Header */}
-                      {art.status === 'published' ? (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            await handleTogglePublish(art);
-                            setViewingArticleDetails(prev => prev ? ({ 
-                              ...prev, 
-                              status: 'draft',
-                              publishedAt: null
-                            }) : null);
-                          }}
-                          style={{
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            padding: '0.35rem 0.85rem',
-                            fontSize: '0.78rem',
-                            fontWeight: '700',
-                            background: 'rgba(217, 119, 6, 0.15)',
-                            color: '#d97706',
-                            border: '1px solid rgba(217, 119, 6, 0.4)',
-                            borderRadius: '6px',
-                            boxShadow: '0 2px 4px rgba(217, 119, 6, 0.2)'
-                          }}
-                          title="Move this article to Drafts (hide from frontend)"
-                        >
-                          <FileText size={13} />
-                          <span>Set as Draft</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            await handleTogglePublish(art);
-                            setViewingArticleDetails(prev => prev ? ({ 
-                              ...prev, 
-                              status: 'published',
-                              publishedAt: prev.publishedAt || new Date().toISOString()
-                            }) : null);
-                          }}
-                          style={{
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            padding: '0.35rem 0.85rem',
-                            fontSize: '0.78rem',
-                            fontWeight: '700',
-                            background: 'rgba(5, 150, 105, 0.15)',
-                            color: '#059669',
-                            border: '1px solid rgba(5, 150, 105, 0.4)',
-                            borderRadius: '6px',
-                            boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)'
-                          }}
-                          title="Publish article live on frontend"
-                        >
-                          <Send size={13} />
-                          <span>Publish Live</span>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className={`abv-action-btn visibility-btn ${art.status === 'published' ? 'active' : 'inactive'}`}
+                        onClick={async () => {
+                          await handleTogglePublish(art);
+                          setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                        }}
+                        style={{ cursor: 'pointer', padding: '0.35rem 0.8rem', fontSize: '0.78rem' }}
+                        title={art.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
+                      >
+                        {art.status === 'published' ? (
+                          <>
+                            <Eye size={13} />
+                            <span>Frontend: ON</span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff size={13} />
+                            <span>Frontend: OFF</span>
+                          </>
+                        )}
+                      </button>
                       {art.isFeatured && (
                         <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
                           <Star size={10} /> FEATURED
@@ -4310,9 +3707,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         />
                         <span>{catName}</span>
                       </div>
-                      {desk && desk.toLowerCase() !== catName.toLowerCase() && (
-                        <span className="abv-detail-desk-pill">{desk}</span>
-                      )}
+                      <span className="abv-detail-desk-pill">{desk}</span>
                       {readingTime && (
                         <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
                           <Clock size={11} /> {readingTime}
@@ -4331,9 +3726,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 {/* Article Headline */}
                 <h1 className="abv-detail-headline">{art.title}</h1>
 
-                {/* Subtitle if available and distinct */}
-                {showSubtitle && (
-                  <h2 className="abv-detail-subtitle">{rawSubtitle}</h2>
+                {/* Subtitle if available */}
+                {art.subtitle && (
+                  <h2 className="abv-detail-subtitle">{art.subtitle}</h2>
                 )}
 
                 {/* Quick Metadata Info Strip */}
@@ -4352,12 +3747,10 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   <div className="abv-detail-meta-card">
                     <Calendar size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
                     <div>
-                      <div className="abv-detail-meta-label">{art.status === 'draft' ? 'Status & Date' : 'Published Date'}</div>
-                      <div className="abv-detail-meta-val" style={{ color: art.status === 'draft' ? '#d97706' : 'inherit' }}>
-                        {art.status === 'draft' ? 'Draft (Unpublished)' : pubDate}
-                      </div>
+                      <div className="abv-detail-meta-label">Published Date</div>
+                      <div className="abv-detail-meta-val">{pubDate}</div>
                       <div className="abv-detail-meta-sub" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        {art.status === 'draft' ? 'Hidden from live site' : <><Eye size={12} /> {viewsCount} total views</>}
+                        <Eye size={12} /> {viewsCount} total views
                       </div>
                     </div>
                   </div>
@@ -4373,25 +3766,25 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   </div>
                 </div>
 
-                {/* Excerpt / Summary (only if distinct and not repeating body/subtitle) */}
-                {showExcerptBox && (
+                {/* Excerpt / Summary */}
+                {detailExcerpt && (
                   <div className="abv-detail-excerpt-box">
                     <div className="abv-detail-section-title">
                       <Quote size={14} color="#0284c7" />
                       <span>Story Excerpt / Executive Summary</span>
                     </div>
-                    <p className="abv-detail-excerpt-text">{rawExcerpt}</p>
+                    <p className="abv-detail-excerpt-text">{detailExcerpt}</p>
                   </div>
                 )}
 
-                {/* Topics & Tags (guaranteed zero repetition) */}
-                {(distinctTopics.length > 0 || distinctTags.length > 0) && (
+                {/* Topics & Tags */}
+                {(topics.length > 0 || tagsList.length > 0) && (
                   <div className="abv-detail-taxonomy-box">
-                    {distinctTopics.length > 0 && (
+                    {topics.length > 0 && (
                       <div className="abv-detail-taxonomy-group">
                         <span className="abv-detail-tax-label">Topics:</span>
                         <div className="abv-detail-pill-wrap">
-                          {distinctTopics.map((top, idx) => (
+                          {topics.map((top, idx) => (
                             <span key={idx} className="abv-detail-topic-pill">
                               <Tag size={10} /> {top}
                             </span>
@@ -4399,11 +3792,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </div>
                       </div>
                     )}
-                    {distinctTags.length > 0 && (
+                    {tagsList.length > 0 && (
                       <div className="abv-detail-taxonomy-group">
                         <span className="abv-detail-tax-label">Tags:</span>
                         <div className="abv-detail-pill-wrap">
-                          {distinctTags.map((tag, idx) => (
+                          {tagsList.map((tag, idx) => (
                             <span key={idx} className="abv-detail-tag-pill">
                               #{tag}
                             </span>
@@ -4474,10 +3867,72 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   )}
                 </div>
 
+                {/* Permalink & SEO Box */}
+                <div className="abv-detail-slug-box">
+                  <div className="abv-detail-slug-info">
+                    <Globe size={15} color="var(--text-muted)" />
+                    <span className="abv-detail-slug-label">Permalink:</span>
+                    <code className="abv-detail-slug-text">{articleUrl}</code>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="abv-detail-copy-btn"
+                    onClick={handleCopyLink}
+                    title="Copy full public URL"
+                  >
+                    {copiedDetailSlug ? (
+                      <>
+                        <Check size={13} color="#10b981" />
+                        <span style={{ color: '#10b981' }}>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={13} />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Modal Footer Actions */}
               <div className="abv-modal-footer abv-details-footer">
+                <button
+                  type="button"
+                  className="abv-modal-btn"
+                  style={{
+                    background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
+                    color: art.status === 'published' ? '#d97706' : '#059669',
+                    border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
+                    marginRight: 'auto'
+                  }}
+                  onClick={async () => {
+                    await handleTogglePublish(art);
+                    setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                  }}
+                  title={art.status === 'published' ? "Hide article from frontend site" : "Show article on frontend site"}
+                >
+                  {art.status === 'published' ? (
+                    <>
+                      <EyeOff size={14} />
+                      <span>Disable from Frontend</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye size={14} />
+                      <span>Enable on Frontend</span>
+                    </>
+                  )}
+                </button>
+
+                <button 
+                  type="button" 
+                  className="abv-modal-btn cancel" 
+                  onClick={() => setViewingArticleDetails(null)}
+                >
+                  Close
+                </button>
+                
                 {articleSlug && (
                   <a 
                     href={`/article/${articleSlug}`}

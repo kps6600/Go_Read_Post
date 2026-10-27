@@ -101,7 +101,7 @@ export default function VideoShowsSection() {
               </div>
 
               <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                {selectedVideo.description || selectedVideo.seo?.description || (Array.isArray(selectedVideo.highlights) && selectedVideo.highlights[0]) || ''}
+                {selectedVideo.description}
               </p>
             </div>
           </div>

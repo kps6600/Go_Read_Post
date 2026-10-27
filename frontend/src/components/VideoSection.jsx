@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Tv, ArrowRight, Clock, Eye, Sparkles, X, User, Share2 } from 'lucide-react';
+import { Play, Tv, ArrowRight, Clock, Eye, Sparkles, X, User, Share2, Bookmark } from 'lucide-react';
 import { VIDEO_EPISODES, getStoredVideos } from '../data/videoData';
 import { VideoService } from '../services/videoService';
 import VideoPlayerModal from './VideoPlayerModal';
 
-export default function VideoSection({ onSelectVideo, onNavigateVideos }) {
+export default function VideoSection({ onSelectVideo, onNavigateVideos, isSaved, onToggleSave }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [videos, setVideos] = useState(() => getStoredVideos());
 
@@ -91,6 +91,19 @@ export default function VideoSection({ onSelectVideo, onNavigateVideos }) {
                   <Clock size={12} />
                   <span>{heroVideo.duration}</span>
                 </span>
+                <button
+                  type="button"
+                  className={`vsec-hero-save-badge-btn ${isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onToggleSave) onToggleSave(heroVideo);
+                  }}
+                  title={isSaved && isSaved(heroVideo.id || heroVideo._id) ? "Remove from bookmarks" : "Save video"}
+                  aria-label="Save video"
+                >
+                  <Bookmark size={13} fill={isSaved && isSaved(heroVideo.id || heroVideo._id) ? '#ffffff' : 'none'} color="#ffffff" />
+                  <span>{isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'Saved' : 'Save'}</span>
+                </button>
               </div>
 
               {/* Pulsing Play Button */}
@@ -102,7 +115,7 @@ export default function VideoSection({ onSelectVideo, onNavigateVideos }) {
             <div className="vsec-hero-info">
               <div className="vsec-hero-series-tag">{heroVideo.series}</div>
               <h3 className="vsec-hero-title">{heroVideo.title}</h3>
-              <p className="vsec-hero-desc">{heroVideo.description || heroVideo.seo?.description || (Array.isArray(heroVideo.highlights) && heroVideo.highlights[0]) || ''}</p>
+              <p className="vsec-hero-desc">{heroVideo.description}</p>
               
               <div className="vsec-hero-footer">
                 <div className="vsec-guest-wrap">
@@ -144,6 +157,18 @@ export default function VideoSection({ onSelectVideo, onNavigateVideos }) {
                     </div>
                   </div>
                   <span className="vsec-card-duration">{vid.duration}</span>
+                  <button
+                    type="button"
+                    className={`vsec-card-save-btn ${isSaved && isSaved(vid.id || vid._id) ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onToggleSave) onToggleSave(vid);
+                    }}
+                    title={isSaved && isSaved(vid.id || vid._id) ? "Remove from saved bookmarks" : "Save video"}
+                    aria-label="Save video"
+                  >
+                    <Bookmark size={13} fill={isSaved && isSaved(vid.id || vid._id) ? '#ffffff' : 'none'} color="#ffffff" />
+                  </button>
                 </div>
 
                 <div className="vsec-card-body">

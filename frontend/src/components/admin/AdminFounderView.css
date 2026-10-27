@@ -56,7 +56,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -94,7 +94,7 @@
   background: #ffffff;
   color: #1e293b;
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -450,7 +450,7 @@
 
 .afv-label {
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #334155;
   display: flex;
   align-items: center;
@@ -519,7 +519,7 @@
   background: #dc2626;
   color: #ffffff;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -833,7 +833,7 @@
 .afv-picker-card-title {
   margin: 0 0 6px 0;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.35;
   color: #0f172a;
   display: -webkit-box;
@@ -935,7 +935,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }

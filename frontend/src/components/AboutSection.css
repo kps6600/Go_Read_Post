@@ -141,7 +141,7 @@
   border-radius: 9999px;
   padding: 6px 16px;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.1em;
   color: #dc2626;
   text-transform: uppercase;
@@ -307,7 +307,7 @@
   background: #ffffff;
   color: #0f172a;
   font-size: 0.96rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 12px 24px;
   border-radius: 9999px;
   border: 1.5px solid #e2e8f0;
@@ -385,7 +385,7 @@
   padding: 8px 18px;
   border-radius: 9999px;
   font-size: 0.9rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #0f172a;
   transition: all 0.2s ease;
 }
@@ -478,7 +478,7 @@
 
 .nexus-share-card-title {
   font-size: 1.2rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   margin: 0 0 0.65rem;
 }
@@ -715,7 +715,7 @@
 
 .nexus-query-badge {
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #dc2626;
@@ -843,7 +843,7 @@
   border-radius: 10px;
   padding: 0.85rem 1.75rem;
   font-size: 0.95rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.22s ease;
 }

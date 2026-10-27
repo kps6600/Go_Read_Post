@@ -559,10 +559,10 @@ export default function ModernHomepageView({
               e.stopPropagation();
               if (onToggleSave) onToggleSave(blog);
             }}
-            title={isCardSaved ? 'Remove from reading list' : 'Save to read later'}
+            title={isCardSaved ? 'Remove from saved bookmarks' : 'Save story'}
             aria-label="Save story"
           >
-            <Bookmark size={15} fill={isCardSaved ? '#ffffff' : 'none'} color={isCardSaved ? '#ffffff' : 'currentColor'} />
+            <Bookmark size={15} fill={isCardSaved ? '#ffffff' : 'none'} color="#ffffff" />
           </button>
           {badgeNode}
         </div>
@@ -1260,7 +1260,7 @@ export default function ModernHomepageView({
           case 'video_section':
           case 'video':
           case 'videos':
-            return <VideoSection key={key} onSelectVideo={onSelectStory} />;
+            return <VideoSection key={key} onSelectVideo={onSelectStory} isSaved={isSaved} onToggleSave={onToggleSave} />;
           case 'video_shows':
           case 'conversations':
             return <ConversationsSection key={key} />;

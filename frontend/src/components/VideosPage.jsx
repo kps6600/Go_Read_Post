@@ -2,15 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Play, Tv, ArrowLeft, Eye, Clock, Share2, Sparkles, X, 
   Search, Check, User, ChevronRight, ChevronLeft, ThumbsUp, Flame, Radio,
-  Filter, SlidersHorizontal, ChevronDown
+  Filter, SlidersHorizontal, ChevronDown, Bookmark
 } from 'lucide-react';
 import { VIDEO_EPISODES, VIDEO_CATEGORIES, getStoredVideos } from '../data/videoData';
 import { VideoService } from '../services/videoService';
 import VideoPlayerModal from './VideoPlayerModal';
-import { getOriginalViewNumbers } from './admin/AdminVideosView';
 import './VideosPage.css';
 
-export default function VideosPage({ onBackToHome, onSelectVideo }) {
+export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onToggleSave }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -191,11 +190,6 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
           />
           <div className="vpage-stage-overlay">
             <h1 className="vpage-stage-title">{heroVideo.title}</h1>
-            {(heroVideo.description || heroVideo.seo?.description) && (
-              <p className="vpage-stage-desc">
-                {heroVideo.description || heroVideo.seo?.description}
-              </p>
-            )}
             
             <div className="vpage-stage-meta">
               <span className="vpage-stage-guest">
@@ -205,10 +199,7 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
               <span className="vpage-meta-dot">•</span>
               <span><Clock size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.duration}</span>
               <span className="vpage-meta-dot">•</span>
-              <span title={`Original view count: ${getOriginalViewNumbers(heroVideo.views)} views`}>
-                <Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                {heroVideo.views} {getOriginalViewNumbers(heroVideo.views) && getOriginalViewNumbers(heroVideo.views) !== String(heroVideo.views) ? `(${getOriginalViewNumbers(heroVideo.views)})` : ''} views
-              </span>
+              <span><Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.views} views</span>
             </div>
 
             <div className="vpage-stage-btn-row">
@@ -223,6 +214,19 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
                 >
                   <Play size={18} fill="#ffffff" color="#ffffff" style={{ marginLeft: '2px' }} />
                   <span>Watch Episode Now</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  className={`vpage-save-hero-btn ${isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onToggleSave) onToggleSave(heroVideo);
+                  }}
+                  title={isSaved && isSaved(heroVideo.id || heroVideo._id) ? "Remove from bookmarks" : "Save video"}
+                >
+                  <Bookmark size={16} fill={isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'currentColor' : 'none'} />
+                  <span>{isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'Saved' : 'Save'}</span>
                 </button>
 
                 <button 
@@ -426,38 +430,46 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
                     </div>
                   </div>
                   <span className="vpage-thumb-duration">{vid.duration}</span>
+                  <button 
+                    type="button" 
+                    className={`vpage-card-save-btn ${isSaved && isSaved(vid.id || vid._id) ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onToggleSave) onToggleSave(vid);
+                    }}
+                    title={isSaved && isSaved(vid.id || vid._id) ? "Remove from saved bookmarks" : "Save video"}
+                    aria-label="Save video"
+                  >
+                    <Bookmark size={14} fill={isSaved && isSaved(vid.id || vid._id) ? '#ffffff' : 'none'} color="#ffffff" />
+                  </button>
                 </div>
 
                 <div className="vpage-card-content">
                   <div className="vpage-card-top-row">
                     <span className="vpage-series-tag">{vid.series}</span>
-                    <button 
-                      type="button" 
-                      className="vpage-card-share-btn"
-                      onClick={(e) => handleShareVideo(e, vid)}
-                      title="Share episode link"
-                      aria-label="Share episode"
-                    >
-                      {copiedId === vid.id ? <Check size={14} color="#34d399" /> : <Share2 size={14} />}
-                    </button>
+                    <div className="vpage-card-actions-group">
+                      <button 
+                        type="button" 
+                        className="vpage-card-share-btn"
+                        onClick={(e) => handleShareVideo(e, vid)}
+                        title="Share episode link"
+                        aria-label="Share episode"
+                      >
+                        {copiedId === vid.id ? <Check size={14} color="#34d399" /> : <Share2 size={14} />}
+                      </button>
+                    </div>
                   </div>
 
                   <h3 className="vpage-card-title">{vid.title}</h3>
-
-                  {(vid.description || vid.seo?.description || (Array.isArray(vid.highlights) && vid.highlights[0])) && (
-                    <p className="vpage-card-desc">
-                      {vid.description || vid.seo?.description || vid.highlights[0]}
-                    </p>
-                  )}
 
                   <div className="vpage-card-footer">
                     <div className="vpage-card-guest">
                       <User size={13} style={{ display: 'inline', marginRight: '4px' }} />
                       <span>{vid.guest}</span>
                     </div>
-                    <div className="vpage-card-views" title={`Original view count: ${getOriginalViewNumbers(vid.views)} views`}>
+                    <div className="vpage-card-views">
                       <Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                      <span>{vid.views} {getOriginalViewNumbers(vid.views) && getOriginalViewNumbers(vid.views) !== String(vid.views) ? `(${getOriginalViewNumbers(vid.views)})` : ''}</span>
+                      <span>{vid.views}</span>
                     </div>
                   </div>
                 </div>

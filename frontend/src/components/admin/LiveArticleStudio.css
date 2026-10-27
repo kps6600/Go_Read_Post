@@ -92,7 +92,7 @@
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -140,7 +140,7 @@
   border-radius: 6px;
   color: #94a3b8;
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -270,7 +270,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #38bdf8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -667,7 +667,7 @@
 
 .las-cover-dropzone-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   margin: 0 0 0.35rem 0;
 }
@@ -938,7 +938,7 @@
   background: #16a34a !important;
   color: #ffffff !important;
   border-color: #15803d !important;
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
 }
 .las-add-block-btn.primary:hover {
@@ -950,7 +950,7 @@
   background: #0284c7 !important;
   color: #ffffff !important;
   border-color: #0369a1 !important;
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
 }
 .las-add-block-btn.image-action:hover {
@@ -1021,7 +1021,7 @@
   background: #ffffff;
   border-radius: 6px;
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1035,7 +1035,7 @@
 .las-section-input {
   width: 100%;
   font-size: 1.08rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -1079,7 +1079,7 @@
   border: none;
   color: #64748b;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   padding: 0;
   margin-top: 0.5rem;
@@ -1194,7 +1194,7 @@
   gap: 0.55rem;
   color: #475569;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .las-section-media-icon {
@@ -1217,7 +1217,7 @@
   gap: 6px;
   padding: 0.45rem 0.85rem;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1267,7 +1267,7 @@
 
 .las-section-media-attached-title {
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
 }
 
@@ -1300,7 +1300,7 @@
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1321,7 +1321,7 @@
   background: #ffffff;
   border: 1px solid #cbd5e1;
   font-size: 0.76rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #334155;
   cursor: pointer;
   transition: all 0.15s;
@@ -1423,4 +1423,400 @@
   border-color: #ef4444;
 }
 
+/* ── Schedule Button & Modal Styles ── */
+.las-btn-schedule {
+  background: rgba(147, 51, 234, 0.16);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.las-btn-schedule:hover:not(:disabled) {
+  background: rgba(147, 51, 234, 0.28);
+  border-color: rgba(192, 132, 252, 0.6);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.las-btn-schedule.active {
+  background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
+  color: #ffffff;
+  border-color: #a855f7;
+  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.35);
+}
+
+.las-schedule-modal {
+  background: #ffffff;
+  border-radius: 18px;
+  max-width: 520px;
+  width: 100%;
+  padding: 1.75rem;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+  animation: lasFadeIn 0.2s ease-out;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+}
+
+.las-schedule-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.las-schedule-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.las-schedule-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(147, 51, 234, 0.12);
+  color: #9333ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.las-schedule-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.las-schedule-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.las-schedule-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.las-schedule-preset-btn {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.las-schedule-preset-btn:hover {
+  background: #f3e8ff;
+  border-color: #d8b4fe;
+  color: #7e22ce;
+}
+
+.las-schedule-datetime-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.las-schedule-datetime-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.las-schedule-datetime-input:focus {
+  border-color: #9333ea;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15);
+}
+
+.las-schedule-callout {
+  background: #faf5ff;
+  border: 1px solid #f3e8ff;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.84rem;
+  color: #6b21a8;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.las-schedule-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.las-schedule-confirm-btn {
+  background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.35);
+  transition: all 0.15s ease;
+}
+
+.las-schedule-confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7e22ce 0%, #6b21a8 100%);
+  box-shadow: 0 4px 18px rgba(147, 51, 234, 0.5);
+  transform: translateY(-1px);
+}
+
+/* ── SEO Tab & Fields Styles ── */
+.las-seo-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.las-seo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.las-seo-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.las-seo-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.las-seo-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.las-seo-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.las-seo-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.las-seo-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.las-seo-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.las-seo-char-counter {
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.las-seo-char-counter.good {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.las-seo-char-counter.danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecdd3;
+}
+
+.las-seo-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.las-seo-sync-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Google SERP Live Simulation */
+.las-google-serp-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem 1.35rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.las-google-serp-url {
+  font-size: 0.78rem;
+  color: #202124;
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.las-google-serp-title {
+  font-size: 1.2rem;
+  color: #1a0dab;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+  cursor: pointer;
+}
+
+.las-google-serp-title:hover {
+  text-decoration: underline;
+}
+
+.las-google-serp-desc {
+  font-size: 0.86rem;
+  color: #4d5156;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Social Share OpenGraph Card Simulation */
+.las-social-card-preview {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 540px;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.las-social-card-img-wrap {
+  width: 100%;
+  aspect-ratio: 1.91 / 1;
+  background: #f1f5f9;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.las-social-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.las-social-card-content {
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.las-social-card-domain {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.las-social-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.las-social-card-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 

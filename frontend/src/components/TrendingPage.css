@@ -116,7 +116,7 @@
 }
 
 .tp-hero-author-name {
-  font-weight: 750;
+  font-weight: 700;
   color: #ffffff;
 }
 
@@ -134,7 +134,7 @@
   border-radius: 30px;
   padding: 11px 24px;
   font-size: 0.95rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
@@ -207,7 +207,7 @@
 
 .tp-slider-counter {
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.08em;
 }
@@ -267,7 +267,7 @@
   border: none;
   color: #475569;
   font-size: 0.9rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 7px 16px;
   border-radius: 20px;
   cursor: pointer;
@@ -370,7 +370,7 @@
 
 .tp-paginated-counter strong {
   color: #0f172a;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .tp-paginated-counter strong {
@@ -582,7 +582,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.9rem;
-  font-weight: 750;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -616,7 +616,7 @@
   width: 32px;
   height: 36px;
   color: #94a3b8;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: 0.1em;
   user-select: none;
@@ -723,7 +723,7 @@
   border-radius: 20px;
   color: #ffffff;
   font-size: 0.74rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: capitalize;
   letter-spacing: 0.02em;
   margin-bottom: 0;
@@ -731,12 +731,13 @@
 }
 
 .tp-card-title {
-  font-size: 1.24rem;
-  font-weight: 750;
-  color: #0f172a;
-  line-height: 1.35;
+  font-family: var(--font-heading, 'DM Sans', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #0e0d1b;
+  line-height: 1.28;
   letter-spacing: -0.015em;
-  margin: 0 0 0.55rem;
+  margin: 0 0 20px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -982,7 +983,7 @@
 
 .tp-mini-title {
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #1e293b;
   line-height: 1.35;
   margin: 0 0 4px;
@@ -1114,7 +1115,7 @@
   border: none;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1226,7 +1227,7 @@
   color: #ffffff;
   border-radius: 8px;
   border: none;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -1240,7 +1241,7 @@
   -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 0.92rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 10px 20px;
   border-radius: 30px;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -1272,39 +1273,40 @@
 }
 
 .tp-card-save-btn {
-  width: 34px;
-  height: 34px;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1px solid #e2e8f0;
-  background: transparent;
-  color: #94a3b8;
+  background: #ffffff;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme='dark'] .tp-card-save-btn {
-  border-color: #2b354b;
-  color: #71717a;
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
 }
 
-.tp-card-save-btn:hover {
-  border-color: var(--brand-primary, #dc2626);
-  color: var(--brand-primary, #dc2626);
-  background: rgba(220, 38, 38, 0.08);
-  transform: scale(1.08);
-}
-
+.tp-card-save-btn:hover,
 .tp-card-save-btn.active {
-  border-color: var(--brand-primary, #dc2626);
-  color: var(--brand-primary, #dc2626);
-  background: rgba(220, 38, 38, 0.15);
+  border-color: #dc2626;
+  color: #ffffff;
+  background: #dc2626;
+  transform: scale(1.1);
 }
 
 .tp-card-save-btn.active svg {
-  fill: var(--brand-primary, #dc2626);
+  fill: #ffffff;
 }
 

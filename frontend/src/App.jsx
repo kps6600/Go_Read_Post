@@ -949,16 +949,11 @@ export default function App() {
 
   const handleToggleSave = async (story) => {
     if (!story) return;
-    if (!currentUser) {
-      showToast('Please log in to save stories.');
-      setAuthModal({ isOpen: true, mode: 'login' });
-      return;
-    }
     const isNowSaved = await BookmarkService.toggleBookmark(story);
     const updated = BookmarkService.getLocalBookmarks();
     setSavedStories(updated);
     if (isNowSaved) {
-      showToast('Saved to reading list.');
+      showToast(currentUser ? 'Saved to reading list.' : 'Saved to bookmarks (Log in to sync across devices).');
     } else {
       showToast('Removed from saved bookmarks.');
     }
@@ -1147,7 +1142,7 @@ export default function App() {
           setSelectedStory(null);
           setActiveCategory(cat);
         }}
-        savedCount={currentUser ? savedStories.length : 0}
+        savedCount={savedStories.length}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         onOpenPitchModal={() => setIsPitchModalOpen(true)}
         onOpenSideDrawer={() => setIsSideDrawerOpen(true)}
@@ -1183,6 +1178,8 @@ export default function App() {
           <VideosPage 
             onBackToHome={handleBackToHome}
             onSelectVideo={(video) => setSelectedVideo(video)}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
           />
         ) : currentRoute.route === 'not-found' ? (
           <NotFoundPage 
@@ -1216,6 +1213,8 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onShowToast={showToast}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
           />
         ) : (
           (currentRoute.route === 'topic' && currentRoute.slug) || 
@@ -1429,6 +1428,8 @@ export default function App() {
           <VideosPage 
             onBackToHome={handleBackToHome}
             onSelectVideo={(video) => setSelectedVideo(video)}
+            isSaved={isSaved}
+            onToggleSave={handleToggleSave}
           />
 
         ) : (currentRoute.route === 'dynamic-page' || sitePages.some(p => {

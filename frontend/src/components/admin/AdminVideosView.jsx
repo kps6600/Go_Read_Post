@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronDown, 
   Check, X, ExternalLink, Clock, Sparkles, ThumbsUp, Layers,
   Film, Video as VideoIcon, Tv, Eye, EyeOff, User, FileText, Copy, Tag, Star, TrendingUp, Globe,
-  Bookmark, Hash, ListPlus, Sliders, CheckCircle2, UploadCloud, Link2, Calendar
+  Bookmark, Hash, ListPlus, Sliders, CheckCircle2
 } from 'lucide-react';
 import { 
   VIDEO_EPISODES, 
@@ -40,12 +40,6 @@ const CATEGORY_COLORS = {
   all: '#ea580c'
 };
 
-// Video upload restrictions & allowed formats
-const MAX_VIDEO_FILE_SIZE_MB = 500;
-const MAX_VIDEO_FILE_SIZE_BYTES = MAX_VIDEO_FILE_SIZE_MB * 1024 * 1024;
-const ALLOWED_VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov', '.mkv'];
-const ALLOWED_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska'];
-
 const getCategoryColor = (catKey) => {
   if (!catKey) return '#ea580c';
   const clean = String(catKey).toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -53,27 +47,6 @@ const getCategoryColor = (catKey) => {
     if (clean.includes(k)) return color;
   }
   return '#ea580c';
-};
-
-// Formats views into their full original numbers (e.g. 120K -> 120,000, 680K -> 680,000, 245000 -> 245,000)
-export const getOriginalViewNumbers = (val) => {
-  if (val === undefined || val === null || val === '') return '';
-  if (typeof val === 'number') return val.toLocaleString();
-  const str = String(val).trim();
-  const cleanNum = str.replace(/,/g, '');
-  if (/^\d+$/.test(cleanNum)) {
-    return Number(cleanNum).toLocaleString();
-  }
-  const match = str.match(/^([\d.]+)\s*([kKmMbB])?$/);
-  if (match) {
-    const num = parseFloat(match[1]);
-    const unit = (match[2] || '').toUpperCase();
-    if (unit === 'K') return Math.round(num * 1000).toLocaleString();
-    if (unit === 'M') return Math.round(num * 1000000).toLocaleString();
-    if (unit === 'B') return Math.round(num * 1000000000).toLocaleString();
-    return Math.round(num).toLocaleString();
-  }
-  return str;
 };
 
 
@@ -177,10 +150,7 @@ const normalizeVideo = (v, index = 0) => {
   const matchedCat = VIDEO_CATEGORIES.find(c => c.id === category);
   const categoryLabel = v.categoryLabel || (matchedCat ? matchedCat.label : 'Video Episode');
   const duration = v.duration || '28:15';
-  const rawViews = v.rawViews !== undefined ? v.rawViews : v.views;
-  const views = typeof v.views === 'number' 
-    ? (v.views >= 1000 ? `${Math.round(v.views / 1000)}K` : String(v.views)) 
-    : (v.views || '180K');
+  const views = typeof v.views === 'number' ? `${Math.round(v.views / 1000)}K` : (v.views || '180K');
   const publishedAt = v.publishedAt || 'Recently';
   const guest = v.guest || 'Featured Guest';
   const guestRole = v.guestRole || 'Founder & CEO';
@@ -194,13 +164,12 @@ const normalizeVideo = (v, index = 0) => {
   const image = v.image || v.fallbackImage || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80');
   const youtubeEmbedUrl = v.youtubeEmbedUrl || (parsed ? parsed.embedUrl : '');
   const videoUrl = v.videoUrl || (parsed ? parsed.watchUrl : (v.youtubeEmbedUrl || ''));
-  const description = v.description || v.seo?.description || (Array.isArray(v.highlights) && v.highlights[0]) || '';
+  const description = v.description || (Array.isArray(v.highlights) && v.highlights[0]) || '';
   const highlights = Array.isArray(v.highlights) ? v.highlights : [];
   const chapters = Array.isArray(v.chapters) ? v.chapters : [];
   const transcript = Array.isArray(v.transcript) ? v.transcript : [];
 
-  const isScheduled = v.status === 'scheduled';
-  const isPub = !isScheduled && v.status !== 'draft' && v.enabled !== false;
+  const isPub = v.status !== 'draft' && v.enabled !== false;
   const slug = v.slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '');
   const seo = {
     title: v.seo?.title || title,
@@ -218,9 +187,8 @@ const normalizeVideo = (v, index = 0) => {
   return {
     ...v,
     id,
-    status: isScheduled ? 'scheduled' : (isPub ? 'published' : 'draft'),
-    enabled: isScheduled ? false : isPub,
-    scheduledAt: v.scheduledAt || null,
+    status: isPub ? 'published' : 'draft',
+    enabled: isPub,
     tags,
     topics,
     slug,
@@ -232,7 +200,6 @@ const normalizeVideo = (v, index = 0) => {
     categoryLabel,
     duration,
     views,
-    rawViews,
     publishedAt,
     guest,
     guestRole,
@@ -292,9 +259,9 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
   const [pickerCategory, setPickerCategory] = useState('all');
   const [isFetchingMeta, setIsFetchingMeta] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  const [showSchedulePicker, setShowSchedulePicker] = useState(false);
-  const [scheduleDateTime, setScheduleDateTime] = useState('');
+  const [isUploadingPoster, setIsUploadingPoster] = useState(false);
   const videoFileInputRef = useRef(null);
+  const posterFileInputRef = useRef(null);
 
   // Project Taxonomies (Categories, Authors, Topics, Tags already in the project)
   const [projectCategories, setProjectCategories] = useState([]);
@@ -725,43 +692,14 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
   }, [editModal.isOpen]);
 
 
-  // Handler: Direct video upload from device with size and format restrictions
+  // Handler: Direct video upload from device
   const handleDeviceVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset file input helper
-    const resetInput = () => {
-      if (videoFileInputRef.current) videoFileInputRef.current.value = '';
-    };
-
-    // 1. File Type / Extension Restriction Check
-    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
-    const isMimeValid = ALLOWED_VIDEO_MIME_TYPES.includes(file.type) || file.type.startsWith('video/');
-    const isExtValid = ALLOWED_VIDEO_EXTENSIONS.includes(ext);
-
-    if (!isMimeValid && !isExtValid) {
-      const msg = `Unsupported file format: "${file.name}". Please upload a supported video format (${ALLOWED_VIDEO_EXTENSIONS.map(x => x.toUpperCase().replace('.', '')).join(', ')}).`;
-      alert(msg);
-      if (onShowToast) onShowToast(`❌ ${msg}`);
-      resetInput();
-      return;
-    }
-
-    // 2. File Size Restriction Check (Max 100 MB)
-    if (file.size > MAX_VIDEO_FILE_SIZE_BYTES) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-      const msg = `File is too large (${sizeMB} MB). Maximum allowed video upload size is ${MAX_VIDEO_FILE_SIZE_MB} MB. Please compress your video or select a smaller file.`;
-      alert(msg);
-      if (onShowToast) onShowToast(`❌ File too large: ${sizeMB} MB (Max limit: ${MAX_VIDEO_FILE_SIZE_MB} MB)`);
-      resetInput();
-      return;
-    }
-
     setIsUploadingVideo(true);
     const localBlobUrl = URL.createObjectURL(file);
     const fileNameClean = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ');
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
 
     setEditModal(prev => {
       if (!prev.data) return prev;
@@ -823,15 +761,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
               };
             });
           }
-        } catch (e) {
-        } finally {
-          tempVideo.src = '';
-          tempVideo.load();
-        }
-      };
-      tempVideo.onerror = () => {
-        tempVideo.src = '';
-        tempVideo.load();
+        } catch (e) {}
       };
     } catch (e) {}
 
@@ -861,7 +791,41 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
     }
   };
 
+  // Handler: Direct thumbnail poster upload from device
+  const handleDevicePosterUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    setIsUploadingPoster(true);
+    const localUrl = URL.createObjectURL(file);
+    setEditModal(prev => {
+      if (!prev.data) return prev;
+      return {
+        ...prev,
+        data: { ...prev.data, image: localUrl }
+      };
+    });
+
+    try {
+      const uploaded = await MediaService.uploadFile(file);
+      if (uploaded && (uploaded.url || uploaded.path)) {
+        const finalUrl = uploaded.url || uploaded.path;
+        setEditModal(prev => {
+          if (!prev.data) return prev;
+          return {
+            ...prev,
+            data: { ...prev.data, image: finalUrl }
+          };
+        });
+        if (onShowToast) onShowToast('Thumbnail poster uploaded from device!');
+      }
+    } catch (err) {
+      console.warn('Poster upload fallback:', err);
+    } finally {
+      setIsUploadingPoster(false);
+      if (posterFileInputRef.current) posterFileInputRef.current.value = '';
+    }
+  };
 
   // Auto-fetch YouTube metadata (Title, HD thumbnail, channel name)
   const handleAutoFetchYouTube = async (url) => {
@@ -988,17 +952,11 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
     }
 
     const parsed = parseVideoUrl(data.videoUrl || data.youtubeEmbedUrl);
-    const isScheduled = data.status === 'scheduled';
-    const description = (data.description !== undefined && data.description !== null && data.description !== '')
-      ? data.description
-      : (data.seo?.description || '');
     const finalVideo = normalizeVideo({
       ...data,
-      description,
       id: isCreate ? `video-${Date.now()}` : data.id,
       status: data.status || 'published',
-      enabled: isScheduled ? false : (data.enabled !== false),
-      scheduledAt: isScheduled ? (data.scheduledAt || null) : null,
+      enabled: data.enabled !== false,
       youtubeEmbedUrl: parsed ? parsed.embedUrl : (data.youtubeEmbedUrl || data.videoUrl),
       videoUrl: parsed ? parsed.watchUrl : (data.videoUrl || data.youtubeEmbedUrl),
       image: data.image || (parsed ? parsed.maxResThumb : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80')
@@ -1022,13 +980,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
       try {
         VideoService.createVideo(finalVideo).catch(err => console.warn('Backend API create error:', err));
       } catch (e) {}
-      if (onShowToast) {
-        if (isScheduled) {
-          onShowToast(`Scheduled video: "${finalVideo.title.slice(0, 35)}..."`);
-        } else {
-          onShowToast(`Added new video: "${finalVideo.title.slice(0, 35)}..."`);
-        }
-      }
+      if (onShowToast) onShowToast(`Added new video: "${finalVideo.title.slice(0, 35)}..."`);
     } else if (typeof index === 'number' && index >= 0) {
       setRankedVideos(prev => {
         const next = [...prev];
@@ -1048,17 +1000,9 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
           VideoService.updateVideo(targetId, finalVideo).catch(err => console.warn('Backend API update error:', err));
         } catch (e) {}
       }
-      if (onShowToast) {
-        if (isScheduled) {
-          onShowToast(`Saved scheduled video #${index + 1}`);
-        } else {
-          onShowToast(`Updated video #${index + 1}`);
-        }
-      }
+      if (onShowToast) onShowToast(`Updated video #${index + 1}`);
     }
 
-    setShowSchedulePicker(false);
-    setScheduleDateTime('');
     setEditModal({ isOpen: false, isCreate: false, index: null, data: null });
   };
 
@@ -1167,8 +1111,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
     const currentTags = Array.isArray(d.tags) ? d.tags : [];
     const currentTopics = Array.isArray(d.topics) ? d.topics : [];
     const currentHighlights = Array.isArray(d.highlights) ? d.highlights : [];
-    const isScheduled = d.status === 'scheduled';
-    const isPub = !isScheduled && d.status !== 'draft' && d.enabled !== false;
+    const isPub = d.status !== 'draft' && d.enabled !== false;
     const catColor = getCategoryColor(d.category);
 
     const currentSlug = d.slug || (d.title ? d.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) : 'video-episode');
@@ -1183,10 +1126,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
             <button
               type="button"
               className="lvs-back-btn"
-              onClick={() => {
-                setShowSchedulePicker(false);
-                setEditModal({ isOpen: false, isCreate: false, index: null, data: null });
-              }}
+              onClick={() => setEditModal({ isOpen: false, isCreate: false, index: null, data: null })}
               title="Return to videos list"
             >
               <span>Back to Videos</span>
@@ -1196,18 +1136,9 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
               <span className="lvs-title-text">
                 {editModal.isCreate ? 'Add New Video Episode' : (d.title || 'Edit Video Episode')}
               </span>
-              {isScheduled && (
-                <span className="lvs-status-pill scheduled">
-                  {d.scheduledAt
-                    ? `• SCHEDULED (${new Date(d.scheduledAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })})`
-                    : '• SCHEDULED'}
-                </span>
-              )}
-              {!isScheduled && (d.status === 'draft' || d.enabled === false) && (
-                <span className="lvs-status-pill draft">
-                  • DRAFT
-                </span>
-              )}
+              <span className={`lvs-status-pill ${isPub ? 'published' : 'draft'}`}>
+                {isPub ? '• LIVE ON SITE' : '• DRAFT'}
+              </span>
             </div>
           </div>
 
@@ -1234,125 +1165,24 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
 
           {/* ── Right Actions ── */}
           <div className="lvs-header-right">
-            {/* Schedule Post Button & Dropdown Popover */}
-            <div className="lvs-schedule-container" style={{ position: 'relative' }}>
-              <button
-                type="button"
-                className={`lvs-btn-schedule ${isScheduled ? 'active' : ''}`}
-                onClick={() => {
-                  if (!scheduleDateTime) {
-                    const defaultTime = d.scheduledAt
-                      ? new Date(d.scheduledAt).toISOString().slice(0, 16)
-                      : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
-                    setScheduleDateTime(defaultTime);
+            <button
+              type="button"
+              className={`abv-action-btn visibility-btn ${isPub ? 'active' : 'inactive'}`}
+              onClick={() => {
+                setEditModal(prev => ({
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    status: isPub ? 'draft' : 'published',
+                    enabled: !isPub
                   }
-                  setShowSchedulePicker(prev => !prev);
-                }}
-                title={isScheduled ? `Scheduled for ${new Date(d.scheduledAt).toLocaleString()}` : "Schedule this video for a future date & time"}
-              >
-                <Calendar size={14} />
-                <span>
-                  {isScheduled
-                    ? (d.scheduledAt
-                        ? `Scheduled (${new Date(d.scheduledAt).toLocaleDateString([], { month: 'short', day: 'numeric' })})`
-                        : 'Scheduled')
-                    : 'Schedule Post'}
-                </span>
-                <ChevronDown size={12} style={{ transform: showSchedulePicker ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-              </button>
-
-              {showSchedulePicker && (
-                <>
-                  <div
-                    className="lvs-schedule-overlay"
-                    onClick={() => setShowSchedulePicker(false)}
-                    style={{ position: 'fixed', inset: 0, zIndex: 100 }}
-                  />
-                  <div className="lvs-schedule-popover">
-                    <div className="lvs-schedule-header">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Calendar size={15} color="#8b5cf6" />
-                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Schedule Post</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setShowSchedulePicker(false)}
-                        className="lvs-schedule-close"
-                        title="Close"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-
-                    <p style={{ margin: '0 0 10px', fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.4 }}>
-                      Choose when this video episode will automatically go live. It remains unlisted until then.
-                    </p>
-
-                    <div style={{ marginBottom: '14px' }}>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '5px' }}>
-                        Release Date & Time
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={scheduleDateTime || (d.scheduledAt ? new Date(d.scheduledAt).toISOString().slice(0, 16) : '')}
-                        min={new Date().toISOString().slice(0, 16)}
-                        onChange={e => setScheduleDateTime(e.target.value)}
-                        className="lvs-schedule-input"
-                      />
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      {isScheduled ? (
-                        <button
-                          type="button"
-                          className="lvs-schedule-clear-btn"
-                          onClick={() => {
-                            setEditModal(prev => ({
-                              ...prev,
-                              data: {
-                                ...prev.data,
-                                status: 'draft',
-                                scheduledAt: null,
-                                enabled: false
-                              }
-                            }));
-                            setScheduleDateTime('');
-                            setShowSchedulePicker(false);
-                            if (onShowToast) onShowToast('Schedule removed — saved as draft');
-                          }}
-                        >
-                          Clear Schedule
-                        </button>
-                      ) : (
-                        <span />
-                      )}
-
-                      <button
-                        type="button"
-                        className="lvs-schedule-confirm-btn"
-                        onClick={() => {
-                          const targetTime = scheduleDateTime || (d.scheduledAt ? new Date(d.scheduledAt).toISOString().slice(0, 16) : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16));
-                          setEditModal(prev => ({
-                            ...prev,
-                            data: {
-                              ...prev.data,
-                              status: 'scheduled',
-                              scheduledAt: new Date(targetTime).toISOString(),
-                              enabled: false
-                            }
-                          }));
-                          setShowSchedulePicker(false);
-                          if (onShowToast) onShowToast(`Post scheduled for ${new Date(targetTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}`);
-                        }}
-                      >
-                        <Check size={14} />
-                        <span>Confirm Schedule</span>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+                }));
+              }}
+              style={{ cursor: 'pointer', padding: '0.42rem 0.9rem', fontSize: '0.8rem' }}
+              title={isPub ? "Currently visible to readers - Click to set draft" : "Hidden from readers - Click to publish"}
+            >
+              <span>{isPub ? 'Frontend: ON' : 'Frontend: OFF'}</span>
+            </button>
 
             <button
               type="button"
@@ -1363,7 +1193,6 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                   data: {
                     ...prev.data,
                     status: 'draft',
-                    scheduledAt: null,
                     enabled: false
                   }
                 }));
@@ -1377,24 +1206,10 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
             <button
               type="button"
               className="lvs-btn-publish"
-              onClick={() => {
-                if (isScheduled) {
-                  // User clicked direct publish button while scheduled -> publish live now
-                  setEditModal(prev => ({
-                    ...prev,
-                    data: {
-                      ...prev.data,
-                      status: 'published',
-                      scheduledAt: null,
-                      enabled: true
-                    }
-                  }));
-                }
-                handleSaveEditModal();
-              }}
-              title={isScheduled ? "Publish live immediately" : "Publish live to public site"}
+              onClick={handleSaveEditModal}
+              title="Publish live to public site"
             >
-              <span>{editModal.isCreate ? (isScheduled ? 'Schedule Video' : 'Publish Video') : (isScheduled ? 'Publish Now' : 'Save Changes')}</span>
+              <span>{editModal.isCreate ? 'Publish Video' : 'Save Changes'}</span>
             </button>
           </div>
         </header>
@@ -1405,54 +1220,63 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
             <div className="lvs-edit-grid">
               {/* Left Main Column: Video URL, Heading, Subheading, SEO & Highlights */}
               <div className="lvs-edit-main">
-                {/* Card 1: Video File & Live Player Preview */}
+                {/* Card 1: Video File & Live Player Preview (Device Upload) */}
                 <div className="lvs-card">
                   <div className="lvs-card-header">
                     <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800 }}>Video File & Player Preview</h4>
+                    <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 700 }}>
+                      Upload directly from your device
+                    </span>
                   </div>
 
-                  {/* Hidden File Input for Device Video Upload with Strict Type Filters */}
+                  {/* Hidden File Input for Device Video Upload */}
                   <input
                     ref={videoFileInputRef}
                     type="file"
-                    accept="video/mp4,video/webm,video/quicktime,video/x-matroska,.mp4,.webm,.mov,.mkv"
+                    accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*"
                     style={{ display: 'none' }}
                     onChange={handleDeviceVideoUpload}
                   />
 
-                  {/* Action Bar if Video is already selected */}
-                  {d.videoUrl && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
+                  {/* Action Bar: Upload from Device */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <button
                         type="button"
                         onClick={() => videoFileInputRef.current?.click()}
                         disabled={isUploadingVideo}
                         className="lvs-autofetch-btn"
-                        title="Replace video file with another from your device (Max 500 MB)"
+                        title="Upload video file (MP4, WebM, MOV, MKV) directly from your device"
                       >
-                        <span>{isUploadingVideo ? 'Uploading Video...' : 'Replace Video from Device'}</span>
+                        <span>{isUploadingVideo ? 'Uploading Video...' : (d.videoUrl ? 'Replace Video from Device' : 'Upload Video from Device')}</span>
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditModal(prev => ({
-                            ...prev,
-                            data: {
-                              ...prev.data,
-                              videoUrl: '',
-                              youtubeEmbedUrl: ''
-                            }
-                          }));
-                        }}
-                        className="avv-btn-secondary"
-                        style={{ padding: '7px 12px', fontSize: '0.78rem' }}
-                        title="Remove current video file"
-                      >
-                        Remove Video
-                      </button>
+                      {d.videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditModal(prev => ({
+                              ...prev,
+                              data: {
+                                ...prev.data,
+                                videoUrl: '',
+                                youtubeEmbedUrl: ''
+                              }
+                            }));
+                          }}
+                          className="avv-btn-secondary"
+                          style={{ padding: '7px 12px', fontSize: '0.78rem' }}
+                          title="Remove current video file"
+                        >
+                          Remove Video
+                        </button>
+                      )}
                     </div>
-                  )}
+
+                    <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      {d.videoUrl ? 'Video file loaded and ready' : 'Supported: MP4, WebM, QuickTime MOV, MKV'}
+                    </span>
+                  </div>
 
                   {/* Video Player Preview or Device Dropzone */}
                   {liveEmbedUrl ? (
@@ -1473,67 +1297,31 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                         />
                       )}
                     </div>
+                  ) : d.image ? (
+                    <div className="lvs-player-embed">
+                      <img src={d.image} alt="Poster preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
                   ) : (
                     <div 
                       className="lvs-player-empty"
                       onClick={() => videoFileInputRef.current?.click()}
-                      style={{ cursor: 'pointer', padding: '26px 16px', textAlign: 'center' }}
-                      title={`Click to choose a video file from your device (Max ${MAX_VIDEO_FILE_SIZE_MB} MB)`}
+                      style={{ cursor: 'pointer' }}
+                      title="Click to choose a video file from your device"
                     >
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          videoFileInputRef.current?.click();
-                        }}
-                        disabled={isUploadingVideo}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '10px 22px',
-                          borderRadius: '8px',
-                          background: '#ea580c',
-                          color: '#ffffff',
-                          border: 'none',
-                          fontSize: '0.86rem',
-                          fontWeight: 750,
-                          cursor: 'pointer',
-                          boxShadow: '0 2px 8px rgba(234, 88, 12, 0.28)',
-                          transition: 'all 0.15s ease'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#c2410c'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#ea580c'; }}
-                      >
-                        <UploadCloud size={18} />
-                        <span>{isUploadingVideo ? 'Uploading...' : 'Click here to upload video from your device'}</span>
-                      </button>
-
-                      {/* Explicit File Restrictions Indicator */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-                        <span style={{ 
-                          fontSize: '0.72rem', 
-                          fontWeight: 750, 
-                          padding: '3px 9px', 
-                          borderRadius: '6px', 
-                          background: 'rgba(234, 88, 12, 0.12)', 
-                          color: '#ea580c',
-                          border: '1px solid rgba(234, 88, 12, 0.3)'
-                        }}>
-                          Max File Size: {MAX_VIDEO_FILE_SIZE_MB} MB
-                        </span>
-                        <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                          Supports MP4, WebM, QuickTime MOV, MKV files
-                        </span>
-                      </div>
+                      <span style={{ fontSize: '0.86rem', color: '#0f172a', fontWeight: 700 }}>
+                        Click here to upload video from your device
+                      </span>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        Supports MP4, WebM, QuickTime MOV, MKV files
+                      </span>
                     </div>
                   )}
                 </div>
 
-                {/* Card 2: Episode Title & Description */}
+                {/* Card 2: Heading & Subheading */}
                 <div className="lvs-card">
                   <div className="lvs-card-header">
-                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800 }}>Episode Heading & Description</h4>
+                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800 }}>Episode Heading & Narrative</h4>
                   </div>
 
                   <div className="avv-form-group">
@@ -1559,33 +1347,13 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                   </div>
 
                   <div className="avv-form-group" style={{ marginBottom: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <label className="avv-form-label" style={{ margin: 0 }}>Episode Description / Overview *</label>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        {(d.description || d.seo?.description || '').length} characters
-                      </span>
-                    </div>
+                    <label className="avv-form-label">Subheading / Episode Narrative Hook</label>
                     <textarea
                       className="avv-form-textarea"
-                      rows={4}
-                      placeholder="Enter the full episode description, what viewers will discover, and discussion summary..."
-                      value={d.description !== undefined ? d.description : (d.seo?.description || '')}
-                      onChange={e => {
-                        const val = e.target.value;
-                        setEditModal(prev => ({
-                          ...prev,
-                          data: {
-                            ...prev.data,
-                            description: val,
-                            seo: {
-                              ...prev.data.seo,
-                              description: (!prev.data.seo?.description || prev.data.seo?.description === prev.data.description)
-                                ? val.slice(0, 160)
-                                : prev.data.seo.description
-                            }
-                          }
-                        }));
-                      }}
+                      rows={3}
+                      placeholder="Inside the high-stakes ambition to build domestic infrastructure, deeptech algorithms, and scalable economics..."
+                      value={d.description || ''}
+                      onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, description: e.target.value } }))}
                     />
                   </div>
                 </div>
@@ -1747,46 +1515,6 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                   </div>
                 </div>
 
-                {/* Sidebar Card: Views & Duration Metrics */}
-                <div className="lvs-card">
-                  <div className="lvs-card-header">
-                    <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800 }}>Views & Duration</h4>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div className="avv-form-group" style={{ marginBottom: 0 }}>
-                      <label className="avv-form-label">Views / Metric</label>
-                      <input
-                        type="text"
-                        className="avv-form-input"
-                        placeholder="e.g. 120,000 or 120K"
-                        value={d.views || ''}
-                        onChange={e => setEditModal(prev => ({
-                          ...prev,
-                          data: { ...prev.data, views: e.target.value }
-                        }))}
-                      />
-                    </div>
-                    <div className="avv-form-group" style={{ marginBottom: 0 }}>
-                      <label className="avv-form-label">Duration</label>
-                      <input
-                        type="text"
-                        className="avv-form-input"
-                        placeholder="e.g. 25:00"
-                        value={d.duration || ''}
-                        onChange={e => setEditModal(prev => ({
-                          ...prev,
-                          data: { ...prev.data, duration: e.target.value }
-                        }))}
-                      />
-                    </div>
-                  </div>
-                  {d.views && (
-                    <div style={{ marginTop: '8px', fontSize: '0.74rem', color: '#64748b' }}>
-                      Original count: <strong>{getOriginalViewNumbers(d.views)}</strong> views
-                    </div>
-                  )}
-                </div>
-
                 {/* Sidebar Card 2: Author / Guest Details */}
                 <div className="lvs-card">
                   <div className="lvs-card-header">
@@ -1804,21 +1532,10 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                       <label className="avv-form-label">Select Author / Guest from Project</label>
                       <select
                         className="avv-form-select"
-                        value={projectAuthors.find(a => a.name === d.guest)?._id || projectAuthors.find(a => a.name === d.guest)?.name || ''}
+                        value=""
                         onChange={e => {
                           const val = e.target.value;
-                          if (!val) {
-                            setEditModal(prev => ({
-                              ...prev,
-                              data: {
-                                ...prev.data,
-                                guest: '',
-                                guestRole: '',
-                                guestAvatar: ''
-                              }
-                            }));
-                            return;
-                          }
+                          if (!val) return;
                           const chosen = projectAuthors.find(a => a._id === val || a.name === val);
                           if (chosen) {
                             setEditModal(prev => ({
@@ -1841,14 +1558,25 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                           </option>
                         ))}
                       </select>
-                      {d.guest && (
-                        <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>✓ Selected: <strong>{d.guest}</strong></span>
-                          {d.guestRole && <span style={{ color: '#64748b' }}>({d.guestRole})</span>}
-                        </div>
-                      )}
                     </div>
                   )}
+
+                  <div className="avv-form-group" style={{ marginBottom: 0 }}>
+                    <label className="avv-form-label">Author / Featured Guest Name *</label>
+                    <input
+                      type="text"
+                      className="avv-form-input"
+                      placeholder="e.g. Bhavish Aggarwal"
+                      value={d.guest || ''}
+                      onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, guest: e.target.value } }))}
+                      list="lvs-authors-datalist"
+                    />
+                    <datalist id="lvs-authors-datalist">
+                      {projectAuthors.map(a => (
+                        <option key={a._id || a.name} value={a.name} />
+                      ))}
+                    </datalist>
+                  </div>
                 </div>
 
                 {/* Sidebar Card 3: Topics */}
@@ -2022,6 +1750,86 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                     })}
                   </div>
                 </div>
+
+                {/* Sidebar Card 4: Poster Thumbnail & Stats */}
+                <div className="lvs-card">
+                  <div className="lvs-card-header">
+                    <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800 }}>Media & Stats</h4>
+                  </div>
+
+                  <div className="avv-form-group">
+                    <input
+                      ref={posterFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleDevicePosterUpload}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
+                      <label className="avv-form-label" style={{ margin: 0 }}>Thumbnail Poster</label>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => posterFileInputRef.current?.click()}
+                          disabled={isUploadingPoster}
+                          style={{ background: 'transparent', border: 'none', color: '#ea580c', fontSize: '0.72rem', fontWeight: 750, cursor: 'pointer' }}
+                        >
+                          {isUploadingPoster ? 'Uploading...' : 'Upload from Device'}
+                        </button>
+                        {parsed && parsed.maxResThumb && (
+                          <button
+                            type="button"
+                            onClick={() => setEditModal(prev => ({ ...prev, data: { ...prev.data, image: parsed.maxResThumb } }))}
+                            style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: '0.72rem', fontWeight: 650, cursor: 'pointer' }}
+                          >
+                            Use YouTube HD
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {d.image && (
+                        <img
+                          src={d.image}
+                          alt="Poster"
+                          style={{ width: '60px', height: '36px', borderRadius: '4px', objectFit: 'cover' }}
+                          onError={e => { e.target.style.display = 'none'; }}
+                        />
+                      )}
+                      <input
+                        type="text"
+                        className="avv-form-input"
+                        placeholder="https://... or upload from device"
+                        value={d.image || ''}
+                        onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, image: e.target.value } }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label className="avv-form-label">Duration</label>
+                      <input
+                        type="text"
+                        className="avv-form-input"
+                        placeholder="42:15"
+                        value={d.duration || ''}
+                        onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, duration: e.target.value } }))}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="avv-form-label">Views</label>
+                      <input
+                        type="text"
+                        className="avv-form-input"
+                        placeholder="245K"
+                        value={d.views || ''}
+                        onChange={e => setEditModal(prev => ({ ...prev, data: { ...prev.data, views: e.target.value } }))}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -2133,12 +1941,12 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                 </div>
 
                 {/* Narrative Description */}
-                {(d.description || d.seo?.description) && (
+                {d.description && (
                   <div className="avv-details-desc-box" style={{ marginBottom: '16px' }}>
                     <div className="avv-details-section-title">
                       <span>Episode Summary & Discussion</span>
                     </div>
-                    <p className="avv-details-desc-text">{d.description || d.seo?.description}</p>
+                    <p className="avv-details-desc-text">{d.description}</p>
                   </div>
                 )}
 
@@ -2329,9 +2137,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                 <span>•</span>
                 <span>⏱ {slideDuration}</span>
                 <span>•</span>
-                <span>
-                  🔥 {slideViews} views {getOriginalViewNumbers(activeSlide.views) && getOriginalViewNumbers(activeSlide.views) !== slideViews ? `(${getOriginalViewNumbers(activeSlide.views)})` : ''}
-                </span>
+                <span>🔥 {slideViews} views</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -2353,12 +2159,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                       isOpen: true,
                       isCreate: false,
                       index: sIdx >= 0 ? sIdx : activeSlideIdx,
-                      data: {
-                        ...activeSlide,
-                        description: (activeSlide.description !== undefined && activeSlide.description !== null && activeSlide.description !== '')
-                          ? activeSlide.description
-                          : (activeSlide.seo?.description || '')
-                      }
+                      data: { ...activeSlide }
                     });
                     setEditorActiveTab('main'); setStudioView('edit');
                     setTagInput('');
@@ -2571,11 +2372,49 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
             </div>
           </div>
 
-          {/* Video Count Indicator */}
+          {/* Count & View Mode Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', fontSize: '0.85rem', color: '#64748b', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
             <div>
               Showing <strong style={{ color: '#0f172a' }}>{visibleVideos.length}</strong> of <strong style={{ color: '#0f172a' }}>{displayRankedVideos.length}</strong> Videos
               {searchQuery && ` (filtered by "${searchQuery}")`}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 650 }}>View Mode:</span>
+              <button
+                type="button"
+                onClick={() => setShowAllCards(true)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: showAllCards ? '#ea580c' : '#cbd5e1',
+                  background: showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
+                  color: showAllCards ? '#ea580c' : '#475569',
+                  fontSize: '0.76rem',
+                  fontWeight: 750,
+                  cursor: 'pointer'
+                }}
+              >
+                Show All ({displayRankedVideos.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAllCards(false)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: !showAllCards ? '#ea580c' : '#cbd5e1',
+                  background: !showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
+                  color: !showAllCards ? '#ea580c' : '#475569',
+                  fontSize: '0.76rem',
+                  fontWeight: 750,
+                  cursor: 'pointer'
+                }}
+              >
+                Paginated (8/page)
+              </button>
             </div>
           </div>
 
@@ -2589,15 +2428,14 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
               const targetIdx = masterRankIdx >= 0 ? masterRankIdx : displayRank;
 
               const vidTitle = video.title || 'Untitled Episode';
-              const vidCat = video.categoryLabel || video.category || 'Founder Interview';
-              const vidDesc = video.description || video.seo?.description || (video.highlights && video.highlights[0]) || '';
+              const vidCat = video.categoryLabel || video.category || 'Interview';
+              const vidDesc = video.description || (video.highlights && video.highlights[0]) || '';
               const vidImg = video.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80';
               const vidGuest = video.guest || 'Featured Guest';
               const vidRole = video.guestRole ? `${video.guestRole}${video.guestCompany ? `, ${video.guestCompany}` : ''}` : '';
               const vidAvatar = video.guestAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
               const vidDuration = video.duration || '25:00';
               const vidViews = video.views || '150K';
-              const origViews = getOriginalViewNumbers(video.rawViews || video.views);
 
               return (
                 <div key={vidId} className="avv-card-item">
@@ -2606,15 +2444,15 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                     <div className="avv-rank-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ color: '#ea580c', fontWeight: 850 }}>#{displayRank + 1}</span>
                       <span style={{ opacity: 0.65 }}>in Video Showcase</span>
-                      {video.status === 'scheduled' ? (
-                        <span style={{ fontSize: '0.68rem', fontWeight: 750, padding: '2px 8px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.25)', letterSpacing: '0.02em' }}>
-                          • SCHEDULED
-                        </span>
-                      ) : video.status === 'draft' || video.enabled === false ? (
+                      {video.status === 'draft' || video.enabled === false ? (
                         <span style={{ fontSize: '0.68rem', fontWeight: 750, padding: '2px 8px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', border: '1px solid rgba(217, 119, 6, 0.25)', letterSpacing: '0.02em' }}>
                           • DRAFT
                         </span>
-                      ) : null}
+                      ) : (
+                        <span style={{ fontSize: '0.68rem', fontWeight: 750, padding: '2px 8px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', color: '#059669', border: '1px solid rgba(5, 150, 105, 0.25)', letterSpacing: '0.02em' }}>
+                          • LIVE ON SITE
+                        </span>
+                      )}
                     </div>
 
                     <div className="avv-card-btn-group">
@@ -2654,12 +2492,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                           isOpen: true,
                           isCreate: false,
                           index: targetIdx,
-                          data: {
-                            ...video,
-                            description: (video.description !== undefined && video.description !== null && video.description !== '')
-                              ? video.description
-                              : (video.seo?.description || '')
-                          }
+                          data: { ...video }
                         })}
                         title="Edit video episode details"
                       >
@@ -2772,24 +2605,8 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                             +{video.tags.length - 1}
                           </span>
                         )}
-                        <span 
-                          style={{ 
-                            fontSize: '0.74rem', 
-                            color: '#ea580c', 
-                            fontWeight: 750, 
-                            whiteSpace: 'nowrap',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                          title={`Original View Count: ${origViews} views`}
-                        >
-                          <span>🔥 {vidViews} views</span>
-                          {origViews && origViews !== vidViews && (
-                            <span style={{ color: '#c2410c', opacity: 0.88, fontWeight: 700, fontSize: '0.71rem' }}>
-                              ({origViews})
-                            </span>
-                          )}
+                        <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 750 }}>
+                          🔥 {vidViews} views
                         </span>
                       </div>
 
@@ -2978,8 +2795,8 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                         {vid.series}
                       </span>
                     )}
-                    <span style={{ fontSize: '0.78rem', color: '#ea580c', fontWeight: 750, marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      🔥 {vid.views} views {getOriginalViewNumbers(vid.views) && getOriginalViewNumbers(vid.views) !== vid.views ? `(${getOriginalViewNumbers(vid.views)})` : ''} • ⏱️ {vid.duration}
+                    <span style={{ fontSize: '0.78rem', color: '#ea580c', fontWeight: 750, marginLeft: 'auto' }}>
+                      🔥 {vid.views} views • ⏱️ {vid.duration}
                     </span>
                   </div>
 
@@ -3035,26 +2852,16 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                       <div className="avv-details-meta-sub">{vid.series || 'Founders Unfiltered'}</div>
                     </div>
                   </div>
-
-                  {/* Original View Numbers Stat Card */}
-                  <div className="avv-details-meta-card">
-                    <Eye size={20} color="#ea580c" style={{ flexShrink: 0 }} />
-                    <div>
-                      <div className="avv-details-meta-label">Original View Numbers</div>
-                      <div className="avv-details-meta-val">{getOriginalViewNumbers(vid.views)} views</div>
-                      <div className="avv-details-meta-sub">{vid.views} display format</div>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Episode Description & Summary */}
-                {(vid.description || vid.seo?.description) && (
+                {vid.description && (
                   <div className="avv-details-desc-box">
                     <div className="avv-details-section-title">
                       <FileText size={15} color="#ea580c" />
                       <span>Episode Summary & Discussion</span>
                     </div>
-                    <p className="avv-details-desc-text">{vid.description || vid.seo?.description}</p>
+                    <p className="avv-details-desc-text">{vid.description}</p>
                   </div>
                 )}
 
@@ -3160,12 +2967,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                       isOpen: true,
                       isCreate: false,
                       index: targetIdx >= 0 ? targetIdx : 0,
-                      data: {
-                        ...toEdit,
-                        description: (toEdit.description !== undefined && toEdit.description !== null && toEdit.description !== '')
-                          ? toEdit.description
-                          : (toEdit.seo?.description || '')
-                      }
+                      data: { ...toEdit }
                     });
                   }}
                 >

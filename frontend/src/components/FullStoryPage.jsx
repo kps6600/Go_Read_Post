@@ -307,18 +307,8 @@ export default function FullStoryPage({
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const added = {
-      id: Date.now(),
-      author: newAuthor.trim() || "Guest Reader",
-      role: "GoReadPost Community Member",
-      time: "Just now",
-      text: newComment.trim(),
-      likes: 0
-    };
-
-    setComments([added, ...comments]);
     setNewComment('');
-    if (onShowToast) onShowToast("Comment posted to the conversation!");
+    if (onShowToast) onShowToast("Thank you! Your perspective has been submitted for editorial review and will appear once approved.");
   };
 
   const handleLikeComment = (commentId) => {

@@ -51,7 +51,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -118,7 +118,7 @@
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   color: #ffffff;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
   transition: all 0.2s ease;
@@ -241,7 +241,7 @@
   color: #ffffff;
   border: none;
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
   transition: all 0.2s ease;
@@ -483,7 +483,7 @@
 .avv-filter-popover-item.selected {
   background: #fff7ed;
   color: #ea580c;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .avv-filter-popover-item.selected {
@@ -513,7 +513,7 @@
   background: #f8fafc;
   color: #ea580c;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
@@ -699,7 +699,7 @@
   background: rgba(0, 0, 0, 0.8);
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 0.04em;
@@ -758,7 +758,7 @@
 
 .avv-card-meta-author {
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #1e293b;
   white-space: nowrap;
   overflow: hidden;
@@ -801,14 +801,14 @@
   border-radius: 20px;
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: capitalize;
   margin-bottom: 0.5rem;
 }
 
 .avv-card-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   line-height: 1.35;
   margin: 0 0 0.45rem;
@@ -913,7 +913,7 @@
 
 .avv-form-label {
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #334155;
 }
 
@@ -946,26 +946,6 @@
 .avv-form-select:focus {
   border-color: #ea580c;
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
-}
-
-.avv-form-input::placeholder,
-.avv-form-textarea::placeholder,
-.avv-form-input::-webkit-input-placeholder,
-.avv-form-textarea::-webkit-input-placeholder {
-  color: #94a3b8 !important;
-  font-weight: 400 !important;
-  opacity: 0.65 !important;
-  font-style: normal !important;
-}
-
-[data-theme='dark'] .avv-form-input::placeholder,
-[data-theme='dark'] .avv-form-textarea::placeholder,
-[data-theme='dark'] .avv-form-input::-webkit-input-placeholder,
-[data-theme='dark'] .avv-form-textarea::-webkit-input-placeholder {
-  color: #64748b !important;
-  font-weight: 400 !important;
-  opacity: 0.65 !important;
-  font-style: normal !important;
 }
 
 @keyframes avvSpin {
@@ -1035,7 +1015,7 @@
 
 .avv-picker-title {
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
@@ -1235,7 +1215,7 @@
 
 .avv-details-meta-label {
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #ea580c;
@@ -1330,7 +1310,7 @@
 
 .avv-details-link-label {
   font-size: 0.74rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted, #64748b);
   white-space: nowrap;
 }
@@ -1445,7 +1425,7 @@
   gap: 7px;
   padding: 0.75rem 1.1rem;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted, #64748b);
   border: none;
   background: transparent;
@@ -1515,7 +1495,7 @@
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .avv-tag-remove {
@@ -1544,7 +1524,7 @@
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.74rem;
-  font-weight: 650;
+  font-weight: 600;
   background: var(--bg-secondary, #f1f5f9);
   color: var(--text-secondary, #475569);
   border: 1px solid var(--border-color, #cbd5e1);
@@ -1656,7 +1636,7 @@
 
 .avv-google-preview-label {
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #ea580c;
@@ -1822,12 +1802,6 @@
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
-.lvs-status-pill.scheduled {
-  background: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-}
-
 /* Center View Switcher: [ Add / Edit Details ] vs [ Live View ] */
 .lvs-header-center {
   display: flex;
@@ -1851,7 +1825,7 @@
   padding: 0.45rem 1.15rem;
   border-radius: 7px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   border: none;
   background: transparent;
   color: #94a3b8;
@@ -1882,7 +1856,7 @@
   padding: 0.42rem 0.9rem;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   background: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1978,7 +1952,7 @@
   color: #ffffff;
   border: none;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
@@ -2123,7 +2097,7 @@ html:has(.lvs-studio-container) {
   color: #ffffff;
   border: 1.5px solid #ea580c;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
@@ -2149,7 +2123,7 @@ html:has(.lvs-studio-container) {
   color: #ea580c;
   border: 1.5px solid #ea580c;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
@@ -2166,131 +2140,4 @@ html:has(.lvs-studio-container) {
 .lvs-device-upload-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Schedule Post Button & Dropdown */
-.lvs-btn-schedule {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0.45rem 1rem;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 750;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  background: rgba(139, 92, 246, 0.12);
-  color: #c4b5fd;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
-
-.lvs-btn-schedule:hover {
-  background: rgba(139, 92, 246, 0.25);
-  color: #ede9fe;
-  border-color: rgba(139, 92, 246, 0.6);
-  transform: translateY(-1px);
-}
-
-.lvs-btn-schedule.active {
-  background: #7c3aed;
-  color: #ffffff;
-  border-color: #6d28d9;
-  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.4);
-}
-
-.lvs-schedule-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 320px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-  z-index: 101;
-  color: #f1f5f9;
-}
-
-.lvs-schedule-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.lvs-schedule-close {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.lvs-schedule-close:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.lvs-schedule-input {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #0f172a;
-  color: #f8fafc;
-  font-size: 0.85rem;
-  outline: none;
-  font-family: inherit;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease;
-}
-
-.lvs-schedule-input:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
-}
-
-.lvs-schedule-confirm-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 7px;
-  background: #7c3aed;
-  color: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.lvs-schedule-confirm-btn:hover {
-  background: #6d28d9;
-}
-
-.lvs-schedule-clear-btn {
-  padding: 6px 12px;
-  border-radius: 7px;
-  background: transparent;
-  color: #f87171;
-  font-size: 0.78rem;
-  font-weight: 600;
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.lvs-schedule-clear-btn:hover {
-  background: rgba(248, 113, 113, 0.15);
-  border-color: rgba(248, 113, 113, 0.5);
 }

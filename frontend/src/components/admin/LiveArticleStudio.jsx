@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, RemoveFormatting,
   Image as ImageIcon, UploadCloud, FolderOpen, Trash2, RefreshCw,
-  Search, Check, X, ChevronDown, Plus, Tag, Bookmark
+  Search, Check, X, ChevronDown, Plus, Tag, Bookmark, Calendar, Clock, Eye, Globe, Share2, Sparkles, Link2
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -545,6 +545,369 @@ export default function LiveArticleStudio({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleDateTime, setScheduleDateTime] = useState('');
+
+  const getPresetTime = (presetType) => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    if (presetType === 'tomorrow_9am') {
+      d.setDate(d.getDate() + 1);
+      d.setHours(9, 0, 0, 0);
+    } else if (presetType === 'tomorrow_6pm') {
+      d.setDate(d.getDate() + 1);
+      d.setHours(18, 0, 0, 0);
+    } else if (presetType === 'in_2_days') {
+      d.setDate(d.getDate() + 2);
+      d.setHours(9, 0, 0, 0);
+    } else if (presetType === 'next_monday') {
+      const day = d.getDay();
+      const daysUntilMonday = ((8 - day) % 7) || 7;
+      d.setDate(d.getDate() + daysUntilMonday);
+      d.setHours(9, 0, 0, 0);
+    }
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const handleOpenScheduleModal = () => {
+    if (formData.scheduledAt) {
+      try {
+        const d = new Date(formData.scheduledAt);
+        const pad = (n) => String(n).padStart(2, '0');
+        const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        setScheduleDateTime(formatted);
+      } catch (e) {
+        setScheduleDateTime(getPresetTime('tomorrow_9am'));
+      }
+    } else {
+      setScheduleDateTime(getPresetTime('tomorrow_9am'));
+    }
+    setShowScheduleModal(true);
+  };
+
+  // SEO helper sync actions
+  const handleSyncSeoTitle = () => {
+    const raw = (formData.title || '').replace(/<[^>]*>/g, '').trim();
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, title: raw }
+    }));
+    if (onShowToast) onShowToast('Synced Meta Title with article headline!');
+  };
+
+  const handleSyncSeoDescription = () => {
+    const desc = (formData.excerpt || formData.subtitle || '').trim();
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, description: desc }
+    }));
+    if (onShowToast) onShowToast('Synced Meta Description with excerpt!');
+  };
+
+  const handleAutoFillCanonical = () => {
+    const cleanSlug = formData.slug ? slugify(formData.slug) : slugify(formData.title.replace(/<[^>]*>/g, ''));
+    const url = `https://goreadpost.com/article/${cleanSlug || 'story'}`;
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, canonicalUrl: url }
+    }));
+    if (onShowToast) onShowToast(`Canonical URL set to ${url}`);
+  };
+
+  const handleSyncOgTitle = () => {
+    const title = (formData.seo?.title || formData.title || '').replace(/<[^>]*>/g, '').trim();
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, ogTitle: title }
+    }));
+    if (onShowToast) onShowToast('Synced Social Share Title!');
+  };
+
+  const handleSyncOgDescription = () => {
+    const desc = (formData.seo?.description || formData.excerpt || formData.subtitle || '').trim();
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, ogDescription: desc }
+    }));
+    if (onShowToast) onShowToast('Synced Social Share Description!');
+  };
+
+  const handleUseCoverForOg = () => {
+    const cover = formData.featuredImage?.url || 
+                  (formData.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || '';
+    if (!cover) {
+      alert('Please add a featured or section image first.');
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      seo: { ...prev.seo, ogImage: cover }
+    }));
+    if (onShowToast) onShowToast('Set cover image as Social Share Image!');
+  };
+
+  const renderSeoFieldsBlock = (isStandaloneView = false) => {
+    const displaySlug = formData.slug || slugify(formData.title.replace(/<[^>]*>/g, '')) || 'custom-story-slug';
+    const serpTitle = formData.seo?.title || (formData.title ? formData.title.replace(/<[^>]*>/g, '') : 'Story Headline — GoReadPost Editorial');
+    const serpDesc = formData.seo?.description || formData.excerpt || formData.subtitle || 'Read the full in-depth editorial coverage on GoReadPost. Stay updated with the latest in tech, business and startups.';
+    const ogImage = formData.seo?.ogImage || formData.featuredImage?.url || '';
+
+    return (
+      <div className="las-seo-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* CARD A: GOOGLE SEARCH & META TAGS */}
+        <div className="las-seo-card">
+          <div className="las-seo-header">
+            <div className="las-seo-title-group">
+              <div className="las-seo-icon-badge">
+                <Globe size={20} />
+              </div>
+              <div>
+                <h4 className="las-seo-title">Search Engine Optimization (Google SERP)</h4>
+                <p className="las-seo-subtitle">Configure search snippet titles, descriptions, and crawl metadata</p>
+              </div>
+            </div>
+            <span className="las-seo-badge">Google SERP Ready</span>
+          </div>
+
+          {/* Live Google Search Preview */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label className="las-label" style={{ marginBottom: '0.4rem', display: 'block' }}>
+              <span>Live Google Search Result Preview</span>
+            </label>
+            <div className="las-google-serp-box">
+              <div className="las-google-serp-url">
+                <span style={{ color: '#202124', fontWeight: 700 }}>GoReadPost</span>
+                <span style={{ color: '#5f6368' }}>› article › {displaySlug}</span>
+              </div>
+              <div className="las-google-serp-title">
+                {serpTitle}
+              </div>
+              <div className="las-google-serp-desc">
+                {serpDesc}
+              </div>
+            </div>
+          </div>
+
+          {/* Meta Title */}
+          <div className="las-form-group" style={{ marginBottom: '1.1rem' }}>
+            <div className="las-seo-field-header">
+              <label className="las-label" style={{ margin: 0 }}>
+                <span>Meta Title Tag</span>
+              </label>
+              <div className="las-seo-actions-row">
+                <span className={`las-seo-char-counter ${(formData.seo?.title || '').length > 60 ? 'danger' : 'good'}`}>
+                  {(formData.seo?.title || '').length}/60 chars
+                </span>
+                <button type="button" className="las-seo-sync-btn" onClick={handleSyncSeoTitle}>
+                  <Sparkles size={11} /> Sync Title
+                </button>
+              </div>
+            </div>
+            <input 
+              type="text" 
+              className="las-input"
+              placeholder={formData.title.replace(/<[^>]*>/g, '') || 'Search optimized title with high-intent keywords...'}
+              value={formData.seo?.title || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, title: e.target.value } }))}
+            />
+          </div>
+
+          {/* Meta Description */}
+          <div className="las-form-group" style={{ marginBottom: '1.1rem' }}>
+            <div className="las-seo-field-header">
+              <label className="las-label" style={{ margin: 0 }}>
+                <span>Meta Description Tag</span>
+              </label>
+              <div className="las-seo-actions-row">
+                <span className={`las-seo-char-counter ${(formData.seo?.description || '').length > 160 ? 'danger' : 'good'}`}>
+                  {(formData.seo?.description || '').length}/160 chars
+                </span>
+                <button type="button" className="las-seo-sync-btn" onClick={handleSyncSeoDescription}>
+                  <Sparkles size={11} /> Sync Excerpt
+                </button>
+              </div>
+            </div>
+            <textarea 
+              rows="3"
+              className="las-input"
+              style={{ height: 'auto', padding: '0.75rem', resize: 'vertical' }}
+              placeholder={formData.excerpt || formData.subtitle || 'Concise editorial summary for Google snippets and search results...'}
+              value={formData.seo?.description || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, description: e.target.value } }))}
+            />
+          </div>
+
+          {/* Keywords & Canonical Grid */}
+          <div className="las-grid-2">
+            <div className="las-form-group">
+              <label className="las-label">
+                <span>Target Keywords</span>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500, marginLeft: '6px' }}>(Comma separated)</span>
+              </label>
+              <input 
+                type="text" 
+                className="las-input"
+                placeholder="e.g. startup, funding 2026, tech trends"
+                value={formData.seo?.keywords || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, keywords: e.target.value } }))}
+              />
+            </div>
+
+            <div className="las-form-group">
+              <div className="las-seo-field-header">
+                <label className="las-label" style={{ margin: 0 }}>
+                  <span>Canonical URL</span>
+                </label>
+                <button type="button" className="las-seo-sync-btn" onClick={handleAutoFillCanonical}>
+                  <Link2 size={11} /> Auto Fill
+                </button>
+              </div>
+              <input 
+                type="text" 
+                className="las-input"
+                placeholder={`https://goreadpost.com/article/${displaySlug}`}
+                value={formData.seo?.canonicalUrl || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, canonicalUrl: e.target.value } }))}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* CARD B: SOCIAL SHARE & OPEN GRAPH (OG TAGS) */}
+        <div className="las-seo-card">
+          <div className="las-seo-header">
+            <div className="las-seo-title-group">
+              <div className="las-seo-icon-badge" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#2563eb' }}>
+                <Share2 size={20} />
+              </div>
+              <div>
+                <h4 className="las-seo-title">Social Share & OpenGraph Cards</h4>
+                <p className="las-seo-subtitle">Control card previews when shared on WhatsApp, LinkedIn, X (Twitter), and Facebook</p>
+              </div>
+            </div>
+            <span className="las-seo-badge" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}>OpenGraph 2.0</span>
+          </div>
+
+          {/* Live Social Share Card Preview */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label className="las-label" style={{ marginBottom: '0.4rem', display: 'block' }}>
+              <span>Live Social Card Preview (LinkedIn / Twitter / WhatsApp)</span>
+            </label>
+            <div className="las-social-card-preview">
+              <div className="las-social-card-img-wrap">
+                {ogImage ? (
+                  <img src={ogImage} alt="Social share card" className="las-social-card-img" />
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+                    No Social Image Selected (will fall back to cover photo)
+                  </div>
+                )}
+              </div>
+              <div className="las-social-card-content">
+                <div className="las-social-card-domain">goreadpost.com</div>
+                <div className="las-social-card-title">
+                  {formData.seo?.ogTitle || serpTitle}
+                </div>
+                <div className="las-social-card-desc">
+                  {formData.seo?.ogDescription || serpDesc}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Title & Image Grid */}
+          <div className="las-grid-2">
+            <div className="las-form-group">
+              <div className="las-seo-field-header">
+                <label className="las-label" style={{ margin: 0 }}>
+                  <span>Social Title (og:title)</span>
+                </label>
+                <button type="button" className="las-seo-sync-btn" onClick={handleSyncOgTitle}>
+                  <Sparkles size={11} /> Sync Title
+                </button>
+              </div>
+              <input 
+                type="text" 
+                className="las-input"
+                placeholder={serpTitle}
+                value={formData.seo?.ogTitle || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, ogTitle: e.target.value } }))}
+              />
+            </div>
+
+            <div className="las-form-group">
+              <div className="las-seo-field-header">
+                <label className="las-label" style={{ margin: 0 }}>
+                  <span>Social Image URL (og:image)</span>
+                </label>
+                <button type="button" className="las-seo-sync-btn" onClick={handleUseCoverForOg}>
+                  <ImageIcon size={11} /> Use Cover Photo
+                </button>
+              </div>
+              <input 
+                type="text" 
+                className="las-input"
+                placeholder="https://images.unsplash.com/..."
+                value={formData.seo?.ogImage || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, ogImage: e.target.value } }))}
+              />
+            </div>
+          </div>
+
+          <div className="las-form-group" style={{ marginTop: '1rem' }}>
+            <div className="las-seo-field-header">
+              <label className="las-label" style={{ margin: 0 }}>
+                <span>Social Description (og:description)</span>
+              </label>
+              <button type="button" className="las-seo-sync-btn" onClick={handleSyncOgDescription}>
+                <Sparkles size={11} /> Sync Description
+              </button>
+            </div>
+            <textarea 
+              rows="2"
+              className="las-input"
+              style={{ height: 'auto', padding: '0.65rem', resize: 'vertical' }}
+              placeholder={serpDesc}
+              value={formData.seo?.ogDescription || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, seo: { ...prev.seo, ogDescription: e.target.value } }))}
+            />
+          </div>
+        </div>
+
+        {isStandaloneView && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
+            <button 
+              type="button" 
+              className="las-card-btn-secondary" 
+              onClick={() => setViewMode('edit')}
+              style={{ padding: '0.6rem 1.25rem' }}
+            >
+              ← Back to Article Editor
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+  const handleConfirmSchedule = () => {
+    if (!scheduleDateTime) {
+      alert('Please select a valid publication date and time.');
+      return;
+    }
+    const chosen = new Date(scheduleDateTime);
+    if (isNaN(chosen.getTime())) {
+      alert('Invalid date format.');
+      return;
+    }
+    if (chosen.getTime() <= Date.now()) {
+      alert('Scheduled time must be in the future.');
+      return;
+    }
+    setShowScheduleModal(false);
+    handleSaveArticle('scheduled', chosen.toISOString());
+  };
 
   // Media picker modal
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -585,6 +948,7 @@ export default function LiveArticleStudio({
           credit: article.featuredImage?.credit || article.photoCredit || ''
         },
         readingTime: article.readingTime || article.readTime || '1 min read',
+        scheduledAt: article.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : '',
         status: article.status || 'published',
         isFeatured: Boolean(article.isFeatured),
         isTrending: Boolean(article.isTrending),
@@ -624,6 +988,7 @@ export default function LiveArticleStudio({
         credit: ''
       },
       readingTime: '1 min read',
+      scheduledAt: '',
       status: 'published',
       isFeatured: false,
       isTrending: true,
@@ -1291,7 +1656,7 @@ export default function LiveArticleStudio({
   };
 
   // Save / Publish Handler
-  const handleSaveArticle = async (targetStatus = 'published') => {
+  const handleSaveArticle = async (targetStatus = 'published', targetScheduledAt = null) => {
     if (!formData.title.trim()) {
       alert('Please provide a title for the story.');
       return;
@@ -1352,6 +1717,12 @@ export default function LiveArticleStudio({
         },
         readingTime: formData.readingTime || `${stats.minutes} min read`,
         status: targetStatus,
+        scheduledAt: targetStatus === 'scheduled' 
+          ? (targetScheduledAt || formData.scheduledAt || new Date(Date.now() + 86400000).toISOString()) 
+          : null,
+        publishedAt: targetStatus === 'published' 
+          ? (formData.publishedAt || new Date().toISOString()) 
+          : (targetStatus === 'scheduled' ? null : (formData.publishedAt || null)),
         isFeatured: formData.isFeatured,
         isTrending: formData.isTrending,
         isBreaking: formData.isBreaking,
@@ -1370,10 +1741,24 @@ export default function LiveArticleStudio({
       let result = null;
       if (formData._id) {
         result = await ArticleService.updateArticle(formData._id, payload);
-        if (onShowToast) onShowToast(`Successfully updated "${formData.title}" (${targetStatus})`);
+        if (onShowToast) {
+          if (targetStatus === 'scheduled') {
+            const dateStr = new Date(payload.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            onShowToast(`Story scheduled for ${dateStr}!`);
+          } else {
+            onShowToast(`Successfully updated "${formData.title}" (${targetStatus})`);
+          }
+        }
       } else {
         result = await ArticleService.createArticle(payload);
-        if (onShowToast) onShowToast(`Successfully published "${formData.title}" to database!`);
+        if (onShowToast) {
+          if (targetStatus === 'scheduled') {
+            const dateStr = new Date(payload.scheduledAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            onShowToast(`Story created and scheduled for ${dateStr}!`);
+          } else {
+            onShowToast(`Successfully published "${formData.title}" to database!`);
+          }
+        }
       }
 
       if (onSaveSuccess) onSaveSuccess(result);
@@ -1578,17 +1963,27 @@ export default function LiveArticleStudio({
               type="button" 
               className={`las-view-btn ${viewMode === 'edit' ? 'active' : ''}`}
               onClick={() => setViewMode('edit')}
-              title="Editor Canvas"
+              title="Main Page Article Editor"
             >
-              <span>Editor</span>
+              <span>Main Page</span>
+            </button>
+            <button 
+              type="button" 
+              className={`las-view-btn ${viewMode === 'seo' ? 'active' : ''}`}
+              onClick={() => setViewMode('seo')}
+              title="SEO & Social Metadata"
+            >
+              <Globe size={13} style={{ marginRight: '4px' }} />
+              <span>SEO</span>
             </button>
             <button 
               type="button" 
               className={`las-view-btn ${viewMode === 'preview' ? 'active' : ''}`}
               onClick={() => setViewMode('preview')}
-              title="Full Live Public Preview"
+              title="Full Live View"
             >
-              <span>Live Preview</span>
+              <Eye size={13} style={{ marginRight: '4px' }} />
+              <span>Live View</span>
             </button>
           </div>
         </div>
@@ -1619,6 +2014,21 @@ export default function LiveArticleStudio({
 
           <button 
             type="button" 
+            className={`las-btn las-btn-schedule ${formData.status === 'scheduled' ? 'active' : ''}`}
+            onClick={handleOpenScheduleModal}
+            disabled={saving}
+            title="Schedule Story to publish automatically at a future time"
+          >
+            <Clock size={14} />
+            <span>
+              {formData.status === 'scheduled' && formData.scheduledAt
+                ? 'Scheduled'
+                : 'Schedule'}
+            </span>
+          </button>
+
+          <button 
+            type="button" 
             className="las-btn las-btn-publish"
             onClick={() => handleSaveArticle('published')}
             disabled={saving}
@@ -1630,8 +2040,8 @@ export default function LiveArticleStudio({
 
       {/* ── Main Workspace ── */}
       <div className={`las-workspace ${viewMode}`}>
-        {/* LEFT: EDITING CANVAS */}
-        {viewMode !== 'preview' && (
+        {/* TAB 1: MAIN PAGE (ARTICLE EDITOR) */}
+        {viewMode === 'edit' && (
           <div className="las-editor-pane">
             <div className="las-editor-inner">
               {/* Hidden file inputs for direct PC upload */}
@@ -2249,8 +2659,37 @@ export default function LiveArticleStudio({
           </div>
         )}
 
-        {/* RIGHT: LIVE INTERACTIVE PREVIEW */}
-        {viewMode !== 'edit' && (
+        {/* TAB 2: DEDICATED SEO PAGE TAB */}
+        {viewMode === 'seo' && (
+          <div className="las-editor-pane" style={{ background: '#f8fafc', width: '100%', flex: 1 }}>
+            <div className="las-editor-inner" style={{ maxWidth: '960px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', background: '#ffffff', padding: '1.25rem 1.5rem', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)' }}>
+                    <Globe size={24} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 850, color: '#0f172a', margin: '0 0 3px 0' }}>SEO & Social Share Studio</h2>
+                    <p style={{ fontSize: '0.86rem', color: '#64748b', margin: 0 }}>Configure search engine snippets, target keywords, canonical URLs, and OpenGraph social previews</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="las-card-btn-secondary"
+                  onClick={() => setViewMode('edit')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  ← Back to Main Page
+                </button>
+              </div>
+
+              {renderSeoFieldsBlock(true)}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: LIVE VIEW TAB */}
+        {viewMode === 'preview' && (
           <div className="las-preview-pane">
             <div className="las-preview-header">
               <div className="las-preview-badge">
@@ -2547,6 +2986,154 @@ export default function LiveArticleStudio({
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CONFIRM PERMANENT DELETE ── */}
+      {/* ── MODAL: SCHEDULE ARTICLE ── */}
+      {showScheduleModal && (
+        <div className="las-modal-backdrop" onClick={() => !saving && setShowScheduleModal(false)}>
+          <div className="las-schedule-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="las-schedule-modal-header">
+              <div className="las-schedule-modal-title-wrap">
+                <div className="las-schedule-icon-badge">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0' }}>
+                    Schedule Story
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
+                    Set a future date and time for automatic publication
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="las-schedule-close-btn" 
+                onClick={() => setShowScheduleModal(false)}
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {formData.status === 'scheduled' && formData.scheduledAt && (
+              <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '10px', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: '#6d28d9' }}>
+                <Calendar size={15} />
+                <span>Currently scheduled for <strong>{new Date(formData.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong></span>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '0.5rem' }}>
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '0.45rem' }}>
+                Quick Presets
+              </label>
+              <div className="las-schedule-presets-grid">
+                <button 
+                  type="button" 
+                  className="las-schedule-preset-btn"
+                  onClick={() => setScheduleDateTime(getPresetTime('tomorrow_9am'))}
+                >
+                  <Calendar size={13} color="#9333ea" />
+                  <span>Tomorrow 9:00 AM</span>
+                </button>
+                <button 
+                  type="button" 
+                  className="las-schedule-preset-btn"
+                  onClick={() => setScheduleDateTime(getPresetTime('tomorrow_6pm'))}
+                >
+                  <Clock size={13} color="#9333ea" />
+                  <span>Tomorrow 6:00 PM</span>
+                </button>
+                <button 
+                  type="button" 
+                  className="las-schedule-preset-btn"
+                  onClick={() => setScheduleDateTime(getPresetTime('in_2_days'))}
+                >
+                  <Calendar size={13} color="#9333ea" />
+                  <span>In 2 Days 9:00 AM</span>
+                </button>
+                <button 
+                  type="button" 
+                  className="las-schedule-preset-btn"
+                  onClick={() => setScheduleDateTime(getPresetTime('next_monday'))}
+                >
+                  <Calendar size={13} color="#9333ea" />
+                  <span>Next Monday 9:00 AM</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="las-schedule-datetime-wrap">
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '0.45rem' }}>
+                Publication Date & Time (Local Time)
+              </label>
+              <input 
+                type="datetime-local" 
+                className="las-schedule-datetime-input"
+                min={(() => {
+                  const d = new Date();
+                  const pad = (n) => String(n).padStart(2, '0');
+                  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                })()}
+                value={scheduleDateTime}
+                onChange={(e) => setScheduleDateTime(e.target.value)}
+              />
+            </div>
+
+            {scheduleDateTime && (
+              <div className="las-schedule-callout">
+                <Clock size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  Story will automatically go live on{' '}
+                  <strong>
+                    {new Date(scheduleDateTime).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(scheduleDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </strong>
+                </div>
+              </div>
+            )}
+
+            <div className="las-schedule-modal-footer">
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {formData.status === 'scheduled' && (
+                  <button 
+                    type="button" 
+                    className="las-btn"
+                    style={{ background: '#f1f5f9', color: '#475569', fontSize: '0.8rem' }}
+                    onClick={() => {
+                      setShowScheduleModal(false);
+                      handleSaveArticle('draft');
+                    }}
+                    disabled={saving}
+                  >
+                    Unschedule to Draft
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                <button 
+                  type="button" 
+                  className="las-btn"
+                  style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569' }}
+                  onClick={() => setShowScheduleModal(false)}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="las-schedule-confirm-btn"
+                  onClick={handleConfirmSchedule}
+                  disabled={saving || !scheduleDateTime}
+                >
+                  <Clock size={14} />
+                  <span>{saving ? 'Scheduling...' : formData.status === 'scheduled' ? 'Update Schedule' : 'Schedule Story'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

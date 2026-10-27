@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, TrendingUp, BookOpen, 
   Send, ExternalLink, Bookmark, Share2, ThumbsUp, Eye, Sparkles, Filter
@@ -95,13 +95,6 @@ export default function FounderFirstPage({
                   <span>{story.readTime || '5 min read'}</span>
                 </div>
                 <div className="ffp-story-actions">
-                  <button 
-                    className="ffp-icon-btn" 
-                    onClick={() => onToggleSave && onToggleSave(story.id)}
-                    title="Bookmark Playbook"
-                  >
-                    <Bookmark size={15} fill={isSaved && isSaved(story.id) ? '#dc2626' : 'none'} color={isSaved && isSaved(story.id) ? '#dc2626' : 'currentColor'} />
-                  </button>
                   <button 
                     className="ffp-icon-btn"
                     onClick={() => onShareStory && onShareStory(story)}

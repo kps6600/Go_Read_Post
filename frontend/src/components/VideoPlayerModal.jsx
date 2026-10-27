@@ -344,7 +344,7 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
               {activeTab === 'overview' && (
                 <div className="cvp-overview-tab">
                   <p className="cvp-full-description">
-                    {currentVideo.description || currentVideo.seo?.description || (Array.isArray(currentVideo.highlights) && currentVideo.highlights[0]) || ''}
+                    {currentVideo.description}
                   </p>
 
                   {currentVideo.highlights && (

@@ -3,7 +3,7 @@ import {
   ChevronRight, ChevronLeft, Search, Mail, CheckCircle2, 
   ArrowRight, LayoutGrid, Tag, Layers, Cpu, Briefcase, 
   GraduationCap, Heart, Plane, Utensils, Atom, Sparkles, TrendingUp,
-  Edit3
+  Edit3, Bookmark
 } from 'lucide-react';
 import './LatestArticlesPage.css';
 import { NewsletterService } from '../services/newsletterService';
@@ -286,7 +286,9 @@ export default function LatestArticlesPage({
   onSelectStory,
   onBackToHome,
   onCategoryClick,
-  onShowToast
+  onShowToast,
+  isSaved,
+  onToggleSave
 }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeTag, setActiveTag] = useState(null);
@@ -623,6 +625,7 @@ export default function LatestArticlesPage({
                 const storyAvatar = getStoryAvatar(story);
                 const storyDate = getStoryDate(story);
                 const storyReadTime = getStoryReadTime(story);
+                const isCardSaved = isSaved ? Boolean(isSaved(story.id || story._id || story.slug)) : false;
 
                 return (
                   <article 
@@ -649,6 +652,18 @@ export default function LatestArticlesPage({
                       <span className="lap-category-on-image">
                         {storyCat}
                       </span>
+                      <button 
+                        type="button" 
+                        className={`lap-card-save-btn ${isCardSaved ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(story);
+                        }}
+                        title={isCardSaved ? 'Remove from saved bookmarks' : 'Save story'}
+                        aria-label="Save story"
+                      >
+                        <Bookmark size={15} fill={isCardSaved ? '#ffffff' : 'none'} color="#ffffff" />
+                      </button>
                     </div>
 
                     <div className="lap-card-body">
@@ -657,20 +672,22 @@ export default function LatestArticlesPage({
                       </h3>
 
                       <div className="lap-card-meta">
-                        <img 
-                          src={storyAvatar} 
-                          alt={storyAuthor} 
-                          className="lap-author-avatar"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-                          }}
-                        />
-                        <span className="lap-author-name">{storyAuthor}</span>
-                        <span className="lap-meta-sep">•</span>
-                        <span>{storyDate}</span>
-                        <span className="lap-meta-sep">•</span>
-                        <span>{storyReadTime}</span>
+                        <div className="lap-card-meta-left">
+                          <img 
+                            src={storyAvatar} 
+                            alt={storyAuthor} 
+                            className="lap-author-avatar"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+                            }}
+                          />
+                          <span className="lap-author-name">{storyAuthor}</span>
+                          <span className="lap-meta-sep">•</span>
+                          <span>{storyDate}</span>
+                          <span className="lap-meta-sep">•</span>
+                          <span>{storyReadTime}</span>
+                        </div>
                       </div>
                     </div>
                   </article>

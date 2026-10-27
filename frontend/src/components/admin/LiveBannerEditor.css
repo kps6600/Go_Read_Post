@@ -115,7 +115,7 @@
   background: transparent;
   color: #94a3b8;
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -137,7 +137,7 @@
   color: #e2e8f0;
   border-radius: 8px;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -189,7 +189,7 @@
   color: #ffffff;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   transition: all 0.2s ease;
@@ -573,7 +573,7 @@
   border-radius: 8px;
   color: #60a5fa;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
@@ -608,7 +608,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #94a3b8;
   cursor: pointer;
   white-space: nowrap;
@@ -813,7 +813,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
   font-size: 0.76rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
@@ -937,7 +937,7 @@
   color: #38bdf8;
   border-radius: 6px;
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -1047,7 +1047,7 @@
 
 .lbe-input-group label {
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #94a3b8;
   letter-spacing: 0.02em;
   text-transform: uppercase;

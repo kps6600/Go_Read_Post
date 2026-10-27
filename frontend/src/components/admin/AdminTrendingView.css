@@ -67,7 +67,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -200,7 +200,7 @@
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   color: #ffffff;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
   transition: all 0.2s ease;
@@ -662,7 +662,7 @@
 .atv-filter-popover-item.selected {
   background: #fff7ed;
   color: #ea580c;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .atv-filter-popover-item.selected {
@@ -692,7 +692,7 @@
   background: #f8fafc;
   color: #ea580c;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
@@ -898,7 +898,7 @@
 
 .atv-card-meta-author {
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #1e293b;
   white-space: nowrap;
   overflow: hidden;
@@ -940,14 +940,14 @@
   border-radius: 20px;
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: capitalize;
   margin-bottom: 0.5rem;
 }
 
 .atv-card-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   line-height: 1.35;
   margin: 0 0 0.45rem;
@@ -1058,7 +1058,7 @@
 
 .atv-field-group label {
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #334155;
 }
 
@@ -1167,7 +1167,7 @@
 
 .atv-picker-title {
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   margin: 0;
   white-space: nowrap;

@@ -3,29 +3,20 @@ import { AuthService } from './authService';
 const GUEST_KEY = 'goreadpost_bookmarks_guest';
 
 export const BookmarkService = {
-  // Get storage key strictly scoped to current logged-in user
+  // Get storage key scoped to current logged-in user or guest
   getStorageKey(user = null) {
     const u = user || AuthService.getUser();
     if (u && (u.id || u._id || u.email || u.username)) {
       const identifier = String(u.id || u._id || u.email || u.username);
       return `goreadpost_bookmarks_user_${identifier}`;
     }
-    return null;
+    return GUEST_KEY;
   },
 
-  // Read local bookmarks for currently active logged-in user
+  // Read local bookmarks for currently active user or guest
   getLocalBookmarks() {
     try {
-      // Permanently purge any unauthenticated guest or legacy shared key
-      localStorage.removeItem('goreadpost_bookmarks_guest');
-      localStorage.removeItem('goreadpost_bookmarks');
-
-      if (!AuthService.isAuthenticated()) {
-        return [];
-      }
-
-      const user = AuthService.getUser();
-      const userKey = this.getStorageKey(user);
+      const userKey = this.getStorageKey();
       if (!userKey) return [];
 
       const raw = localStorage.getItem(userKey);
@@ -42,7 +33,6 @@ export const BookmarkService = {
   // Save to current user's local storage and notify listeners
   saveLocalBookmarks(bookmarks) {
     try {
-      if (!AuthService.isAuthenticated()) return;
       const key = this.getStorageKey();
       if (!key) return;
       localStorage.setItem(key, JSON.stringify(bookmarks || []));
@@ -59,15 +49,11 @@ export const BookmarkService = {
     } catch (e) {}
   },
 
-  // Fetch bookmarks from backend MongoDB for logged-in user only
+  // Fetch bookmarks from backend MongoDB for logged-in user or local guest storage
   async getBookmarks() {
-    // If not authenticated, unauthenticated users have strictly zero saved stories
+    // If not authenticated, return guest bookmarks from local storage
     if (!AuthService.isAuthenticated()) {
-      try {
-        localStorage.removeItem('goreadpost_bookmarks_guest');
-        localStorage.removeItem('goreadpost_bookmarks');
-      } catch (e) {}
-      return [];
+      return this.getLocalBookmarks();
     }
 
     try {
@@ -95,9 +81,9 @@ export const BookmarkService = {
     return this.getLocalBookmarks();
   },
 
-  // Toggle bookmark for current user
+  // Toggle bookmark for current user or guest
   async toggleBookmark(story) {
-    if (!story || !AuthService.isAuthenticated()) return false;
+    if (!story) return false;
     const storyId = String(story.id || story._id || story.slug);
     const current = this.getLocalBookmarks();
     const exists = current.some(s => {
@@ -222,7 +208,7 @@ export const BookmarkService = {
 
   // Helper to test if a story is saved
   isStorySaved(storyId, bookmarksList = null) {
-    if (!storyId || !AuthService.isAuthenticated()) return false;
+    if (!storyId) return false;
     const target = String(storyId);
     const list = bookmarksList || this.getLocalBookmarks();
     return list.some(s => {

@@ -324,14 +324,6 @@ export default function SocialStoryPage({
                       <div className="ssp-card-actions" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
-                          className={`ssp-icon-btn ${cardSaved ? 'saved' : ''}`}
-                          onClick={() => onToggleSave && onToggleSave(card)}
-                          title={cardSaved ? 'Saved' : 'Save'}
-                        >
-                          <Bookmark size={13} fill={cardSaved ? 'currentColor' : 'none'} />
-                        </button>
-                        <button
-                          type="button"
                           className="ssp-icon-btn"
                           onClick={() => onShareStory && onShareStory(card)}
                           title="Share"
@@ -384,12 +376,26 @@ export default function SocialStoryPage({
                   <div className="ssp-compact-body">
                     <h3 className="ssp-compact-title">{item.shortTitle || item.title}</h3>
                     <div className="ssp-compact-footer">
-                      <span className="ssp-author-name">{item.author.name}</span>
-                      <span className="ssp-meta-dot">·</span>
-                      <span className="ssp-read-time">
-                        <Clock size={11} />
-                        {item.readTime}
-                      </span>
+                      <div className="ssp-compact-author-time">
+                        <span className="ssp-author-name">{item.author.name}</span>
+                        <span className="ssp-meta-dot">·</span>
+                        <span className="ssp-read-time">
+                          <Clock size={11} />
+                          {item.readTime}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`ssp-compact-save-btn ${isSaved && isSaved(item.id) ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(item);
+                        }}
+                        title={isSaved && isSaved(item.id) ? 'Saved' : 'Save'}
+                        aria-label="Bookmark"
+                      >
+                        <Bookmark size={13} fill={isSaved && isSaved(item.id) ? 'currentColor' : 'none'} />
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -470,12 +476,26 @@ export default function SocialStoryPage({
                   <div className="ssp-compact-body">
                     <h3 className="ssp-compact-title">{item.shortTitle || item.title}</h3>
                     <div className="ssp-compact-footer">
-                      <span className="ssp-author-name">{item.author.name}</span>
-                      <span className="ssp-meta-dot">·</span>
-                      <span className="ssp-read-time">
-                        <Clock size={11} />
-                        {item.readTime}
-                      </span>
+                      <div className="ssp-compact-author-time">
+                        <span className="ssp-author-name">{item.author.name}</span>
+                        <span className="ssp-meta-dot">·</span>
+                        <span className="ssp-read-time">
+                          <Clock size={11} />
+                          {item.readTime}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`ssp-compact-save-btn ${isSaved && isSaved(item.id) ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(item);
+                        }}
+                        title={isSaved && isSaved(item.id) ? 'Saved' : 'Save'}
+                        aria-label="Bookmark"
+                      >
+                        <Bookmark size={13} fill={isSaved && isSaved(item.id) ? 'currentColor' : 'none'} />
+                      </button>
                     </div>
                   </div>
                 </article>

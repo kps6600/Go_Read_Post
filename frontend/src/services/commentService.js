@@ -1,10 +1,11 @@
 import { AuthService } from './authService';
 
 const API_BASE = '/api/comments';
+const ADMIN_API_BASE = '/api/admin/comments';
 
 export const CommentService = {
   /**
-   * Fetch all comments for a given story slug
+   * Fetch all approved comments for a given story slug (public)
    * @param {string} slug 
    * @returns {Promise<Array>}
    */
@@ -27,10 +28,11 @@ export const CommentService = {
   },
 
   /**
-   * Post a new perspective permanently to the database
+   * Post a new review/perspective permanently to the database.
+   * Review is created with 'pending_review' status on the server.
    * @param {string} storySlug 
    * @param {{ author: string, role: string, text: string }} payload 
-   * @returns {Promise<Object>}
+   * @returns {Promise<{ data: Object, message: string }>}
    */
   async postComment(storySlug, { author, role, text }) {
     if (!storySlug || !text) {
@@ -38,7 +40,7 @@ export const CommentService = {
     }
     const token = AuthService.getToken();
     if (!token) {
-      throw new Error('Please sign in to post your perspective.');
+      throw new Error('Please sign in to share your perspective.');
     }
 
     const res = await fetch(API_BASE, {
@@ -59,7 +61,10 @@ export const CommentService = {
     if (!res.ok || !json.success) {
       throw new Error(json.message || 'Failed to submit perspective');
     }
-    return json.data;
+    return {
+      data: json.data,
+      message: json.message || 'Your perspective has been submitted for editorial review.'
+    };
   },
 
   /**
@@ -147,64 +152,117 @@ export const CommentService = {
   },
 
   /**
-   * Admin: Fetch all comments with filters & stats
+   * Admin: Fetch all reviews/comments with tabs, filters, search, sorting & database statistics
+   * @param {{ status?: string, search?: string, sortBy?: string, limit?: number, page?: number }} params
    */
   async getAdminComments(params = {}) {
-    const token = AuthService.getToken();
     const query = new URLSearchParams();
     if (params.status && params.status !== 'all') query.append('status', params.status);
     if (params.search && params.search.trim()) query.append('search', params.search.trim());
+    if (params.sortBy) query.append('sortBy', params.sortBy);
     if (params.limit) query.append('limit', params.limit);
+    if (params.page) query.append('page', params.page);
 
     try {
-      const res = await fetch(`/api/admin/comments?${query.toString()}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      const res = await fetch(`${ADMIN_API_BASE}?${query.toString()}`, {
+        headers: AuthService.getAdminHeaders()
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.message || 'Failed to fetch comments');
+        throw new Error(json.message || 'Failed to fetch reviews');
       }
       return json;
     } catch (err) {
-      console.warn('Error fetching admin comments:', err);
-      return { success: false, data: [], metrics: { totalComments: 0, approvedCount: 0, pendingCount: 0, rejectedCount: 0 } };
+      console.warn('Error fetching admin reviews:', err);
+      return { 
+        success: false, 
+        data: [], 
+        metrics: { 
+          totalReviews: 0, 
+          totalComments: 0, 
+          approvedCount: 0, 
+          pendingCount: 0, 
+          rejectedHiddenCount: 0,
+          rejectedCount: 0, 
+          hiddenCount: 0 
+        } 
+      };
     }
   },
 
   /**
-   * Admin: Update comment status (approved, pending, rejected)
+   * Admin: Update review status (approved, rejected, hidden, pending_review)
+   * @param {string|number} commentId 
+   * @param {'approved'|'rejected'|'hidden'|'pending_review'} status 
+   * @param {string} [rejectionReason]
    */
-  async updateCommentStatus(commentId, status) {
-    const token = AuthService.getToken();
-    const res = await fetch(`/api/admin/comments/${encodeURIComponent(commentId)}/status`, {
+  async updateCommentStatus(commentId, status, rejectionReason = '') {
+    const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}/status`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ status })
+      headers: AuthService.getAdminHeaders(),
+      body: JSON.stringify({ 
+        status, 
+        rejection_reason: rejectionReason 
+      })
     });
     const json = await res.json();
     if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to update status');
+      throw new Error(json.message || 'Failed to update review status');
     }
     return json;
   },
 
   /**
-   * Admin: Delete comment
+   * Admin: Bulk update status for multiple reviews
+   * @param {Array<string>} ids 
+   * @param {'approved'|'rejected'|'hidden'|'pending_review'} status 
+   * @param {string} [rejectionReason] 
    */
-  async adminDeleteComment(commentId) {
-    const token = AuthService.getToken();
-    const res = await fetch(`/api/admin/comments/${encodeURIComponent(commentId)}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  async bulkUpdateStatus(ids, status, rejectionReason = '') {
+    const res = await fetch(`${ADMIN_API_BASE}/bulk/status`, {
+      method: 'PUT',
+      headers: AuthService.getAdminHeaders(),
+      body: JSON.stringify({ 
+        ids, 
+        status, 
+        rejection_reason: rejectionReason 
+      })
     });
     const json = await res.json();
     if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to delete comment');
+      throw new Error(json.message || 'Failed to perform bulk update');
+    }
+    return json;
+  },
+
+  /**
+   * Admin: Bulk delete multiple reviews permanently
+   * @param {Array<string>} ids 
+   */
+  async bulkDeleteComments(ids) {
+    const res = await fetch(`${ADMIN_API_BASE}/bulk-delete`, {
+      method: 'POST',
+      headers: AuthService.getAdminHeaders(),
+      body: JSON.stringify({ ids })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to delete reviews');
+    }
+    return json;
+  },
+
+  /**
+   * Admin: Delete review permanently
+   */
+  async adminDeleteComment(commentId) {
+    const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}`, {
+      method: 'DELETE',
+      headers: AuthService.getAdminHeaders()
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to delete review');
     }
     return true;
   }

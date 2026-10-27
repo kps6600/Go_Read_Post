@@ -1,8 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap');
+
 :root {
-  /* Editorial Palette - Light Theme */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* Modern Global Typography Tokens - Digital Prisma DM Sans */
+  --font-sans: 'DM Sans', sans-serif;
+  --font-heading: 'DM Sans', sans-serif;
+  --font-display: 'DM Sans', sans-serif;
+  --font-serif: 'DM Sans', sans-serif;
+  --font-headline: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
   --font-mono: 'Space Grotesk', monospace;
 
   --bg-primary: #fcfcfd;
@@ -13,7 +18,7 @@
   --bg-paper: #fffdf9;
   --bg-surface: #ffffff;
 
-  --text-primary: #111827;
+  --text-primary: #0e0d1b;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --text-inverted: #ffffff;
@@ -153,37 +158,6 @@
   padding: 0;
 }
 
-/* ── Universal Dim / Deem Placeholder Styling Across Entire Application ── */
-input::placeholder,
-textarea::placeholder,
-select::placeholder,
-input::-webkit-input-placeholder,
-textarea::-webkit-input-placeholder,
-input::-moz-placeholder,
-textarea::-moz-placeholder,
-input:-ms-input-placeholder,
-textarea:-ms-input-placeholder {
-  color: #94a3b8 !important;
-  opacity: 0.65 !important;
-  font-weight: 400 !important;
-  font-style: normal !important;
-}
-
-[data-theme='dark'] input::placeholder,
-[data-theme='dark'] textarea::placeholder,
-[data-theme='dark'] select::placeholder,
-[data-theme='dark'] input::-webkit-input-placeholder,
-[data-theme='dark'] textarea::-webkit-input-placeholder,
-[data-theme='dark'] input::-moz-placeholder,
-[data-theme='dark'] textarea::-moz-placeholder,
-[data-theme='dark'] input:-ms-input-placeholder,
-[data-theme='dark'] textarea:-ms-input-placeholder {
-  color: #64748b !important;
-  opacity: 0.65 !important;
-  font-weight: 400 !important;
-  font-style: normal !important;
-}
-
 html {
   font-size: 16px;
   scroll-behavior: smooth;
@@ -211,6 +185,22 @@ html {
   }
 }
 
+html,
+body,
+input,
+button,
+select,
+textarea,
+optgroup,
+p,
+span,
+a,
+li,
+td,
+th {
+  font-family: var(--font-sans);
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
@@ -220,33 +210,38 @@ body {
   overflow-x: clip;
 }
 
-/* Typography Scale - Calibrated for Premium Editorial Standards */
+/* Typography Scale - Digital Prisma Bold Standards */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
+  font-family: var(--font-heading);
   color: var(--text-primary);
-  line-height: 1.25;
-  font-weight: 750;
+  line-height: 1.15;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 h1 {
-  font-size: clamp(1.65rem, 1.8vw + 0.8rem, 2.2rem);
-  line-height: 1.2;
+  font-size: clamp(2.2rem, 3vw + 1rem, 46px);
+  line-height: 1.15;
   letter-spacing: -0.025em;
-  font-weight: 800;
+  font-weight: 700;
+  margin: 0 0 20px 0;
 }
 
 h2 {
-  font-size: clamp(1.25rem, 1.1vw + 0.65rem, 1.65rem);
-  line-height: 1.25;
+  font-size: clamp(1.45rem, 1.5vw + 0.9rem, 28px);
+  line-height: 1.2;
   letter-spacing: -0.02em;
-  font-weight: 800;
+  font-weight: 700;
+  margin: 0 0 20px 0;
 }
 
 h3 {
-  font-size: clamp(1.05rem, 0.7vw + 0.55rem, 1.25rem);
-  line-height: 1.3;
-  font-weight: 750;
+  font-family: var(--font-heading, 'DM Sans', sans-serif);
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0e0d1b;
+  margin: 0 0 20px 0;
 }
 
 h4 {
@@ -1459,7 +1454,7 @@ main {
 .modern-cat-tab.active {
   color: var(--brand-primary);
   background: var(--bg-secondary);
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: none;
 }
 
@@ -1498,7 +1493,7 @@ main {
   color: #000000;
   border: none;
   padding: 0.36rem 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: none;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1838,7 +1833,7 @@ main {
 .reports-sub-item:hover {
   color: var(--brand-primary);
   background: var(--bg-secondary);
-  font-weight: 650;
+  font-weight: 600;
   transform: translateX(3px);
 }
 
@@ -2090,7 +2085,7 @@ main {
 .top-pick-headline {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0 0 0.55rem 0;
@@ -2615,7 +2610,7 @@ main {
 
 .captable-item-title {
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0;
@@ -2675,7 +2670,7 @@ main {
   padding: 0.95rem 1.25rem;
   background: var(--bg-secondary);
   font-size: 0.9rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--brand-primary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2880,7 +2875,7 @@ main {
 .editorial-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -3071,7 +3066,7 @@ main {
 .card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin-bottom: 0.45rem;
@@ -3312,7 +3307,7 @@ main {
 .video-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0 0 0.85rem 0;
@@ -3794,7 +3789,7 @@ main {
 
 .reader-category-pill {
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #ea580c;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -3805,7 +3800,7 @@ main {
   align-items: center;
   gap: 0.3rem;
   font-size: 0.76rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
@@ -3824,7 +3819,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-primary);
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   cursor: pointer;
@@ -3887,7 +3882,7 @@ main {
   padding: 0.2rem 0.55rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -3960,7 +3955,7 @@ main {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   background: transparent;
   border: none;
@@ -4025,7 +4020,7 @@ main {
 }
 
 .modern-headline {
-  font-family: var(--font-headline, 'Merriweather', Georgia, serif);
+  font-family: var(--font-headline, var(--font-sans));
   font-size: clamp(1.6rem, 2.4vw + 0.5rem, 2.35rem);
   font-weight: 850;
   line-height: 1.25;
@@ -4117,7 +4112,7 @@ main {
   padding: 0.45rem 0.95rem;
   border-radius: 9999px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -4227,7 +4222,7 @@ main {
   align-items: center;
   gap: 0.4rem;
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .audio-speaker-icon {
@@ -4242,7 +4237,7 @@ main {
 
 .audio-percentage {
   font-family: var(--font-mono, monospace);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.8rem;
   color: #ea580c;
 }
@@ -4369,7 +4364,7 @@ main {
 
 .modern-prose .first-paragraph::first-letter {
   float: left;
-  font-family: var(--font-headline, 'Merriweather', Georgia, serif);
+  font-family: var(--font-headline, var(--font-sans));
   font-size: clamp(2.8rem, 4vw, 3.8rem);
   line-height: 0.82;
   padding-right: 0.65rem;
@@ -4390,7 +4385,7 @@ main {
 
 .reader-tag-pill {
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
   background: var(--bg-secondary);
@@ -4447,7 +4442,7 @@ main {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
   background: var(--bg-card);
@@ -4560,7 +4555,7 @@ main {
   background: #ea580c;
   color: #ffffff;
   border: none;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   display: inline-flex;
@@ -4632,7 +4627,7 @@ main {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted);
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -4860,7 +4855,7 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.22);
   color: #ffffff !important;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: -0.01em;
   padding: 10px 20px;
   border-radius: 9999px;
@@ -5659,7 +5654,7 @@ main {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   font-family: var(--font-mono, monospace);
   padding: 0.26rem 0.65rem;
@@ -5714,7 +5709,7 @@ main {
   border-radius: 9999px;
   padding: 0.72rem 1.65rem;
   font-size: 0.95rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -5735,7 +5730,7 @@ main {
   border: 1px solid var(--border-medium);
   padding: 0.7rem 1.45rem;
   font-size: 0.92rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -5833,7 +5828,7 @@ main {
   -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 4px 10px;
@@ -5850,7 +5845,7 @@ main {
   -webkit-backdrop-filter: blur(6px);
   color: #ffffff;
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   font-family: var(--font-mono, monospace);
   padding: 3px 8px;
   border-radius: 6px;
@@ -6021,7 +6016,7 @@ main {
 .featured-series-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0 0 0.35rem 0;
@@ -6121,7 +6116,7 @@ main {
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
   color: var(--text-primary);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 0.84rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -6146,7 +6141,7 @@ main {
 
 .breadcrumb-current {
   color: var(--brand-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 /* Header Banner */
@@ -6296,7 +6291,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.48rem 1rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -6333,7 +6328,7 @@ main {
   padding: 0.45rem 0.95rem;
   border-radius: var(--radius-md);
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s ease;
@@ -6437,7 +6432,7 @@ main {
 .just-in-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -6623,7 +6618,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-primary);
   font-size: 0.94rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -6682,7 +6677,7 @@ main {
 
 .side-tag-pill {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
@@ -6702,7 +6697,7 @@ main {
   background: var(--brand-light);
   border-color: var(--brand-primary);
   color: var(--brand-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 /* Wire Alert Box */
@@ -6754,7 +6749,7 @@ main {
   background: var(--brand-primary);
   color: #ffffff;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -6848,7 +6843,7 @@ main {
   font-size: 0.72rem;
   font-weight: 900;
   color: #ffffff;
-  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-family: var(--font-display, 'DM Sans', sans-serif);
   letter-spacing: 0.5px;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
   pointer-events: none;
@@ -6880,16 +6875,16 @@ main {
 
 /* Headline Title - Exactly matching home page cards (.editorial-card-title) */
 .ys-search-card-title {
-  font-family: var(--font-sans, 'Inter', sans-serif);
-  font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
-  line-height: 1.38;
+  font-family: var(--font-heading, 'DM Sans', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.28;
   letter-spacing: -0.015em;
-  color: var(--text-primary, #111827);
-  margin: 0 0 1.25rem 0;
-  min-height: 4.1em;
+  color: #0e0d1b;
+  margin: 0 0 20px 0;
+  min-height: 2.6em;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   transition: color 0.2s ease;
@@ -6918,7 +6913,7 @@ main {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: var(--font-sans, 'Inter', sans-serif);
+  font-family: var(--font-sans, 'DM Sans', sans-serif);
 }
 
 [data-theme='dark'] .ys-search-card-category {
@@ -7026,7 +7021,7 @@ main {
   color: #1e293b;
   text-transform: uppercase;
   margin: 0 0 0.85rem 0;
-  font-family: var(--font-sans, 'Inter', sans-serif);
+  font-family: var(--font-sans, 'DM Sans', sans-serif);
 }
 
 [data-theme='dark'] .ys-filter-heading {
@@ -7262,7 +7257,7 @@ main {
 }
 
 .ys-checkbox-label.active-bold {
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
 }
 
@@ -7280,7 +7275,7 @@ main {
   background: transparent;
   border: none;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #1e293b;
   cursor: pointer;
   padding: 0.25rem 0;
@@ -7322,7 +7317,7 @@ main {
 }
 
 .highlight-tag {
-  font-weight: 750;
+  font-weight: 700;
   color: var(--brand-primary, #dc2626);
 }
 
@@ -7372,7 +7367,7 @@ main {
   background: transparent;
   border: none;
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--brand-primary, #dc2626);
   cursor: pointer;
   padding: 0.2rem 0.4rem;
@@ -7457,7 +7452,7 @@ main {
   background: transparent;
   border: none;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
   padding: 0;
@@ -7530,7 +7525,7 @@ main {
 
 .ai-pill-category {
   font-size: 0.75rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.06em;
   color: #dc2626;
   background: rgba(220, 38, 38, 0.12);
@@ -7602,7 +7597,7 @@ main {
 
 .ai-stat-item strong {
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .ai-stat-icon {
@@ -7643,7 +7638,7 @@ main {
   background: var(--bg-card);
   color: var(--text-secondary);
   font-size: 0.85rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.42rem 0.95rem;
   border-radius: 9999px;
   cursor: pointer;
@@ -7950,7 +7945,7 @@ main {
 
 .ai-card-subtopic-tag {
   font-size: 0.74rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
@@ -8063,7 +8058,7 @@ main {
 
 .ai-author-name {
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1.25;
 }
@@ -8274,7 +8269,7 @@ main {
 /* Card headline font size matching home page cards */
 .ai-card-title {
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem) !important;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0 0 0.55rem 0;
@@ -8326,7 +8321,7 @@ main {
 
 .ai-author-small-name {
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -8347,7 +8342,7 @@ main {
 
 .ai-empty-state h3 {
   font-size: 1.25rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
@@ -8502,7 +8497,7 @@ main {
   color: #ffffff;
   border: none;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.75rem 1.35rem;
   border-radius: 8px;
   cursor: pointer;
@@ -8524,7 +8519,7 @@ main {
   padding: 0.65rem 1.25rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 
@@ -8715,7 +8710,7 @@ main {
 .hs-topic-tab.active {
   color: #fff;
   border-bottom-color: var(--hs-accent);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 /* ---- Page Content Area ---- */
@@ -8788,7 +8783,7 @@ main {
   background: var(--hs-accent);
   color: #fff;
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.25rem 0.65rem;
   border-radius: 9999px;
   letter-spacing: 0.03em;
@@ -8877,7 +8872,7 @@ main {
 
 .hs-aside-tag {
   font-size: 0.62rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--hs-accent);
   letter-spacing: 0.06em;
@@ -8983,7 +8978,7 @@ main {
   background: var(--hs-accent);
   color: #fff;
   font-size: 0.62rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   padding: 0.22rem 0.6rem;
@@ -9000,7 +8995,7 @@ main {
 .hs-story-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1.38;
   margin: 0 0 0.55rem 0;
@@ -9143,7 +9138,7 @@ main {
   background: var(--hs-accent-soft);
   color: var(--hs-accent);
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   padding: 0.25rem 0.7rem;
@@ -9199,7 +9194,7 @@ main {
   background: var(--hs-accent);
   color: #fff;
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 0.28rem 0.8rem;
@@ -9241,7 +9236,7 @@ main {
 }
 .hs-byline-name {
   font-size: 0.92rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #fff;
 }
 .hs-byline-meta {
@@ -9310,7 +9305,7 @@ main {
 
 .hs-social-label {
   font-size: 0.62rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-muted);
@@ -9403,7 +9398,7 @@ main {
   line-height: 0.8;
   color: var(--hs-accent);
   opacity: 0.25;
-  font-family: Georgia, serif;
+  font-family: var(--font-heading);
   font-weight: 900;
   margin-bottom: 0.25rem;
   user-select: none;
@@ -9419,7 +9414,7 @@ main {
 }
 .hs-pull-quote cite {
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--hs-accent);
   font-style: normal;
   letter-spacing: 0.02em;
@@ -9475,7 +9470,7 @@ main {
   background: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
   transition: background 0.15s ease, color 0.15s ease;
@@ -9506,7 +9501,7 @@ main {
 .hs-author-card-info { flex: 1; }
 .hs-author-card-label {
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--text-muted);
@@ -9592,7 +9587,7 @@ main {
   padding: 0.6rem 1.35rem;
   border-radius: 9999px;
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   align-self: flex-end;
   transition: opacity 0.2s ease, transform 0.15s ease;
@@ -9618,7 +9613,7 @@ main {
 }
 .hs-comment-author {
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
 }
 .hs-comment-meta {
@@ -9702,14 +9697,14 @@ main {
 }
 .hs-related-tag {
   font-size: 0.62rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--hs-accent);
 }
 .hs-related-title {
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1.4;
   margin: 0.35rem 0 0.5rem;
@@ -9803,7 +9798,7 @@ main {
   color: #dc2626;
   padding: 0.22rem 0.75rem;
   border-radius: 9999px;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.76rem;
   letter-spacing: 0.04em;
 }
@@ -9922,7 +9917,7 @@ main {
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.38rem 0.95rem;
   border-radius: 9999px;
   cursor: pointer;
@@ -10013,7 +10008,7 @@ main {
 
 .grp-origin-journey-text {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
@@ -10070,7 +10065,7 @@ main {
 
 .grp-hero-subheading {
   font-size: clamp(1.15rem, 1.8vw, 1.45rem);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.4;
   color: var(--text-secondary);
   margin: 0.65rem auto 0;
@@ -10527,7 +10522,7 @@ main {
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
   font-size: 0.74rem;
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
@@ -10717,7 +10712,7 @@ main {
 
 .grp-spec-label {
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-secondary);
@@ -10771,7 +10766,7 @@ main {
 
 .grp-spec-benchmark {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   line-height: 1.35;
   margin-bottom: 0.2rem;
@@ -10897,7 +10892,7 @@ main {
 
 .grp-lead-read-indicator {
   font-size: 0.76rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
@@ -11043,7 +11038,7 @@ main {
 .grp-mindset-tag-pill {
   margin-left: auto;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: rgba(220, 38, 38, 0.1);
@@ -11194,7 +11189,7 @@ main {
 
 .grp-discipline-name {
   font-size: 0.98rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.3;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -11644,7 +11639,7 @@ main {
 
 .grp-callout-meta-tag {
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
@@ -11762,7 +11757,7 @@ main {
 
 .grp-takeaway-badge {
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: rgba(220, 38, 38, 0.08);
@@ -11834,7 +11829,7 @@ main {
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.32rem 0.75rem;
   border-radius: 9999px;
   cursor: pointer;
@@ -11908,7 +11903,7 @@ main {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 0.85rem;
   padding: 0.55rem 1rem;
   border-radius: 9999px;
@@ -11996,7 +11991,7 @@ main {
   background: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.78rem;
   padding: 0.38rem 0.95rem;
   border-radius: 9999px;
@@ -12053,7 +12048,7 @@ main {
 
 .grp-signoff-text strong {
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .grp-verified-editorial-seal {
@@ -12255,7 +12250,7 @@ main {
 .grp-similar-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -12359,7 +12354,7 @@ main {
   background: transparent;
   border: none;
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.28rem 0.55rem;
@@ -12382,7 +12377,7 @@ main {
 }
 
 .ssp-crumb-current {
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -12492,7 +12487,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.38rem 0.9rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -12511,7 +12506,7 @@ main {
   background: var(--brand-light);
   border-color: rgba(220, 38, 38, 0.3);
   color: var(--brand-primary);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .ssp-topic-pill.active {
@@ -12900,7 +12895,7 @@ main {
   border: 1px solid var(--border-medium);
   color: var(--text-secondary);
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.25rem 0.75rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -12952,7 +12947,7 @@ main {
   border: 1px solid var(--border-medium);
   color: var(--text-secondary);
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.38rem 0.9rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -13062,7 +13057,7 @@ main {
 .ssp-story-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -13189,7 +13184,7 @@ main {
 .ssp-compact-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -13210,6 +13205,7 @@ main {
 .ssp-compact-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -13217,6 +13213,39 @@ main {
   padding-top: 0.85rem;
   border-top: 1px solid var(--border-light);
   margin-top: auto;
+}
+
+.ssp-compact-author-time {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ssp-compact-save-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ssp-compact-save-btn:hover {
+  color: var(--brand-primary, #dc2626);
+  background: rgba(220, 38, 38, 0.08);
+  transform: scale(1.1);
+}
+
+.ssp-compact-save-btn.active {
+  color: var(--brand-primary, #dc2626);
 }
 
 /* ── Newsletter Section ────────────────────────────────────────── */
@@ -13349,7 +13378,7 @@ main {
   padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 [data-theme='dark'] .ssp-nl-success {
@@ -13392,7 +13421,7 @@ main {
 
 .ssp-empty-state button {
   color: var(--brand-primary);
-  font-weight: 650;
+  font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
   background: none;
@@ -13448,7 +13477,7 @@ main {
   background: transparent;
   border: none;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.35rem 0.6rem;
@@ -13483,7 +13512,7 @@ main {
   margin: 0;
   line-height: 1;
   text-transform: uppercase;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: opacity 0.2s ease;
 }
 
@@ -13527,7 +13556,7 @@ main {
   padding: 0.45rem 1.15rem;
   border-radius: 4px;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -13623,7 +13652,7 @@ main {
 
 .social-subnav-tab.active {
   color: #065f46;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .social-subnav-tab.active {
@@ -13676,7 +13705,7 @@ main {
   border: 1px solid #065f46;
   color: #065f46;
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.25rem 0.65rem;
   border-radius: 4px;
   cursor: pointer;
@@ -13729,7 +13758,7 @@ main {
   background: #059669;
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.25rem 0.65rem;
@@ -13748,7 +13777,7 @@ main {
   color: var(--text-primary);
   margin: 0 0 0.65rem 0;
   letter-spacing: -0.015em;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .social-hero-main-card:hover .social-hero-main-title {
@@ -13776,7 +13805,7 @@ main {
 }
 
 .social-meta-author {
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -13868,7 +13897,7 @@ main {
 
 .social-sidebar-title {
   font-size: 0.95rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.35;
   color: var(--text-primary);
   margin: 0 0 0.35rem 0;
@@ -14088,7 +14117,7 @@ main {
 
 .social-compact-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin: 0.3rem 0 0.6rem 0;
@@ -14209,7 +14238,7 @@ main {
   padding: 0.65rem 1.15rem;
   border-radius: 4px;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 [data-theme='dark'] .social-nl-success {
@@ -14419,7 +14448,7 @@ main {
 
 .smb-eyebrow-sub {
   font-size: 0.72rem;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -14488,7 +14517,7 @@ main {
 }
 
 .smb-author-fullname {
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.95rem;
   color: var(--text-primary);
 }
@@ -14542,7 +14571,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.48rem 0.9rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -14616,7 +14645,7 @@ main {
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-full);
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
@@ -14681,7 +14710,7 @@ main {
 
 .smb-metric-label {
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -14765,7 +14794,7 @@ main {
   font-weight: 900;
   margin: 0.15rem 0.85rem 0 0;
   color: #ea580c;
-  font-family: Georgia, serif;
+  font-family: var(--font-heading);
 }
 
 .smb-lead-subtext {
@@ -15007,7 +15036,7 @@ main {
 
 .smb-dossier-pill {
   font-size: 0.75rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #ea580c;
   background: rgba(234, 88, 12, 0.08);
   padding: 0.22rem 0.65rem;
@@ -15137,7 +15166,7 @@ main {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #ea580c;
   background: rgba(234, 88, 12, 0.08);
   border: 1px solid rgba(234, 88, 12, 0.2);
@@ -15212,7 +15241,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.55rem 1rem;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -15240,7 +15269,7 @@ main {
 
 .smb-story-tag-pill {
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
@@ -15443,7 +15472,7 @@ main {
 .smb-similar-card-title {
   font-family: var(--font-sans);
   font-size: clamp(1.06rem, 0.3vw + 1rem, 1.18rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   letter-spacing: -0.015em;
   color: var(--text-primary);
@@ -15626,7 +15655,7 @@ main {
 
 .enterprise-signin-btn {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   background: transparent;
   border: 1.5px solid var(--border-medium);
@@ -15736,7 +15765,7 @@ main {
 }
 
 .enterprise-lead-title {
-  font-family: 'Playfair Display', Georgia, serif, -apple-system, BlinkMacSystemFont;
+  font-family: var(--font-heading);
   font-size: 2.35rem;
   font-weight: 800;
   line-height: 1.24;
@@ -15929,7 +15958,7 @@ main {
   background: rgba(0, 0, 0, 0.85);
   color: #f1f5f9;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.25rem 0.65rem;
   border-radius: 4px;
   z-index: 10;
@@ -15961,7 +15990,7 @@ main {
   background: transparent;
   border: none;
   font-size: 1.02rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #f97316;
   cursor: pointer;
   padding: 0;
@@ -15998,7 +16027,7 @@ main {
 
 .enterprise-playlist-badge {
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   color: #94a3b8;
   background: rgba(255, 255, 255, 0.06);
   padding: 0.2rem 0.6rem;
@@ -16233,7 +16262,7 @@ main {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   letter-spacing: 0.03em;
 }
@@ -16355,7 +16384,7 @@ main {
   backdrop-filter: blur(4px);
   color: #fff;
   font-size: 0.65rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   padding: 0.2rem 0.5rem;
   border-radius: 3px;
@@ -16371,7 +16400,7 @@ main {
 
 .enterprise-card-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
@@ -16717,7 +16746,7 @@ main {
 
 .hindi-author-name {
   font-size: 0.95rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -16754,7 +16783,7 @@ main {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
@@ -16972,7 +17001,7 @@ main {
 
 .hindi-also-read-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.4;
   color: var(--text-primary);
   margin: 0;
@@ -16996,7 +17025,7 @@ main {
 
 .hindi-tags-label {
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted);
   margin-right: 0.25rem;
 }
@@ -17125,7 +17154,7 @@ main {
 
 .hindi-card-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
   color: var(--text-primary);
   margin-bottom: 0.85rem;
@@ -17244,7 +17273,7 @@ main {
 .hindi-page-wrapper .enterprise-featured-title {
   font-family: var(--font-headline, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   font-size: clamp(1.15rem, 1.3vw, 1.32rem);
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.4;
   color: var(--text-primary);
   margin-top: 0.75rem;
@@ -17338,7 +17367,7 @@ main {
 
 .hindi-card-title {
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
@@ -17369,7 +17398,7 @@ main {
   border: none;
   color: #ea580c;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   padding: 0;
   transition: transform 0.15s ease;
@@ -17438,7 +17467,7 @@ main {
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.84rem;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -17510,7 +17539,7 @@ main {
   gap: 0.5rem;
   margin-bottom: 0.85rem;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted);
 }
 
@@ -17535,7 +17564,7 @@ main {
 
 /* Headline & Subtitle */
 .fs-article-headline {
-  font-family: var(--font-headline, 'Merriweather', Georgia, serif);
+  font-family: var(--font-headline, var(--font-sans));
   font-size: clamp(2.1rem, 3.4vw + 0.3rem, 2.85rem);
   font-weight: 850;
   line-height: 1.24;
@@ -17759,7 +17788,7 @@ main {
 
 .fs-audio-percent {
   font-family: var(--font-mono, monospace);
-  font-weight: 750;
+  font-weight: 700;
   color: #ea580c;
 }
 
@@ -17824,7 +17853,7 @@ main {
 /* Drop Cap on Opening Paragraph */
 .fs-lead-paragraph::first-letter {
   float: left;
-  font-family: var(--font-headline, 'Merriweather', Georgia, serif);
+  font-family: var(--font-headline, var(--font-sans));
   font-size: clamp(3.4rem, 4.8vw, 4.4rem);
   line-height: 0.8;
   padding-right: 0.65rem;
@@ -17881,7 +17910,7 @@ main {
 .fs-red-pullquote p {
   font-size: 1.28rem;
   font-style: italic;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.62;
   color: var(--text-primary);
   margin-bottom: 0.65rem;
@@ -17963,7 +17992,7 @@ main {
 
 .fs-tag-pill {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.4rem 0.95rem;
   border-radius: 9999px;
   background: var(--bg-secondary);
@@ -18020,7 +18049,7 @@ main {
   padding: 0.55rem 1.15rem;
   border-radius: 9999px;
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
   background: var(--bg-card);
@@ -18242,7 +18271,7 @@ main {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-muted);
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -18261,7 +18290,7 @@ main {
   background: rgba(234, 88, 12, 0.12);
   color: #ea580c;
   border-color: rgba(234, 88, 12, 0.4);
-  font-weight: 750;
+  font-weight: 700;
   box-shadow: 0 1px 4px rgba(234, 88, 12, 0.15);
 }
 
@@ -18388,7 +18417,7 @@ main {
 .fs-tile-story-headline {
   font-family: var(--font-headline, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   font-size: 0.96rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.38;
   color: var(--text-primary);
   display: -webkit-box;
@@ -18538,7 +18567,7 @@ main {
   background: var(--bg-secondary, #f1f5f9);
   border: 1px solid var(--border-light, #e2e8f0);
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-secondary, #475569);
   cursor: pointer;
   transition: all 0.18s ease;
@@ -18559,7 +18588,7 @@ main {
   border: 1px solid var(--border-light, #cbd5e1);
   color: var(--text-primary, #0f172a);
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -18608,7 +18637,7 @@ main {
 
 .admin-role-tag {
   font-size: 0.64rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #059669;
 }
 
@@ -18673,7 +18702,7 @@ main {
   background: transparent;
   color: var(--text-muted, #64748b);
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -18896,7 +18925,7 @@ main {
   background: none;
   border: none;
   color: #ea580c;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   font-size: 0.8rem;
   text-decoration: underline;
@@ -18935,7 +18964,7 @@ main {
   border: 1px solid var(--border-light, #cbd5e1);
   border-radius: 9px;
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -18979,7 +19008,7 @@ main {
   background: var(--bg-secondary, #f1f5f9);
   border: 1px solid var(--border-light, #e2e8f0);
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-secondary, #475569);
   cursor: pointer;
   transition: all 0.18s ease;
@@ -19005,7 +19034,7 @@ main {
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-light, #cbd5e1);
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary, #0f172a);
   outline: none;
   cursor: pointer;
@@ -19148,7 +19177,7 @@ main {
   align-items: center;
   gap: 0.55rem;
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary, #0f172a);
   white-space: nowrap;
 }
@@ -19564,7 +19593,7 @@ main {
   background: rgba(0, 0, 0, 0.75);
   color: #ffffff;
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -22308,7 +22337,7 @@ body::-webkit-scrollbar:horizontal,
   border-radius: 9px;
   color: var(--admin-text-primary);
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
@@ -22367,7 +22396,7 @@ body::-webkit-scrollbar:horizontal,
 
 .apv-filter-popover-header {
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--admin-text-faint);
@@ -23154,7 +23183,7 @@ body::-webkit-scrollbar:horizontal,
   gap: 0.35rem;
   padding: 0.28rem 0.6rem;
   font-size: 0.74rem;
-  font-weight: 750;
+  font-weight: 700;
   border-radius: 6px;
   background: transparent;
   border: 1px dashed var(--border-light, #cbd5e1);
@@ -23286,7 +23315,7 @@ body::-webkit-scrollbar:horizontal,
 }
 
 .admin-sublink-name {
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary, #0f172a);
 }
 
@@ -23353,7 +23382,7 @@ body::-webkit-scrollbar:horizontal,
   border: none;
   border-radius: 6px;
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s ease;
@@ -23578,7 +23607,7 @@ body::-webkit-scrollbar:horizontal,
   align-items: center;
   gap: 0.5rem;
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary, #0f172a);
 }
 
@@ -23869,7 +23898,7 @@ body::-webkit-scrollbar:horizontal,
 .bdp-card-title {
   margin: 0 0 4px 0;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.35;
   color: var(--text-primary, #0f172a);
   cursor: pointer;
@@ -23963,7 +23992,7 @@ body::-webkit-scrollbar:horizontal,
   background: rgba(220, 38, 38, 0.08);
   color: var(--brand-primary, #dc2626);
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   border: 1px solid rgba(220, 38, 38, 0.18);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -24232,7 +24261,7 @@ body::-webkit-scrollbar:horizontal,
   gap: 4.5px;
   font-family: inherit;
   font-size: 0.65rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1;
   padding: 2.5px 7.5px;
   border-radius: 9999px;
@@ -24559,7 +24588,7 @@ body::-webkit-scrollbar:horizontal,
 
 .tsp-stat-label {
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -24653,7 +24682,7 @@ body::-webkit-scrollbar:horizontal,
   backdrop-filter: blur(6px);
   color: #ffffff;
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
 }
@@ -25050,7 +25079,7 @@ body::-webkit-scrollbar:horizontal,
   background: #0f172a;
   color: #ffffff;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   border: none;
@@ -25112,7 +25141,7 @@ body::-webkit-scrollbar:horizontal,
   backdrop-filter: blur(4px);
   color: #ffffff;
   font-size: 0.7rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.25rem 0.6rem;
   border-radius: 5px;
 }
@@ -25349,7 +25378,7 @@ body::-webkit-scrollbar:horizontal,
 
 .bhp-lead-title {
   font-size: 0.85rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   line-height: 1.4;
@@ -25553,7 +25582,7 @@ body::-webkit-scrollbar:horizontal,
   background: rgba(0, 0, 0, 0.85);
   color: #fff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -25708,7 +25737,7 @@ body::-webkit-scrollbar:horizontal,
 
 .rep-format-tag {
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   background: var(--bg-secondary);
   color: var(--text-muted);
   padding: 0.25rem 0.65rem;
@@ -25758,7 +25787,7 @@ body::-webkit-scrollbar:horizontal,
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-medium);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.82rem;
   padding: 0.45rem 0.95rem;
   border-radius: 8px;
@@ -25999,7 +26028,7 @@ body::-webkit-scrollbar:horizontal,
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -26156,7 +26185,7 @@ body::-webkit-scrollbar:horizontal,
 .nlp-mockup-stats-bar .lbl {
   font-size: 0.72rem;
   color: var(--text-muted);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 /* Publications Grid Section */
@@ -26195,7 +26224,7 @@ body::-webkit-scrollbar:horizontal,
   background: var(--bg-secondary);
   border: 1px solid var(--border-medium);
   color: var(--text-primary);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.84rem;
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -26868,7 +26897,7 @@ body::-webkit-scrollbar:horizontal,
 .nlp-email-lead-box p {
   margin: 0;
   font-size: 0.96rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-primary);
   line-height: 1.6;
 }
@@ -27026,7 +27055,7 @@ body::-webkit-scrollbar:horizontal,
   border: 1.5px solid var(--border-light);
   color: var(--text-primary);
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -27126,10 +27155,66 @@ body::-webkit-scrollbar:horizontal,
   background: rgba(15, 23, 42, 0.85);
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.25rem 0.55rem;
   border-radius: 4px;
   backdrop-filter: blur(4px);
+}
+
+.vsec-hero-save-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vsec-hero-save-badge-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.vsec-hero-save-badge-btn.active {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.vsec-card-save-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vsec-card-save-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: scale(1.1);
+}
+
+.vsec-card-save-btn.active {
+  background: #dc2626;
+  border-color: #dc2626;
 }
 
 .vsec-hero-play-circle {
@@ -27302,7 +27387,7 @@ body::-webkit-scrollbar:horizontal,
   background: rgba(15, 23, 42, 0.85);
   color: #fff;
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   backdrop-filter: blur(4px);
@@ -27325,7 +27410,7 @@ body::-webkit-scrollbar:horizontal,
 
 .vsec-card-title {
   font-size: 0.92rem;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1.35;
   margin: 0 0 0.5rem 0;
@@ -27392,7 +27477,7 @@ body::-webkit-scrollbar:horizontal,
   color: #ffffff;
   border: none;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -27560,7 +27645,7 @@ body::-webkit-scrollbar:horizontal,
 
 .vpage-stage-series {
   font-size: 0.76rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #f1f5f9;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -27847,7 +27932,7 @@ body::-webkit-scrollbar:horizontal,
   background: rgba(15, 23, 42, 0.85);
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.2rem 0.55rem;
   border-radius: 4px;
   backdrop-filter: blur(4px);
@@ -27921,7 +28006,7 @@ body::-webkit-scrollbar:horizontal,
 }
 
 .vpage-card-guest {
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -28035,7 +28120,7 @@ body::-webkit-scrollbar:horizontal,
   background: #dc2626;
   color: #ffffff;
   border: none;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
   white-space: nowrap;

@@ -135,7 +135,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
   font-size: 0.78rem;
-  font-weight: 650;
+  font-weight: 600;
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
   cursor: pointer;
@@ -245,7 +245,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #e2e8f0;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -356,7 +356,7 @@
 
 .cvp-verified-badge {
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.15);
   padding: 0.15rem 0.45rem;
@@ -511,7 +511,7 @@
 .cvp-credit-val {
   font-size: 0.82rem;
   color: #f1f5f9;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 /* Chapters Tab */
@@ -550,7 +550,7 @@
   background: rgba(220, 38, 38, 0.2);
   color: #ef4444;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   font-family: monospace;
   flex-shrink: 0;
 }
@@ -598,7 +598,7 @@
 .cvp-quote-speaker {
   font-size: 0.84rem;
   color: #ffffff;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .cvp-quote-timestamp {
@@ -660,7 +660,7 @@
   color: #ffffff;
   border: none;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -783,7 +783,7 @@
 
 .cvp-queue-count {
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   background: rgba(255, 255, 255, 0.08);
   color: #cbd5e1;
   padding: 0.15rem 0.45rem;
@@ -904,7 +904,7 @@
   background: rgba(0, 0, 0, 0.8);
   color: #ffffff;
   font-size: 0.65rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
 }
@@ -932,7 +932,7 @@
 .cvp-queue-series-tag {
   font-size: 0.68rem;
   color: #ef4444;
-  font-weight: 750;
+  font-weight: 700;
   text-transform: uppercase;
   display: block;
   margin-bottom: 0.15rem;
@@ -940,7 +940,7 @@
 
 .cvp-queue-item-title {
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #ffffff;
   line-height: 1.35;
   margin: 0 0 0.25rem 0;

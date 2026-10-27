@@ -21,7 +21,7 @@
   color: #ffffff;
   border-radius: 9px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -168,7 +168,7 @@
   border-radius: 6px;
   color: #94a3b8;
   font-size: 0.8rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -339,7 +339,7 @@
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -843,7 +843,7 @@
   padding: 7px 14px;
   border-radius: 8px;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid #e2e8f0;
@@ -944,7 +944,7 @@
   border: 1px solid #cbd5e1;
   background: #ffffff;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #0f172a;
   cursor: pointer;
 }
@@ -976,7 +976,7 @@
   color: #0f172a;
   border-radius: 8px;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1010,7 +1010,7 @@
   color: #334155;
   border-radius: 8px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1037,7 +1037,7 @@
   color: #334155;
   border-radius: 8px;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }

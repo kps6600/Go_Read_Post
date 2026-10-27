@@ -667,6 +667,18 @@ export default function CategoryContentPage({
                           e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80';
                         }}
                       />
+                      <button 
+                        type="button" 
+                        className={`cat-card-save-btn ${isStorySaved ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(story);
+                        }}
+                        title={isStorySaved ? 'Remove from saved bookmarks' : 'Save story'}
+                        aria-label="Save story"
+                      >
+                        <Bookmark size={15} fill={isStorySaved ? '#ffffff' : 'none'} color="#ffffff" />
+                      </button>
                     </div>
 
                     <div className="cat-card-body">
@@ -697,18 +709,6 @@ export default function CategoryContentPage({
                         </div>
 
                         <div className="cat-card-actions">
-                          <button 
-                            type="button" 
-                            className={`cat-card-save-btn ${isStorySaved ? 'active' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (onToggleSave) onToggleSave(story);
-                            }}
-                            title={isStorySaved ? "Remove from bookmarks" : "Save story"}
-                            aria-label="Save story"
-                          >
-                            <Bookmark size={15} fill={isStorySaved ? "currentColor" : "none"} />
-                          </button>
                           <div className="cat-card-arrow" aria-label="Read story">
                             <ArrowRight size={14} />
                           </div>

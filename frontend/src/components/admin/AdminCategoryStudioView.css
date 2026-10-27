@@ -56,7 +56,7 @@
   background: #ffffff;
   color: #334155;
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -161,7 +161,7 @@
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   color: #ffffff;
   font-size: 0.88rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
   transition: all 0.2s ease;
@@ -305,7 +305,7 @@
 }
 
 .acsv-hero-author-name {
-  font-weight: 750;
+  font-weight: 700;
   font-size: 0.96rem;
   color: #ffffff;
 }
@@ -324,7 +324,7 @@
   color: #ffffff;
   border: none;
   font-size: 0.94rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 12px 24px;
   border-radius: 10px;
   cursor: pointer;
@@ -357,7 +357,7 @@
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
   font-size: 0.8rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
@@ -483,7 +483,7 @@
   background: transparent;
   color: #64748b;
   font-size: 0.78rem;
-  font-weight: 750;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
@@ -704,7 +704,7 @@
   backdrop-filter: blur(4px);
   color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 6px;
   text-transform: uppercase;
@@ -858,7 +858,7 @@
 
 .acsv-form-label {
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 700;
   color: #334155;
 }
 
