@@ -3455,7 +3455,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         <div>
           {/* Cards Header: Select All & Count */}
           <div className="abv-cards-header-bar">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <label className="abv-select-all-label" title="Select all articles">
               <input 
                 type="checkbox" 
@@ -3476,30 +3475,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 </span>
               )}
             </label>
-              {selectedIds.size > 0 && isDraftsView && (
-                <button
-                  type="button"
-                  onClick={() => handleBulkPublish()}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '3px 10px',
-                    background: '#059669',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 5px rgba(5, 150, 105, 0.25)'
-                  }}
-                  title={`Post ${selectedIds.size} selected draft article${selectedIds.size > 1 ? 's' : ''} live`}
-                >
-                  <Send size={11} /> Post Selected ({selectedIds.size})
-                </button>
-              )}
-            </div>
             <div className="abv-cards-count-badge">
               <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
             </div>
