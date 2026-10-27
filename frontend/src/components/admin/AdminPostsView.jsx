@@ -640,12 +640,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       setActiveTab('draft');
     } else if (currentPath === '/admin/archived' || currentPath?.includes('/archived')) {
       setActiveTab('archived');
-    } else if (currentPath === '/admin/articles' || currentPath === '/admin/posts' || currentPath === '/admin/blogs') {
-      if (activeTab === 'draft' || activeTab === 'archived') {
-        setActiveTab('all');
-      }
     }
-  }, [currentPath, articles.length]);
+  }, [currentPath]);
 
   const handleTitleChange = (val) => {
     setFormData(prev => {
@@ -1169,6 +1165,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
 
     return true;
+  }).sort((a, b) => {
+    if (activeTab === 'views') {
+      return (b.views || 0) - (a.views || 0);
+    }
+    return 0;
   });
 
   // KPI Stats
@@ -3142,9 +3143,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
     if (tabId === 'archived') {
-      onNavigate?.('/admin/archived');
+      if (currentPath !== '/admin/archived') onNavigate?.('/admin/archived');
     } else {
-      onNavigate?.('/admin/articles');
+      if (currentPath === '/admin/archived') onNavigate?.('/admin/articles');
     }
   };
 
@@ -3152,24 +3153,54 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     <div className="abv-container">
       {/* 1. KPI Cards */}
       <div className="abv-kpi-row" style={{ marginTop: '0.25rem' }}>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('all')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card kpi-all ${activeTab === 'all' ? 'active' : ''}`} 
+          onClick={() => handleTabClick('all')} 
+          role="button"
+          tabIndex={0}
+          title="Filter: All Posts"
+        >
           <div className="abv-kpi-num">{articles.length}</div>
           <div className="abv-kpi-label">All Posts</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('published')} style={{ cursor: 'pointer' }}>
-          <div className="abv-kpi-num" style={{ color: 'var(--accent-emerald)' }}>{publishedCount}</div>
+        <div 
+          className={`abv-kpi-card kpi-published ${activeTab === 'published' ? 'active' : ''}`} 
+          onClick={() => handleTabClick('published')} 
+          role="button"
+          tabIndex={0}
+          title="Filter: Published (Live) Posts"
+        >
+          <div className="abv-kpi-num" style={{ color: 'var(--accent-emerald, #059669)' }}>{publishedCount}</div>
           <div className="abv-kpi-label">Published (Live)</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('draft')} style={{ cursor: 'pointer' }}>
-          <div className="abv-kpi-num" style={{ color: 'var(--brand-primary)' }}>{draftCount}</div>
+        <div 
+          className={`abv-kpi-card kpi-draft ${activeTab === 'draft' ? 'active' : ''}`} 
+          onClick={() => handleTabClick('draft')} 
+          role="button"
+          tabIndex={0}
+          title="Filter: Draft Posts"
+        >
+          <div className="abv-kpi-num" style={{ color: 'var(--brand-primary, #dc2626)' }}>{draftCount}</div>
           <div className="abv-kpi-label">Drafts</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('scheduled')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card kpi-scheduled ${activeTab === 'scheduled' ? 'active' : ''}`} 
+          onClick={() => handleTabClick('scheduled')} 
+          role="button"
+          tabIndex={0}
+          title="Filter: Scheduled Posts"
+        >
           <div className="abv-kpi-num" style={{ color: '#8b5cf6' }}>{scheduledCount}</div>
           <div className="abv-kpi-label">Scheduled</div>
         </div>
-        <div className="abv-kpi-card">
-          <div className="abv-kpi-num" style={{ color: 'var(--text-primary)' }}>{(totalViews || 24800).toLocaleString()}</div>
+        <div 
+          className={`abv-kpi-card kpi-views ${activeTab === 'views' ? 'active' : ''}`} 
+          onClick={() => handleTabClick('views')} 
+          role="button"
+          tabIndex={0}
+          title="Sort by: Most Viewed Posts"
+        >
+          <div className="abv-kpi-num" style={{ color: '#0284c7' }}>{(totalViews || 0).toLocaleString()}</div>
           <div className="abv-kpi-label">Total Views</div>
         </div>
       </div>
@@ -3441,7 +3472,14 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               )}
             </label>
             <div className="abv-cards-count-badge">
-              <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
+              <span>
+                {activeTab === 'draft' && 'Drafts: '}
+                {activeTab === 'published' && 'Published: '}
+                {activeTab === 'scheduled' && 'Scheduled: '}
+                {activeTab === 'views' && 'Most Viewed: '}
+                {activeTab === 'all' && 'All Posts: '}
+                {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}
+              </span>
             </div>
           </div>
 
@@ -3455,7 +3493,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <BookOpen size={40} color="var(--text-muted)" style={{ margin: '0 auto 0.75rem' }} />
               <h4 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.35rem' }}>No Posts Found</h4>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', marginBottom: '1.25rem' }}>
-                {search ? `No articles matching "${search}"` : 'No articles currently in this section.'}
+                {search ? `No articles matching "${search}"` : 
+                 activeTab === 'draft' ? 'No draft articles found. You can create a new article and save it as draft.' :
+                 activeTab === 'scheduled' ? 'No scheduled articles found.' :
+                 activeTab === 'published' ? 'No published articles found.' :
+                 'No articles currently in this section.'}
               </p>
               <button className="abv-btn-primary" onClick={handleOpenCreate} style={{ margin: '0 auto' }}>
                 <Plus size={15} /> Create First Article

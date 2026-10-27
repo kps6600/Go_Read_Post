@@ -1158,18 +1158,135 @@ table input[type="checkbox"]:checked::after {
 }
 .abv-kpi-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   border-radius: 12px;
   padding: 0.85rem 1rem;
   box-shadow: var(--shadow-sm);
   min-width: 0;
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+.abv-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: transparent;
+  transition: background 0.2s ease;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 .abv-kpi-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: var(--border-medium, #cbd5e1);
+}
+
+/* KPI Active Highlight States */
+.abv-kpi-card.active {
+  transform: translateY(-2px);
+}
+
+/* 1. All Posts Active */
+.abv-kpi-card.kpi-all.active {
+  border-color: #2563eb;
+  background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22), 0 6px 16px rgba(37, 99, 235, 0.12);
+}
+.abv-kpi-card.kpi-all.active::before {
+  background: #2563eb;
+}
+.abv-kpi-card.kpi-all.active .abv-kpi-label {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+/* 2. Published Active */
+.abv-kpi-card.kpi-published.active {
+  border-color: #059669;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.22), 0 6px 16px rgba(5, 150, 105, 0.12);
+}
+.abv-kpi-card.kpi-published.active::before {
+  background: #059669;
+}
+.abv-kpi-card.kpi-published.active .abv-kpi-label {
+  color: #059669;
+  font-weight: 700;
+}
+
+/* 3. Drafts Active */
+.abv-kpi-card.kpi-draft.active {
+  border-color: #dc2626;
+  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22), 0 6px 16px rgba(220, 38, 38, 0.12);
+}
+.abv-kpi-card.kpi-draft.active::before {
+  background: #dc2626;
+}
+.abv-kpi-card.kpi-draft.active .abv-kpi-label {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* 4. Scheduled Active */
+.abv-kpi-card.kpi-scheduled.active {
+  border-color: #8b5cf6;
+  background: linear-gradient(180deg, #fbf7ff 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.22), 0 6px 16px rgba(139, 92, 246, 0.12);
+}
+.abv-kpi-card.kpi-scheduled.active::before {
+  background: #8b5cf6;
+}
+.abv-kpi-card.kpi-scheduled.active .abv-kpi-label {
+  color: #8b5cf6;
+  font-weight: 700;
+}
+
+/* 5. Total Views Active */
+.abv-kpi-card.kpi-views.active {
+  border-color: #0284c7;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.22), 0 6px 16px rgba(2, 132, 199, 0.12);
+}
+.abv-kpi-card.kpi-views.active::before {
+  background: #0284c7;
+}
+.abv-kpi-card.kpi-views.active .abv-kpi-label {
+  color: #0284c7;
+  font-weight: 700;
+}
+
+/* Dark Mode KPI active states */
+[data-theme='dark'] .abv-kpi-card.kpi-all.active {
+  background: rgba(37, 99, 235, 0.14);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+[data-theme='dark'] .abv-kpi-card.kpi-published.active {
+  background: rgba(5, 150, 105, 0.14);
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+[data-theme='dark'] .abv-kpi-card.kpi-draft.active {
+  background: rgba(220, 38, 38, 0.14);
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+[data-theme='dark'] .abv-kpi-card.kpi-scheduled.active {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+[data-theme='dark'] .abv-kpi-card.kpi-views.active {
+  background: rgba(2, 132, 199, 0.14);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 .abv-kpi-num {
   font-size: 1.5rem;
