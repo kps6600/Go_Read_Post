@@ -4,8 +4,7 @@ import {
   Menu as MenuIcon, PanelBottom, Search, Settings, 
   LogOut, ExternalLink, X, ChevronRight, Newspaper, Layers,
   Hash, Tag, Users, Shield, BarChart3, FileEdit, Archive,
-  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket,
-  PanelLeftClose
+  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 
@@ -160,15 +159,6 @@ export default function AdminSidebar({
             )}
           </div>
           
-          <button 
-            type="button" 
-            className="sidebar-close-btn" 
-            onClick={onClose || onCloseMobile || onToggle}
-            title="Close sidebar"
-            aria-label="Close sidebar"
-          >
-            <PanelLeftClose size={18} />
-          </button>
         </div>
 
         {/* Navigation Items Grouped */}
