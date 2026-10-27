@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ArrowRight, 
-  Cpu, Briefcase, GraduationCap, Heart, Plane, 
-  Gamepad2, Atom, Layers, ChevronRight, ChevronLeft, Bookmark,
+  Heart, ChevronRight, ChevronLeft, Bookmark,
   Eye, Flame, TrendingUp, Sparkles
 } from 'lucide-react';
 import { ArticleService } from '../services/articleService';
@@ -341,17 +340,6 @@ export default function TrendingPage({
   const heroDate = getStoryDate(activeHero);
   const heroReadTime = getStoryReadTime(activeHero);
 
-  // Defined filter categories with icons matching design
-  const CATEGORIES = [
-    { label: 'All', icon: Layers, slug: 'all' },
-    { label: 'Technology', icon: Cpu, slug: 'technology' },
-    { label: 'Business', icon: Briefcase, slug: 'business' },
-    { label: 'Education', icon: GraduationCap, slug: 'education' },
-    { label: 'Health', icon: Heart, slug: 'health' },
-    { label: 'Travel', icon: Plane, slug: 'travel' },
-    { label: 'Lifestyle', icon: Gamepad2, slug: 'lifestyle' },
-    { label: 'Science', icon: Atom, slug: 'science' },
-  ];
 
   // Filtered stories for main list
   const filteredStories = useMemo(() => {
@@ -553,28 +541,7 @@ export default function TrendingPage({
         </div>
       </section>
 
-      {/* ── 2. Category Filter Bar ── */}
       <div className="tp-container">
-        <div className="tp-filter-bar">
-          {CATEGORIES.map(cat => {
-            const Icon = cat.icon;
-            const isActive = activeCategory === cat.label;
-            return (
-              <button
-                key={cat.label}
-                type="button"
-                className={`tp-filter-btn ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory(cat.label);
-                  setActiveTag(null);
-                }}
-              >
-                <Icon size={16} className="tp-cat-icon" />
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* ── 3. Main Two-Column Layout ── */}
         <div className="tp-main-grid">
