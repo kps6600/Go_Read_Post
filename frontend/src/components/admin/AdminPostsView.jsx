@@ -3624,8 +3624,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         )}
                       </button>
 
-                      {/* Top-Right Action Button: Post for drafts, Draft for published */}
-                      {article.status === 'draft' ? (
+                      {/* Top-Right Action Button: Post for drafts only */}
+                      {article.status === 'draft' && (
                         <button 
                           type="button"
                           className="abv-card-top-post-btn"
@@ -3638,20 +3638,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           <Send size={11} />
                           <span>Post</span>
                         </button>
-                      ) : article.status === 'published' ? (
-                        <button 
-                          type="button"
-                          className="abv-card-top-draft-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDraftSingle(article);
-                          }}
-                          title="Move this article to Drafts"
-                        >
-                          <FileText size={11} />
-                          <span>Set Draft</span>
-                        </button>
-                      ) : null}
+                      )}
 
                       {/* Unified Badges: Show only one tag, and another/remaining in numbers */}
                       {mediaTags.length > 0 && (
@@ -4212,33 +4199,68 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </span>
                       )}
 
-                      <button
-                        type="button"
-                        className={`abv-action-btn visibility-btn ${art.status === 'published' ? 'active' : 'inactive'}`}
-                        onClick={async () => {
-                          const nextStatus = art.status === 'published' ? 'draft' : 'published';
-                          await handleTogglePublish(art);
-                          setViewingArticleDetails(prev => prev ? ({ 
-                            ...prev, 
-                            status: nextStatus,
-                            publishedAt: nextStatus === 'published' ? (prev.publishedAt || new Date().toISOString()) : null
-                          }) : null);
-                        }}
-                        style={{ cursor: 'pointer', padding: '0.35rem 0.8rem', fontSize: '0.78rem' }}
-                        title={art.status === 'published' ? "Showing live on frontend - Click to switch to Draft" : "Hidden from frontend (Draft) - Click to Publish live"}
-                      >
-                        {art.status === 'published' ? (
-                          <>
-                            <Eye size={13} />
-                            <span>Frontend: ON</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={13} />
-                            <span>Frontend: OFF</span>
-                          </>
-                        )}
-                      </button>
+                      {/* Dedicated Draft / Publish Action in Modal Details Header */}
+                      {art.status === 'published' ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleTogglePublish(art);
+                            setViewingArticleDetails(prev => prev ? ({ 
+                              ...prev, 
+                              status: 'draft',
+                              publishedAt: null
+                            }) : null);
+                          }}
+                          style={{
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '0.35rem 0.85rem',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            background: 'rgba(217, 119, 6, 0.15)',
+                            color: '#d97706',
+                            border: '1px solid rgba(217, 119, 6, 0.4)',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 4px rgba(217, 119, 6, 0.2)'
+                          }}
+                          title="Move this article to Drafts (hide from frontend)"
+                        >
+                          <FileText size={13} />
+                          <span>Set as Draft</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleTogglePublish(art);
+                            setViewingArticleDetails(prev => prev ? ({ 
+                              ...prev, 
+                              status: 'published',
+                              publishedAt: prev.publishedAt || new Date().toISOString()
+                            }) : null);
+                          }}
+                          style={{
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '0.35rem 0.85rem',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            background: 'rgba(5, 150, 105, 0.15)',
+                            color: '#059669',
+                            border: '1px solid rgba(5, 150, 105, 0.4)',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)'
+                          }}
+                          title="Publish article live on frontend"
+                        >
+                          <Send size={13} />
+                          <span>Publish Live</span>
+                        </button>
+                      )}
                       {art.isFeatured && (
                         <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
                           <Star size={10} /> FEATURED
@@ -4456,38 +4478,56 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
               {/* Modal Footer Actions */}
               <div className="abv-modal-footer abv-details-footer">
-                <button
-                  type="button"
-                  className="abv-modal-btn"
-                  style={{
-                    background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
-                    color: art.status === 'published' ? '#d97706' : '#059669',
-                    border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
-                    marginRight: 'auto'
-                  }}
-                  onClick={async () => {
-                    const nextStatus = art.status === 'published' ? 'draft' : 'published';
-                    await handleTogglePublish(art);
-                    setViewingArticleDetails(prev => prev ? ({ 
-                      ...prev, 
-                      status: nextStatus,
-                      publishedAt: nextStatus === 'published' ? (prev.publishedAt || new Date().toISOString()) : null
-                    }) : null);
-                  }}
-                  title={art.status === 'published' ? "Hide article from frontend site (Switch to Draft)" : "Show article on frontend site (Publish Live)"}
-                >
-                  {art.status === 'published' ? (
-                    <>
-                      <EyeOff size={14} />
-                      <span>Disable from Frontend (Set as Draft)</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye size={14} />
-                      <span>Enable on Frontend (Publish Live)</span>
-                    </>
-                  )}
-                </button>
+                {/* Dedicated Draft / Publish button in Details footer */}
+                {art.status === 'published' ? (
+                  <button
+                    type="button"
+                    className="abv-modal-btn"
+                    style={{
+                      background: 'rgba(217, 119, 6, 0.15)',
+                      color: '#d97706',
+                      border: '1px solid rgba(217, 119, 6, 0.4)',
+                      fontWeight: 700,
+                      marginRight: 'auto'
+                    }}
+                    onClick={async () => {
+                      await handleTogglePublish(art);
+                      setViewingArticleDetails(prev => prev ? ({ 
+                        ...prev, 
+                        status: 'draft',
+                        publishedAt: null
+                      }) : null);
+                    }}
+                    title="Move this article to Drafts (hide from live site)"
+                  >
+                    <FileText size={14} />
+                    <span>Set as Draft</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="abv-modal-btn"
+                    style={{
+                      background: 'rgba(5, 150, 105, 0.15)',
+                      color: '#059669',
+                      border: '1px solid rgba(5, 150, 105, 0.4)',
+                      fontWeight: 700,
+                      marginRight: 'auto'
+                    }}
+                    onClick={async () => {
+                      await handleTogglePublish(art);
+                      setViewingArticleDetails(prev => prev ? ({ 
+                        ...prev, 
+                        status: 'published',
+                        publishedAt: prev.publishedAt || new Date().toISOString()
+                      }) : null);
+                    }}
+                    title="Publish this article live on frontend"
+                  >
+                    <Send size={14} />
+                    <span>Publish Live</span>
+                  </button>
+                )}
 
 
                 {articleSlug && (
