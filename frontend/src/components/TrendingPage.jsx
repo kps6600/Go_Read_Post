@@ -668,18 +668,6 @@ export default function TrendingPage({
                         className="tp-article-card"
                         onClick={() => onSelectStory && onSelectStory(story)}
                       >
-                        <button 
-                          type="button" 
-                          className={`tp-card-save-btn ${isSaved && isSaved(story.id || story._id || story.slug) ? 'active' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onToggleSave) onToggleSave(story);
-                          }}
-                          title={isSaved && isSaved(story.id || story._id || story.slug) ? 'Remove from saved bookmarks' : 'Save story'}
-                          aria-label="Save story"
-                        >
-                          <Bookmark size={15} fill={isSaved && isSaved(story.id || story._id || story.slug) ? '#ffffff' : 'none'} color="currentColor" />
-                        </button>
                         {/* Rank Number Badge */}
                         <div 
                           className="tp-rank-badge"
@@ -701,6 +689,18 @@ export default function TrendingPage({
                               }}
                               loading="lazy"
                             />
+                            <button 
+                              type="button" 
+                              className={`tp-card-save-btn ${isSaved && isSaved(story.id || story._id || story.slug) ? 'active' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onToggleSave) onToggleSave(story);
+                              }}
+                              title={isSaved && isSaved(story.id || story._id || story.slug) ? 'Remove from saved bookmarks' : 'Save story'}
+                              aria-label="Save story"
+                            >
+                              <Bookmark size={15} fill={isSaved && isSaved(story.id || story._id || story.slug) ? '#ffffff' : 'none'} color="#ffffff" />
+                            </button>
                           </div>
                         </div>
 
