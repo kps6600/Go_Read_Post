@@ -3286,14 +3286,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             ))}
           </select>
 
-          <button 
-            className="abv-refresh-btn" 
-            onClick={loadAllData} 
-            title="Refresh database"
-          >
-            <RefreshCw size={15} />
-          </button>
-
           {/* View Mode Toggle: Cards vs Table (hidden on Drafts page) */}
           {!isDraftsView && (
           <div className="abv-view-toggle-group">
