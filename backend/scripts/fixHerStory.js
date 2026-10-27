@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import Story from '../server/models/Story.js';
-import { ALL_HER_STORIES, HER_STORY_PROFILES } from '../src/data/herStoryData.js';
+import Story from '../models/Story.js';
+import { ALL_HER_STORIES, HER_STORY_PROFILES } from '../../frontend/src/data/herStoryData.js';
 
 mongoose.connect('mongodb://127.0.0.1:27017/goreadpost').then(async () => {
   console.log('Checking HerStory profiles:');

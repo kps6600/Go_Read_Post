@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Page from '../server/models/Page.js';
-import Tag from '../server/models/Tag.js';
-import Article from '../server/models/Article.js';
+import Page from '../models/Page.js';
+import Tag from '../models/Tag.js';
+import Article from '../models/Article.js';
 
 dotenv.config();
 

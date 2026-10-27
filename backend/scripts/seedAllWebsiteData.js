@@ -13,21 +13,21 @@ import {
   CAPTABLE_STORIES, 
   TOP_PICKS, 
   LEAD_STORY 
-} from '../src/data/storiesData.js';
-import { ALL_ENTERPRISE_STORIES } from '../src/data/enterpriseStoryData.js';
-import { ALL_SMB_STORIES, SMB_STORY_PROFILES } from '../src/data/smbStoryData.js';
-import { ALL_HER_STORIES, HER_STORY_PROFILES } from '../src/data/herStoryData.js';
+} from '../../frontend/src/data/storiesData.js';
+import { ALL_ENTERPRISE_STORIES } from '../../frontend/src/data/enterpriseStoryData.js';
+import { ALL_SMB_STORIES, SMB_STORY_PROFILES } from '../../frontend/src/data/smbStoryData.js';
+import { ALL_HER_STORIES, HER_STORY_PROFILES } from '../../frontend/src/data/herStoryData.js';
 import { 
   SOCIAL_HERO_STORY, 
   SOCIAL_HERO_SIDEBAR_STORIES, 
   SOCIAL_GRID_STORIES, 
   SOCIAL_LATEST_STORIES, 
   SOCIAL_EXPERT_OPINION_STORIES 
-} from '../src/data/socialStoryData.js';
+} from '../../frontend/src/data/socialStoryData.js';
 
-import Story from '../server/models/Story.js';
-import Page from '../server/models/Page.js';
-import MenuItem from '../server/models/MenuItem.js';
+import Story from '../models/Story.js';
+import Page from '../models/Page.js';
+import MenuItem from '../models/MenuItem.js';
 
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '../.env') });
 

@@ -78,7 +78,7 @@ const footerData = {
 async function run() {
   try {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-    const Footer = (await import('../server/models/Footer.js')).default;
+    const Footer = (await import('../models/Footer.js')).default;
     let doc = await Footer.findOne();
     if (!doc) {
       doc = await Footer.create(footerData);

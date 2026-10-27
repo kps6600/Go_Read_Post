@@ -214,7 +214,7 @@ function flattenTree(items, parentId = null, level = 0) {
 async function run() {
   try {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-    const NavigationItem = (await import('../server/models/NavigationItem.js')).default;
+    const NavigationItem = (await import('../models/NavigationItem.js')).default;
     
     // Clear old items and insert fresh tree
     await NavigationItem.deleteMany({});
