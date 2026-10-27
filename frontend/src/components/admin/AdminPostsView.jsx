@@ -964,24 +964,42 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   };
 
   const handleBulkPublish = async (targetIds = null) => {
-    const ids = targetIds || Array.from(selectedIds);
-    if (ids.length === 0) {
-      if (filteredArticles.length === 1) {
-        return handlePublishSingle(filteredArticles[0]);
-      } else if (filteredArticles.length > 1) {
-        if (!window.confirm(`Post all ${filteredArticles.length} draft articles to the live site?`)) return;
-        return handleBulkPublish(filteredArticles.map(a => a._id || a.id));
-      }
-      return;
+    let ids = targetIds;
+    if (!ids) {
+      const selectedArticles = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
+      const draftsOnly = selectedArticles.filter(a => a.status === 'draft');
+      ids = draftsOnly.map(a => a._id || a.id);
     }
+
+    if (ids.length === 0) return;
 
     try {
       await ArticleService.bulkUpdateStatus(ids, 'published');
-      if (onShowToast) onShowToast(`Successfully posted ${ids.length} ${ids.length === 1 ? 'article' : 'articles'} live!`);
+      if (onShowToast) onShowToast(`Successfully posted ${ids.length} ${ids.length === 1 ? 'draft article' : 'draft articles'} live!`);
       setSelectedIds(new Set());
       await loadArticles();
     } catch (err) {
       alert('Error posting articles: ' + err.message);
+    }
+  };
+
+  const handleBulkDraft = async (targetIds = null) => {
+    let ids = targetIds;
+    if (!ids) {
+      const selectedArticles = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
+      const publishedOnly = selectedArticles.filter(a => a.status === 'published');
+      ids = publishedOnly.map(a => a._id || a.id);
+    }
+
+    if (ids.length === 0) return;
+
+    try {
+      await ArticleService.bulkUpdateStatus(ids, 'draft');
+      if (onShowToast) onShowToast(`Successfully moved ${ids.length} ${ids.length === 1 ? 'article' : 'articles'} to Drafts!`);
+      setSelectedIds(new Set());
+      await loadArticles();
+    } catch (err) {
+      alert('Error moving articles to draft: ' + err.message);
     }
   };
 
@@ -3353,78 +3371,111 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       </div>
 
       {/* Bulk Action Toolbar */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '4px 0',
-          marginBottom: '0.75rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontWeight: '700',
-              fontSize: '0.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <CheckSquare size={13} />
-              <span>{selectedIds.size} Selected</span>
+      {selectedIds.size > 0 && (() => {
+        const selectedList = filteredArticles.filter(a => selectedIds.has(a._id || a.id));
+        const selectedDraftsCount = selectedList.filter(a => a.status === 'draft').length;
+        const selectedPublishedCount = selectedList.filter(a => a.status === 'published').length;
+
+        return (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '4px 0',
+            marginBottom: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{
+                backgroundColor: '#dc2626',
+                color: '#fff',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontWeight: '700',
+                fontSize: '0.8rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <CheckSquare size={13} />
+                <span>{selectedIds.size} Selected</span>
+              </div>
             </div>
 
-          </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {selectedDraftsCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkPublish()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    backgroundColor: '#059669',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
+                  }}
+                  title={`Post ${selectedDraftsCount} selected draft article${selectedDraftsCount > 1 ? 's' : ''} to live site`}
+                >
+                  <Send size={14} /> Post Selected ({selectedDraftsCount})
+                </button>
+              )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => handleBulkPublish()}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                backgroundColor: '#059669',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
-              }}
-            >
-              <Send size={14} /> Post Selected ({selectedIds.size})
-            </button>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={deleting}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                backgroundColor: '#dc2626',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
-              }}
-            >
-              <Trash2 size={15} />
-              {deleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
-            </button>
+              {selectedPublishedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkDraft()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    backgroundColor: '#d97706',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)'
+                  }}
+                  title={`Move ${selectedPublishedCount} selected published article${selectedPublishedCount > 1 ? 's' : ''} to Drafts`}
+                >
+                  <FileText size={14} /> Move to Draft ({selectedPublishedCount})
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={deleting}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  backgroundColor: '#dc2626',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+                }}
+              >
+                <Trash2 size={15} />
+                {deleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 5. Articles Content: Cards View OR Table View */}
       {(isDraftsView || viewMode === 'cards') ? (
