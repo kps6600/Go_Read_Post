@@ -216,7 +216,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
           </div>
         </div>
 
-        <div className="adv-stat-card" onClick={() => onNavigate('/admin/drafts')}>
+        <div className="adv-stat-card" onClick={() => onNavigate('/admin/articles')}>
           <div className="adv-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
             <FileEdit size={22} />
           </div>
@@ -391,8 +391,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
               <button 
                 className="adv-btn-sm" 
                 onClick={() => {
-                  if (storyFilter === 'draft') onNavigate('/admin/drafts');
-                  else onNavigate('/admin/articles');
+                  onNavigate('/admin/articles');
                 }}
               >
                 {storyFilter === 'draft' ? 'Manage Drafts' : 'Manage Stories'}

@@ -3141,9 +3141,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-    if (tabId === 'draft') {
-      onNavigate?.('/admin/drafts');
-    } else if (tabId === 'archived') {
+    if (tabId === 'archived') {
       onNavigate?.('/admin/archived');
     } else {
       onNavigate?.('/admin/articles');
