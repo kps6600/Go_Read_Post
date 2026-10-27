@@ -3346,7 +3346,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             <RefreshCw size={15} />
           </button>
 
-          {/* View Mode Toggle: Cards vs Table */}
+          {/* View Mode Toggle: Cards vs Table (hidden on Drafts page) */}
+          {!isDraftsView && (
           <div className="abv-view-toggle-group">
             <button
               type="button"
@@ -3367,6 +3368,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <span>Table</span>
             </button>
           </div>
+          )}
         </div>
       </div>
 
@@ -3469,7 +3471,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       )}
 
       {/* 5. Articles Content: Cards View OR Table View */}
-      {viewMode === 'cards' ? (
+      {(isDraftsView || viewMode === 'cards') ? (
         <div>
           {/* Cards Header: Select All & Count */}
           <div className="abv-cards-header-bar">
