@@ -3916,14 +3916,86 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         const catName = art.categoryName || art.categoryTag || art.category || 'General';
         const desk = art.brand || 'GoReadPost';
         const catMeta = getCategoryMeta(catName);
-        const topics = getArticleTopics(art);
-        const detailExcerpt = getArticleExcerpt(art);
-        const tagsList = (typeof art.tags === 'string' 
-          ? art.tags.split(',') 
-          : Array.isArray(art.tags) 
-            ? art.tags 
-            : []
+        // --- DEDUPLICATION LOGIC (Eliminates repeated values in modal) ---
+        const stripHtml = (html) => (typeof html === 'string' ? html : '')
+          .replace(/<figcaption[^>]*>.*?<\/figcaption>/gi, ' ')
+          .replace(/<figure[^>]*>.*?<\/figure>/gi, ' ')
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        const normStr = (str) => stripHtml(str).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        const rawContent = Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0
+          ? art.contentBlocks.map(b => b.text || b.content || b.quote || '').join(' ')
+          : (art.content || '');
+
+        const normTitle = normStr(art.title);
+        const normContent = normStr(rawContent);
+
+        // Subtitle: only show if distinct from title, content, and excerpt
+        const rawSubtitle = (art.subtitle || '').trim();
+        const normSubtitle = normStr(rawSubtitle);
+
+        // Excerpt: only show if explicit and distinct from title, subtitle & content
+        const rawExcerpt = (art.excerpt || art.summary || '').trim();
+        const normExcerpt = normStr(rawExcerpt);
+
+        const showSubtitle = Boolean(
+          rawSubtitle &&
+          normSubtitle &&
+          normSubtitle !== normTitle &&
+          normSubtitle !== normContent
+        );
+
+        const showExcerptBox = Boolean(
+          rawExcerpt &&
+          normExcerpt &&
+          normExcerpt !== normTitle &&
+          normExcerpt !== normSubtitle &&
+          normExcerpt !== normContent
+        );
+
+        // Deduplicate topics & tags to ensure zero repetition
+        const rawTopics = (
+          Array.isArray(art.topics)
+            ? art.topics
+            : typeof art.topics === 'string' && art.topics.trim()
+              ? art.topics.split(',')
+              : []
         ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
+
+        const rawTags = (
+          typeof art.tags === 'string'
+            ? art.tags.split(',')
+            : Array.isArray(art.tags)
+              ? art.tags
+              : []
+        ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
+
+        const distinctTopics = [];
+        const seenTopicKeys = new Set();
+        rawTopics.forEach(t => {
+          const k = t.toLowerCase().replace(/^#+/, '').trim();
+          if (k && !seenTopicKeys.has(k)) {
+            seenTopicKeys.add(k);
+            distinctTopics.push(t.replace(/^#+/, '').trim());
+          }
+        });
+
+        const distinctTags = [];
+        const seenTagKeys = new Set(seenTopicKeys); // Prevents tags from repeating any topic
+        rawTags.forEach(t => {
+          const k = t.toLowerCase().replace(/^#+/, '').trim();
+          if (k && !seenTagKeys.has(k)) {
+            seenTagKeys.add(k);
+            distinctTags.push(t.replace(/^#+/, '').trim());
+          }
+        });
         const pubDate = art.publishedAt 
           ? new Date(art.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
           : (art.createdAt ? new Date(art.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Draft');
@@ -4026,7 +4098,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         />
                         <span>{catName}</span>
                       </div>
-                      <span className="abv-detail-desk-pill">{desk}</span>
+                      {desk && desk.toLowerCase() !== catName.toLowerCase() && (
+                        <span className="abv-detail-desk-pill">{desk}</span>
+                      )}
                       {readingTime && (
                         <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
                           <Clock size={11} /> {readingTime}
@@ -4045,9 +4119,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 {/* Article Headline */}
                 <h1 className="abv-detail-headline">{art.title}</h1>
 
-                {/* Subtitle if available */}
-                {art.subtitle && (
-                  <h2 className="abv-detail-subtitle">{art.subtitle}</h2>
+                {/* Subtitle if available and distinct */}
+                {showSubtitle && (
+                  <h2 className="abv-detail-subtitle">{rawSubtitle}</h2>
                 )}
 
                 {/* Quick Metadata Info Strip */}
@@ -4085,25 +4159,25 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   </div>
                 </div>
 
-                {/* Excerpt / Summary */}
-                {detailExcerpt && (
+                {/* Excerpt / Summary (only if distinct and not repeating body/subtitle) */}
+                {showExcerptBox && (
                   <div className="abv-detail-excerpt-box">
                     <div className="abv-detail-section-title">
                       <Quote size={14} color="#0284c7" />
                       <span>Story Excerpt / Executive Summary</span>
                     </div>
-                    <p className="abv-detail-excerpt-text">{detailExcerpt}</p>
+                    <p className="abv-detail-excerpt-text">{rawExcerpt}</p>
                   </div>
                 )}
 
-                {/* Topics & Tags */}
-                {(topics.length > 0 || tagsList.length > 0) && (
+                {/* Topics & Tags (guaranteed zero repetition) */}
+                {(distinctTopics.length > 0 || distinctTags.length > 0) && (
                   <div className="abv-detail-taxonomy-box">
-                    {topics.length > 0 && (
+                    {distinctTopics.length > 0 && (
                       <div className="abv-detail-taxonomy-group">
                         <span className="abv-detail-tax-label">Topics:</span>
                         <div className="abv-detail-pill-wrap">
-                          {topics.map((top, idx) => (
+                          {distinctTopics.map((top, idx) => (
                             <span key={idx} className="abv-detail-topic-pill">
                               <Tag size={10} /> {top}
                             </span>
@@ -4111,11 +4185,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </div>
                       </div>
                     )}
-                    {tagsList.length > 0 && (
+                    {distinctTags.length > 0 && (
                       <div className="abv-detail-taxonomy-group">
                         <span className="abv-detail-tax-label">Tags:</span>
                         <div className="abv-detail-pill-wrap">
-                          {tagsList.map((tag, idx) => (
+                          {distinctTags.map((tag, idx) => (
                             <span key={idx} className="abv-detail-tag-pill">
                               #{tag}
                             </span>
