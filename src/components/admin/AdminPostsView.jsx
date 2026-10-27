@@ -3327,12 +3327,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '12px 18px',
-          borderRadius: '10px',
-          marginBottom: '1rem',
-          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
+          padding: '4px 0',
+          marginBottom: '0.75rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <div style={{
