@@ -304,7 +304,7 @@ adminArticlesRouter.get('/:id', async (req, res) => {
       return res.json({ success: true, data: article });
     }
     const fallback = readFallbackArticles();
-    const article = fallback.find(a => String(a._id) === String(id));
+    const article = fallback.find(a => String(a._id || a.id) === String(id));
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
     res.json({ success: true, data: article });
   } catch (err) {
@@ -457,7 +457,7 @@ adminArticlesRouter.put('/:id', async (req, res) => {
     }
 
     const fallback = readFallbackArticles();
-    const idx = fallback.findIndex(a => String(a._id) === String(id));
+    const idx = fallback.findIndex(a => String(a._id || a.id) === String(id));
     if (idx === -1) return res.status(404).json({ success: false, message: 'Article not found' });
 
     fallback[idx] = { ...fallback[idx], ...updates, updatedAt: new Date().toISOString() };
@@ -742,7 +742,7 @@ adminArticlesRouter.patch('/:id/publish', async (req, res) => {
     }
 
     const fallback = readFallbackArticles();
-    const target = fallback.find(a => String(a._id) === String(id));
+    const target = fallback.find(a => String(a._id || a.id) === String(id));
     if (!target) return res.status(404).json({ success: false, message: 'Article not found' });
     Object.assign(target, updateData);
     writeFallbackArticles(fallback);
@@ -756,17 +756,17 @@ adminArticlesRouter.patch('/:id/publish', async (req, res) => {
 adminArticlesRouter.patch('/:id/unpublish', async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = { status: 'draft' };
+    const updateData = { status: 'draft', publishedAt: null };
 
     if (isDbConnected()) {
       const updated = await Article.findByIdAndUpdate(id, updateData, { new: true });
       if (!updated) return res.status(404).json({ success: false, message: 'Article not found' });
-      await Story.findOneAndDelete({ slug: updated.slug });
+      await Story.findOneAndDelete({ $or: [{ slug: updated.slug }, { title: updated.title }] });
       return res.json({ success: true, message: 'Article unpublished (saved as draft)', data: updated });
     }
 
     const fallback = readFallbackArticles();
-    const target = fallback.find(a => String(a._id) === String(id));
+    const target = fallback.find(a => String(a._id || a.id) === String(id));
     if (!target) return res.status(404).json({ success: false, message: 'Article not found' });
     Object.assign(target, updateData);
     writeFallbackArticles(fallback);
@@ -789,7 +789,7 @@ adminArticlesRouter.patch('/:id/schedule', async (req, res) => {
     }
 
     const fallback = readFallbackArticles();
-    const target = fallback.find(a => String(a._id) === String(id));
+    const target = fallback.find(a => String(a._id || a.id) === String(id));
     if (!target) return res.status(404).json({ success: false, message: 'Article not found' });
     Object.assign(target, updateData);
     writeFallbackArticles(fallback);
@@ -812,7 +812,7 @@ adminArticlesRouter.patch('/:id/archive', async (req, res) => {
     }
 
     const fallback = readFallbackArticles();
-    const target = fallback.find(a => String(a._id) === String(id));
+    const target = fallback.find(a => String(a._id || a.id) === String(id));
     if (!target) return res.status(404).json({ success: false, message: 'Article not found' });
     Object.assign(target, updateData);
     writeFallbackArticles(fallback);

@@ -3649,7 +3649,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           title="Move this article to Drafts"
                         >
                           <FileText size={11} />
-                          <span>Draft</span>
+                          <span>Set Draft</span>
                         </button>
                       ) : null}
 
@@ -3720,7 +3720,11 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           </span>
                           <span className="abv-card-date">
                             <Calendar size={11} />
-                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Draft'}
+                            {article.status === 'draft' ? (
+                              <span style={{ color: '#d97706', fontWeight: 700 }}>Draft</span>
+                            ) : (
+                              article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Published'
+                            )}
                           </span>
                         </div>
                       </div>
@@ -4168,15 +4172,60 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <h3 className="abv-modal-title" style={{ margin: 0 }}>Article Full Details</h3>
+
+                      {/* Explicit Status Badge */}
+                      {art.status === 'draft' ? (
+                        <span 
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            background: 'rgba(217, 119, 6, 0.15)',
+                            color: '#d97706',
+                            border: '1px solid rgba(217, 119, 6, 0.4)',
+                            borderRadius: '999px',
+                            fontSize: '0.72rem',
+                            fontWeight: '800',
+                            padding: '0.22rem 0.65rem',
+                            letterSpacing: '0.04em'
+                          }}
+                        >
+                          ● DRAFT
+                        </span>
+                      ) : (
+                        <span 
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            background: 'rgba(5, 150, 105, 0.15)',
+                            color: '#059669',
+                            border: '1px solid rgba(5, 150, 105, 0.4)',
+                            borderRadius: '999px',
+                            fontSize: '0.72rem',
+                            fontWeight: '800',
+                            padding: '0.22rem 0.65rem',
+                            letterSpacing: '0.04em'
+                          }}
+                        >
+                          ● PUBLISHED
+                        </span>
+                      )}
+
                       <button
                         type="button"
                         className={`abv-action-btn visibility-btn ${art.status === 'published' ? 'active' : 'inactive'}`}
                         onClick={async () => {
+                          const nextStatus = art.status === 'published' ? 'draft' : 'published';
                           await handleTogglePublish(art);
-                          setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                          setViewingArticleDetails(prev => prev ? ({ 
+                            ...prev, 
+                            status: nextStatus,
+                            publishedAt: nextStatus === 'published' ? (prev.publishedAt || new Date().toISOString()) : null
+                          }) : null);
                         }}
                         style={{ cursor: 'pointer', padding: '0.35rem 0.8rem', fontSize: '0.78rem' }}
-                        title={art.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
+                        title={art.status === 'published' ? "Showing live on frontend - Click to switch to Draft" : "Hidden from frontend (Draft) - Click to Publish live"}
                       >
                         {art.status === 'published' ? (
                           <>
@@ -4281,10 +4330,12 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   <div className="abv-detail-meta-card">
                     <Calendar size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
                     <div>
-                      <div className="abv-detail-meta-label">Published Date</div>
-                      <div className="abv-detail-meta-val">{pubDate}</div>
+                      <div className="abv-detail-meta-label">{art.status === 'draft' ? 'Status & Date' : 'Published Date'}</div>
+                      <div className="abv-detail-meta-val" style={{ color: art.status === 'draft' ? '#d97706' : 'inherit' }}>
+                        {art.status === 'draft' ? 'Draft (Unpublished)' : pubDate}
+                      </div>
                       <div className="abv-detail-meta-sub" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <Eye size={12} /> {viewsCount} total views
+                        {art.status === 'draft' ? 'Hidden from live site' : <><Eye size={12} /> {viewsCount} total views</>}
                       </div>
                     </div>
                   </div>
@@ -4415,20 +4466,25 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                     marginRight: 'auto'
                   }}
                   onClick={async () => {
+                    const nextStatus = art.status === 'published' ? 'draft' : 'published';
                     await handleTogglePublish(art);
-                    setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+                    setViewingArticleDetails(prev => prev ? ({ 
+                      ...prev, 
+                      status: nextStatus,
+                      publishedAt: nextStatus === 'published' ? (prev.publishedAt || new Date().toISOString()) : null
+                    }) : null);
                   }}
-                  title={art.status === 'published' ? "Hide article from frontend site" : "Show article on frontend site"}
+                  title={art.status === 'published' ? "Hide article from frontend site (Switch to Draft)" : "Show article on frontend site (Publish Live)"}
                 >
                   {art.status === 'published' ? (
                     <>
                       <EyeOff size={14} />
-                      <span>Disable from Frontend</span>
+                      <span>Disable from Frontend (Set as Draft)</span>
                     </>
                   ) : (
                     <>
                       <Eye size={14} />
-                      <span>Enable on Frontend</span>
+                      <span>Enable on Frontend (Publish Live)</span>
                     </>
                   )}
                 </button>
