@@ -1149,32 +1149,60 @@ table input[type="checkbox"]:checked::after {
   transform: translateY(-1px);
 }
 
-/* KPI Row */
+/* KPI Row - Single Horizontal Line */
 .abv-kpi-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.85rem;
+  width: 100%;
 }
 .abv-kpi-card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  padding: 1rem 1.2rem;
+  padding: 0.85rem 1rem;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.abv-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-medium, #cbd5e1);
 }
 .abv-kpi-num {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .abv-kpi-label {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .abv-kpi-row {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .abv-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Brand Desk Filter Pills */
