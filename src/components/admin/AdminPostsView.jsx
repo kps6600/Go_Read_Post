@@ -3263,27 +3263,36 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
 
         <div className="abv-filter-group">
-          {/* Desk Filter */}
+          {/* Merged Desk & Category Filter */}
           <select 
-            value={selectedDesk} 
-            onChange={(e) => setSelectedDesk(e.target.value)}
+            value={selectedDesk !== 'all' ? `desk:${selectedDesk}` : selectedCategory !== 'all' ? `cat:${selectedCategory}` : 'all'} 
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === 'all') {
+                setSelectedDesk('all');
+                setSelectedCategory('all');
+              } else if (val.startsWith('desk:')) {
+                setSelectedDesk(val.slice(5));
+                setSelectedCategory('all');
+              } else if (val.startsWith('cat:')) {
+                setSelectedCategory(val.slice(4));
+                setSelectedDesk('all');
+              }
+            }}
             className="abv-select"
+            title="Filter by Desk or Category"
           >
-            {DESKS.map(b => (
-              <option key={b.id} value={b.id}>{b.label}</option>
-            ))}
-          </select>
-
-          {/* Category Filter */}
-          <select 
-            value={selectedCategory} 
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="abv-select"
-          >
-            <option value="all">All Categories</option>
-            {categories.map(c => (
-              <option key={c._id || c.slug} value={c.name}>{c.name}</option>
-            ))}
+            <option value="all">All Desks & Categories</option>
+            <optgroup label="Editorial Desks">
+              {DESKS.filter(b => b.id !== 'all').map(b => (
+                <option key={`desk:${b.id}`} value={`desk:${b.id}`}>{b.label}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Categories">
+              {categories.map(c => (
+                <option key={`cat:${c._id || c.slug || c.name}`} value={`cat:${c.name}`}>{c.name}</option>
+              ))}
+            </optgroup>
           </select>
 
           {/* View Mode Toggle: Cards vs Table (hidden on Drafts page) */}
