@@ -415,6 +415,62 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     };
   };
 
+  // Robust helper to extract or fallback article cover image
+  const getArticleCoverImage = (art) => {
+    if (!art) return 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+    
+    // 1. Direct featuredImage object or string
+    const fUrl = art.featuredImage?.url || (typeof art.featuredImage === 'string' ? art.featuredImage : '');
+    if (fUrl && typeof fUrl === 'string' && fUrl.trim()) return fUrl.trim();
+
+    if (art.image && typeof art.image === 'string' && art.image.trim()) return art.image.trim();
+    if (art.heroImage && typeof art.heroImage === 'string' && art.heroImage.trim()) return art.heroImage.trim();
+    if (art.coverImage && typeof art.coverImage === 'string' && art.coverImage.trim()) return art.coverImage.trim();
+    if (art.thumbnail && typeof art.thumbnail === 'string' && art.thumbnail.trim()) return art.thumbnail.trim();
+    if (art.seo?.ogImage && typeof art.seo.ogImage === 'string' && art.seo.ogImage.trim()) return art.seo.ogImage.trim();
+
+    // 2. Content blocks image
+    if (Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0) {
+      for (const b of art.contentBlocks) {
+        if (b.type === 'image') {
+          const bUrl = typeof b.image === 'string' ? b.image : (b.url || b.image?.url || '');
+          if (bUrl && typeof bUrl === 'string' && bUrl.trim()) return bUrl.trim();
+        }
+        if (b.images && Array.isArray(b.images) && b.images.length > 0) {
+          const imgUrl = b.images[0]?.url || (typeof b.images[0] === 'string' ? b.images[0] : '');
+          if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim()) return imgUrl.trim();
+        }
+      }
+    }
+
+    // 3. Image embedded in HTML content
+    if (art.content && typeof art.content === 'string') {
+      const match = art.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (match && match[1]) return match[1];
+    }
+
+    // 4. Category / Topic tailored fallback
+    const cat = (art.categoryName || art.categoryTag || art.category || '').toLowerCase();
+    const title = (art.title || '').toLowerCase();
+    if (cat.includes('tech') || cat.includes('cyber') || cat.includes('defense') || title.includes('cyber') || title.includes('tech')) {
+      return 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('ai') || title.includes('ai') || title.includes('intelligence')) {
+      return 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('fintech') || cat.includes('crypto') || cat.includes('finance')) {
+      return 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1200&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('startup') || cat.includes('fund') || cat.includes('business')) {
+      return 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('social') || cat.includes('climate') || cat.includes('energy')) {
+      return 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=1200&auto=format&fit=crop&q=80';
+    }
+
+    return 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&auto=format&fit=crop&q=80';
+  };
+
   // Helper for extracting clean topic / tag list from article
   const getArticleTopics = (art) => {
     const list = [];
@@ -3509,10 +3565,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 const id = article._id || article.id;
                 const isSelected = selectedIds.has(id);
                 const slug = article.slug || slugify(article.title);
-                const sectionImg = (article.contentBlocks?.find(b => (b.images && b.images.length > 0) || b.image)?.images?.[0]?.url) || 
-                                   (typeof article.contentBlocks?.find(b => b.image)?.image === 'string' ? article.contentBlocks?.find(b => b.image)?.image : article.contentBlocks?.find(b => b.image)?.image?.url) || 
-                                   '';
-                const coverImage = article.featuredImage?.url || article.image || article.heroImage || sectionImg || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop&q=80';
+                const coverImage = getArticleCoverImage(article);
                 const authorImg = article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
                 const authorLabel = article.authorName || article.author?.name || 'Editorial Desk';
                 const categoryLabel = article.categoryName || article.categoryTag || article.category || 'Startups';
@@ -3702,11 +3755,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       {/* ARTICLE FULL DETAILS PREVIEW MODAL */}
       {viewingArticleDetails && (() => {
         const art = viewingArticleDetails;
-        const coverImg = art.featuredImage?.url || 
-                         (typeof art.featuredImage === 'string' ? art.featuredImage : '') || 
-                         art.image || 
-                         art.heroImage || 
-                         '';
+        const coverImg = getArticleCoverImage(art);
         const coverCaption = art.featuredImage?.caption || '';
         const coverCredit = art.featuredImage?.credit || art.photoCredit || '';
         const authorImg = art.authorAvatar || art.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
@@ -3754,28 +3803,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <h3 className="abv-modal-title" style={{ margin: 0 }}>Article Full Details</h3>
-                      <button
-                        type="button"
-                        className={`abv-action-btn visibility-btn ${art.status === 'published' ? 'active' : 'inactive'}`}
-                        onClick={async () => {
-                          await handleTogglePublish(art);
-                          setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
-                        }}
-                        style={{ cursor: 'pointer', padding: '0.35rem 0.8rem', fontSize: '0.78rem' }}
-                        title={art.status === 'published' ? "Showing in frontend - Click to disable" : "Hidden from frontend - Click to enable"}
-                      >
-                        {art.status === 'published' ? (
-                          <>
-                            <Eye size={13} />
-                            <span>Frontend: ON</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={13} />
-                            <span>Frontend: OFF</span>
-                          </>
-                        )}
-                      </button>
                       {art.isFeatured && (
                         <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
                           <Star size={10} /> FEATURED
@@ -3805,41 +3832,39 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
               {/* Scrollable Body */}
               <div className="abv-modal-form abv-details-body">
-                {/* Cover Image Banner (if available) */}
-                {coverImg && (
-                  <div className="abv-detail-cover-wrap">
-                    <img 
-                      src={coverImg} 
-                      alt={art.title || 'Cover image'} 
-                      className="abv-detail-cover-img"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1000&auto=format&fit=crop&q=80';
-                      }}
-                    />
-                    <div className="abv-detail-cover-meta-bar">
-                      <div className="abv-card-category-pill" style={{ margin: 0 }}>
-                        <span 
-                          className="abv-category-indicator-dot" 
-                          style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
-                        />
-                        <span>{catName}</span>
-                      </div>
-                      <span className="abv-detail-desk-pill">{desk}</span>
-                      {readingTime && (
-                        <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
-                          <Clock size={11} /> {readingTime}
-                        </span>
-                      )}
+                {/* Cover Image Banner */}
+                <div className="abv-detail-cover-wrap">
+                  <img 
+                    src={coverImg} 
+                    alt={art.title || 'Cover image'} 
+                    className="abv-detail-cover-img"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+                    }}
+                  />
+                  <div className="abv-detail-cover-meta-bar">
+                    <div className="abv-card-category-pill" style={{ margin: 0 }}>
+                      <span 
+                        className="abv-category-indicator-dot" 
+                        style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                      />
+                      <span>{catName}</span>
                     </div>
-                    {(coverCaption || coverCredit) && (
-                      <div className="abv-detail-cover-caption">
-                        {coverCaption && <span>{coverCaption}</span>}
-                        {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
-                      </div>
+                    <span className="abv-detail-desk-pill">{desk}</span>
+                    {readingTime && (
+                      <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
+                        <Clock size={11} /> {readingTime}
+                      </span>
                     )}
                   </div>
-                )}
+                  {(coverCaption || coverCredit) && (
+                    <div className="abv-detail-cover-caption">
+                      {coverCaption && <span>{coverCaption}</span>}
+                      {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
+                    </div>
+                  )}
+                </div>
 
                 {/* Article Headline */}
                 <h1 className="abv-detail-headline">{art.title}</h1>
