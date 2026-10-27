@@ -3198,19 +3198,39 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     <div className="abv-container">
       {/* 1. KPI Cards */}
       <div className="abv-kpi-row" style={{ marginTop: '0.25rem' }}>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('all')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'all' ? 'active active-all' : ''}`} 
+          onClick={() => handleTabClick('all')} 
+          style={{ cursor: 'pointer' }}
+          title="Filter: All Posts"
+        >
           <div className="abv-kpi-num">{articles.length}</div>
           <div className="abv-kpi-label">All Posts</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('published')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'published' ? 'active active-published' : ''}`} 
+          onClick={() => handleTabClick('published')} 
+          style={{ cursor: 'pointer' }}
+          title="Filter: Published (Live) Posts"
+        >
           <div className="abv-kpi-num" style={{ color: 'var(--accent-emerald)' }}>{publishedCount}</div>
           <div className="abv-kpi-label">Published (Live)</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('draft')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'draft' ? 'active active-draft' : ''}`} 
+          onClick={() => handleTabClick('draft')} 
+          style={{ cursor: 'pointer' }}
+          title="Filter: Draft Posts"
+        >
           <div className="abv-kpi-num" style={{ color: 'var(--brand-primary)' }}>{draftCount}</div>
           <div className="abv-kpi-label">Drafts</div>
         </div>
-        <div className="abv-kpi-card" onClick={() => handleTabClick('scheduled')} style={{ cursor: 'pointer' }}>
+        <div 
+          className={`abv-kpi-card ${(isDraftsView ? 'draft' : activeTab) === 'scheduled' ? 'active active-scheduled' : ''}`} 
+          onClick={() => handleTabClick('scheduled')} 
+          style={{ cursor: 'pointer' }}
+          title="Filter: Scheduled Posts"
+        >
           <div className="abv-kpi-num" style={{ color: '#8b5cf6' }}>{scheduledCount}</div>
           <div className="abv-kpi-label">Scheduled</div>
         </div>
