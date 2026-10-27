@@ -597,48 +597,6 @@ export default function TrendingPage({
               </div>
             ) : (
               <div className="tp-paginated-container">
-                {/* Header with Title, Counter, and Sort Switcher */}
-                <div className="tp-paginated-header">
-                  <div className="tp-paginated-header-left">
-                    <h2 className="tp-paginated-heading">
-                      {sortMode === 'views' ? 'Most Viewed Content' : sortMode === 'likes' ? 'Most Liked Content' : 'Top Trending Content'}
-                    </h2>
-                    <span className="tp-paginated-counter">
-                      Showing <strong>{currentArticlePage * CARDS_PER_PAGE + 1}–{Math.min(filteredStories.length, (currentArticlePage + 1) * CARDS_PER_PAGE)}</strong> of <strong>{filteredStories.length}</strong>
-                    </span>
-                  </div>
-
-                  {/* Most Viewed / Most Liked Toggle Control */}
-                  <div className="tp-sort-toggle-group">
-                    <button 
-                      type="button" 
-                      className={`tp-sort-toggle-btn ${sortMode === 'views' ? 'active' : ''}`}
-                      onClick={() => setSortMode('views')}
-                      title="Sort by highest views"
-                    >
-                      <Eye size={14} />
-                      <span>Most Viewed</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className={`tp-sort-toggle-btn ${sortMode === 'likes' ? 'active' : ''}`}
-                      onClick={() => setSortMode('likes')}
-                      title="Sort by highest likes"
-                    >
-                      <Heart size={14} />
-                      <span>Most Liked</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className={`tp-sort-toggle-btn ${sortMode === 'trending' ? 'active' : ''}`}
-                      onClick={() => setSortMode('trending')}
-                      title="Sort by overall trending engagement"
-                    >
-                      <Flame size={14} />
-                      <span>Trending Score</span>
-                    </button>
-                  </div>
-                </div>
 
                 {/* Cards for the Current Page */}
                 <div className="tp-paginated-cards-list">
