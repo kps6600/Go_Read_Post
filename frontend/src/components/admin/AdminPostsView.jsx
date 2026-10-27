@@ -48,6 +48,24 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDesk, setSelectedDesk] = useState('all');
   const [selectedAuthor, setSelectedAuthor] = useState('all');
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+        setIsFilterDropdownOpen(false);
+      }
+    }
+    if (isFilterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterDropdownOpen]);
+
+  const activeFilterCount = (selectedDesk !== 'all' ? 1 : 0) + (selectedCategory !== 'all' ? 1 : 0);
   
   // Taxonomies from DB
   const [categories, setCategories] = useState([]);
@@ -3210,28 +3228,96 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
 
         <div className="abv-filter-group">
-          {/* Desk Filter */}
-          <select 
-            value={selectedDesk} 
-            onChange={(e) => setSelectedDesk(e.target.value)}
-            className="abv-select"
-          >
-            {DESKS.map(b => (
-              <option key={b.id} value={b.id}>{b.label}</option>
-            ))}
-          </select>
+          {activeFilterCount > 0 && (
+            <div className="abv-active-filter-chips">
+              {selectedDesk !== 'all' && (
+                <span className="abv-active-chip">
+                  <span>Desk: {DESKS.find(d => d.id === selectedDesk)?.label || selectedDesk}</span>
+                  <button type="button" onClick={() => setSelectedDesk('all')} title="Remove desk filter">
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+              {selectedCategory !== 'all' && (
+                <span className="abv-active-chip">
+                  <span>Category: {selectedCategory}</span>
+                  <button type="button" onClick={() => setSelectedCategory('all')} title="Remove category filter">
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
 
-          {/* Category Filter */}
-          <select 
-            value={selectedCategory} 
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="abv-select"
-          >
-            <option value="all">All Categories</option>
-            {categories.map(c => (
-              <option key={c._id || c.slug} value={c.name}>{c.name}</option>
-            ))}
-          </select>
+          <div className="abv-filter-dropdown-container" ref={filterDropdownRef}>
+            <button 
+              type="button" 
+              className={`abv-filter-btn ${activeFilterCount > 0 ? 'active' : ''} ${isFilterDropdownOpen ? 'open' : ''}`}
+              onClick={() => setIsFilterDropdownOpen(prev => !prev)}
+              title="Filter by Desk and Category"
+            >
+              <Filter size={14} className="abv-filter-icon" />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="abv-filter-count-badge">{activeFilterCount}</span>
+              )}
+              <ChevronDown size={13} className={`abv-filter-chevron ${isFilterDropdownOpen ? 'rotated' : ''}`} />
+            </button>
+
+            {isFilterDropdownOpen && (
+              <div className="abv-filter-popover">
+                <div className="abv-filter-popover-header">
+                  <div className="abv-filter-popover-title">
+                    <Filter size={13} />
+                    <span>Filter Articles</span>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button 
+                      type="button" 
+                      className="abv-filter-reset-btn"
+                      onClick={() => {
+                        setSelectedDesk('all');
+                        setSelectedCategory('all');
+                      }}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                <div className="abv-filter-popover-body">
+                  {/* Desk Filter */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">Desk</label>
+                    <select 
+                      value={selectedDesk} 
+                      onChange={(e) => setSelectedDesk(e.target.value)}
+                      className="abv-popover-select"
+                    >
+                      {DESKS.map(b => (
+                        <option key={b.id} value={b.id}>{b.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">Category</label>
+                    <select 
+                      value={selectedCategory} 
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="abv-popover-select"
+                    >
+                      <option value="all">All Categories</option>
+                      {categories.map(c => (
+                        <option key={c._id || c.slug} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
