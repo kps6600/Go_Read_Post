@@ -4292,14 +4292,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   )}
                 </button>
 
-                <button 
-                  type="button" 
-                  className="abv-modal-btn cancel" 
-                  onClick={() => setViewingArticleDetails(null)}
-                >
-                  Close
-                </button>
-                
+
                 {articleSlug && (
                   <a 
                     href={`/article/${articleSlug}`}
