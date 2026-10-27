@@ -31,7 +31,7 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+const uploadsDir = fs.existsSync(path.join(__dirname, 'uploads')) ? path.join(__dirname, 'uploads') : path.join(__dirname, '..', 'uploads');
 
 const app = express();
 const PORT = process.env.PORT || 5000;

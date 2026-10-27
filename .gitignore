@@ -27,6 +27,9 @@ dist-ssr
 .env
 .env.*
 !.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
 
 # Temporary / scratch
 scratch/
@@ -37,3 +40,8 @@ uploads/*.webm
 uploads/*.mov
 uploads/*.mkv
 uploads/*.avi
+backend/uploads/*.mp4
+backend/uploads/*.webm
+backend/uploads/*.mov
+backend/uploads/*.mkv
+backend/uploads/*.avi
