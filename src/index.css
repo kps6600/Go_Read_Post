@@ -153,6 +153,37 @@
   padding: 0;
 }
 
+/* ── Universal Dim / Deem Placeholder Styling Across Entire Application ── */
+input::placeholder,
+textarea::placeholder,
+select::placeholder,
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder,
+input::-moz-placeholder,
+textarea::-moz-placeholder,
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder,
+[data-theme='dark'] select::placeholder,
+[data-theme='dark'] input::-webkit-input-placeholder,
+[data-theme='dark'] textarea::-webkit-input-placeholder,
+[data-theme='dark'] input::-moz-placeholder,
+[data-theme='dark'] textarea::-moz-placeholder,
+[data-theme='dark'] input:-ms-input-placeholder,
+[data-theme='dark'] textarea:-ms-input-placeholder {
+  color: #64748b !important;
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;

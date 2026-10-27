@@ -46,6 +46,34 @@ export const MediaService = {
       const res = await this.uploadMedia(file, 'image');
       return { file: res, ...res };
     }
+
+    // Direct binary stream upload for files — completely eliminates Base64 memory expansion and V8 heap exhaustion
+    const token = AuthService.getToken();
+    try {
+      const res = await fetch(`${API_BASE}/upload-raw?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: file // Browser streams File directly with zero Base64 overhead
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          return { file: json.data, ...json.data };
+        }
+      }
+    } catch (e) {
+      console.warn('Raw stream upload failed, attempting fallback for small file:', e);
+    }
+
+    // Fallback only for small files (< 15MB) to strictly prevent browser tab crash
+    if (file.size > 15 * 1024 * 1024) {
+      throw new Error(`File is too large for fallback upload (${(file.size / (1024 * 1024)).toFixed(1)} MB). Server upload stream is required.`);
+    }
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = async () => {

@@ -30,3 +30,10 @@ dist-ssr
 
 # Temporary / scratch
 scratch/
+
+# Large media uploads (exceeds GitHub 100MB limit)
+uploads/*.mp4
+uploads/*.webm
+uploads/*.mov
+uploads/*.mkv
+uploads/*.avi

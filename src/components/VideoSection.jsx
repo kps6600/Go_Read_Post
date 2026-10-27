@@ -102,7 +102,7 @@ export default function VideoSection({ onSelectVideo, onNavigateVideos }) {
             <div className="vsec-hero-info">
               <div className="vsec-hero-series-tag">{heroVideo.series}</div>
               <h3 className="vsec-hero-title">{heroVideo.title}</h3>
-              <p className="vsec-hero-desc">{heroVideo.description}</p>
+              <p className="vsec-hero-desc">{heroVideo.description || heroVideo.seo?.description || (Array.isArray(heroVideo.highlights) && heroVideo.highlights[0]) || ''}</p>
               
               <div className="vsec-hero-footer">
                 <div className="vsec-guest-wrap">

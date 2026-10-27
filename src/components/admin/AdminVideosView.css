@@ -948,6 +948,26 @@
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
+.avv-form-input::placeholder,
+.avv-form-textarea::placeholder,
+.avv-form-input::-webkit-input-placeholder,
+.avv-form-textarea::-webkit-input-placeholder {
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+  opacity: 0.65 !important;
+  font-style: normal !important;
+}
+
+[data-theme='dark'] .avv-form-input::placeholder,
+[data-theme='dark'] .avv-form-textarea::placeholder,
+[data-theme='dark'] .avv-form-input::-webkit-input-placeholder,
+[data-theme='dark'] .avv-form-textarea::-webkit-input-placeholder {
+  color: #64748b !important;
+  font-weight: 400 !important;
+  opacity: 0.65 !important;
+  font-style: normal !important;
+}
+
 @keyframes avvSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -1802,6 +1822,12 @@
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
+.lvs-status-pill.scheduled {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
 /* Center View Switcher: [ Add / Edit Details ] vs [ Live View ] */
 .lvs-header-center {
   display: flex;
@@ -2140,4 +2166,131 @@ html:has(.lvs-studio-container) {
 .lvs-device-upload-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Schedule Post Button & Dropdown */
+.lvs-btn-schedule {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.lvs-btn-schedule:hover {
+  background: rgba(139, 92, 246, 0.25);
+  color: #ede9fe;
+  border-color: rgba(139, 92, 246, 0.6);
+  transform: translateY(-1px);
+}
+
+.lvs-btn-schedule.active {
+  background: #7c3aed;
+  color: #ffffff;
+  border-color: #6d28d9;
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.4);
+}
+
+.lvs-schedule-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  z-index: 101;
+  color: #f1f5f9;
+}
+
+.lvs-schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lvs-schedule-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.lvs-schedule-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lvs-schedule-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.lvs-schedule-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+.lvs-schedule-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lvs-schedule-confirm-btn:hover {
+  background: #6d28d9;
+}
+
+.lvs-schedule-clear-btn {
+  padding: 6px 12px;
+  border-radius: 7px;
+  background: transparent;
+  color: #f87171;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lvs-schedule-clear-btn:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.5);
 }

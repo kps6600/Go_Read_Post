@@ -4,6 +4,25 @@
    ══════════════════════════════════════════════════════════════════ */
 @import './components/admin/LiveArticleStudio.css';
 
+/* ── Universal Admin Dim / Deem Placeholder Rules ── */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder,
+[data-theme='dark'] select::placeholder {
+  color: #64748b !important;
+  opacity: 0.65 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
 /* ── Grouped Sidebar Navigation ── */
 .sidebar-nav-group-section {
   margin-bottom: 1.15rem;

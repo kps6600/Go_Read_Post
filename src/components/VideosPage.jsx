@@ -7,6 +7,7 @@ import {
 import { VIDEO_EPISODES, VIDEO_CATEGORIES, getStoredVideos } from '../data/videoData';
 import { VideoService } from '../services/videoService';
 import VideoPlayerModal from './VideoPlayerModal';
+import { getOriginalViewNumbers } from './admin/AdminVideosView';
 import './VideosPage.css';
 
 export default function VideosPage({ onBackToHome, onSelectVideo }) {
@@ -190,6 +191,11 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
           />
           <div className="vpage-stage-overlay">
             <h1 className="vpage-stage-title">{heroVideo.title}</h1>
+            {(heroVideo.description || heroVideo.seo?.description) && (
+              <p className="vpage-stage-desc">
+                {heroVideo.description || heroVideo.seo?.description}
+              </p>
+            )}
             
             <div className="vpage-stage-meta">
               <span className="vpage-stage-guest">
@@ -199,7 +205,10 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
               <span className="vpage-meta-dot">•</span>
               <span><Clock size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.duration}</span>
               <span className="vpage-meta-dot">•</span>
-              <span><Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.views} views</span>
+              <span title={`Original view count: ${getOriginalViewNumbers(heroVideo.views)} views`}>
+                <Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                {heroVideo.views} {getOriginalViewNumbers(heroVideo.views) && getOriginalViewNumbers(heroVideo.views) !== String(heroVideo.views) ? `(${getOriginalViewNumbers(heroVideo.views)})` : ''} views
+              </span>
             </div>
 
             <div className="vpage-stage-btn-row">
@@ -435,14 +444,20 @@ export default function VideosPage({ onBackToHome, onSelectVideo }) {
 
                   <h3 className="vpage-card-title">{vid.title}</h3>
 
+                  {(vid.description || vid.seo?.description || (Array.isArray(vid.highlights) && vid.highlights[0])) && (
+                    <p className="vpage-card-desc">
+                      {vid.description || vid.seo?.description || vid.highlights[0]}
+                    </p>
+                  )}
+
                   <div className="vpage-card-footer">
                     <div className="vpage-card-guest">
                       <User size={13} style={{ display: 'inline', marginRight: '4px' }} />
                       <span>{vid.guest}</span>
                     </div>
-                    <div className="vpage-card-views">
+                    <div className="vpage-card-views" title={`Original view count: ${getOriginalViewNumbers(vid.views)} views`}>
                       <Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                      <span>{vid.views}</span>
+                      <span>{vid.views} {getOriginalViewNumbers(vid.views) && getOriginalViewNumbers(vid.views) !== String(vid.views) ? `(${getOriginalViewNumbers(vid.views)})` : ''}</span>
                     </div>
                   </div>
                 </div>

@@ -93,7 +93,64 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. POST /api/media/upload (Image & Video Upload with Cloudinary & Local support)
+// 2. POST /api/media/upload-raw (High-Performance Raw Stream Upload for Large Video & Audio Files)
+router.post('/upload-raw', async (req, res) => {
+  try {
+    const rawFilename = req.query.filename || `video_${Date.now()}.mp4`;
+    const cleanExt = path.extname(rawFilename) || '.mp4';
+    const baseName = path.basename(rawFilename, cleanExt).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uniqueName = `${baseName}_${Date.now()}${cleanExt}`;
+    const isVideo = /\.(mp4|webm|mov|mkv)$/i.test(uniqueName);
+    const destPath = path.join(uploadsDir, uniqueName);
+    const writeStream = fs.createWriteStream(destPath);
+
+    req.pipe(writeStream);
+
+    writeStream.on('finish', async () => {
+      try {
+        const stats = fs.statSync(destPath);
+        const fileUrl = `/uploads/${uniqueName}`;
+
+        let mediaDoc = null;
+        if (isDbConnected()) {
+          try {
+            mediaDoc = await Media.create({
+              filename: uniqueName,
+              url: fileUrl,
+              mediaType: isVideo ? 'video' : 'image',
+              size: stats.size,
+              provider: 'local',
+              uploadedBy: 'admin'
+            });
+          } catch (e) {
+            console.warn('DB create fallback for raw upload:', e.message);
+          }
+        }
+
+        return res.json({
+          success: true,
+          data: mediaDoc ? mediaDoc.toObject() : {
+            filename: uniqueName,
+            url: fileUrl,
+            size: stats.size,
+            mediaType: isVideo ? 'video' : 'image',
+            provider: 'local'
+          }
+        });
+      } catch (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+    });
+
+    writeStream.on('error', (err) => {
+      return res.status(500).json({ success: false, message: err.message });
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 3. POST /api/media/upload (Image & Video Upload with Cloudinary & Local support)
 router.post('/upload', protectAdmin, async (req, res) => {
   try {
     const { base64Data, filename, altText, caption, credit } = req.body;
