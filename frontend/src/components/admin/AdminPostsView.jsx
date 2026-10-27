@@ -3458,6 +3458,49 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 const displayTopics = cardTopics.filter(t => t.toLowerCase() !== categoryLabel.toLowerCase());
                 const cardExcerpt = getArticleExcerpt(article);
 
+                // Media tags/badges: Category + Trending/Featured
+                const mediaTags = [];
+                if (categoryLabel) {
+                  mediaTags.push({
+                    key: 'category',
+                    title: `Category: ${categoryLabel}`,
+                    node: (
+                      <div key="cat" className="abv-card-category-pill">
+                        <span 
+                          className="abv-category-indicator-dot" 
+                          style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                        />
+                        <span>{categoryLabel}</span>
+                      </div>
+                    )
+                  });
+                }
+                if (article.isTrending) {
+                  mediaTags.push({
+                    key: 'trending',
+                    title: 'Trending',
+                    node: (
+                      <span key="trending" className="abv-flag-badge flag-trending">
+                        <TrendingUp size={10} /> TRENDING
+                      </span>
+                    )
+                  });
+                }
+                if (article.isFeatured) {
+                  mediaTags.push({
+                    key: 'featured',
+                    title: 'Featured',
+                    node: (
+                      <span key="featured" className="abv-flag-badge flag-featured">
+                        <Star size={10} /> FEATURED
+                      </span>
+                    )
+                  });
+                }
+                const primaryMediaTag = mediaTags[0]?.node || null;
+                const extraMediaCount = mediaTags.length - 1;
+                const extraMediaTitle = mediaTags.slice(1).map(t => t.title).join(', ');
+
                 return (
                   <div 
                     key={id} 
@@ -3515,28 +3558,20 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </button>
                       )}
 
-                      {/* Unified Badges: Category & Trending/Featured together side-by-side */}
-                      <div className="abv-card-media-badges">
-                        {/* Glassmorphic Category Badge with Indicator Dot */}
-                        <div className="abv-card-category-pill">
-                          <span 
-                            className="abv-category-indicator-dot" 
-                            style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
-                          />
-                          <span>{categoryLabel}</span>
+                      {/* Unified Badges: Show only one tag, and another/remaining in numbers */}
+                      {mediaTags.length > 0 && (
+                        <div className="abv-card-media-badges">
+                          {primaryMediaTag}
+                          {extraMediaCount > 0 && (
+                            <span 
+                              className="abv-media-more-pill" 
+                              title={extraMediaTitle}
+                            >
+                              +{extraMediaCount}
+                            </span>
+                          )}
                         </div>
-
-                        {article.isTrending && (
-                          <span className="abv-flag-badge flag-trending">
-                            <TrendingUp size={10} /> TRENDING
-                          </span>
-                        )}
-                        {article.isFeatured && (
-                          <span className="abv-flag-badge flag-featured">
-                            <Star size={10} /> FEATURED
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
 
                     {/* Card Content Body */}
