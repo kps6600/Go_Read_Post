@@ -1,20 +1,19 @@
 import { AuthService } from './authService';
 
-const GUEST_KEY = 'goreadpost_bookmarks_guest';
-
 export const BookmarkService = {
-  // Get storage key scoped to current logged-in user or guest
+  // Get storage key scoped strictly to current logged-in user
   getStorageKey(user = null) {
     const u = user || AuthService.getUser();
     if (u && (u.id || u._id || u.email || u.username)) {
       const identifier = String(u.id || u._id || u.email || u.username);
       return `goreadpost_bookmarks_user_${identifier}`;
     }
-    return GUEST_KEY;
+    return null;
   },
 
-  // Read local bookmarks for currently active user or guest
+  // Read local bookmarks for currently active logged-in user
   getLocalBookmarks() {
+    if (!AuthService.isAuthenticated()) return [];
     try {
       const userKey = this.getStorageKey();
       if (!userKey) return [];
@@ -32,6 +31,7 @@ export const BookmarkService = {
 
   // Save to current user's local storage and notify listeners
   saveLocalBookmarks(bookmarks) {
+    if (!AuthService.isAuthenticated()) return;
     try {
       const key = this.getStorageKey();
       if (!key) return;
@@ -49,11 +49,10 @@ export const BookmarkService = {
     } catch (e) {}
   },
 
-  // Fetch bookmarks from backend MongoDB for logged-in user or local guest storage
+  // Fetch bookmarks from backend MongoDB for logged-in user
   async getBookmarks() {
-    // If not authenticated, return guest bookmarks from local storage
     if (!AuthService.isAuthenticated()) {
-      return this.getLocalBookmarks();
+      return [];
     }
 
     try {
@@ -81,9 +80,9 @@ export const BookmarkService = {
     return this.getLocalBookmarks();
   },
 
-  // Toggle bookmark for current user or guest
+  // Toggle bookmark strictly for authenticated user
   async toggleBookmark(story) {
-    if (!story) return false;
+    if (!story || !AuthService.isAuthenticated()) return false;
     const storyId = String(story.id || story._id || story.slug);
     const current = this.getLocalBookmarks();
     const exists = current.some(s => {
@@ -208,7 +207,7 @@ export const BookmarkService = {
 
   // Helper to test if a story is saved
   isStorySaved(storyId, bookmarksList = null) {
-    if (!storyId) return false;
+    if (!AuthService.isAuthenticated() || !storyId) return false;
     const target = String(storyId);
     const list = bookmarksList || this.getLocalBookmarks();
     return list.some(s => {

@@ -153,7 +153,7 @@ export default function BookmarksDrawer({
           ) : (
             <div className="bdp-guest-banner">
               <div className="bdp-guest-text">
-                <strong>Guest Mode:</strong> Stories saved locally on this browser.
+                <strong>Account Required:</strong> Log in to save and access your reading list.
               </div>
               {onOpenAuthModal && (
                 <button 
@@ -165,7 +165,7 @@ export default function BookmarksDrawer({
                   }}
                 >
                   <LogIn size={13} />
-                  <span>Sign In to Sync</span>
+                  <span>Log In</span>
                 </button>
               )}
             </div>

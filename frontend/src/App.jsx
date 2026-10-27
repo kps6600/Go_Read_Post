@@ -949,11 +949,16 @@ export default function App() {
 
   const handleToggleSave = async (story) => {
     if (!story) return;
+    if (!currentUser && !AuthService.isAuthenticated()) {
+      showToast('Please log in to save articles, videos, or any content.');
+      setAuthModal({ isOpen: true, mode: 'login' });
+      return;
+    }
     const isNowSaved = await BookmarkService.toggleBookmark(story);
     const updated = BookmarkService.getLocalBookmarks();
     setSavedStories(updated);
     if (isNowSaved) {
-      showToast(currentUser ? 'Saved to reading list.' : 'Saved to bookmarks (Log in to sync across devices).');
+      showToast('Saved to your reading list.');
     } else {
       showToast('Removed from saved bookmarks.');
     }
