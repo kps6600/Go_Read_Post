@@ -1,13 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap');
-
 :root {
-  /* Modern Global Typography Tokens - Digital Prisma DM Sans */
-  --font-sans: 'DM Sans', sans-serif;
-  --font-heading: 'DM Sans', sans-serif;
-  --font-display: 'DM Sans', sans-serif;
-  --font-serif: 'DM Sans', sans-serif;
-  --font-headline: 'DM Sans', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  /* Editorial Palette - Light Theme */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-headline: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'Space Grotesk', monospace;
 
   --bg-primary: #fcfcfd;
@@ -18,7 +16,7 @@
   --bg-paper: #fffdf9;
   --bg-surface: #ffffff;
 
-  --text-primary: #0e0d1b;
+  --text-primary: #0f172a;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --text-inverted: #ffffff;
@@ -236,12 +234,12 @@ h2 {
 }
 
 h3 {
-  font-family: var(--font-heading, 'DM Sans', sans-serif);
-  font-size: 20px;
-  line-height: 1.25;
-  font-weight: 700;
-  color: #0e0d1b;
-  margin: 0 0 20px 0;
+  font-family: var(--font-heading, 'Inter', sans-serif);
+  font-size: 1.08rem;
+  line-height: 1.36;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
 }
 
 h4 {
@@ -6843,7 +6841,7 @@ main {
   font-size: 0.72rem;
   font-weight: 900;
   color: #ffffff;
-  font-family: var(--font-display, 'DM Sans', sans-serif);
+  font-family: var(--font-display, 'Inter', sans-serif);
   letter-spacing: 0.5px;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
   pointer-events: none;
@@ -6875,14 +6873,14 @@ main {
 
 /* Headline Title - Exactly matching home page cards (.editorial-card-title) */
 .ys-search-card-title {
-  font-family: var(--font-heading, 'DM Sans', sans-serif);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.28;
-  letter-spacing: -0.015em;
-  color: #0e0d1b;
-  margin: 0 0 20px 0;
-  min-height: 2.6em;
+  font-family: var(--font-heading, 'Inter', sans-serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.36;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  min-height: 2.7em;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -6913,7 +6911,7 @@ main {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: var(--font-sans, 'DM Sans', sans-serif);
+  font-family: var(--font-sans, 'Inter', sans-serif);
 }
 
 [data-theme='dark'] .ys-search-card-category {
@@ -7021,7 +7019,7 @@ main {
   color: #1e293b;
   text-transform: uppercase;
   margin: 0 0 0.85rem 0;
-  font-family: var(--font-sans, 'DM Sans', sans-serif);
+  font-family: var(--font-sans, 'Inter', sans-serif);
 }
 
 [data-theme='dark'] .ys-filter-heading {
@@ -13512,7 +13510,7 @@ main {
   margin: 0;
   line-height: 1;
   text-transform: uppercase;
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: opacity 0.2s ease;
 }
 
@@ -13777,7 +13775,7 @@ main {
   color: var(--text-primary);
   margin: 0 0 0.65rem 0;
   letter-spacing: -0.015em;
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .social-hero-main-card:hover .social-hero-main-title {

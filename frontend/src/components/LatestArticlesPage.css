@@ -343,13 +343,13 @@
 }
 
 .lap-card-title {
-  font-family: var(--font-heading, 'DM Sans', sans-serif);
-  font-size: 20px;
-  font-weight: 700;
-  color: #0e0d1b;
-  line-height: 1.28;
-  letter-spacing: -0.015em;
-  margin: 0 0 20px 0;
+  font-family: var(--font-heading, 'Inter', sans-serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.36;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
