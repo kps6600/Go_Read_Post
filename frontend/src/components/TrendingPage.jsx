@@ -717,11 +717,11 @@ export default function TrendingPage({
 
                             <div className="tp-card-metrics-row">
                               <span className="tp-metric-pill tp-metric-views" title={`${formatCount(storyViews)} views`}>
-                                <Eye size={12} />
+                                <Eye size={10} />
                                 <span>{formatCount(storyViews)} views</span>
                               </span>
                               <span className="tp-metric-pill tp-metric-likes" title={`${formatCount(storyLikes)} likes`}>
-                                <Heart size={12} fill="currentColor" />
+                                <Heart size={10} fill="currentColor" />
                                 <span>{formatCount(storyLikes)} likes</span>
                               </span>
                             </div>
