@@ -3499,6 +3499,22 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         )}
                       </button>
 
+                      {/* Top-Right Post Action Button for Drafts */}
+                      {article.status === 'draft' && (
+                        <button 
+                          type="button"
+                          className="abv-card-top-post-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePublishSingle(article);
+                          }}
+                          title="Post this draft article to live site"
+                        >
+                          <Send size={11} />
+                          <span>Post</span>
+                        </button>
+                      )}
+
                       {/* Unified Badges: Category & Trending/Featured together side-by-side */}
                       <div className="abv-card-media-badges">
                         {/* Glassmorphic Category Badge with Indicator Dot */}
@@ -3586,35 +3602,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </div>
 
                         <div className="abv-card-actions">
-                          {article.status === 'draft' && (
-                            <button 
-                              type="button"
-                              className="abv-card-post-action-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePublishSingle(article);
-                              }}
-                              title="Post this draft article to live site"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '3px 9px',
-                                background: '#059669',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '5px',
-                                fontSize: '0.72rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <Send size={11} />
-                              <span>Post</span>
-                            </button>
-                          )}
                           <button 
                             type="button"
                             className="abv-action-btn edit"
