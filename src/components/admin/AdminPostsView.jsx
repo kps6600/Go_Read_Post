@@ -941,6 +941,39 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
   };
 
+  const handlePublishSingle = async (article) => {
+    const id = article._id || article.id;
+    try {
+      await ArticleService.publishArticle(id);
+      if (onShowToast) onShowToast(`Article "${article.title || 'Draft'}" posted live!`);
+      await loadArticles();
+    } catch (err) {
+      alert('Error posting article: ' + err.message);
+    }
+  };
+
+  const handleBulkPublish = async (targetIds = null) => {
+    const ids = targetIds || Array.from(selectedIds);
+    if (ids.length === 0) {
+      if (filteredArticles.length === 1) {
+        return handlePublishSingle(filteredArticles[0]);
+      } else if (filteredArticles.length > 1) {
+        if (!window.confirm(`Post all ${filteredArticles.length} draft articles to the live site?`)) return;
+        return handleBulkPublish(filteredArticles.map(a => a._id || a.id));
+      }
+      return;
+    }
+
+    try {
+      await ArticleService.bulkUpdateStatus(ids, 'published');
+      if (onShowToast) onShowToast(`Successfully posted ${ids.length} ${ids.length === 1 ? 'article' : 'articles'} live!`);
+      setSelectedIds(new Set());
+      await loadArticles();
+    } catch (err) {
+      alert('Error posting articles: ' + err.message);
+    }
+  };
+
   const handleTogglePublish = async (article) => {
     const id = article._id || article.id;
     let nextStatus = 'published';
@@ -3207,7 +3240,59 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             transition: 'all 0.15s ease'
           }}
         >
-          <Plus size={16} /> Create Article
+          <Plus size={16} /> Create Article
+        </button>
+      </div>
+      )}
+
+      {isDraftsView && (
+      <div className="apv-tabs-row" style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'flex-end', 
+        flexWrap: 'wrap', 
+        gap: '0.75rem', 
+        borderBottom: '1px solid var(--border-light)', 
+        paddingBottom: '0.75rem', 
+        marginBottom: '1rem' 
+      }}>
+        <button 
+          type="button"
+          className="abv-btn-primary" 
+          onClick={() => handleBulkPublish()}
+          disabled={loading || filteredArticles.length === 0}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 20px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '700',
+            fontSize: '0.88rem',
+            cursor: filteredArticles.length === 0 ? 'not-allowed' : 'pointer',
+            opacity: filteredArticles.length === 0 ? 0.6 : 1,
+            boxShadow: '0 3px 10px rgba(16, 185, 129, 0.35)',
+            transition: 'all 0.15s ease'
+          }}
+          title={
+            selectedIds.size > 0 
+              ? `Post ${selectedIds.size} selected draft article${selectedIds.size > 1 ? 's' : ''} to live site`
+              : filteredArticles.length === 1 
+                ? 'Post this draft article to live site'
+                : 'Post selected or all draft articles to live site'
+          }
+        >
+          <Send size={15} />
+          <span>
+            {selectedIds.size > 0 
+              ? `Post Selected (${selectedIds.size})` 
+              : filteredArticles.length === 1
+                ? 'Post Article'
+                : 'Post Articles'}
+          </span>
         </button>
       </div>
       )}
@@ -3319,22 +3404,23 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
-              onClick={() => handleBulkStatusChange('published')}
+              onClick={() => handleBulkPublish()}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
+                padding: '6px 14px',
+                backgroundColor: '#059669',
+                border: 'none',
                 borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#059669',
-                cursor: 'pointer'
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
               }}
             >
-              <CheckCircle size={14} /> Publish Selected
+              <Send size={14} /> Post Selected ({selectedIds.size})
             </button>
             <button
               type="button"
@@ -3387,6 +3473,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         <div>
           {/* Cards Header: Select All & Count */}
           <div className="abv-cards-header-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <label className="abv-select-all-label" title="Select all articles">
               <input 
                 type="checkbox" 
@@ -3407,6 +3494,30 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 </span>
               )}
             </label>
+              {selectedIds.size > 0 && isDraftsView && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkPublish()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 10px',
+                    background: '#059669',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 5px rgba(5, 150, 105, 0.25)'
+                  }}
+                  title={`Post ${selectedIds.size} selected draft article${selectedIds.size > 1 ? 's' : ''} live`}
+                >
+                  <Send size={11} /> Post Selected ({selectedIds.size})
+                </button>
+              )}
+            </div>
             <div className="abv-cards-count-badge">
               <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}</span>
             </div>
@@ -3592,6 +3703,35 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         </div>
 
                         <div className="abv-card-actions">
+                          {article.status === 'draft' && (
+                            <button 
+                              type="button"
+                              className="abv-card-post-action-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePublishSingle(article);
+                              }}
+                              title="Post this draft article to live site"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 9px',
+                                background: '#059669',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '5px',
+                                fontSize: '0.72rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <Send size={11} />
+                              <span>Post</span>
+                            </button>
+                          )}
                           <button 
                             type="button"
                             className="abv-action-btn delete"
@@ -3784,6 +3924,31 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                       {/* Actions: "i" button to show details, Edit, Delete */}
                       <td style={{ textAlign: 'right' }}>
                         <div className="abv-action-buttons">
+                          {article.status === 'draft' && (
+                            <button
+                              type="button"
+                              onClick={() => handlePublishSingle(article)}
+                              title="Post this draft article to live site"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 9px',
+                                background: '#059669',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '5px',
+                                fontSize: '0.72rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                marginRight: '4px',
+                                boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)'
+                              }}
+                            >
+                              <Send size={11} />
+                              <span>Post</span>
+                            </button>
+                          )}
                           <button
                             type="button"
                             className={`abv-action-btn visibility-btn ${article.status === 'published' ? 'active' : 'inactive'}`}
