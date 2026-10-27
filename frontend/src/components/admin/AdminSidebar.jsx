@@ -21,7 +21,6 @@ export const ADMIN_NAV_GROUPS = [
     group: 'EDITORIAL CONTENT',
     items: [
       { id: 'articles', path: '/admin/articles', label: 'All Articles', icon: BookOpen },
-      { id: 'drafts', path: '/admin/drafts', label: 'Drafts', icon: FileEdit },
       { id: 'comments', path: '/admin/comments', label: 'Comments & Moderation', icon: MessageSquare },
       { id: 'media', path: '/admin/media', label: 'Media Library', icon: ImageIcon },
       { id: 'authors', path: '/admin/authors', label: 'Authors', icon: Users },
@@ -181,9 +180,8 @@ export default function AdminSidebar({
                 const Icon = item.icon;
                 const isActive = currentPath === item.path || 
                   (item.id === 'homepage' && (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage'))) ||
-                  (item.id === 'drafts' && (currentPath === '/admin/drafts' || currentPath.startsWith('/admin/drafts') || currentPath.includes('/draft'))) ||
                   (item.id === 'archived' && (currentPath === '/admin/archived' || currentPath.startsWith('/admin/archived') || currentPath.includes('/archived'))) ||
-                  (item.id === 'articles' && (currentPath === '/admin/articles' || currentPath.startsWith('/admin/articles') || currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs')) && !currentPath.includes('/draft') && !currentPath.includes('/archived')) ||
+                  (item.id === 'articles' && (currentPath === '/admin/articles' || currentPath.startsWith('/admin/articles') || currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs') || currentPath === '/admin/drafts' || currentPath.startsWith('/admin/drafts')) && !currentPath.includes('/archived')) ||
                   (item.id === 'pages' && (currentPath === '/admin/pages' || (currentPath.startsWith('/admin/pages') && !currentPath.startsWith('/admin/homepage')))) ||
                   (item.id === 'users' && (currentPath === '/admin/users' || currentPath === '/admin/roles'));
 
