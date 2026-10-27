@@ -345,9 +345,9 @@
 .lap-card-title {
   font-family: var(--font-heading, 'Inter', sans-serif);
   font-size: 1.08rem;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.36;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.38;
   letter-spacing: -0.01em;
   margin: 0 0 16px 0;
   display: -webkit-box;
@@ -358,7 +358,7 @@
 }
 
 [data-theme='dark'] .lap-card-title {
-  color: #e2e8f0;
+  color: #cbd5e1;
 }
 
 .lap-card:hover .lap-card-title {

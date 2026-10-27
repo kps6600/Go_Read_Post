@@ -773,9 +773,9 @@
 .cat-card-title {
   font-family: var(--font-heading, 'Inter', sans-serif);
   font-size: 1.08rem;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.36;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.38;
   margin: 0 0 16px;
   letter-spacing: -0.01em;
   display: -webkit-box;
@@ -788,7 +788,7 @@
 }
 
 [data-theme='dark'] .cat-card-title {
-  color: #f1f5f9;
+  color: #cbd5e1;
 }
 
 .cat-grid-card:hover .cat-card-title,

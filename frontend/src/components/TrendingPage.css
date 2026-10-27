@@ -733,9 +733,9 @@
 .tp-card-title {
   font-family: var(--font-heading, 'Inter', sans-serif);
   font-size: 1.08rem;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.36;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.38;
   letter-spacing: -0.01em;
   margin: 0 0 16px;
   display: -webkit-box;
@@ -747,7 +747,7 @@
 }
 
 [data-theme='dark'] .tp-card-title {
-  color: #f8fafc;
+  color: #cbd5e1;
 }
 
 .tp-article-card:hover .tp-card-title,

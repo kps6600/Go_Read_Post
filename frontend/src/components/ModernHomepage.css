@@ -745,9 +745,9 @@
 .mhp-blog-card-title {
   font-family: var(--font-heading, 'Inter', sans-serif);
   font-size: 1.08rem;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.36;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.38;
   letter-spacing: -0.01em;
   margin: 0 0 16px;
   flex: 1;
@@ -765,7 +765,7 @@
 }
 
 [data-theme='dark'] .mhp-blog-card-title {
-  color: #f1f5f9;
+  color: #cbd5e1;
 }
 
 .mhp-blog-card:hover .mhp-blog-card-title {
