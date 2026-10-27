@@ -4478,58 +4478,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
               {/* Modal Footer Actions */}
               <div className="abv-modal-footer abv-details-footer">
-                {/* Dedicated Draft / Publish button in Details footer */}
-                {art.status === 'published' ? (
-                  <button
-                    type="button"
-                    className="abv-modal-btn"
-                    style={{
-                      background: 'rgba(217, 119, 6, 0.15)',
-                      color: '#d97706',
-                      border: '1px solid rgba(217, 119, 6, 0.4)',
-                      fontWeight: 700,
-                      marginRight: 'auto'
-                    }}
-                    onClick={async () => {
-                      await handleTogglePublish(art);
-                      setViewingArticleDetails(prev => prev ? ({ 
-                        ...prev, 
-                        status: 'draft',
-                        publishedAt: null
-                      }) : null);
-                    }}
-                    title="Move this article to Drafts (hide from live site)"
-                  >
-                    <FileText size={14} />
-                    <span>Set as Draft</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="abv-modal-btn"
-                    style={{
-                      background: 'rgba(5, 150, 105, 0.15)',
-                      color: '#059669',
-                      border: '1px solid rgba(5, 150, 105, 0.4)',
-                      fontWeight: 700,
-                      marginRight: 'auto'
-                    }}
-                    onClick={async () => {
-                      await handleTogglePublish(art);
-                      setViewingArticleDetails(prev => prev ? ({ 
-                        ...prev, 
-                        status: 'published',
-                        publishedAt: prev.publishedAt || new Date().toISOString()
-                      }) : null);
-                    }}
-                    title="Publish this article live on frontend"
-                  >
-                    <Send size={14} />
-                    <span>Publish Live</span>
-                  </button>
-                )}
-
-
                 {articleSlug && (
                   <a 
                     href={`/article/${articleSlug}`}
