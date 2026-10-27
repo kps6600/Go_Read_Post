@@ -4186,32 +4186,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   )}
                 </div>
 
-                {/* Permalink & SEO Box */}
-                <div className="abv-detail-slug-box">
-                  <div className="abv-detail-slug-info">
-                    <Globe size={15} color="var(--text-muted)" />
-                    <span className="abv-detail-slug-label">Permalink:</span>
-                    <code className="abv-detail-slug-text">{articleUrl}</code>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="abv-detail-copy-btn"
-                    onClick={handleCopyLink}
-                    title="Copy full public URL"
-                  >
-                    {copiedDetailSlug ? (
-                      <>
-                        <Check size={13} color="#10b981" />
-                        <span style={{ color: '#10b981' }}>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={13} />
-                        <span>Copy Link</span>
-                      </>
-                    )}
-                  </button>
-                </div>
               </div>
 
               {/* Modal Footer Actions */}
