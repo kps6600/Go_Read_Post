@@ -2054,6 +2054,11 @@ table input[type="checkbox"]:checked::after {
   background: var(--brand-light);
   border-color: var(--brand-primary);
 }
+.abv-action-btn.edit:hover {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.4);
+}
 
 /* Modals */
 .abv-modal-backdrop, .anv-modal-backdrop, .amv-modal-backdrop {

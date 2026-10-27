@@ -3612,6 +3612,17 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           )}
                           <button 
                             type="button"
+                            className="abv-action-btn edit"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEdit(article);
+                            }}
+                            title="Edit article in Studio"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button 
+                            type="button"
                             className="abv-action-btn delete"
                             onClick={(e) => {
                               e.stopPropagation();
