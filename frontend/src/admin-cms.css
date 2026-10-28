@@ -1746,6 +1746,90 @@ table input[type="checkbox"]:checked::after {
   border: 1px solid var(--border-light, #e2e8f0);
 }
 
+/* Bulk Action Buttons in Cards Header */
+.abv-bulk-actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.abv-bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+}
+
+.abv-bulk-btn-publish {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+.abv-bulk-btn-publish:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.abv-bulk-btn-draft {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+.abv-bulk-btn-draft:hover {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+.abv-bulk-btn-delete {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+.abv-bulk-btn-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+[data-theme='dark'] .abv-bulk-btn-publish {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+[data-theme='dark'] .abv-bulk-btn-publish:hover {
+  background: #059669;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .abv-bulk-btn-draft {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+[data-theme='dark'] .abv-bulk-btn-draft:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .abv-bulk-btn-delete {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+[data-theme='dark'] .abv-bulk-btn-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
 /* ============================================================
    EDITORIAL CARDS GRID VIEW
 ============================================================ */
@@ -9562,6 +9646,91 @@ table input[type="checkbox"]:checked::after {
   border-color: #0284c7;
   color: #0369a1;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.18);
+}
+
+/* Full Page Article Details View */
+.abv-fullpage-details-wrapper {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.abv-fullpage-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 14px;
+  position: sticky;
+  top: 1rem;
+  z-index: 30;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.abv-fullpage-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.48rem 0.95rem;
+  background: var(--bg-tertiary, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.abv-fullpage-back-btn:hover {
+  background: var(--border-light, #e2e8f0);
+  transform: translateX(-2px);
+}
+
+.abv-fullpage-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 18px;
+  padding: 2.25rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.abv-fullpage-cover-wrap {
+  position: relative;
+  width: 100%;
+  max-height: 480px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.abv-fullpage-cover-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  display: block;
+}
+
+[data-theme='dark'] .abv-fullpage-topbar,
+[data-theme='dark'] .abv-fullpage-card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* 2. Details Modal Dialog & Header */

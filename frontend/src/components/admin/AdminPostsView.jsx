@@ -93,9 +93,19 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const [editorMode, setEditorMode] = useState('tiptap'); // 'tiptap' | 'code'
   const [isSlugExpanded, setIsSlugExpanded] = useState(false);
   const [isExcerptExpanded, setIsExcerptExpanded] = useState(false);
-  const [showCustomSeo, setShowCustomSeo] = useState(false);
   const [viewingArticleDetails, setViewingArticleDetails] = useState(null);
   const [copiedDetailSlug, setCopiedDetailSlug] = useState(false);
+
+  useEffect(() => {
+    if (viewingArticleDetails) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') setViewingArticleDetails(null);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [viewingArticleDetails]);
 
   // Rich Text Editor textarea ref for inserting markdown/html tokens
   const contentTextareaRef = useRef(null);
@@ -1235,6 +1245,27 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const archivedCount = articles.filter(a => a.status === 'archived').length;
   const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
 
+  // Bulk selection status breakdown
+  const selectedArticles = useMemo(() => {
+    if (selectedIds.size === 0) return [];
+    return articles.filter(a => selectedIds.has(a._id || a.id));
+  }, [articles, selectedIds]);
+
+  const hasPublishedSelected = useMemo(() => {
+    return selectedArticles.some(a => (a.status || 'published') === 'published');
+  }, [selectedArticles]);
+
+  const hasDraftOrScheduledSelected = useMemo(() => {
+    return selectedArticles.some(a => (a.status || 'published') !== 'published');
+  }, [selectedArticles]);
+
+  // Conditional button flags:
+  // - If selected article is not published -> show Publish button & Delete button
+  // - If selected article is published -> show Send Draft button & Delete button
+  // - If both published & unpublished are selected -> show ONLY Delete button
+  const showBulkPublish = selectedIds.size > 0 && hasDraftOrScheduledSelected && !hasPublishedSelected;
+  const showBulkDraft = selectedIds.size > 0 && hasPublishedSelected && !hasDraftOrScheduledSelected;
+  const showBulkDelete = selectedIds.size > 0;
 
   // Word count and read time calculations
   const wordCount = formData.content ? formData.content.trim().split(/\s+/).filter(Boolean).length : 0;
@@ -3196,6 +3227,472 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     );
   }
 
+  // Full-Page Article Details View
+  const renderArticleFullDetailsPage = (art) => {
+    const coverImg = getArticleCoverImage(art);
+    const coverCaption = art.featuredImage?.caption || '';
+    const coverCredit = art.featuredImage?.credit || art.photoCredit || '';
+    const authorImg = art.authorAvatar || art.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+    const authorName = art.authorName || art.author?.name || 'Editorial Desk';
+    const authorTitle = art.authorTitle || art.author?.designation || 'Staff Reporter';
+    const catName = art.categoryName || art.categoryTag || art.category || 'General';
+    const desk = art.brand || 'GoReadPost';
+    const catMeta = getCategoryMeta(catName);
+    const topics = getArticleTopics(art);
+    const detailExcerpt = getArticleExcerpt(art);
+    const tagsList = (typeof art.tags === 'string' 
+      ? art.tags.split(',') 
+      : Array.isArray(art.tags) 
+        ? art.tags 
+        : []
+    ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
+    const pubDate = art.publishedAt 
+      ? new Date(art.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      : (art.createdAt ? new Date(art.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Draft');
+    const readingTime = art.readingTime || '4 min read';
+    const viewsCount = (art.views || 0).toLocaleString();
+    const articleSlug = art.slug || slugify(art.title);
+    const articleUrl = typeof window !== 'undefined' ? `${window.location.origin}/article/${articleSlug}` : `/article/${articleSlug}`;
+
+    const handleCopySlug = () => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(articleSlug);
+        setCopiedDetailSlug(true);
+        setTimeout(() => setCopiedDetailSlug(false), 2200);
+      }
+    };
+
+    // Check if article has structured story fields from preset data (e.g. HerStory, SMB, Enterprise)
+    const hasStructuredStory = art.leadStoryText || art.section1Body || art.section2Body || art.section3Body1 || art.section1Lead || art.story || art.fullStory || art.body;
+
+    return (
+      <div className="abv-fullpage-details-wrapper">
+        {/* Sticky Top Bar */}
+        <div className="abv-fullpage-topbar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="abv-fullpage-back-btn"
+              onClick={() => setViewingArticleDetails(null)}
+              title="Return to Articles list (Esc)"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Articles</span>
+            </button>
+
+            <span className={`abv-card-status-badge status-${art.status || 'published'}`} style={{ position: 'static' }}>
+              <span className="abv-status-dot" />
+              {art.status || 'published'}
+            </span>
+
+            {art.isFeatured && (
+              <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
+                <Star size={11} /> FEATURED
+              </span>
+            )}
+            {art.isTrending && (
+              <span className="abv-flag-badge flag-trending" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
+                <TrendingUp size={11} /> TRENDING
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="abv-modal-btn"
+              style={{
+                background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
+                color: art.status === 'published' ? '#d97706' : '#059669',
+                border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
+                cursor: 'pointer'
+              }}
+              onClick={async () => {
+                await handleTogglePublish(art);
+                setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+              }}
+              title={art.status === 'published' ? "Hide article from live site" : "Show article on live site"}
+            >
+              {art.status === 'published' ? (
+                <>
+                  <EyeOff size={14} />
+                  <span>Disable from Frontend</span>
+                </>
+              ) : (
+                <>
+                  <Eye size={14} />
+                  <span>Enable on Frontend</span>
+                </>
+              )}
+            </button>
+
+
+
+            <button 
+              type="button" 
+              className="abv-modal-btn"
+              style={{
+                background: 'var(--brand-primary)',
+                color: '#ffffff'
+              }}
+              onClick={() => {
+                const toEdit = art;
+                setViewingArticleDetails(null);
+                handleOpenEdit(toEdit);
+              }}
+            >
+              <Edit2 size={14} />
+              <span>Edit in Studio</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Full Details Content Card */}
+        <div className="abv-fullpage-card">
+          {/* Cover Media Banner */}
+          <div className="abv-fullpage-cover-wrap">
+            <img 
+              src={coverImg} 
+              alt={art.title || 'Cover image'} 
+              className="abv-fullpage-cover-img"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+              }}
+            />
+            <div className="abv-detail-cover-meta-bar">
+              <div className="abv-card-category-pill" style={{ margin: 0 }}>
+                <span 
+                  className="abv-category-indicator-dot" 
+                  style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                />
+                <span>{catName}</span>
+              </div>
+              <span className="abv-detail-desk-pill">{desk}</span>
+              {readingTime && (
+                <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
+                  <Clock size={11} /> {readingTime}
+                </span>
+              )}
+            </div>
+            {(coverCaption || coverCredit) && (
+              <div className="abv-detail-cover-caption">
+                {coverCaption && <span>{coverCaption}</span>}
+                {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Headline & Subtitle */}
+          <div>
+            <h1 className="abv-detail-headline" style={{ fontSize: '2.1rem', marginBottom: '0.5rem' }}>{art.title}</h1>
+            {art.subtitle && (
+              <h2 className="abv-detail-subtitle" style={{ fontSize: '1.15rem' }}>{art.subtitle}</h2>
+            )}
+          </div>
+
+          {/* Quick Metadata Info Grid */}
+          <div className="abv-detail-meta-grid">
+            {/* Author */}
+            <div className="abv-detail-meta-card">
+              <img src={authorImg} alt={authorName} className="abv-detail-author-avatar" />
+              <div>
+                <div className="abv-detail-meta-label">Author</div>
+                <div className="abv-detail-meta-val">{authorName}</div>
+                <div className="abv-detail-meta-sub">{authorTitle}</div>
+              </div>
+            </div>
+
+            {/* Publication Date */}
+            <div className="abv-detail-meta-card">
+              <Calendar size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+              <div>
+                <div className="abv-detail-meta-label">Published Date</div>
+                <div className="abv-detail-meta-val">{pubDate}</div>
+                <div className="abv-detail-meta-sub" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <Eye size={12} /> {viewsCount} total views
+                </div>
+              </div>
+            </div>
+
+            {/* Category & Format */}
+            <div className="abv-detail-meta-card">
+              <Tag size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+              <div>
+                <div className="abv-detail-meta-label">Category &amp; Format</div>
+                <div className="abv-detail-meta-val">{catName}</div>
+                <div className="abv-detail-meta-sub">{art.contentType || 'Article'} • {art.language || 'English'}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Excerpt / Summary */}
+          {detailExcerpt && (
+            <div className="abv-detail-excerpt-box">
+              <div className="abv-detail-section-title">
+                <Quote size={14} color="#0284c7" />
+                <span>Story Excerpt / Executive Summary</span>
+              </div>
+              <p className="abv-detail-excerpt-text">{detailExcerpt}</p>
+            </div>
+          )}
+
+          {/* Topics & Tags */}
+          {(topics.length > 0 || tagsList.length > 0) && (
+            <div className="abv-detail-taxonomy-box">
+              {topics.length > 0 && (
+                <div className="abv-detail-taxonomy-group">
+                  <span className="abv-detail-tax-label">Topics:</span>
+                  <div className="abv-detail-pill-wrap">
+                    {topics.map((top, idx) => (
+                      <span key={idx} className="abv-detail-topic-pill">
+                        <Tag size={10} /> {top}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {tagsList.length > 0 && (
+                <div className="abv-detail-taxonomy-group">
+                  <span className="abv-detail-tax-label">Tags:</span>
+                  <div className="abv-detail-pill-wrap">
+                    {tagsList.map((tag, idx) => (
+                      <span key={idx} className="abv-detail-tag-pill">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Full Article Body Content */}
+          <div className="abv-detail-content-section">
+            <div className="abv-detail-section-title">
+              <BookOpen size={15} color="#0284c7" />
+              <span>Full Article Body</span>
+            </div>
+
+            {art.contentBlocks && Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0 ? (
+              <div className="abv-detail-blocks-container">
+                {art.contentBlocks.map((block, bIdx) => {
+                  if (block.type === 'heading') {
+                    return (
+                      <h3 key={bIdx} className="abv-detail-block-heading">
+                        {block.text}
+                      </h3>
+                    );
+                  }
+                  if (block.type === 'image') {
+                    const bImg = typeof block.image === 'string' ? block.image : (block.url || block.image?.url || '');
+                    return (
+                      <div key={bIdx} className="abv-detail-block-image-wrap">
+                        {bImg && <img src={bImg} alt={block.alt || ''} className="abv-detail-block-img" />}
+                        {(block.caption || block.credit) && (
+                          <p className="abv-detail-block-img-caption">
+                            {block.caption} {block.credit && `(Credit: ${block.credit})`}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }
+                  if (block.type === 'testimonial' || block.type === 'quote') {
+                    return (
+                      <blockquote key={bIdx} className="abv-detail-block-quote">
+                        <p>"{block.quote || block.text}"</p>
+                        {block.author && <cite>— {block.author} {block.designation ? `(${block.designation})` : ''}</cite>}
+                      </blockquote>
+                    );
+                  }
+                  return (
+                    <div 
+                      key={bIdx} 
+                      className="abv-detail-block-paragraph"
+                      dangerouslySetInnerHTML={{ __html: block.text || block.content || '' }}
+                    />
+                  );
+                })}
+              </div>
+            ) : art.content && typeof art.content === 'string' && art.content.trim().length > 0 ? (
+              <div 
+                className="abv-detail-article-content"
+                dangerouslySetInnerHTML={{ __html: art.content }}
+              />
+            ) : hasStructuredStory ? (
+              <div className="abv-detail-blocks-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {art.mottoText && (
+                  <blockquote className="abv-detail-block-quote" style={{ borderLeftColor: '#f59e0b', background: 'rgba(245, 158, 11, 0.08)' }}>
+                    <p style={{ fontStyle: 'italic', fontSize: '1.05rem', color: 'var(--text-primary)' }}>"{art.mottoText}"</p>
+                    {art.mottoAuthor && <cite>— {art.mottoAuthor} {art.mottoRole ? `(${art.mottoRole})` : ''}</cite>}
+                  </blockquote>
+                )}
+                {art.leadStoryText && (
+                  <p className="abv-detail-block-paragraph" style={{ fontSize: '1.05rem', lineHeight: 1.7, fontWeight: 500 }}>
+                    {art.leadStoryText}
+                  </p>
+                )}
+                {art.section1Title && (
+                  <h3 className="abv-detail-block-heading" style={{ fontSize: '1.35rem', fontWeight: 800, marginTop: '1rem' }}>
+                    {art.section1Title}
+                  </h3>
+                )}
+                {art.featureImage && (
+                  <div className="abv-detail-block-image-wrap">
+                    <img src={art.featureImage} alt={art.featureCaption || 'Story feature'} className="abv-detail-block-img" />
+                    {art.featureCaption && <p className="abv-detail-block-img-caption">{art.featureCaption}</p>}
+                  </div>
+                )}
+                {art.section1Lead && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section1Lead}
+                  </p>
+                )}
+                {art.section1Body && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section1Body}
+                  </p>
+                )}
+                {art.section1PullquoteText && (
+                  <blockquote className="abv-detail-block-quote">
+                    <p>{art.section1PullquoteText}</p>
+                    {art.section1PullquoteAuthor && <cite>— {art.section1PullquoteAuthor}</cite>}
+                  </blockquote>
+                )}
+                {art.section2Title && (
+                  <h3 className="abv-detail-block-heading" style={{ fontSize: '1.35rem', fontWeight: 800, marginTop: '1rem' }}>
+                    {art.section2Title}
+                  </h3>
+                )}
+                {art.section2Lead && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section2Lead}
+                  </p>
+                )}
+                {art.section2ModernQuote && (
+                  <blockquote className="abv-detail-block-quote">
+                    <p>"{art.section2ModernQuote}"</p>
+                    {art.section2ModernAuthor && <cite>— {art.section2ModernAuthor} {art.section2ModernRole ? `(${art.section2ModernRole})` : ''}</cite>}
+                  </blockquote>
+                )}
+                {art.section2Body && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section2Body}
+                  </p>
+                )}
+                {art.calloutTitle && (
+                  <div className="abv-detail-excerpt-box" style={{ borderLeftColor: '#10b981', background: 'rgba(16, 185, 129, 0.08)' }}>
+                    <div style={{ fontWeight: 800, color: '#059669', marginBottom: '0.35rem' }}>{art.calloutTitle}</div>
+                    <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.6 }}>{art.calloutText}</p>
+                  </div>
+                )}
+                {art.section3Title && (
+                  <h3 className="abv-detail-block-heading" style={{ fontSize: '1.35rem', fontWeight: 800, marginTop: '1rem' }}>
+                    {art.section3Title}
+                  </h3>
+                )}
+                {art.section3Body1 && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section3Body1}
+                  </p>
+                )}
+                {art.section3Body2 && (
+                  <p className="abv-detail-block-paragraph" style={{ lineHeight: 1.7 }}>
+                    {art.section3Body2}
+                  </p>
+                )}
+                {art.takeawayText && (
+                  <blockquote className="abv-detail-block-quote" style={{ borderLeftColor: 'var(--brand-primary)', background: 'rgba(2, 132, 199, 0.08)' }}>
+                    <p style={{ fontWeight: 600 }}>{art.takeawayText}</p>
+                  </blockquote>
+                )}
+                {(art.fullStory || art.story || art.body) && (
+                  <div 
+                    className="abv-detail-article-content"
+                    dangerouslySetInnerHTML={{ __html: art.fullStory || art.story || art.body }}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="abv-detail-empty-content">
+                <Info size={16} />
+                <span>No body content written for this article yet. Click "Edit in Studio" to compose content.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Slug Box */}
+          <div className="abv-detail-slug-box">
+            <div className="abv-detail-slug-info">
+              <Globe size={15} color="var(--text-muted)" />
+              <span className="abv-detail-slug-label">Slug:</span>
+              <code className="abv-detail-slug-text">{articleSlug}</code>
+            </div>
+            <button 
+              type="button" 
+              className="abv-detail-copy-btn"
+              onClick={handleCopySlug}
+              title="Copy slug"
+            >
+              {copiedDetailSlug ? (
+                <>
+                  <Check size={13} color="#10b981" />
+                  <span style={{ color: '#10b981' }}>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={13} />
+                  <span>Copy Slug</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+
+
+        {/* Delete Confirmation Modal if triggered */}
+        {articleToDelete && (
+          <div className="modal-overlay" onClick={() => setArticleToDelete(null)}>
+            <div className="anv-modal-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="anv-modal-header">
+                <div className="anv-modal-title-box">
+                  <AlertCircle size={22} color="#dc2626" />
+                  <div>
+                    <h3>Delete Editorial Article?</h3>
+                  </div>
+                </div>
+                <button className="anv-modal-close" onClick={() => setArticleToDelete(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '1rem 0' }}>
+                Are you sure you want to delete <strong>"{articleToDelete.title}"</strong>?
+              </p>
+
+              <div className="anv-modal-footer">
+                <button className="anv-modal-btn cancel" onClick={() => setArticleToDelete(null)}>Cancel</button>
+                <button 
+                  className="anv-modal-btn delete-btn" 
+                  onClick={handleConfirmDelete}
+                  disabled={deleting}
+                  style={{ background: '#dc2626', color: '#fff' }}
+                >
+                  {deleting ? 'Deleting...' : 'Delete Article'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (viewingArticleDetails) {
+    return renderArticleFullDetailsPage(viewingArticleDetails);
+  }
+
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
     if (tabId === 'archived') {
@@ -3406,136 +3903,85 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
       </div>
 
-      {/* Bulk Action Toolbar */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '12px 18px',
-          borderRadius: '10px',
-          marginBottom: '1rem',
-          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontWeight: '700',
-              fontSize: '0.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <CheckSquare size={13} />
-              <span>{selectedIds.size} Selected</span>
-            </div>
 
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => handleBulkStatusChange('published')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#059669',
-                cursor: 'pointer'
-              }}
-            >
-              <CheckCircle size={14} /> Publish Selected
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBulkStatusChange('draft')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#d97706',
-                cursor: 'pointer'
-              }}
-            >
-              <Clock size={14} /> Set as Draft
-            </button>
-
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={deleting}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                backgroundColor: '#dc2626',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
-              }}
-            >
-              <Trash2 size={15} />
-              {deleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 5. Articles Content: Cards Grid View */}
       <div>
-          {/* Cards Header: Select All & Count */}
+          {/* Cards Header: Select All, Conditional Actions, & Count */}
           <div className="abv-cards-header-bar">
-            <label className="abv-select-all-label" title="Select all articles">
-              <input 
-                type="checkbox" 
-                className="admin-table-checkbox"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
-                  } else {
-                    setSelectedIds(new Set());
-                  }
-                }}
-                checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
-              />
-              <span>Select All</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <label className="abv-select-all-label" title="Select all articles">
+                <input 
+                  type="checkbox" 
+                  className="admin-table-checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
+                    } else {
+                      setSelectedIds(new Set());
+                    }
+                  }}
+                  checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
+                />
+                <span>Select All</span>
+              </label>
               {selectedIds.size > 0 && (
                 <span className="abv-selected-pill">
                   {selectedIds.size} of {filteredArticles.length} selected
                 </span>
               )}
-            </label>
-            <div className="abv-cards-count-badge">
-              <span>
-                {activeTab === 'draft' && 'Drafts: '}
-                {activeTab === 'published' && 'Published: '}
-                {activeTab === 'scheduled' && 'Scheduled: '}
-                {activeTab === 'views' && 'Most Viewed: '}
-                {activeTab === 'all' && 'All Posts: '}
-                {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}
-              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {selectedIds.size > 0 && (
+                <div className="abv-bulk-actions-group">
+                  {showBulkPublish && (
+                    <button
+                      type="button"
+                      onClick={() => handleBulkStatusChange('published')}
+                      className="abv-bulk-btn abv-bulk-btn-publish"
+                      title="Publish selected article(s)"
+                    >
+                      <CheckCircle size={14} />
+                      <span>Publish</span>
+                    </button>
+                  )}
+                  {showBulkDraft && (
+                    <button
+                      type="button"
+                      onClick={() => handleBulkStatusChange('draft')}
+                      className="abv-bulk-btn abv-bulk-btn-draft"
+                      title="Send selected article(s) to draft"
+                    >
+                      <Clock size={14} />
+                      <span>Send Draft</span>
+                    </button>
+                  )}
+                  {showBulkDelete && (
+                    <button
+                      type="button"
+                      onClick={handleBulkDelete}
+                      disabled={deleting}
+                      className="abv-bulk-btn abv-bulk-btn-delete"
+                      title="Delete selected article(s)"
+                    >
+                      <Trash2 size={14} />
+                      <span>{deleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="abv-cards-count-badge">
+                <span>
+                  {activeTab === 'draft' && 'Drafts: '}
+                  {activeTab === 'published' && 'Published: '}
+                  {activeTab === 'scheduled' && 'Scheduled: '}
+                  {activeTab === 'views' && 'Most Viewed: '}
+                  {activeTab === 'all' && 'All Posts: '}
+                  {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -3752,369 +4198,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       {/* MEDIA LIBRARY SELECTOR MODAL */}
       {renderMediaPickerModal()}
 
-      {/* ARTICLE FULL DETAILS PREVIEW MODAL */}
-      {viewingArticleDetails && (() => {
-        const art = viewingArticleDetails;
-        const coverImg = getArticleCoverImage(art);
-        const coverCaption = art.featuredImage?.caption || '';
-        const coverCredit = art.featuredImage?.credit || art.photoCredit || '';
-        const authorImg = art.authorAvatar || art.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-        const authorName = art.authorName || art.author?.name || 'Editorial Desk';
-        const authorTitle = art.authorTitle || art.author?.designation || 'Staff Reporter';
-        const catName = art.categoryName || art.categoryTag || art.category || 'General';
-        const desk = art.brand || 'GoReadPost';
-        const catMeta = getCategoryMeta(catName);
-        const topics = getArticleTopics(art);
-        const detailExcerpt = getArticleExcerpt(art);
-        const tagsList = (typeof art.tags === 'string' 
-          ? art.tags.split(',') 
-          : Array.isArray(art.tags) 
-            ? art.tags 
-            : []
-        ).map(t => typeof t === 'string' ? t.trim() : (t?.name || '')).filter(Boolean);
-        const pubDate = art.publishedAt 
-          ? new Date(art.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-          : (art.createdAt ? new Date(art.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Draft');
-        const readingTime = art.readingTime || '4 min read';
-        const viewsCount = (art.views || 0).toLocaleString();
-        const articleSlug = art.slug || '';
-        const articleUrl = typeof window !== 'undefined' ? `${window.location.origin}/article/${articleSlug}` : `/article/${articleSlug}`;
 
-        const handleCopyLink = () => {
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(articleUrl);
-            setCopiedDetailSlug(true);
-            setTimeout(() => setCopiedDetailSlug(false), 2200);
-          }
-        };
-
-        return (
-          <div className="abv-modal-backdrop" onClick={() => setViewingArticleDetails(null)}>
-            <div 
-              className="abv-modal-dialog abv-details-dialog" 
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="abv-modal-header abv-details-header">
-                <div className="abv-modal-title-box">
-                  <div className="abv-details-header-icon">
-                    <FileText size={18} color="#0284c7" />
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <h3 className="abv-modal-title" style={{ margin: 0 }}>Article Full Details</h3>
-                      {art.isFeatured && (
-                        <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
-                          <Star size={10} /> FEATURED
-                        </span>
-                      )}
-                      {art.isTrending && (
-                        <span className="abv-flag-badge flag-trending" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
-                          <TrendingUp size={10} /> TRENDING
-                        </span>
-                      )}
-                    </div>
-
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button 
-                    type="button" 
-                    className="abv-modal-close" 
-                    onClick={() => setViewingArticleDetails(null)}
-                    title="Close preview"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Scrollable Body */}
-              <div className="abv-modal-form abv-details-body">
-                {/* Cover Image Banner */}
-                <div className="abv-detail-cover-wrap">
-                  <img 
-                    src={coverImg} 
-                    alt={art.title || 'Cover image'} 
-                    className="abv-detail-cover-img"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
-                    }}
-                  />
-                  <div className="abv-detail-cover-meta-bar">
-                    <div className="abv-card-category-pill" style={{ margin: 0 }}>
-                      <span 
-                        className="abv-category-indicator-dot" 
-                        style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
-                      />
-                      <span>{catName}</span>
-                    </div>
-                    <span className="abv-detail-desk-pill">{desk}</span>
-                    {readingTime && (
-                      <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
-                        <Clock size={11} /> {readingTime}
-                      </span>
-                    )}
-                  </div>
-                  {(coverCaption || coverCredit) && (
-                    <div className="abv-detail-cover-caption">
-                      {coverCaption && <span>{coverCaption}</span>}
-                      {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
-                    </div>
-                  )}
-                </div>
-
-                {/* Article Headline */}
-                <h1 className="abv-detail-headline">{art.title}</h1>
-
-                {/* Subtitle if available */}
-                {art.subtitle && (
-                  <h2 className="abv-detail-subtitle">{art.subtitle}</h2>
-                )}
-
-                {/* Quick Metadata Info Strip */}
-                <div className="abv-detail-meta-grid">
-                  {/* Author Card */}
-                  <div className="abv-detail-meta-card">
-                    <img src={authorImg} alt={authorName} className="abv-detail-author-avatar" />
-                    <div>
-                      <div className="abv-detail-meta-label">Author</div>
-                      <div className="abv-detail-meta-val">{authorName}</div>
-                      <div className="abv-detail-meta-sub">{authorTitle}</div>
-                    </div>
-                  </div>
-
-                  {/* Publication & Views */}
-                  <div className="abv-detail-meta-card">
-                    <Calendar size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                    <div>
-                      <div className="abv-detail-meta-label">Published Date</div>
-                      <div className="abv-detail-meta-val">{pubDate}</div>
-                      <div className="abv-detail-meta-sub" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <Eye size={12} /> {viewsCount} total views
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Taxonomy / Classification */}
-                  <div className="abv-detail-meta-card">
-                    <Tag size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                    <div>
-                      <div className="abv-detail-meta-label">Category & Type</div>
-                      <div className="abv-detail-meta-val">{catName}</div>
-                      <div className="abv-detail-meta-sub">{art.contentType || 'Article'} • {art.language || 'English'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Excerpt / Summary */}
-                {detailExcerpt && (
-                  <div className="abv-detail-excerpt-box">
-                    <div className="abv-detail-section-title">
-                      <Quote size={14} color="#0284c7" />
-                      <span>Story Excerpt / Executive Summary</span>
-                    </div>
-                    <p className="abv-detail-excerpt-text">{detailExcerpt}</p>
-                  </div>
-                )}
-
-                {/* Topics & Tags */}
-                {(topics.length > 0 || tagsList.length > 0) && (
-                  <div className="abv-detail-taxonomy-box">
-                    {topics.length > 0 && (
-                      <div className="abv-detail-taxonomy-group">
-                        <span className="abv-detail-tax-label">Topics:</span>
-                        <div className="abv-detail-pill-wrap">
-                          {topics.map((top, idx) => (
-                            <span key={idx} className="abv-detail-topic-pill">
-                              <Tag size={10} /> {top}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {tagsList.length > 0 && (
-                      <div className="abv-detail-taxonomy-group">
-                        <span className="abv-detail-tax-label">Tags:</span>
-                        <div className="abv-detail-pill-wrap">
-                          {tagsList.map((tag, idx) => (
-                            <span key={idx} className="abv-detail-tag-pill">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Full Article Content */}
-                <div className="abv-detail-content-section">
-                  <div className="abv-detail-section-title">
-                    <BookOpen size={15} color="#0284c7" />
-                    <span>Full Article Body</span>
-                  </div>
-
-                  {art.contentBlocks && Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0 ? (
-                    <div className="abv-detail-blocks-container">
-                      {art.contentBlocks.map((block, bIdx) => {
-                        if (block.type === 'heading') {
-                          return (
-                            <h3 key={bIdx} className="abv-detail-block-heading">
-                              {block.text}
-                            </h3>
-                          );
-                        }
-                        if (block.type === 'image') {
-                          const bImg = typeof block.image === 'string' ? block.image : (block.url || block.image?.url || '');
-                          return (
-                            <div key={bIdx} className="abv-detail-block-image-wrap">
-                              {bImg && <img src={bImg} alt={block.alt || ''} className="abv-detail-block-img" />}
-                              {(block.caption || block.credit) && (
-                                <p className="abv-detail-block-img-caption">
-                                  {block.caption} {block.credit && `(Credit: ${block.credit})`}
-                                </p>
-                              )}
-                            </div>
-                          );
-                        }
-                        if (block.type === 'testimonial' || block.type === 'quote') {
-                          return (
-                            <blockquote key={bIdx} className="abv-detail-block-quote">
-                              <p>"{block.quote || block.text}"</p>
-                              {block.author && <cite>— {block.author} {block.designation ? `(${block.designation})` : ''}</cite>}
-                            </blockquote>
-                          );
-                        }
-                        return (
-                          <div 
-                            key={bIdx} 
-                            className="abv-detail-block-paragraph"
-                            dangerouslySetInnerHTML={{ __html: block.text || block.content || '' }}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : art.content ? (
-                    <div 
-                      className="abv-detail-article-content"
-                      dangerouslySetInnerHTML={{ __html: art.content }}
-                    />
-                  ) : (
-                    <div className="abv-detail-empty-content">
-                      <Info size={16} />
-                      <span>No body content written for this article yet. Click "Edit in Studio" to compose content.</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Permalink & SEO Box */}
-                <div className="abv-detail-slug-box">
-                  <div className="abv-detail-slug-info">
-                    <Globe size={15} color="var(--text-muted)" />
-                    <span className="abv-detail-slug-label">Permalink:</span>
-                    <code className="abv-detail-slug-text">{articleUrl}</code>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="abv-detail-copy-btn"
-                    onClick={handleCopyLink}
-                    title="Copy full public URL"
-                  >
-                    {copiedDetailSlug ? (
-                      <>
-                        <Check size={13} color="#10b981" />
-                        <span style={{ color: '#10b981' }}>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={13} />
-                        <span>Copy Link</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Footer Actions */}
-              <div className="abv-modal-footer abv-details-footer">
-                <button
-                  type="button"
-                  className="abv-modal-btn"
-                  style={{
-                    background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
-                    color: art.status === 'published' ? '#d97706' : '#059669',
-                    border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
-                    marginRight: 'auto'
-                  }}
-                  onClick={async () => {
-                    await handleTogglePublish(art);
-                    setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
-                  }}
-                  title={art.status === 'published' ? "Hide article from frontend site" : "Show article on frontend site"}
-                >
-                  {art.status === 'published' ? (
-                    <>
-                      <EyeOff size={14} />
-                      <span>Disable from Frontend</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye size={14} />
-                      <span>Enable on Frontend</span>
-                    </>
-                  )}
-                </button>
-
-                <button 
-                  type="button" 
-                  className="abv-modal-btn cancel" 
-                  onClick={() => setViewingArticleDetails(null)}
-                >
-                  Close
-                </button>
-                
-                {articleSlug && (
-                  <a 
-                    href={`/article/${articleSlug}`}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="abv-modal-btn"
-                    style={{
-                      background: 'rgba(2, 132, 199, 0.1)',
-                      color: '#0284c7',
-                      border: '1px solid rgba(2, 132, 199, 0.3)',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    <ExternalLink size={14} />
-                    <span>View Public Page</span>
-                  </a>
-                )}
-
-                <button 
-                  type="button" 
-                  className="abv-modal-btn"
-                  style={{
-                    background: 'var(--brand-primary)',
-                    color: '#ffffff'
-                  }}
-                  onClick={() => {
-                    const toEdit = viewingArticleDetails;
-                    setViewingArticleDetails(null);
-                    handleOpenEdit(toEdit);
-                  }}
-                >
-                  <Edit2 size={14} />
-                  <span>Edit in Studio</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* 8. DELETE CONFIRMATION MODAL */}
       {articleToDelete && (

@@ -119,6 +119,200 @@ const DEFAULT_INITIAL_BLOCKS = [
   }
 ];
 
+// Helper to extract and normalize article content/description into editable section blocks
+function extractInitialBlocks(art) {
+  if (!art) return [...DEFAULT_INITIAL_BLOCKS];
+
+  // 1. If contentBlocks exist
+  if (Array.isArray(art.contentBlocks) && art.contentBlocks.length > 0) {
+    const hasSectionBlocks = art.contentBlocks.some(b => b && b.type === 'section');
+    if (hasSectionBlocks) {
+      return art.contentBlocks.map((b, idx) => {
+        if (!b) return null;
+        if (b.type === 'section') {
+          return {
+            id: b.id || `blk_sec_${idx + 1}`,
+            type: 'section',
+            heading: b.heading || '',
+            content: b.content || b.text || '',
+            images: Array.isArray(b.images) ? b.images : (b.image ? [b.image] : [])
+          };
+        }
+        if (b.type === 'image') return b;
+        const textContent = b.text || b.content || b.html || b.quote || '';
+        return {
+          id: b.id || `blk_sec_${idx + 1}`,
+          type: 'section',
+          heading: b.type === 'heading' ? textContent : '',
+          content: b.type === 'heading' ? '' : `<p>${textContent}</p>`,
+          images: []
+        };
+      }).filter(Boolean);
+    } else {
+      const compiledHtml = art.contentBlocks.map(b => {
+        if (!b) return '';
+        if (b.type === 'heading') return `<h${b.level || 2}>${b.text || ''}</h${b.level || 2}>`;
+        if (b.type === 'quote' || b.type === 'testimonial') return `<blockquote><p>${b.quote || b.text || ''}</p></blockquote>`;
+        return `<p>${b.text || b.content || b.html || ''}</p>`;
+      }).filter(Boolean).join('\n');
+
+      if (compiledHtml) {
+        return [{
+          id: 'blk_sec_1',
+          type: 'section',
+          heading: '',
+          content: compiledHtml,
+          images: []
+        }];
+      }
+    }
+  }
+
+  // 2. If art.content is string or array
+  if (art.content) {
+    let htmlContent = '';
+    if (typeof art.content === 'string' && art.content.trim()) {
+      htmlContent = art.content.trim();
+    } else if (Array.isArray(art.content) && art.content.length > 0) {
+      htmlContent = art.content.map(p => (typeof p === 'string' ? `<p>${p}</p>` : '')).filter(Boolean).join('\n');
+    }
+    if (htmlContent) {
+      return [{
+        id: 'blk_sec_1',
+        type: 'section',
+        heading: '',
+        content: htmlContent,
+        images: []
+      }];
+    }
+  }
+
+  // 3. Structured Story fields (e.g. HerStory, SMBStory, EnterpriseStory)
+  const hasStructured = art.leadStoryText || art.leadParagraph || art.section1Body || art.section2Body || art.section3Body1 || art.section2Prose1;
+  if (hasStructured) {
+    const sections = [];
+
+    // Section 1
+    const sec1Heading = art.section1Title || '';
+    let sec1Html = '';
+    if (art.leadStoryText || art.leadParagraph) {
+      sec1Html += `<p>${art.leadStoryText || art.leadParagraph}</p>\n`;
+    }
+    if (art.section1Lead || art.leadSubtext) {
+      sec1Html += `<p>${art.section1Lead || art.leadSubtext}</p>\n`;
+    }
+    if (art.section1Body) {
+      sec1Html += `<p>${art.section1Body}</p>\n`;
+    }
+    if (art.section1PullquoteText || art.pullquoteText) {
+      sec1Html += `<blockquote><p>${art.section1PullquoteText || art.pullquoteText}</p></blockquote>\n`;
+    }
+    const sec1Images = art.featureImage ? [{ url: art.featureImage, caption: art.featureCaption || '', credit: '' }] : [];
+
+    if (sec1Html || sec1Heading || sec1Images.length > 0) {
+      sections.push({
+        id: 'blk_sec_1',
+        type: 'section',
+        heading: sec1Heading,
+        content: sec1Html.trim(),
+        images: sec1Images
+      });
+    }
+
+    // Section 2
+    const sec2Heading = art.section2Title || '';
+    let sec2Html = '';
+    if (art.section2Lead) {
+      sec2Html += `<p>${art.section2Lead}</p>\n`;
+    }
+    if (art.section2Body || art.section2Prose1) {
+      sec2Html += `<p>${art.section2Body || art.section2Prose1}</p>\n`;
+    }
+    if (art.section2Prose2) {
+      sec2Html += `<p>${art.section2Prose2}</p>\n`;
+    }
+    if (art.section2ModernQuote) {
+      sec2Html += `<blockquote><p>${art.section2ModernQuote}</p></blockquote>\n`;
+    }
+    if (sec2Html || sec2Heading) {
+      sections.push({
+        id: 'blk_sec_2',
+        type: 'section',
+        heading: sec2Heading,
+        content: sec2Html.trim(),
+        images: []
+      });
+    }
+
+    // Section 3
+    const sec3Heading = art.section3Title || art.dossierTitle || '';
+    let sec3Html = '';
+    if (art.dossierProse1) {
+      sec3Html += `<p>${art.dossierProse1}</p>\n`;
+    }
+    if (art.dossierProse2) {
+      sec3Html += `<p>${art.dossierProse2}</p>\n`;
+    }
+    if (art.section3Body1) {
+      sec3Html += `<p>${art.section3Body1}</p>\n`;
+    }
+    if (art.section3Body2 || art.section3Prose1) {
+      sec3Html += `<p>${art.section3Body2 || art.section3Prose1}</p>\n`;
+    }
+    if (art.section3Prose2) {
+      sec3Html += `<p>${art.section3Prose2}</p>\n`;
+    }
+    if (art.takeawayText) {
+      sec3Html += `<blockquote><p>${art.takeawayText}</p></blockquote>\n`;
+    }
+    if (Array.isArray(art.takeaways) && art.takeaways.length > 0) {
+      sec3Html += `<ul>${art.takeaways.map(t => `<li>${t}</li>`).join('')}</ul>\n`;
+    }
+    if (sec3Html || sec3Heading) {
+      sections.push({
+        id: 'blk_sec_3',
+        type: 'section',
+        heading: sec3Heading,
+        content: sec3Html.trim(),
+        images: []
+      });
+    }
+
+    if (sections.length > 0) {
+      return sections;
+    }
+  }
+
+  // 4. If description, body, story, fullStory
+  const genericBody = art.description || art.body || art.story || art.fullStory;
+  if (genericBody && typeof genericBody === 'string' && genericBody.trim()) {
+    const formatted = /<[a-z][\s\S]*>/i.test(genericBody)
+      ? genericBody
+      : genericBody.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('\n');
+    return [{
+      id: 'blk_sec_1',
+      type: 'section',
+      heading: '',
+      content: formatted,
+      images: []
+    }];
+  }
+
+  // 5. Excerpt / summary fallback
+  const fallbackSummary = art.excerpt || art.summary || art.subtitle;
+  if (fallbackSummary && typeof fallbackSummary === 'string' && fallbackSummary.trim()) {
+    return [{
+      id: 'blk_sec_1',
+      type: 'section',
+      heading: '',
+      content: `<p>${fallbackSummary.trim()}</p>`,
+      images: []
+    }];
+  }
+
+  return [...DEFAULT_INITIAL_BLOCKS];
+}
+
 const FALLBACK_TOPICS = [
   'Startups', 'Technology', 'AI & DeepTech', 'Venture Capital', 'FinTech',
   'Enterprise & SaaS', 'HerStory', 'SMB & MSME', 'CleanTech', 'Policy & Governance'
@@ -918,21 +1112,14 @@ export default function LiveArticleStudio({
   // Form State
   const [formData, setFormData] = useState(() => {
     if (article) {
-      let initialBlocks = [];
-      if (Array.isArray(article.contentBlocks) && article.contentBlocks.length > 0) {
-        initialBlocks = article.contentBlocks;
-      } else if (article.content) {
-        initialBlocks = parseHtmlToBlocks(article.content);
-      } else {
-        initialBlocks = [...DEFAULT_INITIAL_BLOCKS];
-      }
+      const initialBlocks = extractInitialBlocks(article);
 
       return {
         _id: article._id || article.id || null,
         title: article.title || '',
         slug: article.slug || slugify(article.title || ''),
-        subtitle: article.subtitle || article.excerpt || '',
-        excerpt: article.excerpt || article.summary || '',
+        subtitle: article.subtitle || article.excerpt || article.description || '',
+        excerpt: article.excerpt || article.summary || article.description || '',
         contentType: article.contentType || 'article',
         brand: article.brand || 'GoReadPost',
         categoryId: article.categoryId || '',
@@ -958,7 +1145,7 @@ export default function LiveArticleStudio({
         titleAlign: article.titleAlign || 'left',
         seo: {
           title: article.seo?.title || article.title || '',
-          description: article.seo?.description || article.subtitle || article.excerpt || '',
+          description: article.seo?.description || article.description || article.subtitle || article.excerpt || '',
           keywords: article.seo?.keywords || '',
           ogImage: article.seo?.ogImage || article.featuredImage?.url || ''
         },
