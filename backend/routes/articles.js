@@ -35,6 +35,19 @@ function writeFallbackArticles(data) {
 // Helper to keep existing Story collection / data_store.json in sync with published articles
 async function syncToStories(article) {
   try {
+    if (article.disabledFromFrontend || article.status !== 'published') {
+      if (isDbConnected()) {
+        await Story.findOneAndDelete({ $or: [{ slug: article.slug }, { title: article.title }] }).catch(() => null);
+      } else if (fs.existsSync(fallbackStoriesPath)) {
+        try {
+          let stories = JSON.parse(fs.readFileSync(fallbackStoriesPath, 'utf-8'));
+          stories = stories.filter(s => s.slug !== article.slug && s.title !== article.title);
+          fs.writeFileSync(fallbackStoriesPath, JSON.stringify(stories, null, 2), 'utf-8');
+        } catch (e) {}
+      }
+      return;
+    }
+
     let storyImage = '';
     if (typeof article.featuredImage === 'string') {
       storyImage = article.featuredImage;
@@ -119,7 +132,7 @@ router.get('/', async (req, res) => {
     } = req.query;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const query = { status: 'published' };
+    const query = { status: 'published', disabledFromFrontend: { $ne: true } };
 
     if (search) {
       query.$or = [
@@ -817,6 +830,38 @@ adminArticlesRouter.patch('/:id/archive', async (req, res) => {
     Object.assign(target, updateData);
     writeFallbackArticles(fallback);
     res.json({ success: true, message: 'Article archived', data: target });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+adminArticlesRouter.patch('/:id/toggle-frontend', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (isDbConnected()) {
+      const article = await Article.findById(id);
+      if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
+      article.disabledFromFrontend = !article.disabledFromFrontend;
+      await article.save();
+      await syncToStories(article);
+      return res.json({ 
+        success: true, 
+        message: `Frontend display ${article.disabledFromFrontend ? 'disabled' : 'enabled'}`, 
+        data: article 
+      });
+    }
+
+    const fallback = readFallbackArticles();
+    const target = fallback.find(a => String(a._id || a.id) === String(id));
+    if (!target) return res.status(404).json({ success: false, message: 'Article not found' });
+    target.disabledFromFrontend = !target.disabledFromFrontend;
+    writeFallbackArticles(fallback);
+    syncToStories(target);
+    return res.json({ 
+      success: true, 
+      message: `Frontend display ${target.disabledFromFrontend ? 'disabled' : 'enabled'}`, 
+      data: target 
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

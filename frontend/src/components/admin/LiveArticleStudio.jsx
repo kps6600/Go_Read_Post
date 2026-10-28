@@ -1251,6 +1251,57 @@ export default function LiveArticleStudio({
     }
   }, [propTopics]);
 
+  useEffect(() => {
+    if (article) {
+      setFormData(prev => {
+        const currentId = prev._id;
+        const incomingId = article._id || article.id;
+        if (currentId && currentId === incomingId && prev.featuredImage?.url) {
+          return prev;
+        }
+
+        const initialBlocks = extractInitialBlocks(article);
+        return {
+          _id: article._id || article.id || null,
+          title: article.title || '',
+          slug: article.slug || slugify(article.title || ''),
+          subtitle: article.subtitle || article.excerpt || article.description || '',
+          excerpt: article.excerpt || article.summary || article.description || '',
+          contentType: article.contentType || 'article',
+          brand: article.brand || 'GoReadPost',
+          categoryId: article.categoryId || '',
+          categoryName: article.categoryName || article.categoryTag || article.category || 'Startups',
+          authorId: article.authorId || '',
+          authorName: article.authorName || (typeof article.author === 'string' ? article.author : article.author?.name) || 'Editorial Desk',
+          authorTitle: article.authorTitle || article.author?.title || 'Staff Reporter',
+          authorAvatar: article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+          featuredImage: {
+            url: article.featuredImage?.url || (typeof article.featuredImage === 'string' ? article.featuredImage : '') || article.image || article.coverImage || '',
+            alt: article.featuredImage?.alt || article.title || 'Featured story image',
+            caption: article.featuredImage?.caption || article.coverCaption || '',
+            credit: article.featuredImage?.credit || article.photoCredit || article.coverCredit || ''
+          },
+          readingTime: article.readingTime || article.readTime || '1 min read',
+          scheduledAt: article.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : '',
+          status: article.status || 'published',
+          isFeatured: Boolean(article.isFeatured),
+          isTrending: Boolean(article.isTrending),
+          isBreaking: Boolean(article.isBreaking),
+          tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
+          topics: Array.isArray(article.topics) ? article.topics : ['Startups'],
+          titleAlign: article.titleAlign || 'left',
+          seo: {
+            title: article.seo?.title || article.title || '',
+            description: article.seo?.description || article.description || article.subtitle || article.excerpt || '',
+            keywords: article.seo?.keywords || '',
+            ogImage: article.seo?.ogImage || article.featuredImage?.url || ''
+          },
+          contentBlocks: initialBlocks
+        };
+      });
+    }
+  }, [article]);
+
   // Current selected topics array
   const currentTopics = useMemo(() => {
     if (!formData.topics) return [];
@@ -2522,6 +2573,182 @@ export default function LiveArticleStudio({
                 </div>
               </div>
 
+              {/* CARD 2: FEATURED / COVER IMAGE */}
+              <div className="las-card">
+                <div className="las-card-title-row">
+                  <div>
+                    <h3 className="las-card-title">
+                      <ImageIcon size={18} color="var(--brand-primary, #dc2626)" />
+                      <span>Featured / Cover Image</span>
+                    </h3>
+                    <p className="las-card-subtitle">
+                      Main story image displayed on hero banners, article header, cards, and social media previews.
+                    </p>
+                  </div>
+                  {formData.featuredImage?.url && (
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="las-block-action-btn"
+                        onClick={() => {
+                          if (coverFileInputRef.current) coverFileInputRef.current.click();
+                        }}
+                        title="Upload a new replacement cover image from computer"
+                      >
+                        <UploadCloud size={13} />
+                        <span>{uploadingCover ? 'Uploading...' : 'Replace (PC)'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="las-block-action-btn"
+                        onClick={() => openMediaPicker({ type: 'featured' })}
+                        title="Select an image from Media Library"
+                      >
+                        <FolderOpen size={13} />
+                        <span>Media Library</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="las-block-action-btn delete"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            featuredImage: { ...prev.featuredImage, url: '', caption: '', credit: '' }
+                          }));
+                        }}
+                        title="Remove cover image"
+                      >
+                        <Trash2 size={13} />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {formData.featuredImage?.url ? (
+                  <div className="las-cover-image-preview-wrap">
+                    <div className="las-cover-preview-img-container">
+                      <img 
+                        src={formData.featuredImage.url} 
+                        alt={formData.featuredImage.alt || 'Cover preview'} 
+                        className="las-cover-preview-img"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                    </div>
+                    <div className="las-grid-2" style={{ marginTop: '0.85rem' }}>
+                      <div className="las-form-group">
+                        <label className="las-label">Photo Credit / Source</label>
+                        <input
+                          type="text"
+                          className="las-input"
+                          placeholder="e.g. YS हिंदी / Unsplash / Reuters"
+                          value={formData.featuredImage.credit || ''}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            featuredImage: { ...prev.featuredImage, credit: e.target.value }
+                          }))}
+                        />
+                      </div>
+                      <div className="las-form-group">
+                        <label className="las-label">Caption / Description</label>
+                        <input
+                          type="text"
+                          className="las-input"
+                          placeholder="Brief caption describing this cover photo..."
+                          value={formData.featuredImage.caption || ''}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            featuredImage: { ...prev.featuredImage, caption: e.target.value }
+                          }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="las-form-group" style={{ marginTop: '0.5rem' }}>
+                      <label className="las-label">Cover Image Direct URL</label>
+                      <input
+                        type="text"
+                        className="las-input"
+                        placeholder="https://images.unsplash.com/..."
+                        value={formData.featuredImage.url || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          featuredImage: { ...prev.featuredImage, url: e.target.value }
+                        }))}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="las-cover-dropzone">
+                    <div className="las-cover-dropzone-content">
+                      <div className="las-cover-dropzone-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ImageIcon size={24} color="#64748b" />
+                        </div>
+                      </div>
+                      <h4 style={{ margin: '0.2rem 0', fontSize: '0.98rem', fontWeight: 700, color: '#1e293b' }}>
+                        No Cover Image Attached
+                      </h4>
+                      <p style={{ margin: '0 0 1rem', fontSize: '0.83rem', color: '#64748b' }}>
+                        Add a high-quality featured cover image for this article.
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="las-btn las-btn-publish"
+                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          onClick={() => {
+                            if (coverFileInputRef.current) coverFileInputRef.current.click();
+                          }}
+                          disabled={uploadingCover}
+                        >
+                          <UploadCloud size={14} />
+                          <span>{uploadingCover ? 'Uploading...' : 'Upload Cover (PC)'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="las-btn"
+                          style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          onClick={() => openMediaPicker({ type: 'featured' })}
+                        >
+                          <FolderOpen size={14} />
+                          <span>Browse Media Library</span>
+                        </button>
+                      </div>
+                      <div style={{ marginTop: '1rem', width: '100%', maxWidth: '520px', marginInline: 'auto' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>or paste URL:</span>
+                          <input
+                            type="text"
+                            className="las-input"
+                            style={{ fontSize: '0.82rem', padding: '0.4rem 0.65rem' }}
+                            placeholder="https://images.unsplash.com/photo-..."
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.target.value.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  featuredImage: { ...prev.featuredImage, url: e.target.value.trim() }
+                                }));
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  featuredImage: { ...prev.featuredImage, url: e.target.value.trim() }
+                                }));
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* CARD 3: ARTICLE SECTIONS */}
               <div className="las-blocks-section">
                 <div className="las-blocks-header">
@@ -2616,18 +2843,7 @@ export default function LiveArticleStudio({
 
                           return (
                             <div className="las-section-block-wrapper">
-                              {/* Section Content (TipTap Editor) */}
-                              <div className="las-section-tiptap">
-                                <TipTapEditor
-                                  key={block.id}
-                                  content={block.content ? (block.heading ? `<h2>${block.heading}</h2>\n${block.content}` : block.content) : (block.heading ? `<h2>${block.heading}</h2>` : '')}
-                                  onChange={(html) => handleUpdateBlock(block.id, { content: html, heading: '' })}
-                                  onOpenMediaPicker={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
-                                  placeholder="Write your section content... Use H2 or H3 from the toolbar above for headings, format text, insert images, lists, and quotes."
-                                />
-                              </div>
-
-                              {/* Section Media (Image Attachment) */}
+                              {/* Section Media (Image Attachment) - Placed at Top of Section */}
                               <div className="las-section-media-container">
                                 {secImages.length === 0 ? (
                                   <div className="las-section-media-empty">
@@ -2749,6 +2965,17 @@ export default function LiveArticleStudio({
                                   </div>
                                 )}
                               </div>
+
+                              {/* Section Content (TipTap Editor) */}
+                              <div className="las-section-tiptap">
+                                <TipTapEditor
+                                  key={block.id}
+                                  content={block.content ? (block.heading ? `<h2>${block.heading}</h2>\n${block.content}` : block.content) : (block.heading ? `<h2>${block.heading}</h2>` : '')}
+                                  onChange={(html) => handleUpdateBlock(block.id, { content: html, heading: '' })}
+                                  onOpenMediaPicker={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                  placeholder="Write your section content... Use H2 or H3 from the toolbar above for headings, format text, insert images, lists, and quotes."
+                                />
+                              </div>
                             </div>
                           );
                         })()}
@@ -2849,7 +3076,7 @@ export default function LiveArticleStudio({
         {/* TAB 2: DEDICATED SEO PAGE TAB */}
         {viewMode === 'seo' && (
           <div className="las-editor-pane" style={{ background: '#f8fafc', width: '100%', flex: 1 }}>
-            <div className="las-editor-inner" style={{ maxWidth: '960px' }}>
+            <div className="las-editor-inner" style={{ maxWidth: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', background: '#ffffff', padding: '1.25rem 1.5rem', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)' }}>

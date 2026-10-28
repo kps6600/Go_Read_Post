@@ -148,7 +148,7 @@
 
 .acv-kpi-label {
   font-size: 0.73rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -157,7 +157,7 @@
 
 .acv-kpi-number {
   font-size: 1.7rem;
-  font-weight: 850;
+  font-weight: 600;
   color: #0f172a;
   line-height: 1.15;
   margin-bottom: 2px;

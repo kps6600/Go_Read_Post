@@ -256,10 +256,10 @@ export default function AdminCommentsView({ onShowToast }) {
           }}
         >
           <div className="acv-kpi-content" style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
+            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 500, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
               Total Reviews
             </span>
-            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.15 }}>
+            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.15 }}>
               {metrics.totalReviews || metrics.totalComments || comments.length}
             </div>
           </div>
@@ -284,10 +284,10 @@ export default function AdminCommentsView({ onShowToast }) {
           }}
         >
           <div className="acv-kpi-content" style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
+            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 500, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
               Approved &amp; Live
             </span>
-            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#059669', lineHeight: 1.15 }}>
+            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 600, color: '#059669', lineHeight: 1.15 }}>
               {metrics.approvedCount || 0}
             </div>
           </div>
@@ -312,10 +312,10 @@ export default function AdminCommentsView({ onShowToast }) {
           }}
         >
           <div className="acv-kpi-content" style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
+            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 500, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
               Pending Review
             </span>
-            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#d97706', lineHeight: 1.15 }}>
+            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 600, color: '#d97706', lineHeight: 1.15 }}>
               {metrics.pendingCount || 0}
             </div>
           </div>
@@ -340,10 +340,10 @@ export default function AdminCommentsView({ onShowToast }) {
           }}
         >
           <div className="acv-kpi-content" style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
+            <span className="acv-kpi-label" style={{ fontSize: '0.74rem', fontWeight: 500, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '3px' }}>
               Rejected / Hidden
             </span>
-            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#dc2626', lineHeight: 1.15 }}>
+            <div className="acv-kpi-number" style={{ fontSize: '1.75rem', fontWeight: 600, color: '#dc2626', lineHeight: 1.15 }}>
               {metrics.rejectedHiddenCount !== undefined ? metrics.rejectedHiddenCount : (metrics.rejectedCount || 0)}
             </div>
           </div>

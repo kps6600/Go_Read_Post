@@ -954,5 +954,39 @@
     "createdAt": "2026-10-27T09:04:17.051Z",
     "__v": 0,
     "updatedAt": "2026-10-27T13:04:17.065Z"
+  },
+  {
+    "storySlug": "ipo-1-mvqdppzy",
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "author": "Vikramaditya Shah",
+    "role": "Principal, Peak Capital",
+    "text": "Crucial analysis on this ecosystem shift. The capital discipline we are seeing across the current cohort will set a much stronger foundation for the next decade.",
+    "likes": 18,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae1902fd2d60d6efa80f059",
+    "createdAt": "2026-10-28T04:03:27.735Z",
+    "__v": 0,
+    "updatedAt": "2026-10-28T06:03:27.745Z"
+  },
+  {
+    "storySlug": "ipo-1-mvqdppzy",
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "author": "Ananya Deshmukh",
+    "role": "VP Product, SaaS Scale",
+    "text": "Particularly agree with the observations on operational efficiency. Real value creation is finally getting the spotlight over pure GMV chasing.",
+    "likes": 12,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae1902fd2d60d6efa80f05a",
+    "createdAt": "2026-10-28T02:03:27.735Z",
+    "__v": 0,
+    "updatedAt": "2026-10-28T06:03:27.746Z"
   }
 ]

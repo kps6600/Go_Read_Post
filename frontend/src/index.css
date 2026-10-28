@@ -19980,11 +19980,13 @@ main {
 }
 
 .sidebar-brand-header {
-  padding: 1.5rem 1.25rem;
+  height: 64px;
+  box-sizing: border-box;
+  padding: 0 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--admin-border-subtle);
+  border-bottom: 1px solid var(--admin-border);
 }
 
 .sidebar-brand-link {

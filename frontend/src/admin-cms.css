@@ -1155,6 +1155,7 @@ table input[type="checkbox"]:checked::after {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.85rem;
   width: 100%;
+  margin-bottom: 1rem;
 }
 .abv-kpi-card {
   background: var(--bg-card);
@@ -1182,115 +1183,113 @@ table input[type="checkbox"]:checked::after {
   border-top-right-radius: 12px;
 }
 .abv-kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
   border-color: var(--border-medium, #cbd5e1);
 }
 
-/* KPI Active Highlight States */
+/* KPI Active Highlight States - Clean Border, No Glow */
 .abv-kpi-card.active {
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 1. All Posts Active */
 .abv-kpi-card.kpi-all.active {
   border-color: #2563eb;
-  background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22), 0 6px 16px rgba(37, 99, 235, 0.12);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 .abv-kpi-card.kpi-all.active::before {
   background: #2563eb;
 }
 .abv-kpi-card.kpi-all.active .abv-kpi-label {
   color: #2563eb;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* 2. Published Active */
 .abv-kpi-card.kpi-published.active {
   border-color: #059669;
-  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.22), 0 6px 16px rgba(5, 150, 105, 0.12);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 .abv-kpi-card.kpi-published.active::before {
   background: #059669;
 }
 .abv-kpi-card.kpi-published.active .abv-kpi-label {
   color: #059669;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* 3. Drafts Active */
 .abv-kpi-card.kpi-draft.active {
   border-color: #dc2626;
-  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22), 0 6px 16px rgba(220, 38, 38, 0.12);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 .abv-kpi-card.kpi-draft.active::before {
   background: #dc2626;
 }
 .abv-kpi-card.kpi-draft.active .abv-kpi-label {
   color: #dc2626;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* 4. Scheduled Active */
 .abv-kpi-card.kpi-scheduled.active {
   border-color: #8b5cf6;
-  background: linear-gradient(180deg, #fbf7ff 0%, #ffffff 100%);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.22), 0 6px 16px rgba(139, 92, 246, 0.12);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 .abv-kpi-card.kpi-scheduled.active::before {
   background: #8b5cf6;
 }
 .abv-kpi-card.kpi-scheduled.active .abv-kpi-label {
   color: #8b5cf6;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* 5. Total Views Active */
 .abv-kpi-card.kpi-views.active {
   border-color: #0284c7;
-  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.22), 0 6px 16px rgba(2, 132, 199, 0.12);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 .abv-kpi-card.kpi-views.active::before {
   background: #0284c7;
 }
 .abv-kpi-card.kpi-views.active .abv-kpi-label {
   color: #0284c7;
-  font-weight: 700;
+  font-weight: 600;
 }
 
-/* Dark Mode KPI active states */
+/* Dark Mode KPI active states - No Glow */
 [data-theme='dark'] .abv-kpi-card.kpi-all.active {
-  background: rgba(37, 99, 235, 0.14);
+  background: rgba(37, 99, 235, 0.08);
   border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 [data-theme='dark'] .abv-kpi-card.kpi-published.active {
-  background: rgba(5, 150, 105, 0.14);
+  background: rgba(5, 150, 105, 0.08);
   border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 [data-theme='dark'] .abv-kpi-card.kpi-draft.active {
-  background: rgba(220, 38, 38, 0.14);
+  background: rgba(220, 38, 38, 0.08);
   border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 [data-theme='dark'] .abv-kpi-card.kpi-scheduled.active {
-  background: rgba(139, 92, 246, 0.14);
+  background: rgba(139, 92, 246, 0.08);
   border-color: #a78bfa;
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 [data-theme='dark'] .abv-kpi-card.kpi-views.active {
-  background: rgba(2, 132, 199, 0.14);
+  background: rgba(2, 132, 199, 0.08);
   border-color: #38bdf8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 .abv-kpi-num {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   line-height: 1.2;
   white-space: nowrap;
@@ -1299,7 +1298,7 @@ table input[type="checkbox"]:checked::after {
 }
 .abv-kpi-label {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -1427,6 +1426,33 @@ table input[type="checkbox"]:checked::after {
   align-items: center;
   gap: 0.65rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.abv-create-article-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--brand-primary, #dc2626);
+  color: #ffffff;
+  border: 1px solid var(--brand-primary, #dc2626);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.48rem 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
+  user-select: none;
+}
+.abv-create-article-btn:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.28);
+}
+.abv-create-article-btn:active {
+  transform: translateY(0);
 }
 .abv-select {
   background: var(--bg-tertiary);
@@ -1888,64 +1914,68 @@ table input[type="checkbox"]:checked::after {
   pointer-events: none;
 }
 
-/* Modern Card Select Button */
+/* Modern Card Select Checkbox */
 .abv-card-select-btn {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 4;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 1.75px solid rgba(255, 255, 255, 0.7);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: 0;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   outline: none;
+}
+
+.abv-article-card:hover .abv-card-select-btn:not(.selected) {
+  border-color: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 23, 42, 0.65);
 }
 
 .abv-card-select-btn:hover {
   transform: scale(1.1);
-  background: rgba(15, 23, 42, 0.85);
-  border-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-}
-
-.abv-select-uncheck-ring {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  transition: all 0.15s ease;
-  display: block;
-}
-
-.abv-card-select-btn:hover .abv-select-uncheck-ring {
   border-color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--brand-primary, #dc2626);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .abv-card-select-btn.selected {
-  background: #0284c7;
+  background: var(--brand-primary, #dc2626);
   border-color: #ffffff;
-  box-shadow: 0 0 12px rgba(2, 132, 199, 0.65), 0 2px 6px rgba(0, 0, 0, 0.3);
-  transform: scale(1.04);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
 }
 
 .abv-card-select-btn.selected:hover {
-  background: #0369a1;
+  background: #b91c1c;
   transform: scale(1.12);
 }
 
 .abv-select-check-icon {
   color: #ffffff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.abv-card-select-btn:hover .abv-select-check-icon {
+  opacity: 0.9;
+  transform: scale(1);
+}
+
+.abv-card-select-btn.selected .abv-select-check-icon {
+  opacity: 1;
+  transform: scale(1);
   animation: checkPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1963,7 +1993,7 @@ table input[type="checkbox"]:checked::after {
   color: #0284c7;
   border: 1px solid rgba(2, 132, 199, 0.28);
 }
-/* Status Pill */
+/* Modern Glassmorphic Status Pill */
 .abv-card-status-badge {
   position: absolute;
   top: 10px;
@@ -1971,37 +2001,85 @@ table input[type="checkbox"]:checked::after {
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  gap: 5.5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  padding: 3.5px 9.5px;
+  border-radius: 9999px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  user-select: none;
 }
 .abv-card-status-badge:hover {
-  transform: scale(1.04);
+  transform: translateY(-1px) scale(1.03);
 }
 .abv-card-status-badge.status-published {
-  background: rgba(5, 150, 105, 0.92);
-  color: #ffffff;
+  background: rgba(6, 78, 59, 0.72);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  color: #ecfdf5;
+}
+.abv-card-status-badge.status-published:hover {
+  background: rgba(6, 95, 70, 0.88);
+  border-color: rgba(52, 211, 153, 0.65);
+  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.35);
 }
 .abv-card-status-badge.status-draft {
-  background: rgba(217, 119, 6, 0.92);
-  color: #ffffff;
+  background: rgba(120, 53, 15, 0.72);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  color: #fffbeb;
+}
+.abv-card-status-badge.status-draft:hover {
+  background: rgba(146, 64, 14, 0.88);
+  border-color: rgba(251, 191, 36, 0.65);
+  box-shadow: 0 4px 12px rgba(146, 64, 14, 0.35);
 }
 .abv-card-status-badge.status-scheduled {
-  background: rgba(139, 92, 246, 0.92);
-  color: #ffffff;
+  background: rgba(76, 29, 149, 0.72);
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  color: #faf5ff;
+}
+.abv-card-status-badge.status-scheduled:hover {
+  background: rgba(91, 33, 182, 0.88);
+  border-color: rgba(192, 132, 252, 0.65);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.35);
 }
 .abv-card-status-badge.status-archived {
-  background: rgba(100, 116, 139, 0.92);
-  color: #ffffff;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #f1f5f9;
+}
+.abv-card-status-badge.status-archived:hover {
+  background: rgba(51, 65, 85, 0.88);
+  border-color: rgba(148, 163, 184, 0.55);
+  box-shadow: 0 4px 12px rgba(30, 41, 59, 0.35);
+}
+
+.abv-card-status-badge .abv-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.abv-card-status-badge.status-published .abv-status-dot {
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.85);
+}
+.abv-card-status-badge.status-draft .abv-status-dot {
+  background: #fbbf24;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.85);
+}
+.abv-card-status-badge.status-scheduled .abv-status-dot {
+  background: #c084fc;
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.85);
+}
+.abv-card-status-badge.status-archived .abv-status-dot {
+  background: #94a3b8;
+  box-shadow: 0 0 6px rgba(148, 163, 184, 0.6);
 }
 
 /* Unified Media Badges (Category + Trending / Featured side-by-side at bottom) */
@@ -2018,10 +2096,14 @@ table input[type="checkbox"]:checked::after {
   pointer-events: none;
 }
 .abv-card-media-badges .abv-card-category-pill,
-.abv-card-media-badges .abv-flag-badge {
+.abv-card-media-badges .abv-flag-badge,
+.abv-detail-cover-meta-bar .abv-card-category-pill,
+.abv-detail-cover-meta-bar .abv-flag-badge {
   position: static !important;
   bottom: auto !important;
   left: auto !important;
+  top: auto !important;
+  right: auto !important;
   margin: 0 !important;
 }
 
@@ -2029,25 +2111,30 @@ table input[type="checkbox"]:checked::after {
 .abv-flag-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.66rem;
-  font-weight: 800;
-  padding: 4px 9px;
-  border-radius: 999px;
-  letter-spacing: 0.04em;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  gap: 5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 9999px;
+  letter-spacing: 0.015em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
   pointer-events: none;
+  box-sizing: border-box;
 }
 .abv-flag-badge.flag-featured {
-  background: rgba(234, 88, 12, 0.92);
-  color: #ffffff;
+  background: rgba(120, 53, 15, 0.72);
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  color: #fef3c7;
 }
 .abv-flag-badge.flag-trending {
-  background: rgba(5, 150, 105, 0.92);
-  color: #ffffff;
+  background: rgba(6, 78, 59, 0.72);
+  border: 1px solid rgba(52, 211, 153, 0.38);
+  color: #a7f3d0;
 }
 /* Modern Glassmorphic Category Pill with Glowing Indicator */
 .abv-card-category-pill {
@@ -2057,24 +2144,28 @@ table input[type="checkbox"]:checked::after {
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(15, 23, 42, 0.78);
-  color: #ffffff;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  gap: 5.5px;
+  height: 24px;
+  background: rgba(15, 23, 42, 0.68);
+  color: #f1f5f9;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 4px 11px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.015em;
+  padding: 0 9.5px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   pointer-events: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 .abv-category-indicator-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
@@ -2152,30 +2243,49 @@ table input[type="checkbox"]:checked::after {
 }
 
 .abv-card-title {
-  font-size: 0.98rem;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.42;
+  letter-spacing: -0.012em;
   color: var(--text-primary, #0f172a);
-  margin: 0 0 0.55rem 0;
+  margin: 0 0 0.45rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.15s ease;
+  text-overflow: ellipsis;
+  min-height: 2.65rem;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.abv-article-card:hover .abv-card-title {
+.abv-article-card:hover .abv-card-title,
+.abv-card-title:hover {
   color: var(--brand-primary, #dc2626);
 }
 
 .abv-card-excerpt {
-  font-size: 0.8rem;
-  color: var(--text-secondary, #64748b);
-  line-height: 1.45;
-  margin: 0 0 0.65rem 0;
+  font-size: 0.81rem;
+  font-weight: 400;
+  color: var(--text-secondary, #475569);
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  margin: 0 0 0.75rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.45rem;
+}
+
+[data-theme='dark'] .abv-card-title {
+  color: #f1f5f9;
+}
+[data-theme='dark'] .abv-article-card:hover .abv-card-title,
+[data-theme='dark'] .abv-card-title:hover {
+  color: #f87171;
+}
+[data-theme='dark'] .abv-card-excerpt {
+  color: #94a3b8;
 }
 
 /* Card Footer */
@@ -2210,7 +2320,7 @@ table input[type="checkbox"]:checked::after {
 }
 .abv-card-author-name {
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary, #0f172a);
   white-space: nowrap;
   overflow: hidden;
@@ -2235,7 +2345,7 @@ table input[type="checkbox"]:checked::after {
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-secondary, #475569);
 }
 .abv-card-actions {
@@ -2726,12 +2836,12 @@ table input[type="checkbox"]:checked::after {
 }
 .anv-kpi-num {
   font-size: 1.7rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
 }
 .anv-kpi-label {
   font-size: 0.74rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
   text-transform: uppercase;
 }
@@ -4605,13 +4715,13 @@ table input[type="checkbox"]:checked::after {
 }
 .anv-kpi-num {
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   line-height: 1.2;
 }
 .anv-kpi-label {
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
   margin-top: 0.25rem;
 }
@@ -8560,19 +8670,18 @@ table input[type="checkbox"]:checked::after {
 }
 
 .aem-tiptap-studio-card {
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .aem-tiptap-studio-card:focus-within {
-  border-color: rgba(220, 38, 38, 0.45);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08), 0 4px 16px rgba(15, 23, 42, 0.05);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* Toolbar */
@@ -9811,17 +9920,22 @@ table input[type="checkbox"]:checked::after {
   z-index: 2;
 }
 .abv-detail-desk-pill {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
+  font-weight: 500;
+  line-height: 1;
+  height: 24px;
+  padding: 0 9.5px;
   border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(8px);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 4.5px;
+  box-sizing: border-box;
 }
 .abv-detail-cover-caption {
   position: absolute;
@@ -9839,19 +9953,20 @@ table input[type="checkbox"]:checked::after {
 
 /* 4. Headlines & Excerpt */
 .abv-detail-headline {
-  font-size: 1.65rem;
-  font-weight: 850;
-  color: var(--text-primary);
-  line-height: 1.3;
-  margin: 0;
-  letter-spacing: -0.02em;
+  font-size: 1.7rem;
+  font-weight: 650;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.34;
+  margin: 0 0 0.6rem 0;
+  letter-spacing: -0.018em;
 }
 .abv-detail-subtitle {
   font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  line-height: 1.45;
-  margin: -0.4rem 0 0;
+  font-weight: 450;
+  color: var(--text-secondary, #475569);
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.005em;
 }
 .abv-detail-excerpt-box {
   background: var(--bg-tertiary);
@@ -10098,9 +10213,15 @@ table input[type="checkbox"]:checked::after {
   font-family: monospace;
   font-size: 0.78rem;
   color: #0284c7;
+  text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.abv-detail-slug-text:hover {
+  text-decoration: underline;
+  color: #0369a1;
 }
 .abv-detail-copy-btn {
   display: inline-flex;
@@ -10173,4 +10294,20 @@ table input[type="checkbox"]:checked::after {
   border-color: #d97706;
   box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
   transform: translateY(-1px);
+}
+
+/* Perfect alignment between Sidebar Logo Header and Header Navbar */
+.sidebar-brand-header,
+.admin-console-topbar {
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-brand-header {
+  padding: 0 1.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  border-bottom: 1px solid var(--admin-border, #e2e8f0) !important;
 }

@@ -136,6 +136,18 @@ export const ArticleService = {
     return json.data;
   },
 
+  // Admin: toggle frontend visibility independently
+  async toggleFrontendVisibility(id) {
+    const token = AuthService.getToken();
+    const res = await fetch(`${ADMIN_API_BASE}/${id}/toggle-frontend`, {
+      method: 'PATCH',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    const json = await res.json();
+    notifyArticleChange();
+    return json.data;
+  },
+
   // Admin: schedule
   async scheduleArticle(id, scheduledAt) {
     const token = AuthService.getToken();

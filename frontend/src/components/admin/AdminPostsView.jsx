@@ -1025,6 +1025,21 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
   };
 
+  const handleToggleFrontend = async (article) => {
+    const id = article._id || article.id;
+    try {
+      const updated = await ArticleService.toggleFrontendVisibility(id);
+      const nextDisabled = updated ? updated.disabledFromFrontend : !article.disabledFromFrontend;
+      if (onShowToast) {
+        onShowToast(`Frontend display ${nextDisabled ? 'DISABLED' : 'ENABLED'}`);
+      }
+      setViewingArticleDetails(prev => prev ? ({ ...prev, disabledFromFrontend: nextDisabled }) : null);
+      await loadArticles();
+    } catch (err) {
+      alert('Error toggling frontend visibility: ' + err.message);
+    }
+  };
+
   const handleArchiveArticle = async (article) => {
     const id = article._id || article.id;
     if (!window.confirm(`Archive "${article.title}"? This will hide it from the live site and move it to the Archived tab.`)) return;
@@ -3252,11 +3267,12 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     const readingTime = art.readingTime || '4 min read';
     const viewsCount = (art.views || 0).toLocaleString();
     const articleSlug = art.slug || slugify(art.title);
-    const articleUrl = typeof window !== 'undefined' ? `${window.location.origin}/article/${articleSlug}` : `/article/${articleSlug}`;
+    const articlePath = `/article/${articleSlug}`;
+    const articleUrl = typeof window !== 'undefined' ? `${window.location.origin}${articlePath}` : articlePath;
 
-    const handleCopySlug = () => {
+    const handleCopyUrl = () => {
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(articleSlug);
+        navigator.clipboard.writeText(articleUrl);
         setCopiedDetailSlug(true);
         setTimeout(() => setCopiedDetailSlug(false), 2200);
       }
@@ -3280,19 +3296,47 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <span>Back to Articles</span>
             </button>
 
-            <span className={`abv-card-status-badge status-${art.status || 'published'}`} style={{ position: 'static' }}>
+            <button
+              type="button"
+              className={`abv-card-status-badge status-${art.status || 'published'}`}
+              style={{ position: 'static', cursor: 'pointer' }}
+              onClick={async () => {
+                await handleTogglePublish(art);
+                setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
+              }}
+              title={`Workflow Status: ${(art.status || 'published').toUpperCase()}. Click to switch between Published & Draft.`}
+            >
               <span className="abv-status-dot" />
               {art.status || 'published'}
-            </span>
+            </button>
+
+            {art.disabledFromFrontend && (
+              <span 
+                className="abv-flag-badge" 
+                style={{ 
+                  background: 'rgba(217, 119, 6, 0.12)', 
+                  color: '#d97706', 
+                  border: '1px solid rgba(217, 119, 6, 0.3)',
+                  fontSize: '0.72rem', 
+                  padding: '0.2rem 0.55rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title="This article is currently hidden from the public frontend site"
+              >
+                <EyeOff size={11} /> Hidden from Frontend
+              </span>
+            )}
 
             {art.isFeatured && (
               <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
-                <Star size={11} /> FEATURED
+                <Star size={11} /> Featured
               </span>
             )}
             {art.isTrending && (
               <span className="abv-flag-badge flag-trending" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
-                <TrendingUp size={11} /> TRENDING
+                <TrendingUp size={11} /> Trending
               </span>
             )}
           </div>
@@ -3302,26 +3346,23 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               type="button"
               className="abv-modal-btn"
               style={{
-                background: art.status === 'published' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(5, 150, 105, 0.12)',
-                color: art.status === 'published' ? '#d97706' : '#059669',
-                border: `1px solid ${art.status === 'published' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(5, 150, 105, 0.3)'}`,
+                background: art.disabledFromFrontend ? 'rgba(5, 150, 105, 0.12)' : 'rgba(217, 119, 6, 0.12)',
+                color: art.disabledFromFrontend ? '#059669' : '#d97706',
+                border: `1px solid ${art.disabledFromFrontend ? 'rgba(5, 150, 105, 0.3)' : 'rgba(217, 119, 6, 0.3)'}`,
                 cursor: 'pointer'
               }}
-              onClick={async () => {
-                await handleTogglePublish(art);
-                setViewingArticleDetails(prev => prev ? ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }) : null);
-              }}
-              title={art.status === 'published' ? "Hide article from live site" : "Show article on live site"}
+              onClick={() => handleToggleFrontend(art)}
+              title={art.disabledFromFrontend ? "Currently hidden from public frontend site - Click to show on frontend" : "Currently visible on public frontend site - Click to hide from frontend"}
             >
-              {art.status === 'published' ? (
-                <>
-                  <EyeOff size={14} />
-                  <span>Disable from Frontend</span>
-                </>
-              ) : (
+              {art.disabledFromFrontend ? (
                 <>
                   <Eye size={14} />
                   <span>Enable on Frontend</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff size={14} />
+                  <span>Disable from Frontend</span>
                 </>
               )}
             </button>
@@ -3342,7 +3383,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               }}
             >
               <Edit2 size={14} />
-              <span>Edit in Studio</span>
+              <span>Edit</span>
             </button>
           </div>
         </div>
@@ -3361,14 +3402,14 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               }}
             />
             <div className="abv-detail-cover-meta-bar">
-              <div className="abv-card-category-pill" style={{ margin: 0 }}>
+              <div className="abv-card-category-pill" style={{ position: 'relative', inset: 'auto', margin: 0 }}>
                 <span 
                   className="abv-category-indicator-dot" 
-                  style={{ background: catMeta.dotColor, boxShadow: `0 0 6px ${catMeta.dotColor}` }} 
+                  style={{ background: catMeta.dotColor }} 
                 />
                 <span>{catName}</span>
               </div>
-              <span className="abv-detail-desk-pill">{desk}</span>
+              {desk && <span className="abv-detail-desk-pill">{desk}</span>}
               {readingTime && (
                 <span className="abv-detail-desk-pill" style={{ marginLeft: 'auto' }}>
                   <Clock size={11} /> {readingTime}
@@ -3385,9 +3426,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
 
           {/* Headline & Subtitle */}
           <div>
-            <h1 className="abv-detail-headline" style={{ fontSize: '2.1rem', marginBottom: '0.5rem' }}>{art.title}</h1>
+            <h1 className="abv-detail-headline">{art.title}</h1>
             {art.subtitle && (
-              <h2 className="abv-detail-subtitle" style={{ fontSize: '1.15rem' }}>{art.subtitle}</h2>
+              <h2 className="abv-detail-subtitle">{art.subtitle}</h2>
             )}
           </div>
 
@@ -3616,33 +3657,41 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
             ) : (
               <div className="abv-detail-empty-content">
                 <Info size={16} />
-                <span>No body content written for this article yet. Click "Edit in Studio" to compose content.</span>
+                <span>No body content written for this article yet. Click "Edit" to compose content.</span>
               </div>
             )}
           </div>
 
-          {/* Slug Box */}
+          {/* Permalink & Full URL Box */}
           <div className="abv-detail-slug-box">
             <div className="abv-detail-slug-info">
-              <Globe size={15} color="var(--text-muted)" />
-              <span className="abv-detail-slug-label">Slug:</span>
-              <code className="abv-detail-slug-text">{articleSlug}</code>
+              <Globe size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+              <span className="abv-detail-slug-label">URL:</span>
+              <a 
+                href={articlePath} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="abv-detail-slug-text"
+                title={`Open ${articlePath} in new tab`}
+              >
+                {articlePath}
+              </a>
             </div>
             <button 
               type="button" 
               className="abv-detail-copy-btn"
-              onClick={handleCopySlug}
-              title="Copy slug"
+              onClick={handleCopyUrl}
+              title="Copy full article URL"
             >
               {copiedDetailSlug ? (
                 <>
                   <Check size={13} color="#10b981" />
-                  <span style={{ color: '#10b981' }}>Copied!</span>
+                  <span style={{ color: '#10b981' }}>Copied URL!</span>
                 </>
               ) : (
                 <>
                   <Copy size={13} />
-                  <span>Copy Slug</span>
+                  <span>Copy URL</span>
                 </>
               )}
             </button>
@@ -3758,39 +3807,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         </div>
       </div>
 
-      {/* 2. Top Actions Row */}
-      <div className="apv-tabs-row" style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'flex-end', 
-        flexWrap: 'wrap', 
-        gap: '0.75rem', 
-        borderBottom: '1px solid var(--border-light)', 
-        paddingBottom: '0.75rem', 
-        marginBottom: '1rem' 
-      }}>
-        <button 
-          className="abv-btn-primary" 
-          onClick={handleOpenCreate}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 18px',
-            background: 'var(--brand-primary, #dc2626)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: '0.86rem',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Plus size={16} /> Create Article
-        </button>
-      </div>
 
       {/* 4. Controls & Filters Omnibar */}
       <div className="abv-filter-bar abv-controls-panel">
@@ -3900,6 +3916,16 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               </div>
             )}
           </div>
+
+          <button 
+            type="button" 
+            className="abv-create-article-btn"
+            onClick={handleOpenCreate}
+            title="Create New Article"
+          >
+            <Plus size={15} />
+            <span>Create Article</span>
+          </button>
         </div>
       </div>
 
@@ -4056,11 +4082,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         title={isSelected ? "Deselect article" : "Select article"}
                         aria-label={isSelected ? "Deselect article" : "Select article"}
                       >
-                        {isSelected ? (
-                          <Check size={13} strokeWidth={3} className="abv-select-check-icon" />
-                        ) : (
-                          <span className="abv-select-uncheck-ring" />
-                        )}
+                        <Check size={13} strokeWidth={3} className="abv-select-check-icon" />
                       </button>
 
                       {/* Status Toggle Badge */}
@@ -4088,14 +4110,29 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           <span>{categoryLabel}</span>
                         </div>
 
+                        {article.disabledFromFrontend && (
+                          <span 
+                            className="abv-flag-badge" 
+                            style={{ 
+                              background: 'rgba(30, 41, 59, 0.75)', 
+                              color: '#fbbf24', 
+                              border: '1px solid rgba(251, 191, 36, 0.35)',
+                              fontSize: '0.72rem'
+                            }} 
+                            title="Hidden from public frontend"
+                          >
+                            <EyeOff size={11} /> Hidden
+                          </span>
+                        )}
+
                         {article.isTrending && (
                           <span className="abv-flag-badge flag-trending">
-                            <TrendingUp size={10} /> TRENDING
+                            <TrendingUp size={11} /> Trending
                           </span>
                         )}
                         {article.isFeatured && (
                           <span className="abv-flag-badge flag-featured">
-                            <Star size={10} /> FEATURED
+                            <Star size={11} /> Featured
                           </span>
                         )}
                       </div>

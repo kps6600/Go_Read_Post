@@ -37,6 +37,7 @@ const articleSchema = new mongoose.Schema(
     isBreaking: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     isEditorsPick: { type: Boolean, default: false },
+    disabledFromFrontend: { type: Boolean, default: false },
     status: { 
       type: String, 
       enum: ['draft', 'in_review', 'scheduled', 'published', 'archived'], 

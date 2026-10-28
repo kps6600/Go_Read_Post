@@ -226,6 +226,7 @@
 /* ── Left Editor Pane ── */
 .las-editor-pane {
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -234,10 +235,10 @@
 }
 
 .las-editor-inner {
-  max-width: 900px;
+  max-width: 100%;
   width: 100%;
-  margin: 0 auto;
-  padding: 2rem 1.75rem 5rem;
+  margin: 0;
+  padding: 1.75rem 2rem 5rem;
   box-sizing: border-box;
 }
 
@@ -1094,19 +1095,24 @@
 }
 
 .las-section-tiptap .aem-tiptap-studio-card {
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .las-section-tiptap .aem-tiptap-studio-card:focus-within {
-  border-color: #ea580c;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .las-section-tiptap .aem-tiptap-toolbar {
-  padding: 0.45rem 0.65rem;
-  background: #f8fafc;
+  padding: 0.45rem 0;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #e2e8f0;
   gap: 0.25rem;
 }
 
@@ -1116,14 +1122,19 @@
 
 .las-section-tiptap .aem-tiptap-prosemirror-wrap .ProseMirror {
   min-height: 160px;
-  padding: 1rem 1.25rem;
+  padding: 1rem 0;
   font-size: 0.98rem;
   line-height: 1.7;
 }
 
 .las-section-tiptap .aem-tiptap-statusbar {
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0;
   font-size: 0.72rem;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  background: transparent;
 }
 
 /* Preview pane rich content formatting */

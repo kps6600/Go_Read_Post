@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Database, RefreshCw, ExternalLink, ShieldCheck, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Menu, RefreshCw, ShieldCheck, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export default function AdminTopNavbar({
   currentPath,
@@ -53,38 +53,21 @@ export default function AdminTopNavbar({
       </div>
 
       <div className="topbar-right">
-        {/* Database Status */}
-        <div className={`db-status-badge ${isDbConnected ? 'live' : 'fallback'}`}>
-          <span className="db-pulse-dot" />
-          <Database size={13} />
-          <span>{isDbConnected ? 'MongoDB Live' : 'Local Fallback'}</span>
-        </div>
-
         {/* Sync Button */}
         {onSyncData && (
-          <button
-            type="button"
-            className="topbar-sync-btn"
-            onClick={onSyncData}
-            title="Sync Live Records"
-          >
-            <RefreshCw size={14} />
-            <span>Sync</span>
-          </button>
+          <>
+            <button
+              type="button"
+              className="topbar-sync-btn"
+              onClick={onSyncData}
+              title="Sync Live Records"
+            >
+              <RefreshCw size={14} />
+              <span>Sync</span>
+            </button>
+            <div className="topbar-divider-v" />
+          </>
         )}
-
-        {/* Live Website Preview */}
-        <button
-          type="button"
-          className="topbar-live-site-btn"
-          onClick={onViewSite}
-          title="Return to Public Website"
-        >
-          <ExternalLink size={14} />
-          <span>Live Site</span>
-        </button>
-
-        <div className="topbar-divider-v" />
 
         {/* User Badge */}
         <div className="topbar-user-pill">

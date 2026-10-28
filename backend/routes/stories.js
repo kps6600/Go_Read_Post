@@ -150,7 +150,7 @@ router.get('/', async (req, res) => {
 
     if (isDbConnected()) {
       const desiredStatus = (!status || status === 'all') ? 'published' : status;
-      const articleQuery = {};
+      const articleQuery = { disabledFromFrontend: { $ne: true } };
       if (desiredStatus !== 'all') articleQuery.status = desiredStatus;
 
       if (category && category !== 'all') {

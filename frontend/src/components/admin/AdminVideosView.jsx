@@ -2972,7 +2972,7 @@ export default function AdminVideosView({ onShowToast, onNavigate }) {
                   }}
                 >
                   <Edit2 size={14} />
-                  <span>Edit in Studio</span>
+                  <span>Edit</span>
                 </button>
               </div>
             </div>
