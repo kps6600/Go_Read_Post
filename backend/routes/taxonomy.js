@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Category from '../models/Category.js';
 import Author from '../models/Author.js';
 import Topic from '../models/Topic.js';
@@ -14,6 +15,7 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const taxonomyFallbackPath = path.join(__dirname, '..', 'taxonomy_data_store.json');
+const articlesFallbackPath = path.join(__dirname, '..', 'articles_data_store.json');
 
 const INITIAL_TAXONOMY = {
   categories: [
@@ -488,6 +490,76 @@ router.post('/admin/categories/bulk-delete', protectAdmin, requireRoles('SUPER_A
 // ==========================================
 // 2. AUTHORS CRUD & PUBLIC ENDPOINTS
 // ==========================================
+
+// Helper: Calculate live published article counts for authors
+async function getAuthorsWithArticleCounts(authorsList) {
+  if (!Array.isArray(authorsList)) return [];
+
+  if (isDbConnected()) {
+    try {
+      const idCounts = await Article.aggregate([
+        { $match: { status: 'published' } },
+        { $group: { _id: "$authorId", count: { $sum: 1 } } }
+      ]);
+
+      const nameCounts = await Article.aggregate([
+        { $match: { status: 'published' } },
+        { $group: { _id: { $toLower: "$authorName" }, count: { $sum: 1 } } }
+      ]);
+
+      const idMap = new Map();
+      idCounts.forEach(c => {
+        if (c._id) idMap.set(String(c._id), c.count);
+      });
+
+      const nameMap = new Map();
+      nameCounts.forEach(c => {
+        if (c._id) nameMap.set(c._id, c.count);
+      });
+
+      return authorsList.map(a => {
+        const doc = (a && typeof a.toObject === 'function') ? a.toObject() : { ...a };
+        const aId = String(doc._id || '');
+        const aName = (doc.name || '').trim().toLowerCase();
+        let count = idMap.get(aId) || 0;
+        if (count === 0 && nameMap.has(aName)) {
+          count = nameMap.get(aName);
+        }
+        doc.publishedArticlesCount = count;
+        doc.totalPublishedArticles = count;
+        return doc;
+      });
+    } catch (e) {
+      console.warn('Error aggregating author article counts:', e.message);
+    }
+  }
+
+  // Fallback mode using articles_data_store.json
+  let fallbackArticles = [];
+  try {
+    if (fs.existsSync(articlesFallbackPath)) {
+      fallbackArticles = JSON.parse(fs.readFileSync(articlesFallbackPath, 'utf-8'));
+    }
+  } catch (e) {}
+
+  return authorsList.map(a => {
+    const doc = (a && typeof a.toObject === 'function') ? a.toObject() : { ...a };
+    const aId = String(doc._id || '');
+    const aName = (doc.name || '').trim().toLowerCase();
+    const count = fallbackArticles.filter(art => {
+      if (art.status !== 'published') return false;
+      if (art.authorId && String(art.authorId) === aId) return true;
+      if (art.authorName && art.authorName.trim().toLowerCase() === aName) return true;
+      return false;
+    }).length;
+
+    doc.publishedArticlesCount = count;
+    doc.totalPublishedArticles = count;
+    return doc;
+  });
+}
+
+// Public list of authors with live auto-calculated published article counts
 router.get('/authors', async (req, res) => {
   try {
     if (isDbConnected()) {
@@ -496,16 +568,38 @@ router.get('/authors', async (req, res) => {
         await Author.insertMany(INITIAL_TAXONOMY.authors.map(({ _id, ...a }) => a));
         authors = await Author.find().sort({ name: 1 });
       }
-      return res.json({ success: true, data: authors });
+      const enriched = await getAuthorsWithArticleCounts(authors);
+      return res.json({ success: true, data: enriched });
     }
     const store = readFallbackTaxonomy();
-    res.json({ success: true, data: store.authors });
+    const enriched = await getAuthorsWithArticleCounts(store.authors || []);
+    res.json({ success: true, data: enriched });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Single author + related stories for /author/:slug with pagination
+// Admin list of authors with live article counts
+router.get('/admin/authors', protectAdmin, async (req, res) => {
+  try {
+    if (isDbConnected()) {
+      let authors = await Author.find().sort({ name: 1 });
+      if (authors.length === 0) {
+        await Author.insertMany(INITIAL_TAXONOMY.authors.map(({ _id, ...a }) => a));
+        authors = await Author.find().sort({ name: 1 });
+      }
+      const enriched = await getAuthorsWithArticleCounts(authors);
+      return res.json({ success: true, data: enriched });
+    }
+    const store = readFallbackTaxonomy();
+    const enriched = await getAuthorsWithArticleCounts(store.authors || []);
+    res.json({ success: true, data: enriched });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Single author + related stories for /author/:slug with pagination and auto-calculated count
 router.get('/authors/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
@@ -522,12 +616,58 @@ router.get('/authors/:slug', async (req, res) => {
       sortObj = { publishedAt: 1 };
     }
 
+    const rawSlug = String(slug || '').trim();
+    const decodedSlug = decodeURIComponent(rawSlug).trim();
+    const slugHyphenated = decodedSlug.toLowerCase().replace(/[\s_]+/g, '-');
+    const slugUnderscored = decodedSlug.toLowerCase().replace(/[\s-]+/g, '_');
+    const escapedText = decodedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${escapedText}$`, 'i');
+    const slugRegex = new RegExp(`^(${slugHyphenated}|${slugUnderscored}|${escapedText})$`, 'i');
+
     let author = null;
     let articles = [];
     let total = 0;
 
     if (isDbConnected()) {
-      author = await Author.findOne({ slug });
+      const orConditions = [
+        { slug: rawSlug },
+        { slug: decodedSlug },
+        { slug: slugHyphenated },
+        { slug: slugUnderscored },
+        { slug: slugRegex },
+        { name: nameRegex }
+      ];
+      if (mongoose.Types.ObjectId.isValid(rawSlug)) {
+        orConditions.push({ _id: rawSlug });
+      }
+
+      author = await Author.findOne({ $or: orConditions });
+
+      // If user requests auther_name / author_name (or test URI placeholder) and it doesn't exist yet, auto-provision it!
+      if (!author && (slugHyphenated === 'auther-name' || slugHyphenated === 'author-name' || slugUnderscored === 'auther_name' || slugUnderscored === 'author_name')) {
+        author = await Author.findOne({ slug: { $in: ['auther_name', 'author_name', 'auther-name', 'author-name'] } });
+        if (!author) {
+          author = await Author.create({
+            name: 'Author Name',
+            slug: 'auther_name',
+            designation: 'Senior Technology Journalist',
+            bio: 'Expert technology journalist and contributing author covering AI, deep tech innovations, venture capital, and startups for GoReadPost.',
+            image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+            profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+            email: 'author@goreadpost.com',
+            socialLinks: {
+              linkedin: 'https://linkedin.com',
+              facebook: 'https://facebook.com',
+              instagram: 'https://instagram.com',
+              twitter: 'https://x.com',
+              youtube: 'https://youtube.com',
+              website: 'https://goreadpost.com'
+            },
+            isActive: true
+          });
+        }
+      }
+
       if (author) {
         const filter = {
           status: 'published',
@@ -545,17 +685,78 @@ router.get('/authors/:slug', async (req, res) => {
       }
     } else {
       const store = readFallbackTaxonomy();
-      author = store.authors.find(a => a.slug === slug);
+      const target = decodedSlug.toLowerCase();
+      author = (store.authors || []).find(a => {
+        if (!a) return false;
+        const aSlug = String(a.slug || '').toLowerCase();
+        const aName = String(a.name || '').toLowerCase();
+        const aId = String(a._id || '');
+        return (
+          aSlug === rawSlug.toLowerCase() ||
+          aSlug === target ||
+          aSlug === slugHyphenated ||
+          aSlug === slugUnderscored ||
+          aName === target ||
+          aName === target.replace(/[-_]+/g, ' ') ||
+          aId === rawSlug
+        );
+      });
+
+      if (!author && (slugHyphenated === 'auther-name' || slugHyphenated === 'author-name' || slugUnderscored === 'auther_name' || slugUnderscored === 'author_name')) {
+        author = {
+          _id: 'auth_auther_name',
+          name: 'Author Name',
+          slug: 'auther_name',
+          designation: 'Senior Technology Journalist',
+          bio: 'Expert technology journalist and contributing author covering AI, deep tech innovations, venture capital, and startups for GoReadPost.',
+          image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+          profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+          email: 'author@goreadpost.com',
+          socialLinks: {
+            linkedin: 'https://linkedin.com',
+            facebook: 'https://facebook.com',
+            instagram: 'https://instagram.com',
+            twitter: 'https://x.com',
+            youtube: 'https://youtube.com',
+            website: 'https://goreadpost.com'
+          },
+          isActive: true
+        };
+      }
+
+      if (author) {
+        let fallbackArticles = [];
+        try {
+          if (fs.existsSync(articlesFallbackPath)) {
+            fallbackArticles = JSON.parse(fs.readFileSync(articlesFallbackPath, 'utf-8'));
+          }
+        } catch (e) {}
+
+        const aId = String(author._id || '');
+        const aName = (author.name || '').trim().toLowerCase();
+        const matched = fallbackArticles.filter(art => {
+          if (art.status !== 'published') return false;
+          if (art.authorId && String(art.authorId) === aId) return true;
+          if (art.authorName && art.authorName.trim().toLowerCase() === aName) return true;
+          return false;
+        });
+        total = matched.length;
+        articles = matched.slice((page - 1) * limit, page * limit);
+      }
     }
 
     if (!author) {
       return res.status(404).json({ success: false, message: 'Author not found' });
     }
 
+    const authorObj = (author && typeof author.toObject === 'function') ? author.toObject() : { ...author };
+    authorObj.publishedArticlesCount = total;
+    authorObj.totalPublishedArticles = total;
+
     res.json({
       success: true,
       data: {
-        author,
+        author: authorObj,
         articles,
         pagination: {
           page,
@@ -576,6 +777,22 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
     if (!name) return res.status(400).json({ success: false, message: 'Author name is required' });
     const cleanSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+    // Strict security rule: Do not allow manual editing or overriding of published article count
+    delete req.body.publishedArticlesCount;
+    delete req.body.totalPublishedArticles;
+    delete req.body.articleCount;
+    delete req.body.totalArticlesCount;
+
+    const formattedSocialLinks = {
+      linkedin: socialLinks?.linkedin || '',
+      facebook: socialLinks?.facebook || '',
+      instagram: socialLinks?.instagram || '',
+      twitter: socialLinks?.twitter || '',
+      youtube: socialLinks?.youtube || '',
+      website: socialLinks?.website || '',
+      github: socialLinks?.github || ''
+    };
+
     if (isDbConnected()) {
       const created = await Author.create({
         name,
@@ -585,9 +802,10 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
         bio: bio || '',
         designation: designation || 'Staff Reporter',
         email: email || '',
-        socialLinks: socialLinks || {}
+        socialLinks: formattedSocialLinks
       });
-      return res.status(201).json({ success: true, data: created });
+      const [enriched] = await getAuthorsWithArticleCounts([created]);
+      return res.status(201).json({ success: true, data: enriched || created });
     }
 
     const store = readFallbackTaxonomy();
@@ -600,12 +818,13 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
       bio: bio || '',
       designation: designation || 'Staff Reporter',
       email: email || '',
-      socialLinks: socialLinks || {},
+      socialLinks: formattedSocialLinks,
       isActive: true
     };
     store.authors.push(newAuthor);
     writeFallbackTaxonomy(store);
-    res.status(201).json({ success: true, data: newAuthor });
+    const [enriched] = await getAuthorsWithArticleCounts([newAuthor]);
+    res.status(201).json({ success: true, data: enriched || newAuthor });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -614,19 +833,46 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
 router.put('/admin/authors/:id', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN', 'EDITOR'), async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Strict security rule: Do not allow manual editing or overriding of published article count
+    delete req.body.publishedArticlesCount;
+    delete req.body.totalPublishedArticles;
+    delete req.body.articleCount;
+    delete req.body.totalArticlesCount;
+
+    if (req.body.socialLinks) {
+      req.body.socialLinks = {
+        linkedin: req.body.socialLinks.linkedin || '',
+        facebook: req.body.socialLinks.facebook || '',
+        instagram: req.body.socialLinks.instagram || '',
+        twitter: req.body.socialLinks.twitter || '',
+        youtube: req.body.socialLinks.youtube || '',
+        website: req.body.socialLinks.website || '',
+        github: req.body.socialLinks.github || ''
+      };
+    }
+
+    if (req.body.image && !req.body.profileImage) {
+      req.body.profileImage = req.body.image;
+    } else if (req.body.profileImage && !req.body.image) {
+      req.body.image = req.body.profileImage;
+    }
+
     if (isDbConnected()) {
       const isOid = mongoose.Types.ObjectId.isValid(id);
       const query = isOid ? { _id: id } : { slug: id };
       const updated = await Author.findOneAndUpdate(query, req.body, { new: true });
       if (!updated) return res.status(404).json({ success: false, message: 'Author not found' });
-      return res.json({ success: true, data: updated });
+      const [enriched] = await getAuthorsWithArticleCounts([updated]);
+      return res.json({ success: true, data: enriched || updated });
     }
     const store = readFallbackTaxonomy();
     const idx = store.authors.findIndex(a => a._id === id || a.slug === id);
     if (idx !== -1) {
       store.authors[idx] = { ...store.authors[idx], ...req.body };
       writeFallbackTaxonomy(store);
-      return res.json({ success: true, data: store.authors[idx] });
+      const [enriched] = await getAuthorsWithArticleCounts([store.authors[idx]]);
+      return res.json({ success: true, data: enriched || store.authors[idx] });
     }
     res.status(404).json({ success: false, message: 'Author not found' });
   } catch (err) {

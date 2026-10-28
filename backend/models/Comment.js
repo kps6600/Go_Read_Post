@@ -8,6 +8,22 @@ const commentSchema = new mongoose.Schema(
       trim: true,
       index: true
     },
+    contentType: {
+      type: String,
+      enum: ['article', 'video'],
+      default: 'article',
+      index: true
+    },
+    contentTitle: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    videoId: {
+      type: String,
+      default: null,
+      index: true
+    },
     articleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Article',
@@ -27,6 +43,20 @@ const commentSchema = new mongoose.Schema(
     isEdited: {
       type: Boolean,
       default: false
+    },
+    isPinned: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    adminReply: {
+      text: { type: String, default: '' },
+      author: { type: String, default: 'Editorial Desk' },
+      repliedAt: { type: Date, default: null }
+    },
+    rejection_reason: {
+      type: String,
+      default: ''
     },
     author: {
       type: String,
@@ -54,7 +84,7 @@ const commentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['approved', 'pending', 'rejected'],
+      enum: ['approved', 'pending', 'pending_review', 'rejected', 'hidden'],
       default: 'approved',
       index: true
     }
@@ -65,5 +95,7 @@ const commentSchema = new mongoose.Schema(
 );
 
 commentSchema.index({ storySlug: 1, createdAt: -1 });
+commentSchema.index({ contentType: 1, createdAt: -1 });
 
 export default mongoose.models.Comment || mongoose.model('Comment', commentSchema);
+

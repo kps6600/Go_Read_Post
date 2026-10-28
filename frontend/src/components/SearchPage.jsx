@@ -180,7 +180,10 @@ export default function SearchPage({
               <button
                 key={a._id || a.slug}
                 type="button"
-                onClick={() => onNavigateEntity?.('author', a.slug)}
+                onClick={() => {
+                  setQuery(a.name);
+                  executeSearch(a.name);
+                }}
                 className="ys-brand-pill"
                 style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >

@@ -9,8 +9,11 @@ const authorSchema = new mongoose.Schema(
     bio: { type: String, default: '' },
     designation: { type: String, default: 'Staff Reporter' },
     socialLinks: {
-      twitter: { type: String, default: '' },
       linkedin: { type: String, default: '' },
+      facebook: { type: String, default: '' },
+      instagram: { type: String, default: '' },
+      twitter: { type: String, default: '' },
+      youtube: { type: String, default: '' },
       website: { type: String, default: '' },
       github: { type: String, default: '' }
     },

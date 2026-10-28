@@ -123,7 +123,9 @@ export default function ArticlePage({
       const res = await CommentService.postComment(targetSlug, {
         author: authorVal,
         role: roleVal,
-        text: submittedText
+        text: submittedText,
+        contentType: 'article',
+        contentTitle: current?.title || ''
       });
       if (onShowToast) {
         onShowToast(res?.message || 'Thank you! Your perspective has been submitted for editorial review and will appear once approved.');
@@ -995,12 +997,14 @@ export default function ArticlePage({
                   if (block.type === 'section') {
                     const hasHtml = /<[a-z][\s\S]*>/i.test(block.content || '');
                     const paragraphs = !hasHtml ? (block.content || '').split('\n').filter(p => p.trim()) : [];
-                    const secImages = Array.isArray(block.images) && block.images.length > 0
-                      ? block.images
-                      : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+                    const secImages = (idx > 0 && Array.isArray(block.images) && block.images.length > 0)
+                      ? [block.images[0]]
+                      : (idx > 0 && block.image?.url ? [block.image] : (idx > 0 && typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+
+                    const imgPos = block.imagePosition || (idx === 1 ? 'left' : 'top');
 
                     const renderSecImages = () => secImages.map((img, sIdx) => (
-                      <figure key={sIdx} className="map-inline-figure standard" style={{ margin: '1.25rem 0' }}>
+                      <figure key={sIdx} className={`map-inline-figure standard ${imgPos === 'left' ? 'left' : ''}`} style={{ margin: imgPos === 'left' ? '0.4rem 2.25rem 1.5rem 0' : '1.25rem 0' }}>
                         <img src={img.url || img} alt={img.caption || img.alt || 'Section illustration'} className="map-inline-img" />
                         {(img.caption || img.credit) && (
                           <figcaption className="map-inline-caption">
@@ -1010,6 +1014,18 @@ export default function ArticlePage({
                       </figure>
                     ));
 
+                    const renderSectionContent = () => (
+                      hasHtml ? (
+                        <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
+                      ) : paragraphs.length > 0 ? (
+                        paragraphs.map((p, pIdx) => (
+                          <p key={pIdx} dangerouslySetInnerHTML={{ __html: p }} />
+                        ))
+                      ) : (
+                        block.text && <p dangerouslySetInnerHTML={{ __html: block.text }} />
+                      )
+                    );
+
                     return (
                       <div key={key} className="map-section-group" style={{ margin: '1.75rem 0' }}>
                         {block.heading && (
@@ -1017,17 +1033,11 @@ export default function ArticlePage({
                             {block.heading}
                           </h2>
                         )}
-                        {block.imagePosition !== 'bottom' && renderSecImages()}
-                        {hasHtml ? (
-                          <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
-                        ) : paragraphs.length > 0 ? (
-                          paragraphs.map((p, pIdx) => (
-                            <p key={pIdx} dangerouslySetInnerHTML={{ __html: p }} />
-                          ))
-                        ) : (
-                          block.text && <p dangerouslySetInnerHTML={{ __html: block.text }} />
-                        )}
-                        {block.imagePosition === 'bottom' && renderSecImages()}
+
+                        {imgPos === 'left' && renderSecImages()}
+                        {imgPos === 'top' && renderSecImages()}
+                        {renderSectionContent()}
+                        {imgPos === 'bottom' && renderSecImages()}
                       </div>
                     );
                   }
@@ -1394,14 +1404,21 @@ export default function ArticlePage({
                           );
 
                           return (
-                            <div key={commentKey} className={`fs-comment-bubble ${isEditing ? 'fs-editing' : ''}`}>
+                            <div key={commentKey} className={`fs-comment-bubble ${isEditing ? 'fs-editing' : ''} ${comment.isPinned ? 'fs-pinned' : ''}`} style={comment.isPinned ? { borderLeft: '3px solid #dc2626', background: '#fff5f5' } : undefined}>
                               <div className="fs-bubble-top">
                                 <div className="fs-bubble-user">
                                   <div className="fs-bubble-avatar">
                                     {(comment.author || 'R').charAt(0).toUpperCase()}
                                   </div>
                                   <div>
-                                    <div className="fs-bubble-name">{comment.author || 'Reader Contributor'}</div>
+                                    <div className="fs-bubble-name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span>{comment.author || 'Reader Contributor'}</span>
+                                      {comment.isPinned && (
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '5px', fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px' }}>
+                                          📌 Featured
+                                        </span>
+                                      )}
+                                    </div>
                                     <div className="fs-bubble-role">
                                       {comment.role || 'Community Member'} • {comment.time || 'Recently'}
                                     </div>
@@ -1483,12 +1500,39 @@ export default function ArticlePage({
                                 </div>
                               </form>
                             ) : (
-                              <p className="fs-bubble-text">
-                                {comment.text}
-                                {comment.isEdited && (
-                                  <span className="fs-bubble-edited-tag" title="Edited by author"> (edited)</span>
+                              <>
+                                <p className="fs-bubble-text">
+                                  {comment.text}
+                                  {comment.isEdited && (
+                                    <span className="fs-bubble-edited-tag" title="Edited by author"> (edited)</span>
+                                  )}
+                                </p>
+
+                                {/* Official Editorial Staff Response */}
+                                {comment.adminReply && comment.adminReply.text && (
+                                  <div style={{
+                                    marginTop: '0.75rem',
+                                    background: '#fafaf9',
+                                    border: '1px solid #e7e5e4',
+                                    borderLeft: '3px solid #dc2626',
+                                    borderRadius: '8px',
+                                    padding: '0.65rem 0.9rem',
+                                    fontSize: '0.84rem'
+                                  }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                      <span style={{ fontWeight: 800, color: '#dc2626', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                        🛡️ {comment.adminReply.author || 'Editorial Desk'}
+                                      </span>
+                                      <span style={{ background: '#fee2e2', color: '#dc2626', fontSize: '0.66rem', fontWeight: 750, padding: '1px 5px', borderRadius: '4px' }}>
+                                        STAFF RESPONSE
+                                      </span>
+                                    </div>
+                                    <div style={{ color: '#334155', lineHeight: 1.5 }}>
+                                      {comment.adminReply.text}
+                                    </div>
+                                  </div>
                                 )}
-                              </p>
+                              </>
                             )}
                           </div>
                         );

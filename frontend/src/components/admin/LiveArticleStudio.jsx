@@ -135,7 +135,7 @@ function extractInitialBlocks(art) {
             type: 'section',
             heading: b.heading || '',
             content: b.content || b.text || '',
-            images: Array.isArray(b.images) ? b.images : (b.image ? [b.image] : [])
+            images: (Array.isArray(b.images) && b.images.length > 0) ? [b.images[0]] : (b.image ? [b.image] : [])
           };
         }
         if (b.type === 'image') return b;
@@ -1684,44 +1684,36 @@ export default function LiveArticleStudio({
   };
 
   const handleSectionImageFileUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
+    const file = e.target.files?.[0];
     const blockId = targetSectionId;
-    if (files.length === 0 || !blockId) return;
+    if (!file || !blockId) return;
 
     setUploadingSectionImage(true);
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        try {
-          const uploaded = await MediaService.uploadFile(file);
-          const finalUrl = uploaded && (uploaded.url || uploaded.path) ? (uploaded.url || uploaded.path) : '';
-          if (finalUrl) {
-            const newImg = {
-              url: finalUrl,
-              caption: '',
-              credit: 'GoReadPost Media',
-              alt: file.name.replace(/\.[^/.]+$/, '')
+      const uploaded = await MediaService.uploadFile(file);
+      const finalUrl = uploaded && (uploaded.url || uploaded.path) ? (uploaded.url || uploaded.path) : '';
+      if (finalUrl) {
+        const newImg = {
+          url: finalUrl,
+          caption: '',
+          credit: 'GoReadPost Media',
+          alt: file.name.replace(/\.[^/.]+$/, '')
+        };
+        setFormData(prev => ({
+          ...prev,
+          contentBlocks: prev.contentBlocks.map(b => {
+            if (b.id !== blockId) return b;
+            return {
+              ...b,
+              image: newImg,
+              images: [newImg]
             };
-            setFormData(prev => ({
-              ...prev,
-              contentBlocks: prev.contentBlocks.map(b => {
-                if (b.id !== blockId) return b;
-                const existingImages = Array.isArray(b.images) && b.images.length > 0
-                  ? b.images
-                  : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
-                return {
-                  ...b,
-                  image: newImg,
-                  images: [...existingImages, newImg]
-                };
-              })
-            }));
-          }
-        } catch (err) {
-          console.warn('Failed to upload section image:', err);
-        }
+          })
+        }));
+        if (onShowToast) onShowToast('Section image uploaded');
       }
-      if (onShowToast) onShowToast(files.length > 1 ? `Added ${files.length} images to section` : 'Section image uploaded');
+    } catch (err) {
+      console.warn('Failed to upload section image:', err);
     } finally {
       setUploadingSectionImage(false);
       setTargetSectionId(null);
@@ -1729,36 +1721,34 @@ export default function LiveArticleStudio({
     }
   };
 
-  const handleRemoveSectionImage = (blockId, imageIndex) => {
+  const handleRemoveSectionImage = (blockId) => {
     setFormData(prev => ({
       ...prev,
       contentBlocks: prev.contentBlocks.map(b => {
         if (b.id !== blockId) return b;
-        const existing = Array.isArray(b.images) ? [...b.images] : (b.image ? [b.image] : []);
-        const updated = existing.filter((_, idx) => idx !== imageIndex);
         return {
           ...b,
-          image: updated.length > 0 ? updated[0] : null,
-          images: updated
+          image: null,
+          images: []
         };
       })
     }));
+    if (onShowToast) onShowToast('Section image removed');
   };
 
-  const handleUpdateSectionImage = (blockId, imageIndex, updates) => {
+  const handleUpdateSectionImage = (blockId, updates) => {
     setFormData(prev => ({
       ...prev,
       contentBlocks: prev.contentBlocks.map(b => {
         if (b.id !== blockId) return b;
-        const existing = Array.isArray(b.images) && b.images.length > 0 
-          ? [...b.images] 
-          : (b.image ? [{ ...b.image }] : []);
-        if (!existing[imageIndex]) existing[imageIndex] = { url: '' };
-        existing[imageIndex] = { ...existing[imageIndex], ...updates };
+        const current = (Array.isArray(b.images) && b.images.length > 0)
+          ? { ...b.images[0] }
+          : (b.image ? { ...b.image } : { url: '' });
+        const updatedImg = { ...current, ...updates };
         return {
           ...b,
-          image: existing[0],
-          images: existing
+          image: updatedImg,
+          images: [updatedImg]
         };
       })
     }));
@@ -1828,7 +1818,7 @@ export default function LiveArticleStudio({
 
   // Compile blocks into semantic HTML string for database & public feed
   const compileBlocksToHtml = (blocks) => {
-    return blocks.map(b => {
+    return blocks.map((b, bIdx) => {
       if (b.type === 'section') {
         let sectionHtml = '';
         if (b.heading && b.heading.trim()) {
@@ -1837,34 +1827,41 @@ export default function LiveArticleStudio({
           sectionHtml += `<h${level} class="map-body-heading"${align}>${b.heading.trim()}</h${level}>\n`;
         }
 
-        // Section Images
-        const secImages = Array.isArray(b.images) && b.images.length > 0
-          ? b.images
-          : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
+        // Section Images (only for Section 2 and beyond)
+        const secImages = (bIdx > 0 && Array.isArray(b.images) && b.images.length > 0)
+          ? [b.images[0]]
+          : (bIdx > 0 && b.image?.url ? [b.image] : (bIdx > 0 && typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
+
+        const imgPos = b.imagePosition || (bIdx === 1 ? 'left' : 'top');
 
         const imagesHtml = secImages.map(img => {
           const captionHtml = (img.caption || img.credit)
             ? `<figcaption class="map-inline-caption">${img.caption || ''} ${img.credit ? `(Photo: ${img.credit})` : ''}</figcaption>`
             : '';
-          return `<figure class="map-inline-figure standard"><img src="${img.url || img}" alt="${img.caption || img.alt || 'Section image'}" />${captionHtml}</figure>`;
+          return `<figure class="map-inline-figure standard ${imgPos === 'left' ? 'left' : ''}"><img src="${img.url || img}" alt="${img.caption || img.alt || 'Section image'}" />${captionHtml}</figure>`;
         }).join('\n');
 
-        if (b.imagePosition !== 'bottom' && imagesHtml) {
-          sectionHtml += imagesHtml + '\n';
-        }
-
+        let textHtml = '';
         if (b.content && b.content.trim()) {
           const hasHtml = /<[a-z][\s\S]*>/i.test(b.content);
           if (hasHtml) {
-            sectionHtml += b.content.trim() + '\n';
+            textHtml = b.content.trim() + '\n';
           } else {
             const paras = b.content.split('\n').filter(p => p.trim().length > 0);
-            sectionHtml += paras.map(p => `<p>${p.trim()}</p>`).join('\n');
+            textHtml = paras.map(p => `<p>${p.trim()}</p>`).join('\n') + '\n';
           }
         }
 
-        if (b.imagePosition === 'bottom' && imagesHtml) {
-          sectionHtml += imagesHtml + '\n';
+        if (imgPos === 'left' && imagesHtml) {
+          sectionHtml += imagesHtml + '\n' + textHtml;
+        } else {
+          if (imgPos === 'top' && imagesHtml) {
+            sectionHtml += imagesHtml + '\n';
+          }
+          sectionHtml += textHtml;
+          if (imgPos === 'bottom' && imagesHtml) {
+            sectionHtml += imagesHtml + '\n';
+          }
         }
 
         return sectionHtml;
@@ -2072,18 +2069,15 @@ export default function LiveArticleStudio({
         ...prev,
         contentBlocks: prev.contentBlocks.map(b => {
           if (b.id !== blockId) return b;
-          const existingImages = Array.isArray(b.images) && b.images.length > 0
-            ? b.images
-            : (b.image?.url ? [b.image] : (typeof b.image === 'string' && b.image ? [{ url: b.image }] : []));
           return {
             ...b,
             image: newImg,
-            images: [...existingImages, newImg]
+            images: [newImg]
           };
         })
       }));
       setIsMediaPickerOpen(false);
-      if (onShowToast) onShowToast('Image added to section');
+      if (onShowToast) onShowToast('Section image set');
     } else if (mediaPickerTarget.type === 'testimonialAvatar') {
       handleUpdateBlock(mediaPickerTarget.blockId, {
         avatar: file.url
@@ -2298,7 +2292,7 @@ export default function LiveArticleStudio({
                 onChange={handleBlockImageFileUpload}
               />
 
-              {/* CARD 1: ARTICLE DETAILS */}
+              {/* UNIFIED SECTION: ARTICLE DETAILS & COVER IMAGE */}
               <div className="las-card">
                 <div className="las-card-title-row">
                   <div>
@@ -2306,36 +2300,137 @@ export default function LiveArticleStudio({
                       <span>Article Details</span>
                     </h3>
                   </div>
-                  <div className="las-stats-badge">
-                    <input 
-                      type="text"
-                      className="las-stats-input"
-                      value={formData.readingTime ?? `~${stats.minutes} min read`}
-                      onChange={(e) => {
-                        setIsReadingTimeCustom(true);
-                        setFormData(prev => ({ ...prev, readingTime: e.target.value }));
-                      }}
-                      title="Click to edit estimated reading time"
-                      placeholder={`~${stats.minutes} min read`}
-                    />
-                    {isReadingTimeCustom && (
-                      <button
-                        type="button"
-                        className="las-stats-reset-btn"
-                        title="Reset to auto-calculated time"
-                        onClick={() => {
-                          setIsReadingTimeCustom(false);
-                          setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
-                        }}
-                      >
-                        ↺ auto
-                      </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {formData.featuredImage?.url && (
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="las-block-action-btn"
+                          onClick={() => {
+                            if (coverFileInputRef.current) coverFileInputRef.current.click();
+                          }}
+                          title="Upload a new replacement cover image from computer"
+                        >
+                          <UploadCloud size={13} />
+                          <span>{uploadingCover ? 'Uploading...' : 'Replace (PC)'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="las-block-action-btn"
+                          onClick={() => openMediaPicker({ type: 'featured' })}
+                          title="Select an image from Media Library"
+                        >
+                          <FolderOpen size={13} />
+                          <span>Media Library</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="las-block-action-btn delete"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              featuredImage: { ...prev.featuredImage, url: '', caption: '', credit: '' }
+                            }));
+                          }}
+                          title="Remove cover image"
+                        >
+                          <Trash2 size={13} />
+                          <span>Remove</span>
+                        </button>
+                      </div>
                     )}
+                    <div className="las-stats-badge">
+                      <input 
+                        type="text"
+                        className="las-stats-input"
+                        value={formData.readingTime ?? `~${stats.minutes} min read`}
+                        onChange={(e) => {
+                          setIsReadingTimeCustom(true);
+                          setFormData(prev => ({ ...prev, readingTime: e.target.value }));
+                        }}
+                        title="Click to edit estimated reading time"
+                        placeholder={`~${stats.minutes} min read`}
+                      />
+                      {isReadingTimeCustom && (
+                        <button
+                          type="button"
+                          className="las-stats-reset-btn"
+                          title="Reset to auto-calculated time"
+                          onClick={() => {
+                            setIsReadingTimeCustom(false);
+                            setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
+                          }}
+                        >
+                          ↺ auto
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
+                {formData.featuredImage?.url ? (
+                  <div className="las-cover-image-preview-wrap">
+                    <div className="las-cover-preview-img-container">
+                      <img 
+                        src={formData.featuredImage.url} 
+                        alt={formData.featuredImage.alt || 'Cover preview'} 
+                        className="las-cover-preview-img"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                      <div className="las-cover-meta-bar">
+                        <div className="las-cover-badge-pill">
+                          <span className="las-cover-badge-dot" />
+                          <span>{formData.categoryName || 'Startups'}</span>
+                        </div>
+                        {formData.brand && (
+                          <div className="las-cover-badge-pill">
+                            <span>{formData.brand}</span>
+                          </div>
+                        )}
+                        {formData.readingTime && (
+                          <div className="las-cover-badge-pill" style={{ marginLeft: 'auto' }}>
+                            <Clock size={11} />
+                            <span>{formData.readingTime}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="las-cover-dropzone">
+                    <div className="las-cover-dropzone-content" style={{ width: '100%' }}>
+                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="las-btn las-btn-publish"
+                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          onClick={() => {
+                            if (coverFileInputRef.current) coverFileInputRef.current.click();
+                          }}
+                          disabled={uploadingCover}
+                        >
+                          <UploadCloud size={14} />
+                          <span>{uploadingCover ? 'Uploading...' : 'Upload Cover (PC)'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="las-btn"
+                          style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          onClick={() => openMediaPicker({ type: 'featured' })}
+                        >
+                          <FolderOpen size={14} />
+                          <span>Browse Media Library</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Rich Headline Formatting Toolbar */}
-                <div className="las-headline-toolbar">
+                <div className="las-headline-toolbar" style={{ marginTop: '1.25rem' }}>
                   <div className="las-headline-tools-group">
                     <button
                       type="button"
@@ -2573,182 +2668,6 @@ export default function LiveArticleStudio({
                 </div>
               </div>
 
-              {/* CARD 2: FEATURED / COVER IMAGE */}
-              <div className="las-card">
-                <div className="las-card-title-row">
-                  <div>
-                    <h3 className="las-card-title">
-                      <ImageIcon size={18} color="var(--brand-primary, #dc2626)" />
-                      <span>Featured / Cover Image</span>
-                    </h3>
-                    <p className="las-card-subtitle">
-                      Main story image displayed on hero banners, article header, cards, and social media previews.
-                    </p>
-                  </div>
-                  {formData.featuredImage?.url && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        className="las-block-action-btn"
-                        onClick={() => {
-                          if (coverFileInputRef.current) coverFileInputRef.current.click();
-                        }}
-                        title="Upload a new replacement cover image from computer"
-                      >
-                        <UploadCloud size={13} />
-                        <span>{uploadingCover ? 'Uploading...' : 'Replace (PC)'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="las-block-action-btn"
-                        onClick={() => openMediaPicker({ type: 'featured' })}
-                        title="Select an image from Media Library"
-                      >
-                        <FolderOpen size={13} />
-                        <span>Media Library</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="las-block-action-btn delete"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            featuredImage: { ...prev.featuredImage, url: '', caption: '', credit: '' }
-                          }));
-                        }}
-                        title="Remove cover image"
-                      >
-                        <Trash2 size={13} />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {formData.featuredImage?.url ? (
-                  <div className="las-cover-image-preview-wrap">
-                    <div className="las-cover-preview-img-container">
-                      <img 
-                        src={formData.featuredImage.url} 
-                        alt={formData.featuredImage.alt || 'Cover preview'} 
-                        className="las-cover-preview-img"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                    </div>
-                    <div className="las-grid-2" style={{ marginTop: '0.85rem' }}>
-                      <div className="las-form-group">
-                        <label className="las-label">Photo Credit / Source</label>
-                        <input
-                          type="text"
-                          className="las-input"
-                          placeholder="e.g. YS हिंदी / Unsplash / Reuters"
-                          value={formData.featuredImage.credit || ''}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            featuredImage: { ...prev.featuredImage, credit: e.target.value }
-                          }))}
-                        />
-                      </div>
-                      <div className="las-form-group">
-                        <label className="las-label">Caption / Description</label>
-                        <input
-                          type="text"
-                          className="las-input"
-                          placeholder="Brief caption describing this cover photo..."
-                          value={formData.featuredImage.caption || ''}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            featuredImage: { ...prev.featuredImage, caption: e.target.value }
-                          }))}
-                        />
-                      </div>
-                    </div>
-                    <div className="las-form-group" style={{ marginTop: '0.5rem' }}>
-                      <label className="las-label">Cover Image Direct URL</label>
-                      <input
-                        type="text"
-                        className="las-input"
-                        placeholder="https://images.unsplash.com/..."
-                        value={formData.featuredImage.url || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          featuredImage: { ...prev.featuredImage, url: e.target.value }
-                        }))}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="las-cover-dropzone">
-                    <div className="las-cover-dropzone-content">
-                      <div className="las-cover-dropzone-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ImageIcon size={24} color="#64748b" />
-                        </div>
-                      </div>
-                      <h4 style={{ margin: '0.2rem 0', fontSize: '0.98rem', fontWeight: 700, color: '#1e293b' }}>
-                        No Cover Image Attached
-                      </h4>
-                      <p style={{ margin: '0 0 1rem', fontSize: '0.83rem', color: '#64748b' }}>
-                        Add a high-quality featured cover image for this article.
-                      </p>
-                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <button
-                          type="button"
-                          className="las-btn las-btn-publish"
-                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
-                          onClick={() => {
-                            if (coverFileInputRef.current) coverFileInputRef.current.click();
-                          }}
-                          disabled={uploadingCover}
-                        >
-                          <UploadCloud size={14} />
-                          <span>{uploadingCover ? 'Uploading...' : 'Upload Cover (PC)'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          className="las-btn"
-                          style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
-                          onClick={() => openMediaPicker({ type: 'featured' })}
-                        >
-                          <FolderOpen size={14} />
-                          <span>Browse Media Library</span>
-                        </button>
-                      </div>
-                      <div style={{ marginTop: '1rem', width: '100%', maxWidth: '520px', marginInline: 'auto' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>or paste URL:</span>
-                          <input
-                            type="text"
-                            className="las-input"
-                            style={{ fontSize: '0.82rem', padding: '0.4rem 0.65rem' }}
-                            placeholder="https://images.unsplash.com/photo-..."
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.target.value.trim()) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  featuredImage: { ...prev.featuredImage, url: e.target.value.trim() }
-                                }));
-                              }
-                            }}
-                            onBlur={(e) => {
-                              if (e.target.value.trim()) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  featuredImage: { ...prev.featuredImage, url: e.target.value.trim() }
-                                }));
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* CARD 3: ARTICLE SECTIONS */}
               <div className="las-blocks-section">
                 <div className="las-blocks-header">
@@ -2772,7 +2691,6 @@ export default function LiveArticleStudio({
                   <input
                     ref={sectionImageFileInputRef}
                     type="file"
-                    multiple
                     accept="image/*"
                     style={{ display: 'none' }}
                     onChange={handleSectionImageFileUpload}
@@ -2838,133 +2756,107 @@ export default function LiveArticleStudio({
                         {/* 1. SECTION BLOCK (SINGLE UNIFIED EDITABLE CANVAS + INTEGRATED SECTION MEDIA) */}
                         {block.type === 'section' && (() => {
                           const secImages = Array.isArray(block.images) && block.images.length > 0
-                            ? block.images
+                            ? [block.images[0]]
                             : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
 
                           return (
                             <div className="las-section-block-wrapper">
-                              {/* Section Media (Image Attachment) - Placed at Top of Section */}
-                              <div className="las-section-media-container">
-                                {secImages.length === 0 ? (
-                                  <div className="las-section-media-empty">
-                                    <div className="las-section-media-empty-info">
-                                      <ImageIcon size={16} className="las-section-media-icon" />
-                                      <span className="las-section-media-empty-text">Section Image (Optional)</span>
-                                    </div>
-                                    <div className="las-section-media-btn-row">
-                                      <button
-                                        type="button"
-                                        className="las-section-media-btn upload"
-                                        onClick={() => triggerSectionImageUpload(block.id)}
-                                        disabled={uploadingSectionImage && targetSectionId === block.id}
-                                        title="Upload image from your computer to this section"
-                                      >
-                                        <UploadCloud size={14} />
-                                        <span>{uploadingSectionImage && targetSectionId === block.id ? 'Uploading...' : 'Add Image (PC)'}</span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="las-section-media-btn library"
-                                        onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
-                                        title="Select image from Media Library"
-                                      >
-                                        <FolderOpen size={14} />
-                                        <span>Media Library</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="las-section-media-attached">
-                                    <div className="las-section-media-attached-header">
-                                      <div className="las-section-media-header-left">
-                                        <ImageIcon size={16} className="las-section-media-icon active" />
-                                        <span className="las-section-media-attached-title">
-                                          Section {secImages.length === 1 ? 'Image' : `Images (${secImages.length})`}
-                                        </span>
+                              {/* Section Media (Image Attachment) - Only available in Section #2 and beyond */}
+                              {index > 0 && (
+                                <div className="las-section-media-container">
+                                  {secImages.length === 0 ? (
+                                    <div className="las-section-media-empty">
+                                      <div className="las-section-media-empty-info">
+                                        <ImageIcon size={16} className="las-section-media-icon" />
+                                        <span className="las-section-media-empty-text">Section Image (Optional)</span>
                                       </div>
-                                      <div className="las-section-media-header-right">
-                                        <div className="las-section-pos-toggle">
-                                          <span className="las-pos-label">Position:</span>
-                                          <button
-                                            type="button"
-                                            className={`las-pos-btn ${(block.imagePosition || 'top') === 'top' ? 'active' : ''}`}
-                                            onClick={() => handleToggleSectionImagePosition(block.id, 'top')}
-                                            title="Display image at top of section"
-                                          >
-                                            Top
-                                          </button>
-                                          <button
-                                            type="button"
-                                            className={`las-pos-btn ${block.imagePosition === 'bottom' ? 'active' : ''}`}
-                                            onClick={() => handleToggleSectionImagePosition(block.id, 'bottom')}
-                                            title="Display image below section text"
-                                          >
-                                            Bottom
-                                          </button>
-                                        </div>
+                                      <div className="las-section-media-btn-row">
                                         <button
                                           type="button"
-                                          className="las-section-add-more-btn"
+                                          className="las-section-media-btn upload"
                                           onClick={() => triggerSectionImageUpload(block.id)}
-                                          title="Add another image to this section"
+                                          disabled={uploadingSectionImage && targetSectionId === block.id}
+                                          title="Upload image from your computer to this section"
                                         >
-                                          <Plus size={13} />
-                                          <span>Add Another (PC)</span>
+                                          <UploadCloud size={14} />
+                                          <span>{uploadingSectionImage && targetSectionId === block.id ? 'Uploading...' : 'Add Image (PC)'}</span>
                                         </button>
                                         <button
                                           type="button"
-                                          className="las-section-add-more-btn"
+                                          className="las-section-media-btn library"
                                           onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
-                                          title="Add another from Media Library"
+                                          title="Select image from Media Library"
                                         >
-                                          <FolderOpen size={13} />
+                                          <FolderOpen size={14} />
                                           <span>Media Library</span>
                                         </button>
                                       </div>
                                     </div>
+                                  ) : (
+                                    <div className="las-section-media-attached">
+                                      <div className="las-section-media-attached-header">
+                                        <div className="las-section-media-header-left">
+                                          <ImageIcon size={16} className="las-section-media-icon active" />
+                                          <span className="las-section-media-attached-title">
+                                            Section Image
+                                          </span>
+                                        </div>
+                                        <div className="las-section-media-header-right">
+                                          <button
+                                            type="button"
+                                            className="las-section-add-more-btn"
+                                            onClick={() => triggerSectionImageUpload(block.id)}
+                                            title="Replace section image from your computer"
+                                          >
+                                            <UploadCloud size={13} />
+                                            <span>Replace (PC)</span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="las-section-add-more-btn"
+                                            onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                            title="Replace section image from Media Library"
+                                          >
+                                            <FolderOpen size={13} />
+                                            <span>Media Library</span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="las-section-add-more-btn"
+                                            onClick={() => handleRemoveSectionImage(block.id)}
+                                            title="Remove image from section"
+                                            style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                                          >
+                                            <Trash2 size={13} />
+                                            <span>Remove</span>
+                                          </button>
+                                        </div>
+                                      </div>
 
-                                    <div className="las-section-images-list">
-                                      {secImages.map((img, imgIdx) => (
-                                        <div key={imgIdx} className="las-section-image-card">
-                                          <div className="las-section-image-thumb-wrap">
-                                            <img 
-                                              src={img.url || img} 
-                                              alt={img.caption || `Section image ${imgIdx + 1}`} 
-                                              className="las-section-image-thumb" 
-                                            />
-                                          </div>
-                                          <div className="las-section-image-meta">
-                                            <div className="las-section-meta-row">
-                                              <input
-                                                type="text"
-                                                className="las-section-meta-input"
-                                                placeholder="Image caption / description..."
-                                                value={img.caption || ''}
-                                                onChange={(e) => handleUpdateSectionImage(block.id, imgIdx, { caption: e.target.value })}
+                                      <div className="las-section-images-list">
+                                        {secImages.slice(0, 1).map((img, imgIdx) => (
+                                          <div key={imgIdx} className="las-section-image-card">
+                                            <div className="las-section-image-thumb-wrap">
+                                              <img 
+                                                src={img.url || img} 
+                                                alt={img.caption || 'Section image'} 
+                                                className="las-section-image-thumb" 
                                               />
-                                              <input
-                                                type="text"
-                                                className="las-section-meta-input credit"
-                                                placeholder="Photo credit / source..."
-                                                value={img.credit || ''}
-                                                onChange={(e) => handleUpdateSectionImage(block.id, imgIdx, { credit: e.target.value })}
-                                              />
-                                              <button
-                                                type="button"
-                                                className="las-section-img-remove-btn"
-                                                onClick={() => handleRemoveSectionImage(block.id, imgIdx)}
-                                                title="Remove image from section"
-                                              >
-                                                <Trash2 size={14} />
-                                              </button>
+                                            </div>
+                                            <div className="las-section-image-meta">
+                                              <div className="las-section-meta-row">
+                                                <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
+                                                  Attached Section Image
+                                                </span>
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                              </div>
+                                  )}
+                                </div>
+                              )}
 
                               {/* Section Content (TipTap Editor) */}
                               <div className="las-section-tiptap">
@@ -3039,28 +2931,6 @@ export default function LiveArticleStudio({
                               </div>
                             )}
 
-                            <div className="las-grid-2">
-                              <div className="las-form-group">
-                                <label className="las-label">Caption</label>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={block.caption || ''}
-                                  onChange={(e) => handleUpdateBlock(block.id, { caption: e.target.value })}
-                                  placeholder="Caption describing this photo..."
-                                />
-                              </div>
-                              <div className="las-form-group">
-                                <label className="las-label">Photo Credit</label>
-                                <input 
-                                  type="text" 
-                                  className="las-input"
-                                  value={block.credit || ''}
-                                  onChange={(e) => handleUpdateBlock(block.id, { credit: e.target.value })}
-                                  placeholder="e.g. Photo by Unsplash"
-                                />
-                              </div>
-                            </div>
                           </div>
                         )}
                       </div>
@@ -3145,21 +3015,7 @@ export default function LiveArticleStudio({
                   dangerouslySetInnerHTML={{ __html: liveArticle.title || 'Untitled Headline' }}
                 />
 
-                {/* Subtitle / Standfirst */}
-                {liveArticle.subtitle && (
-                  <p 
-                    className="map-subtitle" 
-                    style={{ 
-                      fontSize: '1.18rem', 
-                      color: '#475569', 
-                      lineHeight: 1.5, 
-                      margin: '0.5rem 0 1.25rem',
-                      textAlign: formData.titleAlign || 'left' 
-                    }}
-                  >
-                    {liveArticle.subtitle}
-                  </p>
-                )}
+
 
                 {/* Author Cluster & Date */}
                 <div className="map-meta-row" style={{ margin: '1.25rem 0 2rem 0' }}>
@@ -3192,13 +3048,15 @@ export default function LiveArticleStudio({
                     if (block.type === 'section') {
                       const hasHtml = /<[a-z][\s\S]*>/i.test(block.content || '');
                       const paras = !hasHtml ? (block.content || '').split('\n').filter(p => p.trim().length > 0) : [];
-                      const secImages = Array.isArray(block.images) && block.images.length > 0
-                        ? block.images
-                        : (block.image?.url ? [block.image] : (typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+                      const secImages = (idx > 0 && Array.isArray(block.images) && block.images.length > 0)
+                        ? [block.images[0]]
+                        : (idx > 0 && block.image?.url ? [block.image] : (idx > 0 && typeof block.image === 'string' && block.image ? [{ url: block.image }] : []));
+
+                      const imgPos = block.imagePosition || (idx === 1 ? 'left' : 'top');
 
                       const renderSecImages = () => (
                         secImages.map((img, sIdx) => (
-                          <figure key={sIdx} className="map-inline-figure standard" style={{ margin: '1.25rem 0' }}>
+                          <figure key={sIdx} className={`map-inline-figure standard ${imgPos === 'left' ? 'left' : ''}`} style={{ margin: imgPos === 'left' ? '0.4rem 2.25rem 1.5rem 0' : '1.25rem 0' }}>
                             <img src={img.url || img} alt={img.caption || 'Section image'} className="map-inline-img" />
                             {(img.caption || img.credit) && (
                               <figcaption className="map-inline-caption">
@@ -3207,6 +3065,16 @@ export default function LiveArticleStudio({
                             )}
                           </figure>
                         ))
+                      );
+
+                      const renderSectionContent = () => (
+                        hasHtml ? (
+                          <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
+                        ) : (
+                          paras.map((p, pIdx) => (
+                            <p key={pIdx}>{p}</p>
+                          ))
+                        )
                       );
 
                       return (
@@ -3226,15 +3094,10 @@ export default function LiveArticleStudio({
                               />
                             )
                           )}
-                          {block.imagePosition !== 'bottom' && renderSecImages()}
-                          {hasHtml ? (
-                            <div className="map-body-rich-content" dangerouslySetInnerHTML={{ __html: block.content }} />
-                          ) : (
-                            paras.map((p, pIdx) => (
-                              <p key={pIdx}>{p}</p>
-                            ))
-                          )}
-                          {block.imagePosition === 'bottom' && renderSecImages()}
+                          {imgPos === 'left' && renderSecImages()}
+                          {imgPos === 'top' && renderSecImages()}
+                          {renderSectionContent()}
+                          {imgPos === 'bottom' && renderSecImages()}
                           {!block.heading && secImages.length === 0 && (!block.content || (!hasHtml && paras.length === 0)) && (
                             <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Empty section...</p>
                           )}

@@ -100,7 +100,7 @@ export const TaxonomyService = {
   // Authors
   async getAuthors() {
     try {
-      const res = await fetch('/api/authors');
+      const res = await fetch(`/api/authors?_t=${Date.now()}`, { cache: 'no-store' });
       const json = await res.json();
       return json.success ? json.data : [];
     } catch (e) {
@@ -108,9 +108,24 @@ export const TaxonomyService = {
     }
   },
 
+  async getAdminAuthors() {
+    try {
+      const token = AuthService.getToken();
+      const res = await fetch(`/api/admin/authors?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) return json.data;
+      }
+    } catch (e) {}
+    return this.getAuthors();
+  },
+
   async getAuthorBySlug(slug, params = {}) {
     const qs = new URLSearchParams(params).toString();
-    const url = `/api/authors/${slug}${qs ? `?${qs}` : ''}`;
+    const url = `/api/authors/${encodeURIComponent(slug)}${qs ? `?${qs}` : ''}`;
     const res = await fetch(url);
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Author not found');
@@ -156,6 +171,21 @@ export const TaxonomyService = {
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete author');
     return true;
+  },
+
+  async bulkDeleteAuthors(ids) {
+    const token = AuthService.getToken();
+    const res = await fetch('/api/admin/authors/bulk-delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ ids })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to bulk delete authors');
+    return json;
   },
 
   // Topics

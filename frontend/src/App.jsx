@@ -209,8 +209,7 @@ export const parseCurrentRoute = () => {
       if (slug) return { route: 'tag', slug };
     }
     if (pathname.startsWith('/author/')) {
-      const slug = pathname.replace('/author/', '').split('/')[0].split('?')[0];
-      if (slug) return { route: 'author', slug };
+      return { route: 'not-found' };
     }
     if (pathname === '/search' || pathname.startsWith('/search')) {
       const params = new URLSearchParams(window.location.search);
@@ -828,8 +827,6 @@ export default function App() {
           setActiveCategory('topic:' + (route.slug || ''));
         } else if (route.route === 'tag') {
           setActiveCategory('tag:' + (route.slug || ''));
-        } else if (route.route === 'author') {
-          setActiveCategory('author:' + (route.slug || ''));
         } else if (route.route === 'brand') {
           setActiveCategory(route.slug);
         } else if (route.route === 'dynamic-page') {
@@ -1307,9 +1304,9 @@ export default function App() {
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
           />
-        ) : (currentRoute.route === 'tag' || currentRoute.route === 'author') ? (
+        ) : currentRoute.route === 'tag' ? (
           <DynamicEntityPage
-            type={currentRoute.route}
+            type="tag"
             slug={currentRoute.slug}
             onBack={handleBackToHome}
             onSelectStory={handleSelectStory}

@@ -183,21 +183,73 @@ export default function DynamicEntityPage({
         <div className="section-header-row" style={{ marginBottom: '1.25rem', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid var(--border-light, #e2e8f0)', paddingBottom: '0.85rem' }}>
           <div className="section-title-box">
             {type === 'author' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexWrap: 'wrap' }}>
                 <img
                   src={entity.image || entity.profileImage || fallbackDefaultImg}
                   alt={entity.name}
-                  style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand-primary, #ea580c)' }}
+                  style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--brand-primary, #dc2626)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                  onError={e => { e.currentTarget.src = fallbackDefaultImg; }}
                 />
-                <div>
-                  <h1 className="section-title" style={{ margin: '0 0 0.15rem', fontSize: '1.5rem', fontWeight: 800 }}>{entity.name}</h1>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--brand-primary, #ea580c)', fontWeight: '700' }}>
-                    {entity.designation || 'Staff Correspondent'}
+                <div style={{ flex: 1, minWidth: '260px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <h1 className="section-title" style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>{entity.name}</h1>
+                    <span style={{
+                      fontSize: '0.76rem',
+                      fontWeight: 750,
+                      color: '#0284c7',
+                      background: 'rgba(2, 132, 199, 0.1)',
+                      border: '1px solid rgba(2, 132, 199, 0.28)',
+                      padding: '2px 9px',
+                      borderRadius: '999px'
+                    }}>
+                      {pagination?.total || entity.publishedArticlesCount || entity.totalPublishedArticles || 0} Published Articles
+                    </span>
                   </div>
+
+                  <div style={{ fontSize: '0.88rem', color: 'var(--brand-primary, #dc2626)', fontWeight: '750', marginTop: '2px' }}>
+                    {entity.designation || 'Technology Writer'}
+                  </div>
+
                   {entity.bio && (
-                    <p style={{ margin: '0.2rem 0 0', maxWidth: '720px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.4 }}>
+                    <p style={{ margin: '0.4rem 0 0.6rem', maxWidth: '760px', color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
                       {entity.bio}
                     </p>
+                  )}
+
+                  {/* Author Social Media Links */}
+                  {entity.socialLinks && Object.values(entity.socialLinks).some(Boolean) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                      {entity.socialLinks.linkedin && (
+                        <a href={entity.socialLinks.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" style={{ color: '#0077b5', display: 'inline-flex' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                      )}
+                      {entity.socialLinks.facebook && (
+                        <a href={entity.socialLinks.facebook} target="_blank" rel="noreferrer" title="Facebook" style={{ color: '#1877f2', display: 'inline-flex' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+                        </a>
+                      )}
+                      {entity.socialLinks.instagram && (
+                        <a href={entity.socialLinks.instagram} target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#e4405f', display: 'inline-flex' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                      )}
+                      {entity.socialLinks.twitter && (
+                        <a href={entity.socialLinks.twitter} target="_blank" rel="noreferrer" title="X (Twitter)" style={{ color: '#0f172a', display: 'inline-flex' }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                      )}
+                      {entity.socialLinks.youtube && (
+                        <a href={entity.socialLinks.youtube} target="_blank" rel="noreferrer" title="YouTube" style={{ color: '#ff0000', display: 'inline-flex' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        </a>
+                      )}
+                      {entity.socialLinks.website && (
+                        <a href={entity.socialLinks.website} target="_blank" rel="noreferrer" title="Personal Website" style={{ color: '#475569', display: 'inline-flex' }}>
+                          <Globe size={16} />
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

@@ -211,9 +211,19 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       return <AdminTagsView onShowToast={onShowToast} />;
     }
 
-    // 5. Authors: /admin/authors
-    if (currentPath === '/admin/authors') {
-      return <AdminAuthorsView onShowToast={onShowToast} />;
+    // 5. Authors: /admin/authors or /admin/authors/:author_name
+    if (currentPath === '/admin/authors' || currentPath.startsWith('/admin/authors/')) {
+      const rawAuthorSlug = currentPath.startsWith('/admin/authors/')
+        ? decodeURIComponent(currentPath.replace('/admin/authors/', '').split('/')[0].split('?')[0] || '')
+        : null;
+
+      return (
+        <AdminAuthorsView 
+          authorSlug={rawAuthorSlug || null}
+          onNavigate={handleNavigate}
+          onShowToast={onShowToast} 
+        />
+      );
     }
 
     // 6. Homepage CMS & Live Studio: /admin/homepage

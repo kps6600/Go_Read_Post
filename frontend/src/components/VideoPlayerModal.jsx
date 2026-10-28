@@ -5,6 +5,8 @@ import {
   Maximize2, Minimize2, Lightbulb, Volume2, ArrowLeft, Send
 } from 'lucide-react';
 import { VIDEO_EPISODES } from '../data/videoData';
+import { CommentService } from '../services/commentService';
+import { AuthService } from '../services/authService';
 import './VideoPlayerModal.css';
 
 export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
@@ -20,32 +22,33 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
   
   // Interactive discussion comments
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      name: 'Aditya Mathur',
-      role: 'Principal, Stellaris Venture Partners',
-      time: '3 hours ago',
-      text: 'The breakdown on domestic AI token economics vs Silicon Valley cloud margin models is by far the most lucid explanation in Indian tech media right now.',
-      likes: 42
-    },
-    {
-      id: 2,
-      name: 'Rohit Shenoy',
-      role: 'VP Engineering, Sarvam AI',
-      time: '6 hours ago',
-      text: 'Crucial point about megawatt power distribution and co-locating datacenters directly next to solar farms in southern India. Thermal management is where software meets hard reality.',
-      likes: 29
-    },
-    {
-      id: 3,
-      name: 'Priya Sundaram',
-      role: 'Founder, IndicFlow',
-      time: '1 day ago',
-      text: 'Krutrim’s approach to synthetic vernacular token generation solves the massive context drop typical of western foundation models on regional scripts.',
-      likes: 18
-    }
-  ]);
+  const [comments, setComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+
+  // Fetch comments for active video from backend
+  useEffect(() => {
+    const slug = currentVideo?.slug || currentVideo?.id;
+    if (!slug) return;
+    let isMounted = true;
+    setLoadingComments(true);
+
+    CommentService.getComments(slug, 'video')
+      .then((data) => {
+        if (isMounted && Array.isArray(data)) {
+          setComments(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load video discussion:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingComments(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentVideo]);
 
   // Helper to safely parse likes from number, string, or undefined
   const parseLikesCount = (val) => {
@@ -114,19 +117,56 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
     }
   };
 
-  const handleAddComment = (e) => {
+  const handleAddComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    const newEntry = {
-      id: Date.now(),
-      name: 'Guest Operator',
-      role: 'Tech Community Member',
-      time: 'Just now',
-      text: newComment.trim(),
-      likes: 0
-    };
-    setComments([newEntry, ...comments]);
+
+    const user = AuthService.getCurrentUser();
+    const authorVal = user ? (user.name || user.username || 'Community Reader') : 'Tech Community Member';
+    const roleVal = user ? (user.title || (user.role === 'ADMIN' ? 'Editorial Team' : 'Community Member')) : 'Founder / Operator';
+    const targetSlug = currentVideo?.slug || currentVideo?.id;
+    const submittedText = newComment.trim();
     setNewComment('');
+
+    try {
+      const res = await CommentService.postComment(targetSlug, {
+        author: authorVal,
+        role: roleVal,
+        text: submittedText,
+        contentType: 'video',
+        contentTitle: currentVideo?.title || '',
+        videoId: currentVideo?.id || currentVideo?.slug
+      });
+      if (res?.data) {
+        setComments(prev => [res.data, ...prev]);
+      }
+    } catch (err) {
+      console.warn('Could not post comment to backend, displaying locally:', err);
+      const fallbackEntry = {
+        id: `local_${Date.now()}`,
+        _id: `local_${Date.now()}`,
+        author: authorVal,
+        role: roleVal,
+        time: 'Just now',
+        text: submittedText,
+        likes: 0
+      };
+      setComments(prev => [fallbackEntry, ...prev]);
+    }
+  };
+
+  const handleLikeVideoComment = async (commentId) => {
+    try {
+      const user = AuthService.getCurrentUser();
+      const userIdentifier = user ? String(user.id || user._id || user.email) : 'guest';
+      const res = await CommentService.likeComment(commentId, userIdentifier);
+      setComments(prev => prev.map(c => {
+        if ((c._id || c.id) === commentId) {
+          return { ...c, likes: res.likes, isLiked: res.liked };
+        }
+        return c;
+      }));
+    } catch (e) {}
   };
 
   // Find other episodes for the playlist queue
@@ -450,29 +490,91 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
 
                   {/* Comments list */}
                   <div className="cvp-comments-list">
-                    {comments.map((c) => (
-                      <div key={c.id} className="cvp-comment-card">
-                        <div className="cvp-comment-avatar">
-                          {c.name.charAt(0)}
-                        </div>
-                        <div className="cvp-comment-body">
-                          <div className="cvp-comment-header">
-                            <div>
-                              <strong className="cvp-comment-name">{c.name}</strong>
-                              <span className="cvp-comment-role">• {c.role}</span>
-                            </div>
-                            <span className="cvp-comment-time">{c.time}</span>
-                          </div>
-                          <p className="cvp-comment-text">{c.text}</p>
-                          <div className="cvp-comment-footer">
-                            <button type="button" className="cvp-comment-like-btn">
-                              <ThumbsUp size={12} />
-                              <span>{c.likes}</span>
-                            </button>
-                          </div>
-                        </div>
+                    {loadingComments ? (
+                      <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                        Loading operator perspectives...
                       </div>
-                    ))}
+                    ) : comments.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+                        Be the first to share an operator takeaway on this masterclass!
+                      </div>
+                    ) : (
+                      comments.map((c) => {
+                        const commentKey = c._id || c.id;
+                        const authorName = c.author || c.name || 'Community Member';
+                        const isPinned = Boolean(c.isPinned);
+
+                        return (
+                          <div key={commentKey} className={`cvp-comment-card ${isPinned ? 'pinned-comment' : ''}`} style={isPinned ? { borderLeft: '3px solid #f59e0b', background: 'rgba(245, 158, 11, 0.05)' } : undefined}>
+                            <div className="cvp-comment-avatar">
+                              {authorName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="cvp-comment-body">
+                              <div className="cvp-comment-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                  <strong className="cvp-comment-name">{authorName}</strong>
+                                  {c.role && <span className="cvp-comment-role">• {c.role}</span>}
+                                  {isPinned && (
+                                    <span style={{ 
+                                      background: '#fef3c7', 
+                                      color: '#b45309', 
+                                      border: '1px solid #fde68a', 
+                                      borderRadius: '4px', 
+                                      fontSize: '0.66rem', 
+                                      fontWeight: 800, 
+                                      padding: '1px 5px',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}>
+                                      📌 Featured
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="cvp-comment-time">{c.time || 'Recently'}</span>
+                              </div>
+                              <p className="cvp-comment-text">{c.text}</p>
+
+                              {/* Official Editorial Staff Response */}
+                              {c.adminReply && c.adminReply.text && (
+                                <div style={{
+                                  marginTop: '0.65rem',
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  borderLeft: '3px solid #dc2626',
+                                  borderRadius: '6px',
+                                  padding: '0.55rem 0.8rem',
+                                  fontSize: '0.82rem'
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                                    <span style={{ fontWeight: 800, color: '#ef4444', fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                      🛡️ {c.adminReply.author || 'Editorial Desk'}
+                                    </span>
+                                    <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', fontSize: '0.64rem', fontWeight: 750, padding: '1px 5px', borderRadius: '3px' }}>
+                                      STAFF RESPONSE
+                                    </span>
+                                  </div>
+                                  <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.85)', lineHeight: 1.45 }}>
+                                    {c.adminReply.text}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="cvp-comment-footer">
+                                <button 
+                                  type="button" 
+                                  className={`cvp-comment-like-btn ${c.isLiked ? 'active' : ''}`}
+                                  onClick={() => handleLikeVideoComment(commentKey)}
+                                  title="Like comment"
+                                >
+                                  <ThumbsUp size={12} fill={c.isLiked ? 'currentColor' : 'none'} />
+                                  <span>{c.likes || 0}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}

@@ -1940,34 +1940,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                               onChange={(e) => setFormData(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, alt: e.target.value } }))}
                             />
                           </div>
-
-                          <div className="aem-form-group">
-                            <label className="aem-label">
-                              <span>Photo Credit & Attribution</span>
-                              <span className="aem-label-hint">Photographer or agency</span>
-                            </label>
-                            <input 
-                              type="text" 
-                              className="aem-input"
-                              placeholder="e.g. GoReadPost Media / Reuters / Unsplash"
-                              value={formData.featuredImage.credit}
-                              onChange={(e) => setFormData(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, credit: e.target.value } }))}
-                            />
-                          </div>
-
-                          <div className="aem-form-group">
-                            <label className="aem-label">
-                              <span>Image Caption / Context</span>
-                              <span className="aem-label-hint">Shown under hero image</span>
-                            </label>
-                            <input 
-                              type="text" 
-                              className="aem-input"
-                              placeholder="e.g. Keynote address at the Global AI Summit 2026"
-                              value={formData.featuredImage.caption}
-                              onChange={(e) => setFormData(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, caption: e.target.value } }))}
-                            />
-                          </div>
                         </div>
                       </div>
                     ) : (
@@ -3416,13 +3388,13 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 </span>
               )}
             </div>
-            {(coverCaption || coverCredit) && (
-              <div className="abv-detail-cover-caption">
-                {coverCaption && <span>{coverCaption}</span>}
-                {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
-              </div>
-            )}
           </div>
+          {(coverCaption || coverCredit) && (
+            <div className="abv-detail-cover-caption">
+              {coverCaption && <span>{coverCaption}</span>}
+              {coverCredit && <span style={{ opacity: 0.8 }}>Photo Credit: {coverCredit}</span>}
+            </div>
+          )}
 
           {/* Headline & Subtitle */}
           <div>

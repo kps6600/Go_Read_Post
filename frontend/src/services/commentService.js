@@ -5,14 +5,19 @@ const ADMIN_API_BASE = '/api/admin/comments';
 
 export const CommentService = {
   /**
-   * Fetch all approved comments for a given story slug (public)
+   * Fetch all approved comments for a given story or video slug (public)
    * @param {string} slug 
+   * @param {'article'|'video'} [contentType='article']
    * @returns {Promise<Array>}
    */
-  async getComments(slug) {
+  async getComments(slug, contentType = 'article') {
     if (!slug) return [];
     try {
-      const res = await fetch(`${API_BASE}?slug=${encodeURIComponent(slug)}`);
+      const query = new URLSearchParams({
+        slug: slug,
+        contentType: contentType || 'article'
+      });
+      const res = await fetch(`${API_BASE}?${query.toString()}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -28,13 +33,12 @@ export const CommentService = {
   },
 
   /**
-   * Post a new review/perspective permanently to the database.
-   * Review is created with 'pending_review' status on the server.
+   * Post a new perspective permanently to the database.
    * @param {string} storySlug 
-   * @param {{ author: string, role: string, text: string }} payload 
+   * @param {{ author: string, role: string, text: string, contentType?: 'article'|'video', contentTitle?: string, videoId?: string }} payload 
    * @returns {Promise<{ data: Object, message: string }>}
    */
-  async postComment(storySlug, { author, role, text }) {
+  async postComment(storySlug, { author, role, text, contentType = 'article', contentTitle = '', videoId = null }) {
     if (!storySlug || !text) {
       throw new Error('Story identifier and comment text are required');
     }
@@ -53,7 +57,10 @@ export const CommentService = {
         storySlug,
         author: author || 'Community Reader',
         role: role || 'Community Member',
-        text
+        text,
+        contentType: contentType || 'article',
+        contentTitle: contentTitle || '',
+        videoId: videoId || null
       })
     });
 
@@ -63,7 +70,7 @@ export const CommentService = {
     }
     return {
       data: json.data,
-      message: json.message || 'Your perspective has been submitted for editorial review.'
+      message: json.message || 'Your perspective has been submitted successfully.'
     };
   },
 
@@ -152,12 +159,14 @@ export const CommentService = {
   },
 
   /**
-   * Admin: Fetch all reviews/comments with tabs, filters, search, sorting & database statistics
-   * @param {{ status?: string, search?: string, sortBy?: string, limit?: number, page?: number }} params
+   * Admin: Fetch reviews/comments with tabs, content filters (Article vs Video), specific story filter, search & sorting
+   * @param {{ status?: string, contentType?: string, storySlug?: string, search?: string, sortBy?: string, limit?: number, page?: number }} params
    */
   async getAdminComments(params = {}) {
     const query = new URLSearchParams();
     if (params.status && params.status !== 'all') query.append('status', params.status);
+    if (params.contentType && params.contentType !== 'all') query.append('contentType', params.contentType);
+    if (params.storySlug && params.storySlug !== 'all') query.append('storySlug', params.storySlug);
     if (params.search && params.search.trim()) query.append('search', params.search.trim());
     if (params.sortBy) query.append('sortBy', params.sortBy);
     if (params.limit) query.append('limit', params.limit);
@@ -184,10 +193,85 @@ export const CommentService = {
           pendingCount: 0, 
           rejectedHiddenCount: 0,
           rejectedCount: 0, 
-          hiddenCount: 0 
+          hiddenCount: 0,
+          articlesCount: 0,
+          videosCount: 0
         } 
       };
     }
+  },
+
+  /**
+   * Admin: Fetch list of unique Articles & Videos that have discussions
+   * @returns {Promise<Array<{ storySlug: string, contentType: 'article'|'video', contentTitle: string, totalCount: number, approvedCount: number, pendingCount: number, rejectedCount: number }>>}
+   */
+  async getCommentedContents() {
+    try {
+      const res = await fetch(`${ADMIN_API_BASE}/contents`, {
+        headers: AuthService.getAdminHeaders()
+      });
+      const json = await res.json();
+      if (json && json.success && Array.isArray(json.data)) {
+        return json.data;
+      }
+      return [];
+    } catch (err) {
+      console.warn('Error fetching commented contents:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Admin: Post or edit an official Editorial reply
+   * @param {string|number} commentId 
+   * @param {string} text 
+   * @param {string} [author='Editorial Desk']
+   */
+  async adminReplyComment(commentId, text, author = 'Editorial Desk') {
+    const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}/reply`, {
+      method: 'POST',
+      headers: AuthService.getAdminHeaders(),
+      body: JSON.stringify({ text, author })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to post editorial reply');
+    }
+    return json.data;
+  },
+
+  /**
+   * Admin: Remove official Editorial reply
+   * @param {string|number} commentId 
+   */
+  async deleteAdminReply(commentId) {
+    const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}/reply`, {
+      method: 'DELETE',
+      headers: AuthService.getAdminHeaders()
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to remove editorial reply');
+    }
+    return true;
+  },
+
+  /**
+   * Admin: Toggle or set pinned status
+   * @param {string|number} commentId 
+   * @param {boolean} [isPinned]
+   */
+  async togglePinComment(commentId, isPinned) {
+    const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}/pin`, {
+      method: 'PUT',
+      headers: AuthService.getAdminHeaders(),
+      body: JSON.stringify({ isPinned })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to toggle pin status');
+    }
+    return json.data;
   },
 
   /**
