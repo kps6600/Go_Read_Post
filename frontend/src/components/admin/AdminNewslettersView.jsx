@@ -345,46 +345,30 @@ export default function AdminNewslettersView({ onShowToast }) {
       {/* KPI Cards */}
       <div className="adv-stats-row" style={{ marginTop: '0.25rem', marginBottom: '1.5rem' }}>
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
-            <Mail size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Active Publications</span>
             <div className="adv-stat-number">{publications.length}</div>
-            <span className="adv-stat-sub">Across 6 editorial franchises</span>
           </div>
         </div>
 
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(14, 165, 233, 0.12)', color: '#0284c7' }}>
-            <Users size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Total Subscribers</span>
             <div className="adv-stat-number">{(totalSubscribers / 1000).toFixed(0)}K+</div>
-            <span className="adv-stat-sub">Ecosystem founders &amp; VCs</span>
           </div>
         </div>
 
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-            <Send size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Dispatches Delivered</span>
             <div className="adv-stat-number">142+</div>
-            <span className="adv-stat-sub">100% Zero-spam verified</span>
           </div>
         </div>
 
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
-            <CheckCircle size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Average Open Rate</span>
             <div className="adv-stat-number">51.4%</div>
-            <span className="adv-stat-sub">Industry benchmark: 22%</span>
           </div>
         </div>
       </div>

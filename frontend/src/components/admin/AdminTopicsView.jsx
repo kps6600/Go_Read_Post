@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Hash, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, 
   AlertCircle, AlertTriangle, CheckCircle, Check, X, Globe, 
-  ChevronRight, FileText, CheckSquare, Layers, Eye, EyeOff
+  ChevronRight, FileText, CheckSquare, Layers, Eye, EyeOff,
+  Filter, ChevronDown, Clock
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 
@@ -27,6 +28,24 @@ export default function AdminTopicsView({ onShowToast }) {
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
+
+  // Unified Filter Popover state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen]);
+
+  const activeFilterCount = (categoryFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (sortBy !== 'name_asc' ? 1 : 0);
 
   // Modal / Drawer state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -357,39 +376,10 @@ export default function AdminTopicsView({ onShowToast }) {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Hash size={26} color="var(--brand-primary, #dc2626)" />
-              Topics
-            </h1>
-            <p style={{ margin: '0.3rem 0 0', color: '#64748b', fontSize: '0.92rem' }}>
-              Organize articles around subjects readers want to explore.
-            </p>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Topics</h1>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={() => loadData(true)}
-              disabled={refreshing}
-              title="Refresh Topics Data"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.65rem 0.95rem',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '9px',
-                color: '#475569',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <RefreshCw size={15} className={refreshing ? 'rotate-icon' : ''} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
-              <span>Refresh</span>
-            </button>
-
             <button
               type="button"
               onClick={openCreateModal}
@@ -418,38 +408,56 @@ export default function AdminTopicsView({ onShowToast }) {
       {/* ── Summary Stats Strip ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1rem',
         marginBottom: '1.25rem'
       }}>
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-            <Hash size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Total Topics</div>
-          </div>
+        <div 
+          onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'all' ? '1.5px solid #0f172a' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by all topics"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Topics</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
-            <CheckCircle size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.active}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Active Subjects</div>
-          </div>
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'active' ? 'all' : 'active'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'active' ? '1.5px solid #059669' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by active subjects"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.active}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Active Subjects</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
-            <FileText size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#2563eb', lineHeight: 1 }}>{stats.totalArticles}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Published Stories</div>
-          </div>
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'inactive' ? 'all' : 'inactive'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'inactive' ? '1.5px solid #dc2626' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by not active topics"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{stats.inactive}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Not Active</div>
         </div>
       </div>
 
@@ -463,7 +471,7 @@ export default function AdminTopicsView({ onShowToast }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '0.85rem',
-        marginBottom: '1rem',
+        marginBottom: '0.75rem',
         flexWrap: 'wrap'
       }}>
         {/* Search */}
@@ -507,196 +515,255 @@ export default function AdminTopicsView({ onShowToast }) {
           )}
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-          {/* Associated Category Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Category:</span>
-            <select
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                setCurrentPage(1);
-              }}
+        {/* Filter Popover Button */}
+        <div ref={filterRef} style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setIsFilterOpen(prev => !prev)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0.55rem 0.95rem',
+              borderRadius: '9px',
+              border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
+              background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
+              color: activeFilterCount > 0 ? '#dc2626' : '#334155',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title="Filter and sort topics"
+          >
+            <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span style={{
+                background: '#dc2626',
+                color: '#ffffff',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                borderRadius: '10px',
+                padding: '1px 6px',
+                lineHeight: 1.2
+              }}>
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown 
+              size={14} 
               style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="all">All Categories</option>
-              {categories.map(c => (
-                <option key={c._id || c.slug} value={c._id || c.slug}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+                transform: isFilterOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.18s ease',
+                color: activeFilterCount > 0 ? '#dc2626' : '#64748b'
+              }} 
+            />
+          </button>
 
-          {/* Status Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active Only</option>
-              <option value="inactive">Inactive Only</option>
-            </select>
-          </div>
+          {isFilterOpen && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: 'calc(100% + 8px)',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
+              width: '280px',
+              zIndex: 50,
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.85rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+                  <Filter size={14} color="#dc2626" />
+                  <span>Filter Topics</span>
+                </div>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategoryFilter('all');
+                      setStatusFilter('all');
+                      setSortBy('name_asc');
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#dc2626',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    Reset All
+                  </button>
+                )}
+              </div>
 
-          {/* Sort Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Sort:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="name_asc">Name (A-Z)</option>
-              <option value="name_desc">Name (Z-A)</option>
-              <option value="articles_desc">Most Published Articles</option>
-              <option value="updated_desc">Recently Updated</option>
-            </select>
-          </div>
+              {/* Category Filter */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Category
+                </label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => {
+                    setCategoryFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem',
+                    fontWeight: 500,
+                    color: '#1e293b',
+                    background: '#ffffff',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map(c => (
+                    <option key={c._id || c.slug} value={c._id || c.slug}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem',
+                    fontWeight: 500,
+                    color: '#1e293b',
+                    background: '#ffffff',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  <option value="all">All Status ({topics.length})</option>
+                  <option value="active">Active Only ({stats.active})</option>
+                  <option value="inactive">Inactive Only ({stats.inactive})</option>
+                </select>
+              </div>
+
+              {/* Sort By */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Sort By
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem',
+                    fontWeight: 500,
+                    color: '#1e293b',
+                    background: '#ffffff',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  <option value="name_asc">Name (A-Z)</option>
+                  <option value="name_desc">Name (Z-A)</option>
+                  <option value="articles_desc">Most Published Articles</option>
+                  <option value="updated_desc">Recently Updated</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '10px 16px',
-          borderRadius: '10px',
-          marginBottom: '1rem',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 700,
-              fontSize: '0.78rem'
-            }}>
-              {selectedIds.size} Selected
+      {/* ── Sub-Header Bar: Select All, Bulk Actions, & Count (Exact match to AdminPostsView) ── */}
+      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label className="abv-select-all-label" title="Select all topics">
+            <input 
+              type="checkbox" 
+              checked={selectedIds.size > 0 && selectedIds.size === filteredAndSorted.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filteredAndSorted.map(t => t._id || t.slug)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+              style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+            />
+            <span>Select All</span>
+          </label>
+          {selectedIds.size > 0 && (
+            <span className="abv-selected-pill">
+              {selectedIds.size} of {filteredAndSorted.length} selected
             </span>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set(filteredAndSorted.map(t => t._id || t.slug)))}
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'underline' }}
-            >
-              Select All ({filteredAndSorted.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.82rem', textDecoration: 'underline' }}
-            >
-              Clear Selection
-            </button>
-          </div>
+          )}
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => handleBulkStatus(true)}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                background: '#ffffff',
-                border: '1px solid #10b981',
-                borderRadius: '7px',
-                color: '#047857',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <Check size={14} /> Set Active
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBulkStatus(false)}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '7px',
-                color: '#475569',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <EyeOff size={14} /> Set Inactive
-            </button>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 14px',
-                backgroundColor: '#dc2626',
-                border: 'none',
-                borderRadius: '7px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                cursor: 'pointer'
-              }}
-            >
-              <Trash2 size={14} />
-              {bulkProcessing ? 'Processing...' : `Delete Selected (${selectedIds.size})`}
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <div className="abv-bulk-actions-group">
+              <button
+                type="button"
+                onClick={() => handleBulkStatus(false)}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-draft"
+                title="Set selected topic(s) to inactive"
+              >
+                <Clock size={14} />
+                <span>Send Draft</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-delete"
+                title="Delete selected topic(s)"
+              >
+                <Trash2 size={14} />
+                <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+              </button>
+            </div>
+          )}
+
+          <div className="abv-cards-count-badge">
+            <span>
+              {statusFilter === 'active' && 'Active Topics: '}
+              {statusFilter === 'inactive' && 'Inactive Topics: '}
+              {statusFilter === 'all' && 'All Posts: '}
+              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'article' : 'articles'}
+            </span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Topics Table Card ── */}
       <div style={{
@@ -710,22 +777,7 @@ export default function AdminTopicsView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '850px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}>
-                  <input 
-                    type="checkbox"
-                    checked={paginatedTopics.length > 0 && paginatedTopics.every(t => selectedIds.has(t._id || t.slug))}
-                    onChange={(e) => {
-                      const next = new Set(selectedIds);
-                      if (e.target.checked) {
-                        paginatedTopics.forEach(t => next.add(t._id || t.slug));
-                      } else {
-                        paginatedTopics.forEach(t => next.delete(t._id || t.slug));
-                      }
-                      setSelectedIds(next);
-                    }}
-                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                  />
-                </th>
+                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   Topic Name &amp; Description
                 </th>
@@ -830,20 +882,21 @@ export default function AdminTopicsView({ onShowToast }) {
                       {/* Name & Description */}
                       <td style={{ padding: '0.9rem 1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
-                            background: top.image ? `url(${top.image}) center/cover no-repeat` : '#f1f5f9',
-                            border: '1px solid #e2e8f0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--brand-primary)',
-                            flexShrink: 0
-                          }}>
-                            {!top.image && <Hash size={18} />}
-                          </div>
+                          {top.image && (
+                            <img
+                              src={top.image}
+                              alt=""
+                              style={{
+                                width: '36px',
+                                height: '36px',
+                                borderRadius: '10px',
+                                objectFit: 'cover',
+                                border: '1px solid #e2e8f0',
+                                flexShrink: 0
+                              }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          )}
                           <div>
                             <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{top.name}</strong>
                             {top.description && (
@@ -983,7 +1036,7 @@ export default function AdminTopicsView({ onShowToast }) {
                             href={`/topic/${top.slug}`}
                             target="_blank"
                             rel="noreferrer"
-                            title="Preview Topic Archive"
+                            title="View Live Topic Page"
                             style={{
                               padding: '6px',
                               background: '#f8fafc',
@@ -994,7 +1047,7 @@ export default function AdminTopicsView({ onShowToast }) {
                               alignItems: 'center'
                             }}
                           >
-                            <Eye size={14} />
+                            <ExternalLink size={14} />
                           </a>
 
                           <button

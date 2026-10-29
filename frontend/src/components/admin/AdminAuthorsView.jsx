@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X, 
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
-  Calendar, FileText, User
+  Calendar, FileText, User, LayoutGrid, List
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { AuthService } from '../../services/authService';
@@ -53,6 +53,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState('list');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -698,15 +699,26 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                     <div className="aav-detail-designation-tag">
                       {author.designation || 'Staff Reporter'}
                     </div>
+                  </div>
+                </div>
 
-                    <div className="aav-detail-badges-row">
-                      <div className="aav-detail-badge-metric" title="Auto-calculated published articles count">
-                        <BookOpen size={13} />
-                        <span>{publishedCount} Published {publishedCount === 1 ? 'Article' : 'Articles'}</span>
-                        <Lock size={11} style={{ opacity: 0.7 }} />
-                      </div>
+                <div className="aav-detail-hero-actions">
+                  <div className="aav-detail-badges-row">
+                    <div className="aav-detail-badge-metric" title="Auto-calculated published articles count">
+                      <BookOpen size={13} />
+                      <span>{publishedCount} Published {publishedCount === 1 ? 'Article' : 'Articles'}</span>
+                      <Lock size={11} style={{ opacity: 0.7 }} />
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(author)}
+                    className="aav-detail-btn-edit"
+                  >
+                    <Edit2 size={15} />
+                    <span>Edit Author</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -799,7 +811,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
               </div>
 
               {/* Right Column: Social Media Links & Metadata */}
-              <div>
+              <div className="aav-detail-sidebar-col">
                 {/* Social Media Links Card */}
                 <div className="aav-detail-card">
                   <div className="aav-detail-card-header">
@@ -944,6 +956,25 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             {filteredAuthors.length} {filteredAuthors.length === 1 ? 'Author' : 'Authors'}
           </span>
 
+          <div className="aav-view-toggle">
+            <button
+              type="button"
+              className={`aav-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="List View"
+            >
+              <List size={16} />
+            </button>
+            <button
+              type="button"
+              className={`aav-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+            >
+              <LayoutGrid size={16} />
+            </button>
+          </div>
+
           <button 
             type="button"
             onClick={loadAuthors} 
@@ -977,6 +1008,169 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             <Plus size={16} />
             <span>Add Author Profile</span>
           </button>
+        </div>
+      ) : viewMode === 'list' ? (
+        <div className="aav-list">
+          {filteredAuthors.map((author) => {
+            const avatarUrl = author.image || author.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80';
+            const id = author._id || author.slug;
+            const isSelected = selectedIds.has(id);
+            const publishedCount = author.publishedArticlesCount ?? author.totalPublishedArticles ?? 0;
+            const socials = author.socialLinks || {};
+
+            return (
+              <div
+                key={id}
+                className={`aav-list-card ${isSelected ? 'selected' : ''}`}
+              >
+                {/* Select Checkbox */}
+                <div className="aav-list-check">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      const next = new Set(selectedIds);
+                      if (e.target.checked) next.add(id);
+                      else next.delete(id);
+                      setSelectedIds(next);
+                    }}
+                    style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
+                  />
+                </div>
+
+                {/* Author Avatar, Name & Designation */}
+                <div className="aav-list-author-info">
+                  <img
+                    src={avatarUrl}
+                    alt={author.name}
+                    className="aav-list-avatar"
+                    onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80'; }}
+                  />
+                  <div className="aav-list-names">
+                    <div className="aav-list-name-row">
+                      <h3 className="aav-author-name" title={author.name}>{author.name}</h3>
+                      <div className="aav-article-count-pill" title="Automatically calculated number of published blog posts assigned to this author">
+                        <BookOpen size={11} />
+                        <span>{publishedCount} Published {publishedCount === 1 ? 'Article' : 'Articles'}</span>
+                      </div>
+                    </div>
+                    <p className="aav-author-designation" title={author.designation || 'Staff Reporter'}>
+                      {author.designation || 'Staff Reporter'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Short Biography Snippet */}
+                <p className="aav-list-bio" title={author.bio}>
+                  {author.bio || 'GoReadPost editorial journalist covering innovative startups, tech disruptors, and founders.'}
+                </p>
+
+                {/* Social Links */}
+                <div className="aav-list-socials">
+                  <span className="aav-list-social-label">
+                    Social:
+                  </span>
+                  
+                  <a
+                    href={socials.linkedin || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.linkedin ? '' : 'disabled'}`}
+                    title={socials.linkedin ? `LinkedIn: ${socials.linkedin}` : 'No LinkedIn link'}
+                  >
+                    <SocialSvg name="linkedin" size={13} />
+                  </a>
+
+                  <a
+                    href={socials.facebook || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.facebook ? '' : 'disabled'}`}
+                    title={socials.facebook ? `Facebook: ${socials.facebook}` : 'No Facebook link'}
+                  >
+                    <SocialSvg name="facebook" size={13} />
+                  </a>
+
+                  <a
+                    href={socials.instagram || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.instagram ? '' : 'disabled'}`}
+                    title={socials.instagram ? `Instagram: ${socials.instagram}` : 'No Instagram link'}
+                  >
+                    <SocialSvg name="instagram" size={13} />
+                  </a>
+
+                  <a
+                    href={socials.twitter || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.twitter ? '' : 'disabled'}`}
+                    title={socials.twitter ? `X / Twitter: ${socials.twitter}` : 'No X / Twitter link'}
+                  >
+                    <SocialSvg name="twitter" size={13} />
+                  </a>
+
+                  <a
+                    href={socials.youtube || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.youtube ? '' : 'disabled'}`}
+                    title={socials.youtube ? `YouTube: ${socials.youtube}` : 'No YouTube channel'}
+                  >
+                    <SocialSvg name="youtube" size={13} />
+                  </a>
+
+                  <a
+                    href={socials.website || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`aav-social-icon-btn ${socials.website ? '' : 'disabled'}`}
+                    title={socials.website ? `Website: ${socials.website}` : 'No Personal Website'}
+                  >
+                    <SocialSvg name="website" size={13} />
+                  </a>
+                </div>
+
+                {/* Actions & View Profile */}
+                <div className="aav-list-actions">
+                  <a
+                    href={`/admin/authors/${encodeURIComponent(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                    onClick={(e) => {
+                      if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+                        e.preventDefault();
+                        handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'));
+                      }
+                    }}
+                    className="aav-link-public"
+                    title={`Open author details page for ${author.name}`}
+                  >
+                    <Eye size={13} />
+                    <span>View Profile</span>
+                  </a>
+
+                  <div className="aav-card-actions">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(author)}
+                      className="aav-btn-action"
+                      title="Edit Author Profile"
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(author)}
+                      className="aav-btn-action delete"
+                      title="Delete Author"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="aav-grid">

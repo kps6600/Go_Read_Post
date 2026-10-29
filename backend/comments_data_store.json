@@ -1414,5 +1414,59 @@
     "createdAt": "2026-10-27T09:52:26.461Z",
     "__v": 0,
     "updatedAt": "2026-10-28T09:52:26.467Z"
+  },
+  {
+    "storySlug": "captable-2",
+    "contentType": "article",
+    "contentTitle": "If AI is writing your resume, then what?",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": true,
+    "adminReply": {
+      "text": "Spot on analysis, Vikramaditya. Our follow-up piece on Q4 capital allocation will dive deeper into Series B valuations.",
+      "author": "Editorial Desk",
+      "repliedAt": "2026-10-28T15:58:40.927Z"
+    },
+    "rejection_reason": "",
+    "author": "Vikramaditya Shah",
+    "role": "Principal, Peak Capital",
+    "text": "Crucial analysis on this ecosystem shift. The capital discipline we are seeing across the current cohort will set a much stronger foundation for the next decade.",
+    "likes": 18,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae229c0d7fa7bc7b7e2385e",
+    "createdAt": "2026-10-28T14:58:40.927Z",
+    "__v": 0,
+    "updatedAt": "2026-10-28T16:58:40.942Z"
+  },
+  {
+    "storySlug": "captable-2",
+    "contentType": "article",
+    "contentTitle": "If AI is writing your resume, then what?",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": false,
+    "adminReply": {
+      "text": "",
+      "author": "Editorial Desk",
+      "repliedAt": null
+    },
+    "rejection_reason": "",
+    "author": "Ananya Deshmukh",
+    "role": "VP Product, SaaS Scale",
+    "text": "Particularly agree with the observations on operational efficiency. Real value creation is finally getting the spotlight over pure GMV chasing.",
+    "likes": 12,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae229c0d7fa7bc7b7e2385f",
+    "createdAt": "2026-10-28T12:58:40.927Z",
+    "__v": 0,
+    "updatedAt": "2026-10-28T16:58:40.943Z"
   }
 ]

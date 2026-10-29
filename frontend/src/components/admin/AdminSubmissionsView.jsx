@@ -114,37 +114,25 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       </div>
 
       {/* KPI Stats */}
-      <div className="adv-stats-row" style={{ marginBottom: '1.5rem' }}>
+      <div className="adv-stats-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '1.5rem' }}>
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
-            <Send size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Startup Pitches</span>
             <div className="adv-stat-number">{metrics.totalPitches}</div>
-            <span className="adv-stat-sub">From tech founders &amp; CEOs</span>
           </div>
         </div>
 
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(14, 165, 233, 0.12)', color: '#0284c7' }}>
-            <Mail size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Contact Inquiries</span>
             <div className="adv-stat-number">{metrics.totalContacts}</div>
-            <span className="adv-stat-sub">Partnerships &amp; enterprise</span>
           </div>
         </div>
 
         <div className="adv-stat-card">
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
-            <Clock size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Pending Action</span>
             <div className="adv-stat-number">{metrics.pendingCount}</div>
-            <span className="adv-stat-sub">Awaiting editorial review</span>
           </div>
         </div>
       </div>

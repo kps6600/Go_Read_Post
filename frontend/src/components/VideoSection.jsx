@@ -44,9 +44,6 @@ export default function VideoSection({ onSelectVideo, onNavigateVideos, isSaved,
         <div className="vsec-header-row">
           <div className="vsec-header-title-box">
             <h2 className="vsec-section-title">Video Stories &amp; Masterclasses</h2>
-            <p className="vsec-section-subtitle">
-              Watch exclusive boardroom dialogues, deep tech demonstrations, and founder masterclasses.
-            </p>
           </div>
 
           <button 

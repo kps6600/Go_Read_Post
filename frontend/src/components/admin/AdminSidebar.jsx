@@ -4,7 +4,7 @@ import {
   Menu as MenuIcon, PanelBottom, Search, Settings, 
   LogOut, ExternalLink, X, ChevronRight, Newspaper, Layers,
   Hash, Tag, Users, Shield, BarChart3, FileEdit, Archive,
-  Tv, Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
+  Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 
@@ -20,7 +20,7 @@ export const ADMIN_NAV_GROUPS = [
     group: 'EDITORIAL CONTENT',
     items: [
       { id: 'articles', path: '/admin/articles', label: 'All Articles', icon: BookOpen },
-      { id: 'comments', path: '/admin/comments', label: 'Comments & Moderation', icon: MessageSquare },
+      { id: 'comments', path: '/admin/comments', label: 'Comments', icon: MessageSquare },
       { id: 'media', path: '/admin/media', label: 'Media Library', icon: ImageIcon },
       { id: 'authors', path: '/admin/authors', label: 'Authors', icon: Users },
     ]
@@ -28,8 +28,6 @@ export const ADMIN_NAV_GROUPS = [
   {
     group: 'MULTIMEDIA & AUDIENCE',
     items: [
-      { id: 'videos', path: '/admin/videos', label: 'Video Shows (TV)', icon: Tv },
-      { id: 'newsletters', path: '/admin/newsletters', label: 'Newsletters & Leads', icon: Mail },
       { id: 'submissions', path: '/admin/submissions', label: 'Startup Pitches & Leads', icon: Send },
     ]
   },

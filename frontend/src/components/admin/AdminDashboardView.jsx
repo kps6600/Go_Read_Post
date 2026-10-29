@@ -203,121 +203,55 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
       {/* Top Metric KPI Cards */}
       <div className="adv-stats-row">
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/articles')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-            <BookOpen size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Total Articles</span>
             <div className="adv-stat-number">{stories.length}</div>
-            <div className="adv-stat-footer positive">
-              <span className="adv-stat-live-dot" />
-              <span>{publishedStories} Live • {stories.length} Total</span>
-            </div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/articles')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
-            <FileEdit size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Drafts & Revisions</span>
             <div className="adv-stat-number" style={{ color: draftStories > 0 ? '#d97706' : 'inherit' }}>
               {draftStories}
             </div>
-            <div className="adv-stat-footer neutral">
-              <span>{draftStories > 0 ? `${draftStories} In progress` : 'No pending drafts'}</span>
-            </div>
           </div>
         </div>
 
-
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/pages')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(139, 92, 246, 0.12)', color: '#7c3aed' }}>
-            <Globe size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Dynamic Landing Pages</span>
             <div className="adv-stat-number">{pages.length}</div>
-            <div className="adv-stat-footer positive">
-              <span>{publishedPages} Published • {draftPages} Drafts</span>
-            </div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/videos')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#dc2626' }}>
-            <Tv size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Video Productions</span>
             <div className="adv-stat-number">{videoCount} Shows</div>
-            <div className="adv-stat-footer positive">
-              <span className="adv-stat-live-dot" />
-              <span>MongoDB Synced • {videoCount} Episodes</span>
-            </div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/comments')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#2563eb' }}>
-            <MessageSquare size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Reader Comments</span>
             <div className="adv-stat-number">{commentsMetric.totalComments || 0}</div>
-            <div className="adv-stat-footer positive">
-              <span>{commentsMetric.pendingCount || 0} pending review</span>
-            </div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/submissions')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#ea580c' }}>
-            <Send size={22} />
-          </div>
           <div className="adv-stat-content">
             <span className="adv-stat-label">Startup Pitches & Leads</span>
             <div className="adv-stat-number">{submissionsMetric.totalPitches || 0}</div>
-            <div className="adv-stat-footer positive">
-              <span>{submissionsMetric.pendingCount || 0} unreviewed decks</span>
-            </div>
           </div>
         </div>
 
-        <div className="adv-stat-card" onClick={() => onNavigate('/admin/newsletters')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(2, 132, 199, 0.12)', color: '#0284c7' }}>
-            <Mail size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Newsletters &amp; Audiences</span>
-            <div className="adv-stat-number">{newsletterMetric.publicationsCount} Editions</div>
-            <div className="adv-stat-footer positive">
-              <span>{newsletterMetric.subscribersCount} DB Subscribers</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="adv-stat-card" onClick={() => onNavigate('/admin/categories')}>
-          <div className="adv-stat-icon-wrap" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#6366f1' }}>
-            <Layers size={22} />
-          </div>
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Database Categories</span>
-            <div className="adv-stat-number">{categories.length} Categories</div>
-            <div className="adv-stat-footer positive">
-              <span className="adv-stat-live-dot" />
-              <span>{publishedStories} Live Stories Covered</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Section Title: Content Categories & Desks (100% Database Driven) */}
       <div className="adv-section-header">
         <div>
           <h2 className="adv-section-title">Content Categories &amp; Desks</h2>
-          <p className="adv-section-desc">Active coverage categories stored in database ({categories.length} registered)</p>
         </div>
         <button 
           className="adv-link-btn" 
@@ -331,8 +265,6 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
       {/* Dynamic Database Categories Grid */}
       <div className="adv-desks-grid-modern">
         {categories.map((cat) => {
-          const style = getCategoryStyle(cat);
-          const CatIcon = style.icon;
           const count = getCategoryArticleCount(cat);
           return (
             <div 
@@ -341,17 +273,11 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
               onClick={() => onNavigate('/admin/articles')}
               title={`View ${cat.name} stories in database`}
             >
-              <div className="adv-desk-icon-bubble" style={{ background: style.bg, color: style.color }}>
-                <CatIcon size={19} />
-              </div>
               <div className="adv-desk-info-compact">
                 <span className="adv-desk-title-compact">{cat.name}</span>
                 <span className="adv-desk-count-compact">
                   <strong>{count}</strong> {count === 1 ? 'Story' : 'Stories'}
                 </span>
-              </div>
-              <div className="adv-desk-arrow-pill" style={{ color: style.color }}>
-                <ArrowUpRight size={14} />
               </div>
             </div>
           );

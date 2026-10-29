@@ -15,7 +15,6 @@ export default function VideoShowsSection() {
             </div>
             <div>
               <h2 className="section-title">GoReadPost Studio &amp; Shows</h2>
-              <p className="section-subtitle">Founder interviews, industry masterclasses, and executive dialogues</p>
             </div>
           </div>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--brand-primary)' }}>

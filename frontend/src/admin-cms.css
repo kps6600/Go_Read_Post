@@ -250,18 +250,31 @@
 /* KPI Stats Row */
 .adv-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .adv-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .adv-stats-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .adv-stat-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 1.35rem 1.5rem;
+  padding: 1.25rem 1.4rem;
   display: flex;
-  align-items: center;
-  gap: 1.15rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
@@ -296,7 +309,7 @@
 
 .adv-stat-label {
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -305,7 +318,7 @@
 
 .adv-stat-number {
   font-size: 1.85rem;
-  font-weight: 850;
+  font-weight: 600;
   color: #0f172a;
   letter-spacing: -0.025em;
   line-height: 1.15;
@@ -336,7 +349,7 @@
 /* Section Header */
 .adv-section-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.75rem;
