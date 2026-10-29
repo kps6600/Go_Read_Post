@@ -4,7 +4,7 @@ import {
   Menu as MenuIcon, PanelBottom, Search, Settings, 
   LogOut, ExternalLink, X, ChevronRight, Newspaper, Layers,
   Hash, Tag, Users, Shield, BarChart3, FileEdit, Archive,
-  Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket
+  Mail, MessageSquare, Send, Sparkles, Flame, Compass, Rocket, Video
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 
@@ -20,6 +20,7 @@ export const ADMIN_NAV_GROUPS = [
     group: 'EDITORIAL CONTENT',
     items: [
       { id: 'articles', path: '/admin/articles', label: 'All Articles', icon: BookOpen },
+      { id: 'videos', path: '/admin/videos', label: 'All Videos', icon: Video },
       { id: 'comments', path: '/admin/comments', label: 'Comments', icon: MessageSquare },
       { id: 'media', path: '/admin/media', label: 'Media Library', icon: ImageIcon },
       { id: 'authors', path: '/admin/authors', label: 'Authors', icon: Users },
@@ -169,6 +170,7 @@ export default function AdminSidebar({
                 const isActive = currentPath === item.path || 
                   (item.id === 'homepage' && (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage'))) ||
                   (item.id === 'archived' && (currentPath === '/admin/archived' || currentPath.startsWith('/admin/archived') || currentPath.includes('/archived'))) ||
+                  (item.id === 'videos' && (currentPath === '/admin/videos' || currentPath.startsWith('/admin/videos'))) ||
                   (item.id === 'articles' && (currentPath === '/admin/articles' || currentPath.startsWith('/admin/articles') || currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs') || currentPath === '/admin/drafts' || currentPath.startsWith('/admin/drafts')) && !currentPath.includes('/archived')) ||
                   (item.id === 'pages' && (currentPath === '/admin/pages' || (currentPath.startsWith('/admin/pages') && !currentPath.startsWith('/admin/homepage')))) ||
                   (item.id === 'users' && (currentPath === '/admin/users' || currentPath === '/admin/roles'));

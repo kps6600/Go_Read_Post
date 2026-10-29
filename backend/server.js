@@ -11,7 +11,7 @@ import storiesRouter from './routes/stories.js';
 import menuRouter from './routes/menu.js';
 import navigationRouter, { adminNavigationRouter } from './routes/navigation.js';
 import articlesRouter, { adminArticlesRouter } from './routes/articles.js';
-import taxonomyRouter from './routes/taxonomy.js';
+import taxonomyRouter, { ensureTaxonomySeeded } from './routes/taxonomy.js';
 import pagesRouter from './routes/pages.js';
 import authRouter, { ensureDefaultAdmin } from './routes/auth.js';
 import usersRouter from './routes/users.js';
@@ -20,9 +20,9 @@ import footerRouter, { adminFooterRouter } from './routes/footer.js';
 import analyticsRouter from './routes/analytics.js';
 import searchRouter from './routes/search.js';
 import settingsRouter from './routes/settings.js';
-import mediaRouter from './routes/media.js';
+import mediaRouter, { ensureMediaSeeded } from './routes/media.js';
 import newslettersRouter from './routes/newsletters.js';
-import commentsRouter, { adminCommentsRouter } from './routes/comments.js';
+import commentsRouter, { adminCommentsRouter, ensureCommentsSeeded } from './routes/comments.js';
 import videosRouter, { adminVideosRouter, ensureVideosSeeded } from './routes/videos.js';
 import submissionsRouter, { adminSubmissionsRouter, ensureSubmissionsSeeded } from './routes/submissions.js';
 import { migrateStoriesToArticles } from './migrateStoriesToArticles.js';
@@ -165,6 +165,9 @@ app.listen(PORT, () => {
     await migrateStoriesToArticles();
     await ensureVideosSeeded();
     await ensureSubmissionsSeeded();
+    await ensureMediaSeeded();
+    await ensureTaxonomySeeded();
+    await ensureCommentsSeeded();
 
     // Reliable Scheduled Publication Background Worker
     setInterval(async () => {

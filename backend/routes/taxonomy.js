@@ -5,6 +5,7 @@ import Author from '../models/Author.js';
 import Topic from '../models/Topic.js';
 import Tag from '../models/Tag.js';
 import Article from '../models/Article.js';
+import Video from '../models/Video.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin, requireRoles } from '../middleware/auth.js';
 import fs from 'fs';
@@ -95,6 +96,110 @@ function writeFallbackTaxonomy(data) {
   try {
     fs.writeFileSync(taxonomyFallbackPath, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {}
+}
+
+function toSlug(str) {
+  return String(str || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `item-${Date.now()}`;
+}
+
+/**
+ * Seed & Synchronize all taxonomy items (Categories, Topics, Tags) from Article collection
+ */
+export async function ensureTaxonomySeeded() {
+  if (!isDbConnected()) return;
+  try {
+    const articles = await Article.find({}, 'categoryName categoryId topics topicIds tags tagIds status');
+
+    // 1. Categories
+    const categoryNames = new Set([
+      'Startups', 'Technology', 'Enterprise', 'AI & DeepTech',
+      'SMBStory', 'HerStory', 'SocialStory', 'FinTech',
+      'YS हिंदी', 'TechSparks 2024'
+    ]);
+    articles.forEach(a => {
+      if (a.categoryName && a.categoryName.trim()) categoryNames.add(a.categoryName.trim());
+    });
+
+    const categoryOrderMap = {
+      'startups': 1, 'technology': 2, 'enterprise': 3, 'ai-deeptech': 4,
+      'smbstory': 5, 'her-story': 6, 'social-story': 7, 'fintech': 8,
+      'hindi': 9, 'techsparks-2024': 10
+    };
+
+    for (const name of categoryNames) {
+      let slug = toSlug(name);
+      if (name === 'HerStory') slug = 'her-story';
+      if (name === 'SocialStory') slug = 'social-story';
+      if (name === 'AI & DeepTech') slug = 'ai-deeptech';
+      if (name === 'YS हिंदी') slug = 'hindi';
+      if (name === 'TechSparks 2024') slug = 'techsparks-2024';
+
+      const existing = await Category.findOne({ $or: [{ slug }, { name }] });
+      if (!existing) {
+        await Category.create({
+          name,
+          slug,
+          description: `${name} news, insights, and analysis`,
+          order: categoryOrderMap[slug] || 20,
+          isActive: true
+        });
+      }
+    }
+
+    // 2. Topics
+    const topicNames = new Set(['OpenAI', 'Microsoft', 'Google', 'Swiggy', 'Zomato']);
+    articles.forEach(a => {
+      if (Array.isArray(a.topics)) {
+        a.topics.forEach(tp => {
+          if (tp && tp.trim()) topicNames.add(tp.trim());
+        });
+      }
+    });
+
+    for (const name of topicNames) {
+      const slug = toSlug(name);
+      const existing = await Topic.findOne({ $or: [{ slug }, { name }] });
+      if (!existing) {
+        await Topic.create({
+          name,
+          slug,
+          description: `Latest news, analyses, and stories covering ${name}.`,
+          isActive: true
+        });
+      }
+    }
+
+    // 3. Tags
+    const tagNames = new Set(['AI', 'Startup', 'Funding', 'LLM', 'India']);
+    articles.forEach(a => {
+      if (Array.isArray(a.tags)) {
+        a.tags.forEach(tg => {
+          if (tg && tg.trim()) tagNames.add(tg.trim());
+        });
+      }
+    });
+
+    for (const name of tagNames) {
+      const slug = toSlug(name);
+      const existing = await Tag.findOne({ $or: [{ slug }, { name }] });
+      if (!existing) {
+        await Tag.create({
+          name,
+          slug,
+          description: `Stories tagged with #${name}`,
+          isActive: true
+        });
+      }
+    }
+    console.log(`🏷️ Taxonomy sync complete: ${await Category.countDocuments()} Categories, ${await Topic.countDocuments()} Topics, ${await Tag.countDocuments()} Tags`);
+  } catch (err) {
+    console.warn('ensureTaxonomySeeded warning:', err.message);
+  }
 }
 
 // ==========================================
@@ -321,8 +426,16 @@ router.get('/admin/categories/:id/usage', protectAdmin, async (req, res) => {
         ]
       };
 
-      const publishedCount = await Article.countDocuments({ ...filter, status: 'published' });
-      const draftCount = await Article.countDocuments({ ...filter, status: { $ne: 'published' } });
+      const artPub = await Article.countDocuments({ ...filter, status: 'published' });
+      const artDraft = await Article.countDocuments({ ...filter, status: { $ne: 'published' } });
+      let vidPub = 0;
+      let vidDraft = 0;
+      try {
+        vidPub = await Video.countDocuments({ ...filter, status: 'published' });
+        vidDraft = await Video.countDocuments({ ...filter, status: { $ne: 'published' } });
+      } catch (e) {}
+      const publishedCount = artPub + vidPub;
+      const draftCount = artDraft + vidDraft;
       const recentArticles = await Article.find(filter).select('title slug status publishedAt').limit(5);
 
       return res.json({
@@ -559,10 +672,60 @@ async function getAuthorsWithArticleCounts(authorsList) {
   });
 }
 
+// Synchronize and auto-provision all unique authors from published Articles into the Author collection
+export async function syncAuthorsFromArticles() {
+  if (isDbConnected()) {
+    try {
+      const articles = await Article.find({ authorName: { $exists: true, $ne: '' } }, 'authorName authorAvatar authorBio authorRole');
+      const authorMap = new Map();
+      for (const art of articles) {
+        const name = (art.authorName || '').trim();
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (!authorMap.has(key)) {
+          const slug = name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') || `author-${Date.now()}`;
+          authorMap.set(key, {
+            name,
+            slug,
+            designation: art.authorRole || 'Contributing Writer',
+            bio: art.authorBio || `${name} is an editorial contributor and technology journalist covering startups, venture capital, and digital innovation on GoReadPost.`,
+            profileImage: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+            image: art.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+            email: `${slug}@goreadpost.com`,
+            socialLinks: { linkedin: '#', twitter: '#', website: 'https://goreadpost.com' },
+            isActive: true
+          });
+        }
+      }
+
+      for (const [key, data] of authorMap.entries()) {
+        const existing = await Author.findOne({ 
+          $or: [
+            { name: new RegExp(`^${data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+            { slug: data.slug }
+          ]
+        });
+        if (!existing) {
+          let uniqueSlug = data.slug;
+          const slugExists = await Author.findOne({ slug: uniqueSlug });
+          if (slugExists) {
+            uniqueSlug = `${data.slug}-${Date.now()}`;
+          }
+          data.slug = uniqueSlug;
+          await Author.create(data);
+        }
+      }
+    } catch (e) {
+      console.warn('syncAuthorsFromArticles warning:', e.message);
+    }
+  }
+}
+
 // Public list of authors with live auto-calculated published article counts
 router.get('/authors', async (req, res) => {
   try {
     if (isDbConnected()) {
+      await syncAuthorsFromArticles();
       let authors = await Author.find().sort({ name: 1 });
       if (authors.length === 0) {
         await Author.insertMany(INITIAL_TAXONOMY.authors.map(({ _id, ...a }) => a));
@@ -583,6 +746,7 @@ router.get('/authors', async (req, res) => {
 router.get('/admin/authors', protectAdmin, async (req, res) => {
   try {
     if (isDbConnected()) {
+      await syncAuthorsFromArticles();
       let authors = await Author.find().sort({ name: 1 });
       if (authors.length === 0) {
         await Author.insertMany(INITIAL_TAXONOMY.authors.map(({ _id, ...a }) => a));
@@ -1309,30 +1473,67 @@ router.get('/admin/tags', async (req, res) => {
         tags = await Tag.find().sort({ count: -1, name: 1 }).lean();
       }
 
-      // Aggregate real article count per tag
-      const counts = await Article.aggregate([
+      // Aggregate real article & video counts per tag separated by published vs draft
+      const articleCounts = await Article.aggregate([
         { $unwind: "$tags" },
         {
           $group: {
-            _id: { $toLower: "$tags" },
+            _id: {
+              tag: { $toLower: "$tags" },
+              isPublished: { $eq: ["$status", "published"] }
+            },
             count: { $sum: 1 }
           }
         }
       ]);
 
-      const countMap = {};
-      counts.forEach(c => {
-        if (c._id) countMap[c._id] = c.count;
-      });
+      let videoCounts = [];
+      try {
+        videoCounts = await Video.aggregate([
+          { $unwind: "$tags" },
+          {
+            $group: {
+              _id: {
+                tag: { $toLower: "$tags" },
+                isPublished: { $eq: ["$status", "published"] }
+              },
+              count: { $sum: 1 }
+            }
+          }
+        ]);
+      } catch (e) {}
 
       const enriched = tags.map(tag => {
         const lowerName = (tag.name || '').toLowerCase();
         const lowerSlug = (tag.slug || '').toLowerCase();
-        const articleCount = countMap[lowerName] || countMap[lowerSlug] || tag.count || 0;
+        let publishedCount = 0;
+        let draftCount = 0;
+
+        articleCounts.forEach(c => {
+          if (c._id.tag === lowerName || c._id.tag === lowerSlug) {
+            if (c._id.isPublished) publishedCount += c.count;
+            else draftCount += c.count;
+          }
+        });
+
+        videoCounts.forEach(c => {
+          if (c._id.tag === lowerName || c._id.tag === lowerSlug) {
+            if (c._id.isPublished) publishedCount += c.count;
+            else draftCount += c.count;
+          }
+        });
+
+        const totalCount = publishedCount + draftCount;
+
         return {
           ...tag,
-          articlesCount: articleCount,
-          count: articleCount,
+          articlesCount: totalCount,
+          count: totalCount,
+          publishedArticlesCount: publishedCount,
+          draftArticlesCount: draftCount,
+          publishedCount,
+          draftCount,
+          totalArticlesCount: totalCount,
           isActive: tag.isActive !== false
         };
       });

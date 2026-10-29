@@ -1,8 +1,8 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  FolderPlus, Edit2, Trash2, Search, Check, 
-  ExternalLink, Layers, RefreshCw, X, Folder, CheckSquare,
-  AlertTriangle, AlertCircle, Eye, EyeOff, ChevronRight,
+  Edit2, Trash2, Search, Check, Clock,
+  ExternalLink, Layers, RefreshCw, X, CheckSquare,
+  AlertTriangle, AlertCircle, EyeOff, 
   ArrowUpDown, Filter, ChevronDown, CheckCircle, FileText,
   Sparkles, Image as ImageIcon, Link2, Globe
 } from 'lucide-react';
@@ -45,7 +45,7 @@ export default function AdminCategoriesView({ onShowToast }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isFilterOpen]);
 
-  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (parentFilter !== 'all' ? 1 : 0) + (sortBy !== 'order' ? 1 : 0);
+  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (sortBy !== 'order' ? 1 : 0);
 
   // Modal / Drawer state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -359,58 +359,8 @@ export default function AdminCategoriesView({ onShowToast }) {
     return result;
   }, [categories, search, statusFilter, parentFilter, sortBy]);
 
-  // Paginated slice
-  const totalItems = filteredAndSorted.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const paginatedCategories = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredAndSorted.slice(start, start + pageSize);
-  }, [filteredAndSorted, currentPage, pageSize]);
-
   return (
     <div className="admin-page-container">
-      
-      {/* ── Breadcrumb & Top Header ── */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.4rem', fontWeight: 500 }}>
-          <span>Editorial CMS</span>
-          <ChevronRight size={13} />
-          <span>Taxonomy & Entities</span>
-          <ChevronRight size={13} />
-          <span style={{ color: 'var(--brand-primary, #dc2626)', fontWeight: 600 }}>Categories</span>
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Categories</h1>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={handleOpenCreate}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.65rem 1.35rem',
-                backgroundColor: 'var(--brand-primary, #dc2626)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '9px',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
-                transition: 'transform 0.15s ease'
-              }}
-            >
-              <FolderPlus size={17} />
-              <span>+ Add Category</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* ── Summary Stats Strip ── */}
       <div style={{
@@ -423,72 +373,48 @@ export default function AdminCategoriesView({ onShowToast }) {
           onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
           style={{ 
             background: '#ffffff', 
-            padding: '0.9rem 1.15rem', 
+            padding: '1rem 1.25rem', 
             borderRadius: '12px', 
             border: statusFilter === 'all' ? '1.5px solid #0f172a' : '1px solid #e2e8f0', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '14px',
             cursor: 'pointer',
             transition: 'all 0.15s ease'
           }}
           title="Filter by all categories"
         >
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-            <Layers size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Total Categories</div>
-          </div>
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Categories</div>
         </div>
 
         <div 
           onClick={() => { setStatusFilter(statusFilter === 'active' ? 'all' : 'active'); setCurrentPage(1); }}
           style={{ 
             background: '#ffffff', 
-            padding: '0.9rem 1.15rem', 
+            padding: '1rem 1.25rem', 
             borderRadius: '12px', 
             border: statusFilter === 'active' ? '1.5px solid #059669' : '1px solid #e2e8f0', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '14px',
             cursor: 'pointer',
             transition: 'all 0.15s ease'
           }}
           title="Filter by active sections"
         >
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
-            <CheckCircle size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.active}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Active Sections</div>
-          </div>
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.active}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Active Sections</div>
         </div>
 
         <div 
           onClick={() => { setStatusFilter(statusFilter === 'inactive' ? 'all' : 'inactive'); setCurrentPage(1); }}
           style={{ 
             background: '#ffffff', 
-            padding: '0.9rem 1.15rem', 
+            padding: '1rem 1.25rem', 
             borderRadius: '12px', 
             border: statusFilter === 'inactive' ? '1.5px solid #dc2626' : '1px solid #e2e8f0', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '14px',
             cursor: 'pointer',
             transition: 'all 0.15s ease'
           }}
           title="Filter by not active sections"
         >
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626' }}>
-            <EyeOff size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{stats.inactive}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Not Active</div>
-          </div>
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{stats.inactive}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Not Active</div>
         </div>
       </div>
 
@@ -618,7 +544,6 @@ export default function AdminCategoriesView({ onShowToast }) {
                     type="button"
                     onClick={() => {
                       setStatusFilter('all');
-                      setParentFilter('all');
                       setSortBy('order');
                       setCurrentPage(1);
                     }}
@@ -667,36 +592,6 @@ export default function AdminCategoriesView({ onShowToast }) {
                 </select>
               </div>
 
-              {/* Hierarchy Filter */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Type
-                </label>
-                <select
-                  value={parentFilter}
-                  onChange={(e) => {
-                    setParentFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.84rem',
-                    fontWeight: 500,
-                    color: '#1e293b',
-                    background: '#ffffff',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  <option value="all">All Sections</option>
-                  <option value="root">Primary Sections</option>
-                  <option value="sub">Sub-Categories</option>
-                </select>
-              </div>
-
               {/* Sort By */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
@@ -732,114 +627,92 @@ export default function AdminCategoriesView({ onShowToast }) {
             </div>
           )}
         </div>
+
+        {/* + Add Category Button */}
+        <button
+          type="button"
+          onClick={handleOpenCreate}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '0.55rem 1.25rem',
+            backgroundColor: 'var(--brand-primary, #dc2626)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9px',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+            transition: 'transform 0.15s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span>+ Add Category</span>
+        </button>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '10px 16px',
-          borderRadius: '10px',
-          marginBottom: '1rem',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 700,
-              fontSize: '0.78rem'
-            }}>
-              {selectedIds.size} Selected
+      {/* ── Sub-Header Bar: Select All, Bulk Actions & Count ── */}
+      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label className="abv-select-all-label" title="Select all categories">
+            <input
+              type="checkbox"
+              className="admin-table-checkbox"
+              checked={selectedIds.size > 0 && selectedIds.size === filteredAndSorted.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filteredAndSorted.map(c => c._id || c.slug)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+            />
+            <span>Select All</span>
+          </label>
+          {selectedIds.size > 0 && (
+            <span className="abv-selected-pill">
+              {selectedIds.size} of {filteredAndSorted.length} selected
             </span>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set(filteredAndSorted.map(c => c._id || c.slug)))}
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'underline' }}
-            >
-              Select All ({filteredAndSorted.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.82rem', textDecoration: 'underline' }}
-            >
-              Clear Selection
-            </button>
-          </div>
+          )}
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => handleBulkStatus(true)}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                background: '#ffffff',
-                border: '1px solid #10b981',
-                borderRadius: '7px',
-                color: '#047857',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <Check size={14} /> Set Active
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBulkStatus(false)}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '7px',
-                color: '#475569',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <EyeOff size={14} /> Set Inactive
-            </button>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 14px',
-                backgroundColor: '#dc2626',
-                border: 'none',
-                borderRadius: '7px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                cursor: 'pointer'
-              }}
-            >
-              <Trash2 size={14} />
-              {bulkProcessing ? 'Processing...' : `Delete Selected (${selectedIds.size})`}
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <div className="abv-bulk-actions-group">
+              <button
+                type="button"
+                onClick={() => handleBulkStatus(false)}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-draft"
+                title="Set selected categories to inactive"
+              >
+                <Clock size={14} />
+                <span>Send Draft</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-delete"
+                title="Delete selected categories"
+              >
+                <Trash2 size={14} />
+                <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+              </button>
+            </div>
+          )}
+          <div className="abv-cards-count-badge">
+            <span>
+              {statusFilter === 'active' && 'Active: '}
+              {statusFilter === 'inactive' && 'Inactive: '}
+              {statusFilter === 'all' && 'All Posts: '}
+              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'article' : 'articles'}
+            </span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Categories Table Card ── */}
       <div style={{
@@ -853,24 +726,9 @@ export default function AdminCategoriesView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '850px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}>
-                  <input 
-                    type="checkbox"
-                    checked={paginatedCategories.length > 0 && paginatedCategories.every(c => selectedIds.has(c._id || c.slug))}
-                    onChange={(e) => {
-                      const next = new Set(selectedIds);
-                      if (e.target.checked) {
-                        paginatedCategories.forEach(c => next.add(c._id || c.slug));
-                      } else {
-                        paginatedCategories.forEach(c => next.delete(c._id || c.slug));
-                      }
-                      setSelectedIds(next);
-                    }}
-                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                  />
-                </th>
+                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Category Name &amp; Description
+                  Category Name
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   URL Slug
@@ -932,7 +790,7 @@ export default function AdminCategoriesView({ onShowToast }) {
                   </td>
                 </tr>
               ) : (
-                paginatedCategories.map((cat) => {
+                filteredAndSorted.map((cat) => {
                   const id = cat._id || cat.slug;
                   const isSelected = selectedIds.has(id);
                   const parentName = typeof cat.parentId === 'object' && cat.parentId?.name 
@@ -969,45 +827,22 @@ export default function AdminCategoriesView({ onShowToast }) {
                         />
                       </td>
 
-                      {/* Name & Icon & Description */}
+                      {/* Category Name */}
                       <td style={{ padding: '0.9rem 1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{
-                            width: '38px',
-                            height: '38px',
-                            borderRadius: '10px',
-                            background: cat.image ? `url(${cat.image}) center/cover no-repeat` : '#f1f5f9',
-                            border: '1px solid #e2e8f0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--brand-primary)',
-                            flexShrink: 0
-                          }}>
-                            {!cat.image && <Folder size={18} />}
-                          </div>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{cat.name}</strong>
-                              {parentName && (
-                                <span style={{
-                                  fontSize: '0.72rem',
-                                  padding: '1px 6px',
-                                  borderRadius: '5px',
-                                  background: '#f1f5f9',
-                                  color: '#475569',
-                                  fontWeight: 600
-                                }}>
-                                  Sub-pillar of {parentName}
-                                </span>
-                              )}
-                            </div>
-                            {cat.description && (
-                              <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b', maxWidth: '380px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {cat.description}
-                              </p>
-                            )}
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{cat.name}</strong>
+                          {parentName && (
+                            <span style={{
+                              fontSize: '0.72rem',
+                              padding: '1px 6px',
+                              borderRadius: '5px',
+                              background: '#f1f5f9',
+                              color: '#475569',
+                              fontWeight: 600
+                            }}>
+                              Sub-pillar of {parentName}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -1033,7 +868,6 @@ export default function AdminCategoriesView({ onShowToast }) {
                           title="Click to view public category page"
                         >
                           <span>/category/{cat.slug}</span>
-                          <ExternalLink size={11} />
                         </a>
                       </td>
 
@@ -1131,7 +965,7 @@ export default function AdminCategoriesView({ onShowToast }) {
                             href={`/category/${cat.slug}`}
                             target="_blank"
                             rel="noreferrer"
-                            title="Preview Public Page"
+                            title="View Live Category Page"
                             style={{
                               padding: '6px',
                               background: '#f8fafc',
@@ -1142,7 +976,7 @@ export default function AdminCategoriesView({ onShowToast }) {
                               alignItems: 'center'
                             }}
                           >
-                            <Eye size={14} />
+                            <ExternalLink size={14} />
                           </a>
 
                           <button
@@ -1170,86 +1004,7 @@ export default function AdminCategoriesView({ onShowToast }) {
           </table>
         </div>
 
-        {/* ── Table Footer & Pagination ── */}
-        <div style={{
-          padding: '0.85rem 1.25rem',
-          borderTop: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          background: '#f8fafc'
-        }}>
-          <div style={{ fontSize: '0.84rem', color: '#64748b' }}>
-            Showing <strong>{filteredAndSorted.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong>{Math.min(currentPage * pageSize, filteredAndSorted.length)}</strong> of <strong>{filteredAndSorted.length}</strong> categories
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Per page:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                style={{
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.8rem',
-                  background: '#ffffff'
-                }}
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === 1 ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
-                }}
-              >
-                Previous
-              </button>
-              <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600, padding: '0 4px' }}>
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === totalPages ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === totalPages ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
-                }}
-              >
-                Next
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
 
       {/* ── CREATE / EDIT CATEGORY MODAL ── */}
       {isModalOpen && (
@@ -1291,9 +1046,6 @@ export default function AdminCategoriesView({ onShowToast }) {
                 <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingCategory ? `Edit Category: ${editingCategory.name}` : 'Create New Category'}
                 </h3>
-                <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                  Configure editorial taxonomy, URL routing and search engine metadata
-                </p>
               </div>
               <button
                 type="button"
@@ -1378,135 +1130,31 @@ export default function AdminCategoriesView({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Row 2: Description */}
+              {/* Status */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Editorial Description
+                  Status
                 </label>
-                <textarea
-                  rows={2}
-                  placeholder="Short description displayed on the category archive header..."
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit'
-                  }}
-                />
-              </div>
-
-              {/* Row 3: Parent Category, Display Order, Status */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 140px', gap: '1rem', alignItems: 'end' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Parent Category (Optional Hierarchy)
-                  </label>
-                  <select
-                    value={formData.parentId}
-                    onChange={(e) => setFormData(prev => ({ ...prev, parentId: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      background: '#fff',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <option value="">None (Top-Level Category)</option>
-                    {categories
-                      .filter(c => !editingCategory || (c._id !== editingCategory._id && c.slug !== editingCategory.slug))
-                      .map(c => (
-                        <option key={c._id || c.slug} value={c._id || c.slug}>{c.name}</option>
-                      ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Display Order
-                  </label>
+                <label style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: formData.isActive ? '#ecfdf5' : '#f8fafc',
+                  cursor: 'pointer'
+                }}>
                   <input
-                    type="number"
-                    value={formData.order}
-                    onChange={(e) => setFormData(prev => ({ ...prev, order: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    style={{ cursor: 'pointer' }}
                   />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Status
-                  </label>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: formData.isActive ? '#ecfdf5' : '#f8fafc',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: formData.isActive ? '#059669' : '#64748b' }}>
-                      {formData.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Row 4: Image URL */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Category Featured Image / Icon URL
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: formData.isActive ? '#059669' : '#64748b' }}>
+                    {formData.isActive ? 'Active' : 'Inactive'}
+                  </span>
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    placeholder="https://images.unsplash.com/... or /uploads/..."
-                    value={formData.image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                    style={{
-                      flex: 1,
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none'
-                    }}
-                  />
-                  {formData.image && (
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '8px',
-                      background: `url(${formData.image}) center/cover no-repeat`,
-                      border: '1px solid #cbd5e1'
-                    }} />
-                  )}
-                </div>
               </div>
 
               {/* Row 5: SEO Accordion */}

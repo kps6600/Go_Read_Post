@@ -169,7 +169,6 @@ export default function AdminUsersView({ onShowToast }) {
               borderBottom: activeTab === 'users' ? '2px solid var(--brand-primary, #0ea5e9)' : '2px solid transparent'
             }}
           >
-            <Users size={16} />
             <span>Editorial Users ({users.length})</span>
           </button>
 
@@ -183,7 +182,6 @@ export default function AdminUsersView({ onShowToast }) {
               borderBottom: activeTab === 'roles' ? '2px solid var(--brand-primary, #0ea5e9)' : '2px solid transparent'
             }}
           >
-            <Shield size={16} />
             <span>Role Permissions Matrix</span>
           </button>
         </div>

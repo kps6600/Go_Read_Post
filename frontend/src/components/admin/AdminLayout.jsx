@@ -166,9 +166,9 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       return <AdminAnalyticsView onShowToast={onShowToast} />;
     }
 
-    // Videos TV CMS: /admin/videos
-    if (currentPath === '/admin/videos') {
-      return <AdminVideosView onShowToast={onShowToast} onNavigate={handleNavigate} />;
+    // Videos CMS: /admin/videos
+    if (currentPath === '/admin/videos' || currentPath.startsWith('/admin/videos')) {
+      return <AdminVideosView onShowToast={onShowToast} onNavigate={handleNavigate} currentPath={currentPath} />;
     }
 
     // About Us Page Studio: /admin/about
@@ -444,8 +444,6 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     currentPath.startsWith('/admin/trending') ||
     currentPath === '/admin/category' ||
     currentPath.startsWith('/admin/category') ||
-    currentPath === '/admin/videos' ||
-    currentPath.startsWith('/admin/videos') ||
     currentPath === '/admin/about' ||
     currentPath.startsWith('/admin/about') ||
     currentPath === '/admin/homepage' ||

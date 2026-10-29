@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   ArrowUp, ArrowDown, Eye, EyeOff, Save, RefreshCw, 
   AlertCircle, CheckCircle, X, Search, FileText, ArrowLeft,
@@ -266,9 +266,6 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
           )}
 
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
-              Homepage Layout &amp; Content Studio
-            </h1>
             <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)' }}>
               Reorder feed sections, toggle visibility, customize headlines, and curate featured stories on your live homepage.
             </p>

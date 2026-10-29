@@ -257,7 +257,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             onClick={() => window.open('/about', '_blank')}
             title="Open live public about page in new window"
           >
-            <Eye size={15} />
             <span>View Live Page</span>
           </button>
 
@@ -295,7 +294,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'hero' ? 'active' : ''}`}
             onClick={() => setActiveTab('hero')}
           >
-            <Sparkles size={15} />
             <span>Hero & Manifesto</span>
           </button>
 
@@ -304,7 +302,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'story' ? 'active' : ''}`}
             onClick={() => setActiveTab('story')}
           >
-            <Compass size={15} />
             <span>Mission & Narrative</span>
           </button>
 
@@ -313,7 +310,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'values' ? 'active' : ''}`}
             onClick={() => setActiveTab('values')}
           >
-            <ShieldCheck size={15} />
             <span>Core Values</span>
           </button>
 
@@ -322,7 +318,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
             onClick={() => setActiveTab('stats')}
           >
-            <Zap size={15} />
             <span>Impact Metrics</span>
           </button>
 
@@ -331,7 +326,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'team' ? 'active' : ''}`}
             onClick={() => setActiveTab('team')}
           >
-            <Users size={15} />
             <span>Core Team ({teamSection?.members?.length || 0})</span>
           </button>
 
@@ -340,7 +334,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             className={`aav-tab-btn ${activeTab === 'seo' ? 'active' : ''}`}
             onClick={() => setActiveTab('seo')}
           >
-            <Search size={15} />
             <span>SEO Settings</span>
           </button>
 
@@ -350,7 +343,6 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
             onClick={() => setActiveTab('preview')}
             style={{ marginLeft: 'auto', background: activeTab === 'preview' ? '#ea580c' : 'rgba(234, 88, 12, 0.08)', color: activeTab === 'preview' ? '#ffffff' : '#ea580c' }}
           >
-            <Eye size={15} />
             <span>Full Live Preview</span>
           </button>
         </div>

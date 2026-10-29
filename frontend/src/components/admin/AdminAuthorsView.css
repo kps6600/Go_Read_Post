@@ -1,4 +1,4 @@
-/* ── Admin Authors Management View ── */
+﻿/* â”€â”€ Admin Authors Management View â”€â”€ */
 
 .aav-root {
   padding: 0;
@@ -31,7 +31,7 @@
   margin: 0;
 }
 
-/* ── Toolbar ── */
+/* â”€â”€ Toolbar â”€â”€ */
 .aav-toolbar-wrap {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -169,12 +169,13 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.aav-root .aav-btn-primary,
 .aav-btn-primary {
   height: 42px;
   padding: 0 1.25rem;
-  background: #dc2626;
-  color: #ffffff;
-  border: 1px solid #dc2626;
+  background: var(--brand-primary, #dc2626) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--brand-primary, #dc2626) !important;
   border-radius: 9px;
   font-size: 0.86rem;
   font-weight: 700;
@@ -184,16 +185,18 @@
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.28) !important;
 }
 
+.aav-root .aav-btn-primary:hover,
 .aav-btn-primary:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35) !important;
 }
 
-/* ── Bulk Actions Bar ── */
+/* â”€â”€ Bulk Actions Bar â”€â”€ */
 .aav-bulk-bar {
   display: flex;
   align-items: center;
@@ -238,7 +241,7 @@
   background: #b91c1c;
 }
 
-/* ── Authors Horizontal List View ── */
+/* â”€â”€ Authors Horizontal List View â”€â”€ */
 .aav-list {
   display: flex;
   flex-direction: column;
@@ -279,8 +282,8 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  width: 280px;
-  min-width: 240px;
+  min-width: 260px;
+  max-width: 500px;
   flex-shrink: 0;
 }
 
@@ -305,6 +308,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .aav-list-name-row .aav-author-name {
@@ -313,9 +317,6 @@
   font-weight: 800;
   color: #0f172a;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 140px;
 }
 
 .aav-list-name-row .aav-article-count-pill {
@@ -389,7 +390,7 @@
   }
 }
 
-/* ── Authors Grid ── */
+/* â”€â”€ Authors Grid â”€â”€ */
 .aav-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -496,7 +497,7 @@
   overflow: hidden;
 }
 
-/* ── Social Media Links Bar ── */
+/* â”€â”€ Social Media Links Bar â”€â”€ */
 .aav-card-socials {
   display: flex;
   align-items: center;
@@ -534,11 +535,11 @@
   pointer-events: none;
 }
 
-/* ── Card Footer ── */
+/* â”€â”€ Card Footer â”€â”€ */
 .aav-card-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .aav-link-public {
@@ -588,7 +589,7 @@
   color: #dc2626;
 }
 
-/* ── Modal Dialog ── */
+/* â”€â”€ Modal Dialog â”€â”€ */
 .aav-modal-overlay {
   position: fixed;
   inset: 0;
@@ -819,10 +820,10 @@
 
 /* Auto-calculated Published Articles Box */
 .aav-locked-metric-box {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -831,35 +832,45 @@
 
 .aav-metric-info {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .aav-metric-title {
-  font-size: 0.82rem;
-  font-weight: 750;
-  color: #166534;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 7px;
 }
 
-.aav-metric-subtext {
-  font-size: 0.76rem;
-  color: #15803d;
-  margin: 0;
-  line-height: 1.4;
+.aav-metric-lock-tag {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .aav-metric-badge {
-  font-size: 1.25rem;
-  font-weight: 850;
-  color: #166534;
-  background: #ffffff;
-  border: 1.5px solid #86efac;
-  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 4px 12px;
   border-radius: 999px;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* Modal Footer */
@@ -922,7 +933,7 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ── Author Profile Preview Modal ── */
+/* â”€â”€ Author Profile Preview Modal â”€â”€ */
 .aav-profile-modal {
   background: #ffffff;
   border-radius: 18px;
@@ -1229,7 +1240,7 @@
   }
 }
 
-/* ── Author Details Page View (/admin/authors/:slug) ── */
+/* â”€â”€ Author Details Page View (/admin/authors/:slug) â”€â”€ */
 .aav-detail-container {
   padding: 0;
   width: 100%;
@@ -1599,4 +1610,121 @@
   .aav-detail-sidebar-col {
     position: static;
   }
+}
+
+/* â”€â”€ Filter Button â”€â”€ */
+.aav-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.aav-filter-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.aav-filter-btn.active {
+  background: #fff1f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.aav-filter-badge {
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  line-height: 1.2;
+}
+
+/* ── Filter Popover ── */
+.aav-filter-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04);
+  width: 280px;
+  z-index: 50;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.aav-filter-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.6rem;
+}
+
+.aav-filter-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.aav-filter-popover-reset {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.aav-filter-popover-reset:hover {
+  text-decoration: underline;
+}
+
+.aav-filter-popover-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.aav-filter-popover-label {
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.aav-filter-popover-select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.aav-filter-popover-select:focus {
+  border-color: #dc2626;
 }

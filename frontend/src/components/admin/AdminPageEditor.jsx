@@ -826,7 +826,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           className={`admin-nav-tab-item ${activeTab === 'sections' ? 'active' : ''}`}
           onClick={() => setActiveTab('sections')}
         >
-          <Layers size={16} />
           <span>Page Sections Builder</span>
           <span className="tab-counter-badge">{sections.length}</span>
         </button>
@@ -836,7 +835,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           className={`admin-nav-tab-item ${activeTab === 'seo' ? 'active' : ''}`}
           onClick={() => setActiveTab('seo')}
         >
-          <Globe size={16} />
           <span>Page Info & SEO Settings</span>
         </button>
       </div>

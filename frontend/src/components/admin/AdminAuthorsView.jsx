@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿﻿﻿import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X, 
+  Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
-  Calendar, FileText, User, LayoutGrid, List
+  Calendar, FileText, User, LayoutGrid, List, SlidersHorizontal, Filter, ChevronDown
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { AuthService } from '../../services/authService';
@@ -54,6 +54,24 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState('list');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('name');
+  const [filterHasArticles, setFilterHasArticles] = useState('all');
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterOpen(false);
+      }
+    };
+    if (filterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [filterOpen]);
+
+  const activeFilterCount = (sortBy !== 'name' ? 1 : 0) + (filterHasArticles !== 'all' ? 1 : 0);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -323,14 +341,44 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
     }
   };
 
-  const filteredAuthors = authors.filter(a =>
-    a.name?.toLowerCase().includes(search.toLowerCase()) ||
-    a.designation?.toLowerCase().includes(search.toLowerCase()) ||
-    a.slug?.toLowerCase().includes(search.toLowerCase()) ||
-    a.bio?.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    if (!window.confirm(`Delete ${count} selected author${count > 1 ? 's' : ''}? This cannot be undone.`)) return;
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await TaxonomyService.deleteAuthor(id);
+      }
+      if (onShowToast) onShowToast(`Deleted ${count} author${count > 1 ? 's' : ''}`);
+      setSelectedIds(new Set());
+      loadAuthors();
+    } catch (err) {
+      alert(err.message || 'Error deleting authors');
+    }
+  };
 
-  // ── Modal Form Renderer ──
+  const filteredAuthors = authors
+    .filter(a => {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        a.name?.toLowerCase().includes(q) ||
+        a.designation?.toLowerCase().includes(q) ||
+        a.slug?.toLowerCase().includes(q) ||
+        a.bio?.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+      if (filterHasArticles === 'with') return (a.publishedArticlesCount || a.totalPublishedArticles || 0) > 0;
+      if (filterHasArticles === 'without') return (a.publishedArticlesCount || a.totalPublishedArticles || 0) === 0;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      if (sortBy === 'name_desc') return (b.name || '').localeCompare(a.name || '');
+      if (sortBy === 'articles') return (b.publishedArticlesCount || b.totalPublishedArticles || 0) - (a.publishedArticlesCount || a.totalPublishedArticles || 0);
+      if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      return 0;
+    });
+
+  // â”€â”€ Modal Form Renderer â”€â”€
   const renderEditModal = () => {
     if (!isModalOpen) return null;
     return (
@@ -395,14 +443,6 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                         </button>
                       )}
                     </div>
-
-                    <input
-                      type="url"
-                      placeholder="Or enter image URL (e.g. https://...)"
-                      value={formData.image}
-                      onChange={e => setFormData(prev => ({ ...prev, image: e.target.value, profileImage: e.target.value }))}
-                      className="aav-photo-url-input"
-                    />
                   </div>
                 </div>
               </div>
@@ -585,21 +625,20 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 </div>
               </div>
 
-              {/* 6. Total Published Articles (Locked Auto-Calculated Field) */}
+              {/* Total Published Articles (Read-Only Auto-Synced Field) */}
               <div className="aav-form-section" style={{ marginBottom: 0 }}>
                 <div className="aav-locked-metric-box">
                   <div className="aav-metric-info">
                     <span className="aav-metric-title">
-                      <Lock size={13} />
-                      <span>6. Total Published Articles (Auto-Calculated)</span>
+                      <BookOpen size={15} color="#2563eb" />
+                      <span>Total Published Articles</span>
                     </span>
-                    <p className="aav-metric-subtext">
-                      Automatically calculated based on published blog posts assigned to this author. Manual editing is locked and updates automatically when articles are published or unpublished.
-                    </p>
+
                   </div>
 
                   <div className="aav-metric-badge" title="Live published count">
-                    {formData.publishedArticlesCount} {formData.publishedArticlesCount === 1 ? 'Article' : 'Articles'}
+                    <BookOpen size={12} />
+                    <span>{formData.publishedArticlesCount} {formData.publishedArticlesCount === 1 ? 'Article' : 'Articles'}</span>
                   </div>
                 </div>
               </div>
@@ -628,9 +667,9 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
     );
   };
 
-  // ══════════════════════════════════════════════════════════════════
-  // ── VIEW 1: DEDICATED AUTHOR DETAILS PAGE (/admin/authors/:slug) ──
-  // ══════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // â”€â”€ VIEW 1: DEDICATED AUTHOR DETAILS PAGE (/admin/authors/:slug) â”€â”€
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   if (authorSlug) {
     const author = singleAuthorData?.author;
     const articles = singleAuthorData?.articles || [];
@@ -641,21 +680,15 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
       <div className="aav-detail-container">
         {/* Navigation & Breadcrumb */}
         <div className="aav-detail-nav-bar">
-          <div className="aav-detail-breadcrumb">
-            <button
-              type="button"
-              onClick={handleBackToList}
-              className="aav-detail-btn-back"
-              title="Return to Authors list"
-            >
-              <ArrowLeft size={14} />
-              <span>All Authors</span>
-            </button>
-            <span style={{ color: '#cbd5e1' }}>/</span>
-            <span style={{ fontWeight: 700, color: '#0f172a' }}>
-              {author ? author.name : authorSlug}
-            </span>
-          </div>
+          <button
+            type="button"
+            onClick={handleBackToList}
+            className="aav-detail-btn-back"
+            title="Return to Authors list"
+          >
+            <ArrowLeft size={14} />
+            <span>All Authors</span>
+          </button>
 
           {/* Top navigation actions */}
         </div>
@@ -785,7 +818,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                                     </span>
                                   )}
                                   {typeof art.views === 'number' && (
-                                    <span>• {art.views} views</span>
+                                    <span>â€¢ {art.views} views</span>
                                   )}
                                 </div>
                               </div>
@@ -883,37 +916,22 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  // ── VIEW 2: AUTHORS LIST WORKSPACE (/admin/authors) ───────────────
-  // ══════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // â”€â”€ VIEW 2: AUTHORS LIST WORKSPACE (/admin/authors) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   return (
     <div className="aav-root">
       
-      {/* ── Page Header ── */}
-      <div className="aav-header-wrap">
-        <div className="aav-header-title-box">
-          <h1>Author Profiles</h1>
-        </div>
-
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="aav-btn-primary"
-        >
-          <Plus size={16} />
-          <span>Add New Author</span>
-        </button>
-      </div>
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '10px', color: '#dc2626', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', fontWeight: 600 }}>
           <AlertCircle size={18} />
           <span>{error}</span>
-          <button type="button" onClick={() => setError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}>✕</button>
+          <button type="button" onClick={() => setError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}>âœ•</button>
         </div>
       )}
 
-      {/* ── Toolbar: Search & Controls ── */}
+      {/* â”€â”€ Toolbar: Search & Controls â”€â”€ */}
       <div className="aav-toolbar-wrap">
         <div className="aav-toolbar-left">
           <div className="aav-search-bar">
@@ -936,57 +954,146 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
               </button>
             )}
           </div>
+          {/* Filter Popover Button */}
+          <div ref={filterRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className={`aav-filter-btn${activeFilterCount > 0 ? ' active' : ''}`}
+              onClick={() => setFilterOpen(v => !v)}
+              title="Filter and sort authors"
+            >
+              <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
+              <span>Filter</span>
+              {activeFilterCount > 0 && (
+                <span className="aav-filter-badge">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDown 
+                size={14} 
+                style={{
+                  transform: filterOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.18s ease',
+                  color: activeFilterCount > 0 ? '#dc2626' : '#64748b'
+                }} 
+              />
+            </button>
+
+            {filterOpen && (
+              <div className="aav-filter-popover">
+                <div className="aav-filter-popover-header">
+                  <div className="aav-filter-popover-title">
+                    <Filter size={14} color="#dc2626" />
+                    <span>Filter Authors</span>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      className="aav-filter-popover-reset"
+                      onClick={() => {
+                        setSortBy('name');
+                        setFilterHasArticles('all');
+                      }}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                <div className="aav-filter-popover-group">
+                  <label className="aav-filter-popover-label">Sort By</label>
+                  <select
+                    className="aav-filter-popover-select"
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value)}
+                  >
+                    <option value="name">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="articles">Most Articles</option>
+                    <option value="newest">Newest First</option>
+                  </select>
+                </div>
+
+                <div className="aav-filter-popover-group">
+                  <label className="aav-filter-popover-label">Articles</label>
+                  <select
+                    className="aav-filter-popover-select"
+                    value={filterHasArticles}
+                    onChange={e => setFilterHasArticles(e.target.value)}
+                  >
+                    <option value="all">All Authors ({authors.length})</option>
+                    <option value="with">With Articles</option>
+                    <option value="without">Without Articles</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="aav-toolbar-right">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#475569', cursor: 'pointer', fontWeight: 600, userSelect: 'none' }}>
-            <input 
-              type="checkbox"
-              checked={selectedIds.size > 0 && selectedIds.size === filteredAuthors.length}
-              onChange={(e) => {
-                if (e.target.checked) setSelectedIds(new Set(filteredAuthors.map(a => a._id || a.slug)));
-                else setSelectedIds(new Set());
-              }}
-              style={{ accentColor: '#dc2626', width: '15px', height: '15px', cursor: 'pointer' }}
-            />
-            <span>Select All</span>
-          </label>
-
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>
-            {filteredAuthors.length} {filteredAuthors.length === 1 ? 'Author' : 'Authors'}
-          </span>
-
-          <div className="aav-view-toggle">
-            <button
-              type="button"
-              className={`aav-view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="List View"
-            >
-              <List size={16} />
-            </button>
-            <button
-              type="button"
-              className={`aav-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-            >
-              <LayoutGrid size={16} />
-            </button>
-          </div>
-
-          <button 
+          <button
             type="button"
-            onClick={loadAuthors} 
-            className="aav-btn-refresh" 
-            title="Refresh authors list"
+            onClick={openCreateModal}
+            className="aav-btn-primary"
+            style={{ backgroundColor: 'var(--brand-primary, #dc2626)', borderColor: 'var(--brand-primary, #dc2626)', boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)' }}
           >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            <Plus size={15} />
+            <span>Add</span>
           </button>
         </div>
       </div>
 
-      {/* ── Authors Card Grid ── */}
+      {/* Sub-Header Bar: Select All & Bulk Actions (Above Cards) */}
+      {filteredAuthors.length > 0 && (
+        <div className="abv-cards-header-bar" style={{ marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <label className="abv-select-all-label" title="Select all authors">
+              <input
+                type="checkbox"
+                checked={selectedIds.size > 0 && selectedIds.size === filteredAuthors.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedIds(new Set(filteredAuthors.map(a => a._id || a.slug)));
+                  } else {
+                    setSelectedIds(new Set());
+                  }
+                }}
+                style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+              />
+              <span>Select All</span>
+            </label>
+            {selectedIds.size > 0 && (
+              <span className="abv-selected-pill">
+                {selectedIds.size} of {filteredAuthors.length} selected
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {selectedIds.size > 0 && (
+              <div className="abv-bulk-actions-group">
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  className="abv-bulk-btn abv-bulk-btn-delete"
+                  title="Delete selected authors"
+                >
+                  <Trash2 size={14} />
+                  <span>Delete ({selectedIds.size})</span>
+                </button>
+              </div>
+            )}
+            <div className="abv-cards-count-badge">
+              <span>
+                {filteredAuthors.length} {filteredAuthors.length === 1 ? 'author' : 'authors'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Authors Card Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '70px 20px', color: '#64748b' }}>
           <RefreshCw className="animate-spin" size={26} style={{ margin: '0 auto 12px', color: '#dc2626' }} />
@@ -1044,11 +1151,20 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                     src={avatarUrl}
                     alt={author.name}
                     className="aav-list-avatar"
+                    onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                    style={{ cursor: 'pointer' }}
                     onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80'; }}
                   />
                   <div className="aav-list-names">
                     <div className="aav-list-name-row">
-                      <h3 className="aav-author-name" title={author.name}>{author.name}</h3>
+                      <h3 
+                        className="aav-author-name" 
+                        title={author.name}
+                        onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {author.name}
+                      </h3>
                       <div className="aav-article-count-pill" title="Automatically calculated number of published blog posts assigned to this author">
                         <BookOpen size={11} />
                         <span>{publishedCount} Published {publishedCount === 1 ? 'Article' : 'Articles'}</span>
@@ -1067,9 +1183,6 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
 
                 {/* Social Links */}
                 <div className="aav-list-socials">
-                  <span className="aav-list-social-label">
-                    Social:
-                  </span>
                   
                   <a
                     href={socials.linkedin || undefined}
@@ -1132,24 +1245,17 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   </a>
                 </div>
 
-                {/* Actions & View Profile */}
+                {/* Actions */}
                 <div className="aav-list-actions">
-                  <a
-                    href={`/admin/authors/${encodeURIComponent(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}`}
-                    onClick={(e) => {
-                      if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
-                        e.preventDefault();
-                        handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'));
-                      }
-                    }}
-                    className="aav-link-public"
-                    title={`Open author details page for ${author.name}`}
-                  >
-                    <Eye size={13} />
-                    <span>View Profile</span>
-                  </a>
-
                   <div className="aav-card-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                      className="aav-btn-action"
+                      title="View Author Profile"
+                    >
+                      <Eye size={13} />
+                    </button>
                     <button
                       type="button"
                       onClick={() => openEditModal(author)}
@@ -1194,10 +1300,19 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                         src={avatarUrl}
                         alt={author.name}
                         className="aav-avatar"
+                        onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                        style={{ cursor: 'pointer' }}
                         onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80'; }}
                       />
                       <div className="aav-author-names">
-                        <h3 className="aav-author-name" title={author.name}>{author.name}</h3>
+                        <h3 
+                          className="aav-author-name" 
+                          title={author.name}
+                          onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {author.name}
+                        </h3>
                         <p className="aav-author-designation" title={author.designation || 'Staff Reporter'}>
                           {author.designation || 'Staff Reporter'}
                         </p>
@@ -1232,9 +1347,6 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 <div>
                   {/* 5. Social Media Links Row */}
                   <div className="aav-card-socials">
-                    <span style={{ fontSize: '0.72rem', fontWeight: 750, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '4px' }}>
-                      Social:
-                    </span>
                     
                     {/* LinkedIn */}
                     <a
@@ -1303,24 +1415,17 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                     </a>
                   </div>
 
-                  {/* Card Footer: View Profile (Opens /admin/authors/:slug) & Action Buttons */}
+                  {/* Card Footer: Action Buttons */}
                   <div className="aav-card-footer">
-                    <a
-                      href={`/admin/authors/${encodeURIComponent(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}`}
-                      onClick={(e) => {
-                        if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
-                          e.preventDefault();
-                          handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'));
-                        }
-                      }}
-                      className="aav-link-public"
-                      title={`Open author details page for ${author.name}`}
-                    >
-                      <Eye size={13} />
-                      <span>View Profile</span>
-                    </a>
-
                     <div className="aav-card-actions">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAuthorDetails(author.slug || author.name.toLowerCase().replace(/\s+/g, '-'))}
+                        className="aav-btn-action"
+                        title="View Author Profile"
+                      >
+                        <Eye size={13} />
+                      </button>
                       <button
                         type="button"
                         onClick={() => openEditModal(author)}

@@ -5,6 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { v2 as cloudinary } from 'cloudinary';
 import Media from '../models/Media.js';
+import Article from '../models/Article.js';
+import Video from '../models/Video.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin } from '../middleware/auth.js';
 
@@ -29,6 +31,106 @@ if (hasCloudinary) {
   console.log('☁️ Cloudinary integration active');
 }
 
+/**
+ * Seed & Synchronize all media assets across the database (uploads, article images, video assets)
+ */
+export async function ensureMediaSeeded() {
+  if (!isDbConnected()) return;
+  try {
+    // 1. Sync uploads folder files into MongoDB Media collection
+    if (fs.existsSync(uploadsDir)) {
+      const uploadFiles = fs.readdirSync(uploadsDir).filter(f => !f.startsWith('.'));
+      for (const file of uploadFiles) {
+        const existing = await Media.findOne({ $or: [{ filename: file }, { url: `/uploads/${file}` }] });
+        if (!existing) {
+          const filePath = path.join(uploadsDir, file);
+          const stats = fs.statSync(filePath);
+          const isVideo = /\.(mp4|webm|mov|mkv)$/i.test(file);
+          const ext = path.extname(file).replace('.', '').toLowerCase();
+          await Media.create({
+            filename: file,
+            url: `/uploads/${file}`,
+            mediaType: isVideo ? 'video' : 'image',
+            type: isVideo ? `video/${ext || 'mp4'}` : `image/${ext || 'jpeg'}`,
+            size: stats.size,
+            altText: file.replace(/_[0-9]{10,}\.[^.]+$/, '').replace(/[-_]/g, ' '),
+            caption: '',
+            credit: 'GoReadPost Media',
+            provider: 'local',
+            uploadedBy: 'admin',
+            createdAt: stats.birthtime || new Date()
+          });
+        }
+      }
+    }
+
+    // 2. Sync article featured images into MongoDB Media collection
+    if (Article) {
+      const articles = await Article.find({ 'featuredImage.url': { $exists: true, $ne: '' } });
+      for (const a of articles) {
+        if (a.featuredImage?.url) {
+          const url = a.featuredImage.url.trim();
+          const existing = await Media.findOne({ url });
+          if (!existing) {
+            let filename = 'article_image.jpg';
+            try {
+              const parsed = new URL(url);
+              filename = path.basename(parsed.pathname) || 'article_image.jpg';
+            } catch {
+              filename = `image_${Date.now()}.jpg`;
+            }
+            const isVideo = /\.(mp4|webm|mov)$/i.test(filename);
+            await Media.create({
+              filename,
+              url,
+              mediaType: isVideo ? 'video' : 'image',
+              type: isVideo ? 'video/mp4' : 'image/jpeg',
+              size: 250000 + Math.floor(Math.random() * 500000),
+              altText: a.featuredImage.alt || a.title || 'Article Cover',
+              caption: a.featuredImage.caption || a.title || '',
+              credit: a.featuredImage.credit || 'GoReadPost / Editorial Desk',
+              provider: url.includes('cloudinary') ? 'cloudinary' : (url.startsWith('/uploads') ? 'local' : 'external'),
+              uploadedBy: a.authorName || 'admin',
+              createdAt: a.publishedAt || a.createdAt || new Date()
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Sync video thumbnails into MongoDB Media collection
+    if (Video) {
+      const videos = await Video.find({ image: { $exists: true, $ne: '' } });
+      for (const v of videos) {
+        if (v.image) {
+          const existing = await Media.findOne({ url: v.image });
+          if (!existing) {
+            let filename = 'video_poster.jpg';
+            try {
+              filename = path.basename(new URL(v.image).pathname) || 'video_poster.jpg';
+            } catch {}
+            await Media.create({
+              filename,
+              url: v.image,
+              mediaType: 'image',
+              type: 'image/jpeg',
+              size: 320000,
+              altText: `${v.title} - Video Thumbnail`,
+              caption: v.title,
+              credit: 'GoReadPost Video Series',
+              provider: 'external',
+              uploadedBy: 'admin',
+              createdAt: new Date()
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('ensureMediaSeeded warning:', err.message);
+  }
+}
+
 // 1. GET /api/media (List & Search media files)
 router.get('/', async (req, res) => {
   try {
@@ -36,22 +138,43 @@ router.get('/', async (req, res) => {
     const mediaType = req.query.type; // 'image' or 'video'
 
     if (isDbConnected()) {
-      let filter = {};
+      const conditions = [];
       if (query) {
-        filter.$or = [
-          { filename: new RegExp(query, 'i') },
-          { altText: new RegExp(query, 'i') },
-          { caption: new RegExp(query, 'i') }
-        ];
+        conditions.push({
+          $or: [
+            { filename: new RegExp(query, 'i') },
+            { altText: new RegExp(query, 'i') },
+            { caption: new RegExp(query, 'i') }
+          ]
+        });
       }
-      if (mediaType && (mediaType === 'image' || mediaType === 'video')) {
-        filter.mediaType = mediaType;
+      if (mediaType === 'video') {
+        conditions.push({
+          $or: [
+            { mediaType: 'video' },
+            { type: /^video\//i },
+            { filename: /\.(mp4|webm|mov|mkv|m4v|avi)$/i },
+            { url: /\.(mp4|webm|mov|mkv|m4v|avi)$/i }
+          ]
+        });
+      } else if (mediaType === 'image') {
+        conditions.push({
+          $or: [
+            { mediaType: 'image' },
+            { type: /^image\//i }
+          ]
+        });
+      }
+
+      const filter = conditions.length > 1 ? { $and: conditions } : (conditions[0] || {});
+
+      const count = await Media.countDocuments();
+      if (count === 0) {
+        await ensureMediaSeeded();
       }
 
       const mediaDocs = await Media.find(filter).sort({ createdAt: -1 });
-      if (mediaDocs.length > 0) {
-        return res.json({ success: true, count: mediaDocs.length, data: mediaDocs });
-      }
+      return res.json({ success: true, count: mediaDocs.length, data: mediaDocs });
     }
 
     // Local filesystem scan fallback
@@ -65,29 +188,42 @@ router.get('/', async (req, res) => {
       .map(file => {
         const filePath = path.join(uploadsDir, file);
         const stats = fs.statSync(filePath);
-        const isVideo = /\.(mp4|webm|mov|mkv)$/i.test(file);
+        const isVideo = /\.(mp4|webm|mov|mkv|m4v|avi)$/i.test(file);
         return {
           _id: `media_${file}`,
           filename: file,
           originalName: file,
           url: `/uploads/${file}`,
+          mediaType: isVideo ? 'video' : 'image',
+          type: isVideo ? 'video/mp4' : 'image/jpeg',
           size: stats.size,
           sizeBytes: stats.size,
-          createdAt: stats.birthtime,
-          mediaType: isVideo ? 'video' : 'image',
-          isImage: !isVideo,
-          provider: 'local'
+          createdAt: stats.birthtime || stats.mtime
         };
       });
 
     if (query) {
-      mediaList = mediaList.filter(m => m.filename.toLowerCase().includes(query.toLowerCase()));
+      mediaList = mediaList.filter(m => (m.filename || '').toLowerCase().includes(query.toLowerCase()));
     }
-    if (mediaType) {
-      mediaList = mediaList.filter(m => m.mediaType === mediaType);
+    if (mediaType === 'video') {
+      mediaList = mediaList.filter(file => file.mediaType === 'video' || /\.(mp4|webm|mov|mkv|m4v|avi)$/i.test(file.filename || file.url));
+    } else if (mediaType === 'image') {
+      mediaList = mediaList.filter(file => file.mediaType === 'image');
     }
 
     res.json({ success: true, count: mediaList.length, data: mediaList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+// Sync media assets on demand
+router.post('/sync', protectAdmin, async (req, res) => {
+  try {
+    await ensureMediaSeeded();
+    const count = await Media.countDocuments();
+    res.json({ success: true, message: `Media library synced. Total assets in database: ${count}`, count });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -272,6 +408,9 @@ router.delete('/:id', protectAdmin, async (req, res) => {
       }
       if (!doc) {
         doc = await Media.findOne({ filename: id });
+      }
+      if (!doc) {
+        doc = await Media.findOne({ url: id });
       }
 
       if (doc) {

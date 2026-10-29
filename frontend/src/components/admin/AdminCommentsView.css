@@ -216,26 +216,112 @@
 .acv-kpi-label {
   font-size: 0.74rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
+  transition: color 0.15s ease;
 }
 
 .acv-kpi-number {
   font-size: 1.7rem;
   font-weight: 750;
-  color: #0f172a !important;
+  color: #0f172a;
   line-height: 1.15;
+  transition: color 0.15s ease;
+}
+
+/* ── Specific Status Behavior Colors ── */
+/* 1. Total Reviews (Neutral / Slate) */
+.acv-kpi-card.kpi-total .acv-kpi-label {
+  color: #475569 !important;
+}
+.acv-kpi-card.kpi-total .acv-kpi-number {
+  color: #0f172a !important;
+}
+.acv-kpi-card.kpi-total:hover {
+  border-color: #0f172a;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+.acv-kpi-card.kpi-total.active {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 1px #0f172a;
+}
+.acv-kpi-card.kpi-total.active::after {
+  background: #0f172a;
+}
+
+/* 2. Approved & Live (Success / Green) */
+.acv-kpi-card.kpi-approved .acv-kpi-label {
+  color: #15803d !important;
+}
+.acv-kpi-card.kpi-approved .acv-kpi-number {
+  color: #16a34a !important;
+}
+.acv-kpi-card.kpi-approved:hover {
+  border-color: #16a34a;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.14);
+}
+.acv-kpi-card.kpi-approved.active {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 1px #16a34a;
+}
+.acv-kpi-card.kpi-approved.active::after {
+  background: #16a34a;
+}
+
+/* 3. Pending Review (Warning / Amber) */
+.acv-kpi-card.kpi-pending .acv-kpi-label {
+  color: #b45309 !important;
+}
+.acv-kpi-card.kpi-pending .acv-kpi-number {
+  color: #d97706 !important;
+}
+.acv-kpi-card.kpi-pending:hover {
+  border-color: #d97706;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.14);
+}
+.acv-kpi-card.kpi-pending.active {
+  border-color: #d97706;
+  box-shadow: 0 0 0 1px #d97706;
+}
+.acv-kpi-card.kpi-pending.active::after {
+  background: #d97706;
+}
+
+/* 4. Rejected / Hidden (Danger / Red) */
+.acv-kpi-card.kpi-rejected .acv-kpi-label {
+  color: #b91c1c !important;
+}
+.acv-kpi-card.kpi-rejected .acv-kpi-number {
+  color: #dc2626 !important;
+}
+.acv-kpi-card.kpi-rejected:hover {
+  border-color: #dc2626;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.14);
+}
+.acv-kpi-card.kpi-rejected.active {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px #dc2626;
+}
+.acv-kpi-card.kpi-rejected.active::after {
+  background: #dc2626;
 }
 
 /* ── Toolbar: Search & Sort ── */
 .acv-toolbar {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.25rem;
   width: 100%;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
 }
 
 .acv-search-box {
@@ -244,6 +330,7 @@
   gap: 8px;
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .acv-search-input-wrap {
@@ -252,16 +339,24 @@
   align-items: center;
   flex: 1;
   min-width: 0;
+  width: 100%;
+}
+
+.acv-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
 }
 
 .acv-search-input {
   width: 100%;
   height: 42px;
-  padding: 0 2.25rem 0 1.1rem;
+  padding: 0 2.2rem 0 2.6rem;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: 0.88rem;
-  background: #ffffff;
+  background: #f8fafc;
   color: #0f172a;
   outline: none;
   transition: all 0.15s ease;
@@ -273,6 +368,7 @@
 }
 
 .acv-search-input:focus {
+  background: #ffffff;
   border-color: #dc2626;
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
@@ -282,54 +378,28 @@
   right: 8px;
   background: none;
   border: none;
-  color: #0f172a;
-  font-size: 0.85rem;
-  font-weight: 700;
+  color: #64748b;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px;
   border-radius: 4px;
-  transition: background 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
 }
 
 .acv-search-clear-btn:hover {
+  color: #0f172a;
   background: #e2e8f0;
-}
-
-.acv-search-btn {
-  height: 42px;
-  padding: 0 1.35rem;
-  background: #dc2626;
-  color: #ffffff;
-  border: 1px solid #dc2626;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 750;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.acv-search-btn:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
-}
-
-.acv-search-btn:active {
-  transform: translateY(1px);
 }
 
 .acv-sort-select {
   height: 42px;
   padding: 0 1rem;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   background: #ffffff;
   color: #0f172a;
   outline: none;
@@ -478,6 +548,13 @@
   font-size: 0.95rem;
   font-weight: 800;
   color: #0f172a;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.acv-author-name:hover {
+  color: #dc2626;
+  text-decoration: underline;
 }
 
 .acv-author-role {
@@ -1094,49 +1171,49 @@
   color: #ffffff;
 }
 
-/* ── Reviews Feed Pagination Bar (5 Cards per page) ── */
+/* ── Modern Pagination Bar ── */
 .acv-pagination-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 1rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0.9rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   margin-top: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .acv-pagination-info {
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   color: #64748b;
   font-weight: 500;
 }
 
+.acv-pagination-info .acv-pg-bold,
 .acv-pagination-info strong {
   color: #0f172a;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .acv-pagination-actions {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
 .acv-page-nav-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 6px 13px;
+  gap: 5px;
+  padding: 7px 14px;
   border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #334155;
-  font-size: 0.82rem;
-  font-weight: 650;
+  font-size: 0.83rem;
+  font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1149,53 +1226,55 @@
 }
 
 .acv-page-nav-btn:disabled {
-  background: #f1f5f9;
+  background: #f8fafc;
   border-color: #e2e8f0;
   color: #94a3b8;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .acv-page-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin: 0 4px;
 }
 
 .acv-page-number-btn {
-  width: 34px;
-  height: 34px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #334155;
-  font-size: 0.82rem;
-  font-weight: 700;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-size: 0.86rem;
+  font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .acv-page-number-btn:hover:not(.active) {
-  border-color: #0f172a;
+  background: #f1f5f9;
   color: #0f172a;
-  background: #f8fafc;
 }
 
 .acv-page-number-btn.active {
-  background: #dc2626 !important;
-  border-color: #dc2626 !important;
+  background: #0f172a !important;
+  border-color: #0f172a !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.28);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
 }
 
 .acv-page-ellipsis {
-  padding: 0 4px;
+  padding: 0 6px;
   color: #94a3b8;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {

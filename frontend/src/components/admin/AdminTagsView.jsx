@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Tag as TagIcon, Plus, Edit2, Trash2, Search, ExternalLink, 
+  Tag as TagIcon, Plus, Filter, ChevronDown, Edit2, Trash2, Search, 
   RefreshCw, AlertCircle, AlertTriangle, CheckCircle, Check, 
-  X, ChevronRight, FileText, CheckSquare, GitMerge, Sparkles, 
+  X, FileText, CheckSquare, GitMerge, Sparkles, 
   Eye, EyeOff
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -23,6 +23,24 @@ export default function AdminTagsView({ onShowToast }) {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
+
+  // Unified Filter Popover state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen]);
+
+  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (sortBy !== 'articles_desc' ? 1 : 0);
 
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -80,10 +98,10 @@ export default function AdminTagsView({ onShowToast }) {
   const stats = useMemo(() => {
     const total = tags.length;
     const active = tags.filter(t => t.isActive !== false).length;
+    const inactive = total - active;
     const inUse = tags.filter(t => (t.articlesCount || t.count || 0) > 0).length;
     const unused = total - inUse;
-    const totalAssignments = tags.reduce((sum, t) => sum + (t.articlesCount || t.count || 0), 0);
-    return { total, active, inUse, unused, totalAssignments };
+    return { total, active, inactive, inUse, unused };
   }, [tags]);
 
   // Open Create
@@ -332,7 +350,8 @@ export default function AdminTagsView({ onShowToast }) {
       const aCount = a.articlesCount || a.count || 0;
       const bCount = b.articlesCount || b.count || 0;
 
-      if (sortBy === 'articles_desc') return bCount - aCount;
+      if (sortBy === 'articles_desc') return (b.publishedArticlesCount ?? b.publishedCount ?? bCount) - (a.publishedArticlesCount ?? a.publishedCount ?? aCount);
+      if (sortBy === 'drafts_desc') return (b.draftArticlesCount ?? b.draftCount ?? 0) - (a.draftArticlesCount ?? a.draftCount ?? 0);
       if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
       if (sortBy === 'name_desc') return b.name.localeCompare(a.name);
       if (sortBy === 'updated_desc') return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
@@ -353,142 +372,62 @@ export default function AdminTagsView({ onShowToast }) {
   return (
     <div className="admin-page-container">
       
-      {/* ── Breadcrumb & Top Header ── */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.4rem', fontWeight: 500 }}>
-          <span>Editorial CMS</span>
-          <ChevronRight size={13} />
-          <span>Taxonomy & Entities</span>
-          <ChevronRight size={13} />
-          <span style={{ color: 'var(--brand-primary, #dc2626)', fontWeight: 600 }}>Tags</span>
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <TagIcon size={26} color="var(--brand-primary, #dc2626)" />
-              Tags
-            </h1>
-            <p style={{ margin: '0.3rem 0 0', color: '#64748b', fontSize: '0.92rem' }}>
-              Manage keywords that help readers discover related content.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => openMergeModal()}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.65rem 0.95rem',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '9px',
-                color: '#475569',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-              title="Merge duplicate tags into a single tag"
-            >
-              <GitMerge size={15} color="#2563eb" />
-              <span>Merge Duplicates</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCleanUnused}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.65rem 0.95rem',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '9px',
-                color: '#475569',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-              title="Delete all tags with 0 associated articles"
-            >
-              <Trash2 size={15} color="#dc2626" />
-              <span>Clean Unused ({stats.unused})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={openCreateModal}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.65rem 1.35rem',
-                backgroundColor: 'var(--brand-primary, #dc2626)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '9px',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)'
-              }}
-            >
-              <Plus size={17} />
-              <span>+ Add Tag</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* ── Summary Stats Strip ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1rem',
         marginBottom: '1.25rem'
       }}>
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a' }}>
-            <TagIcon size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Total Keywords</div>
-          </div>
+        {/* Total Tags */}
+        <div 
+          onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'all' ? '1.5px solid #0f172a' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by all tags"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{stats.total}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Tags</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
-            <CheckCircle size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.inUse}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>In Active Use</div>
-          </div>
+        {/* Active Tags */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'active' ? 'all' : 'active'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'active' ? '1.5px solid #059669' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by active tags"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{stats.active}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Active Tags</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
-            <FileText size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#2563eb', lineHeight: 1 }}>{stats.totalAssignments}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Article Attachments</div>
-          </div>
-        </div>
-
-        <div style={{ background: '#ffffff', padding: '0.9rem 1.15rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
-            <AlertCircle size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#d97706', lineHeight: 1 }}>{stats.unused}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginTop: '3px' }}>Unused Tags (0 Uses)</div>
-          </div>
+        {/* Inactive Tags */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'inactive' ? 'all' : 'inactive'); setCurrentPage(1); }}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'inactive' ? '1.5px solid #dc2626' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Filter by inactive tags"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{stats.inactive}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Not Active</div>
         </div>
       </div>
 
@@ -546,87 +485,185 @@ export default function AdminTagsView({ onShowToast }) {
           )}
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-          {/* Usage Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Usage:</span>
-            <select
-              value={usageFilter}
-              onChange={(e) => {
-                setUsageFilter(e.target.value);
-                setCurrentPage(1);
-              }}
+        {/* Filter Popover Button */}
+        <div ref={filterRef} style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setIsFilterOpen(prev => !prev)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0.55rem 0.95rem',
+              borderRadius: '9px',
+              border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
+              background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
+              color: activeFilterCount > 0 ? '#dc2626' : '#334155',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title="Filter and sort tags"
+          >
+            <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span style={{
+                background: '#dc2626',
+                color: '#ffffff',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                borderRadius: '10px',
+                padding: '1px 6px',
+                lineHeight: 1.2
+              }}>
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown 
+              size={14} 
               style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="all">All Tags</option>
-              <option value="in_use">In Active Use ({stats.inUse})</option>
-              <option value="unused">Unused (0 Articles) ({stats.unused})</option>
-            </select>
-          </div>
+                transform: isFilterOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.18s ease',
+                color: activeFilterCount > 0 ? '#dc2626' : '#64748b'
+              }} 
+            />
+          </button>
 
-          {/* Status Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active Only</option>
-              <option value="inactive">Inactive Only</option>
-            </select>
-          </div>
+          {isFilterOpen && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: 'calc(100% + 8px)',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
+              width: '280px',
+              zIndex: 50,
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.85rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+                  <Filter size={14} color="#dc2626" />
+                  <span>Filter Tags</span>
+                </div>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter('all');
+                      setSortBy('articles_desc');
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#dc2626',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    Reset All
+                  </button>
+                )}
+              </div>
 
-          {/* Sort By */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Sort:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              style={{
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                color: '#334155',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="articles_desc">Most Associated Articles</option>
-              <option value="name_asc">Name (A-Z)</option>
-              <option value="name_desc">Name (Z-A)</option>
-              <option value="updated_desc">Recently Updated</option>
-            </select>
-          </div>
+              {/* Status Filter */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem',
+                    fontWeight: 500,
+                    color: '#1e293b',
+                    background: '#ffffff',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  <option value="all">All Status ({tags.length})</option>
+                  <option value="active">Active Only ({stats.active})</option>
+                  <option value="inactive">Inactive Only ({stats.total - stats.active})</option>
+                </select>
+              </div>
+
+              {/* Sort By */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  Sort By
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem',
+                    fontWeight: 500,
+                    color: '#1e293b',
+                    background: '#ffffff',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  <option value="articles_desc">Most Published Articles / Videos</option>
+                  <option value="drafts_desc">Most Draft Articles / Videos</option>
+                  <option value="name_asc">Name (A-Z)</option>
+                  <option value="name_desc">Name (Z-A)</option>
+                  <option value="updated_desc">Recently Updated</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* + Add Tag Button */}
+        <button
+          type="button"
+          onClick={openCreateModal}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '0.55rem 1.25rem',
+            backgroundColor: 'var(--brand-primary, #dc2626)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9px',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+            transition: 'transform 0.15s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Plus size={16} />
+          <span>Add Tag</span>
+        </button>
       </div>
 
       {/* ── Bulk Actions Bar ── */}
@@ -708,30 +745,18 @@ export default function AdminTagsView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '780px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}>
-                  <input 
-                    type="checkbox"
-                    checked={paginatedTags.length > 0 && paginatedTags.every(t => selectedIds.has(t._id || t.slug))}
-                    onChange={(e) => {
-                      const next = new Set(selectedIds);
-                      if (e.target.checked) {
-                        paginatedTags.forEach(t => next.add(t._id || t.slug));
-                      } else {
-                        paginatedTags.forEach(t => next.delete(t._id || t.slug));
-                      }
-                      setSelectedIds(next);
-                    }}
-                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                  />
-                </th>
+                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Tag Name &amp; Keyword
+                  Tag Name
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   URL Slug
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center' }}>
-                  Associated Articles
+                  Draft
+                </th>
+                <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center' }}>
+                  Published
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center' }}>
                   Status
@@ -747,14 +772,14 @@ export default function AdminTagsView({ onShowToast }) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" style={{ padding: '3.5rem', textAlign: 'center', color: '#64748b' }}>
+                  <td colSpan="8" style={{ padding: '3.5rem', textAlign: 'center', color: '#64748b' }}>
                     <RefreshCw size={26} className="rotate-icon" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 0.75rem', color: 'var(--brand-primary)' }} />
                     <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Loading tags index...</div>
                   </td>
                 </tr>
               ) : filteredAndSorted.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+                  <td colSpan="8" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: '#94a3b8' }}>
                       <TagIcon size={28} />
                     </div>
@@ -788,6 +813,8 @@ export default function AdminTagsView({ onShowToast }) {
                   const id = tag._id || tag.slug;
                   const isSelected = selectedIds.has(id);
                   const count = tag.articlesCount || tag.count || 0;
+                  const publishedCount = tag.publishedArticlesCount ?? tag.publishedCount ?? count;
+                  const draftCount = tag.draftArticlesCount ?? tag.draftCount ?? 0;
                   const isActive = tag.isActive !== false;
                   const formattedDate = tag.updatedAt 
                     ? new Date(tag.updatedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -831,14 +858,8 @@ export default function AdminTagsView({ onShowToast }) {
                             fontWeight: 700,
                             fontSize: '0.88rem'
                           }}>
-                            <span style={{ color: 'var(--brand-primary)' }}>#</span>
                             <span>{tag.name}</span>
                           </span>
-                          {tag.description && (
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                              ({tag.description})
-                            </span>
-                          )}
                         </div>
                       </td>
 
@@ -864,11 +885,10 @@ export default function AdminTagsView({ onShowToast }) {
                           title="Click to view public tag archive"
                         >
                           <span>/tag/{tag.slug}</span>
-                          <ExternalLink size={11} />
                         </a>
                       </td>
 
-                      {/* Associated Articles Count */}
+                      {/* Draft Articles / Videos Count */}
                       <td style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>
                         <span style={{
                           display: 'inline-flex',
@@ -878,11 +898,29 @@ export default function AdminTagsView({ onShowToast }) {
                           borderRadius: '20px',
                           fontSize: '0.78rem',
                           fontWeight: 700,
-                          background: count > 0 ? '#eff6ff' : '#f1f5f9',
-                          color: count > 0 ? '#1d4ed8' : '#94a3b8',
-                          border: `1px solid ${count > 0 ? '#bfdbfe' : '#e2e8f0'}`
+                          background: draftCount > 0 ? '#fef3c7' : '#f1f5f9',
+                          color: draftCount > 0 ? '#b45309' : '#94a3b8',
+                          border: `1px solid ${draftCount > 0 ? '#fde68a' : '#e2e8f0'}`
                         }}>
-                          {count}
+                          {draftCount}
+                        </span>
+                      </td>
+
+                      {/* Published Articles / Videos Count */}
+                      <td style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '3px 9px',
+                          borderRadius: '20px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          background: publishedCount > 0 ? '#ecfdf5' : '#f1f5f9',
+                          color: publishedCount > 0 ? '#059669' : '#94a3b8',
+                          border: `1px solid ${publishedCount > 0 ? '#a7f3d0' : '#e2e8f0'}`
+                        }}>
+                          {publishedCount}
                         </span>
                       </td>
 
@@ -938,22 +976,6 @@ export default function AdminTagsView({ onShowToast }) {
                             }}
                           >
                             <Edit2 size={14} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => openMergeModal(tag)}
-                            title="Merge this tag into another"
-                            style={{
-                              padding: '6px',
-                              background: '#eff6ff',
-                              border: '1px solid #dbeafe',
-                              borderRadius: '7px',
-                              color: '#2563eb',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <GitMerge size={14} />
                           </button>
 
                           <a
@@ -1116,9 +1138,6 @@ export default function AdminTagsView({ onShowToast }) {
                 <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingTag ? `Edit Tag: #${editingTag.name}` : 'Create New Keyword Tag'}
                 </h3>
-                <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                  Define keyword chip for story discoverability and search indexing
-                </p>
               </div>
               <button
                 type="button"
@@ -1194,27 +1213,6 @@ export default function AdminTagsView({ onShowToast }) {
                 {formErrors.slug && (
                   <span style={{ fontSize: '0.74rem', color: '#ef4444', marginTop: '3px', display: 'block' }}>{formErrors.slug}</span>
                 )}
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Short Description (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contextual note or descriptor for editors"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
               </div>
 
               <div>

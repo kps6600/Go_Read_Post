@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Upload, Image as ImageIcon, Trash2, Copy, Check, 
   ExternalLink, Search, RefreshCw, AlertCircle, File, 
@@ -21,6 +21,7 @@ export default function AdminMediaView({ onShowToast }) {
   const [error, setError] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [previewAsset, setPreviewAsset] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [brokenImages, setBrokenImages] = useState(new Set());
@@ -30,6 +31,21 @@ export default function AdminMediaView({ onShowToast }) {
   useEffect(() => {
     loadFiles();
   }, []);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await MediaService.syncMedia();
+      await loadFiles();
+      if (onShowToast) {
+        onShowToast(res?.message || 'Media assets synchronized from database');
+      }
+    } catch (err) {
+      if (onShowToast) onShowToast('Sync failed: ' + err.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const loadFiles = async () => {
     setLoading(true);
@@ -108,9 +124,9 @@ export default function AdminMediaView({ onShowToast }) {
     if (!fileToDelete) return;
     setDeleting(true);
     try {
-      const filename = fileToDelete.filename || fileToDelete.originalName;
-      await MediaService.deleteFile(filename);
-      setFiles(prev => prev.filter(f => (f.filename || f._id) !== (fileToDelete.filename || fileToDelete._id)));
+      const idOrFilename = fileToDelete._id || fileToDelete.filename || fileToDelete.originalName;
+      await MediaService.deleteFile(idOrFilename);
+      setFiles(prev => prev.filter(f => (f._id !== fileToDelete._id && f.filename !== fileToDelete.filename)));
       setSelectedIds(prev => {
         const next = new Set(prev);
         next.delete(fileToDelete.filename);
@@ -140,10 +156,14 @@ export default function AdminMediaView({ onShowToast }) {
 
   const isAssetVideo = (file) => {
     if (!file) return false;
-    if (file.mediaType === 'video') return true;
-    if (file.type && file.type.startsWith('video/')) return true;
+    const mt = String(file.mediaType || '').toLowerCase();
+    if (mt === 'video') return true;
+    const t = String(file.type || '').toLowerCase();
+    if (t.includes('video/')) return true;
+    const mime = String(file.mimeType || '').toLowerCase();
+    if (mime.includes('video/')) return true;
     const name = (file.filename || file.originalName || file.url || '').toLowerCase();
-    return /\.(mp4|webm|mov|mkv|m4v)$/i.test(name);
+    return /\.(mp4|webm|mov|mkv|m4v)($|\?|#)/i.test(name) || /youtube\.com|youtu\.be|vimeo\.com/i.test(name);
   };
 
   const getFileExtension = (file) => {
@@ -248,7 +268,7 @@ export default function AdminMediaView({ onShowToast }) {
     if (selectedIds.size === filteredFiles.length && filteredFiles.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredFiles.map(f => f.filename || f._id)));
+      setSelectedIds(new Set(filteredFiles.map((f, idx) => f._id || f.filename || f.url || `media-${idx}`)));
     }
   };
 
@@ -277,16 +297,6 @@ export default function AdminMediaView({ onShowToast }) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* ── Top Header Row ── */}
-      <div className="amv-header-section">
-        <div className="amv-header-top">
-          <div>
-            <h1 className="amv-main-title">
-              Media &amp; Asset Library
-            </h1>
-          </div>
-        </div>
-      </div>
 
       {/* ── KPI Stats Cards Bar ── */}
       <div className="amv-stats-grid">
@@ -406,6 +416,31 @@ export default function AdminMediaView({ onShowToast }) {
         </div>
 
         <div className="amv-toolbar-right">
+          <button
+            type="button"
+            className="amv-btn-secondary"
+            onClick={handleSync}
+            disabled={syncing || loading}
+            title="Sync all media assets from database and files"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              background: '#fff',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              color: '#334155',
+              cursor: (syncing || loading) ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
+            <span>{syncing ? 'Syncing...' : 'Sync Database'}</span>
+          </button>
+
           <label 
             className={`amv-btn-upload-primary ${uploading ? 'disabled' : ''}`}
             title="Upload image or video file"
@@ -423,57 +458,6 @@ export default function AdminMediaView({ onShowToast }) {
           </label>
         </div>
       </div>
-
-      {/* ── Sub-Header Bar: Select All, Bulk Delete, & Count (Matching AdminPostsView) ── */}
-      {filteredFiles.length > 0 && (
-        <div className="abv-cards-header-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <label className="abv-select-all-label" title="Select all media assets">
-              <input 
-                type="checkbox" 
-                className="admin-table-checkbox"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedIds(new Set(filteredFiles.map(f => f.filename || f._id)));
-                  } else {
-                    setSelectedIds(new Set());
-                  }
-                }}
-                checked={selectedIds.size > 0 && selectedIds.size === filteredFiles.length}
-              />
-              <span>Select All</span>
-            </label>
-            {selectedIds.size > 0 && (
-              <span className="abv-selected-pill">
-                {selectedIds.size} of {filteredFiles.length} selected
-              </span>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            {selectedIds.size > 0 && (
-              <div className="abv-bulk-actions-group">
-                <button
-                  type="button"
-                  onClick={handleBulkDelete}
-                  disabled={bulkDeleting}
-                  className="abv-bulk-btn abv-bulk-btn-delete"
-                  title="Delete selected media file(s)"
-                >
-                  <Trash2 size={14} />
-                  <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
-                </button>
-              </div>
-            )}
-
-            <div className="abv-cards-count-badge">
-              <span>
-                All Media: {filteredFiles.length} {filteredFiles.length === 1 ? 'asset' : 'assets'}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Drag & Drop Active Banner ── */}
       {isDragging && (
@@ -527,8 +511,8 @@ export default function AdminMediaView({ onShowToast }) {
         </div>
       ) : (
         <div className="amv-media-grid">
-          {filteredFiles.map((file) => {
-            const fileIdentifier = file.filename || file._id;
+          {filteredFiles.map((file, idx) => {
+            const fileIdentifier = file._id || file.filename || file.url || `media-${idx}`;
             const isSelected = selectedIds.has(fileIdentifier);
             const isVideo = isAssetVideo(file);
             const fileExt = getFileExtension(file);

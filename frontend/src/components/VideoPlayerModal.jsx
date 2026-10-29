@@ -346,7 +346,6 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
                 className={`cvp-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
                 onClick={() => setActiveTab('overview')}
               >
-                <Sparkles size={14} />
                 <span>Overview &amp; Key Takeaways</span>
               </button>
 
@@ -355,7 +354,6 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
                 className={`cvp-tab-btn ${activeTab === 'chapters' ? 'active' : ''}`}
                 onClick={() => setActiveTab('chapters')}
               >
-                <ListOrdered size={14} />
                 <span>Chapters &amp; Timestamps ({currentVideo.chapters?.length || 4})</span>
               </button>
 

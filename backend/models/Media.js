@@ -13,7 +13,7 @@ const mediaSchema = new mongoose.Schema(
     altText: { type: String, default: '' },
     caption: { type: String, default: '' },
     credit: { type: String, default: '' },
-    provider: { type: String, enum: ['cloudinary', 'local'], default: 'local' },
+    provider: { type: String, default: 'local' },
     publicId: { type: String, default: '' },
     uploadedBy: { type: String, default: 'admin' }
   },

@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Hash, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, 
   AlertCircle, AlertTriangle, CheckCircle, Check, X, Globe, 
-  ChevronRight, FileText, CheckSquare, Layers, Eye, EyeOff,
+  FileText, CheckSquare, Layers, Eye, EyeOff,
   Filter, ChevronDown, Clock
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -45,7 +45,7 @@ export default function AdminTopicsView({ onShowToast }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isFilterOpen]);
 
-  const activeFilterCount = (categoryFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (sortBy !== 'name_asc' ? 1 : 0);
+  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (sortBy !== 'name_asc' ? 1 : 0);
 
   // Modal / Drawer state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -346,6 +346,7 @@ export default function AdminTopicsView({ onShowToast }) {
       if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
       if (sortBy === 'name_desc') return b.name.localeCompare(a.name);
       if (sortBy === 'articles_desc') return (b.publishedArticlesCount || 0) - (a.publishedArticlesCount || 0);
+      if (sortBy === 'drafts_desc') return (b.draftArticlesCount || 0) - (a.draftArticlesCount || 0);
       if (sortBy === 'updated_desc') return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
       return 0;
     });
@@ -353,58 +354,9 @@ export default function AdminTopicsView({ onShowToast }) {
     return result;
   }, [topics, search, statusFilter, categoryFilter, sortBy]);
 
-  // Paginated slice
-  const totalItems = filteredAndSorted.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const paginatedTopics = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredAndSorted.slice(start, start + pageSize);
-  }, [filteredAndSorted, currentPage, pageSize]);
-
   return (
     <div className="admin-page-container">
       
-      {/* ── Breadcrumb & Top Header ── */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.4rem', fontWeight: 500 }}>
-          <span>Editorial CMS</span>
-          <ChevronRight size={13} />
-          <span>Taxonomy & Entities</span>
-          <ChevronRight size={13} />
-          <span style={{ color: 'var(--brand-primary, #dc2626)', fontWeight: 600 }}>Topics</span>
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>Topics</h1>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={openCreateModal}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.65rem 1.35rem',
-                backgroundColor: 'var(--brand-primary, #dc2626)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '9px',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)'
-              }}
-            >
-              <Plus size={17} />
-              <span>+ Add Topic</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* ── Summary Stats Strip ── */}
       <div style={{
         display: 'grid',
@@ -586,7 +538,6 @@ export default function AdminTopicsView({ onShowToast }) {
                   <button
                     type="button"
                     onClick={() => {
-                      setCategoryFilter('all');
                       setStatusFilter('all');
                       setSortBy('name_asc');
                       setCurrentPage(1);
@@ -604,37 +555,6 @@ export default function AdminTopicsView({ onShowToast }) {
                     Reset All
                   </button>
                 )}
-              </div>
-
-              {/* Category Filter */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Category
-                </label>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => {
-                    setCategoryFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.84rem',
-                    fontWeight: 500,
-                    color: '#1e293b',
-                    background: '#ffffff',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(c => (
-                    <option key={c._id || c.slug} value={c._id || c.slug}>{c.name}</option>
-                  ))}
-                </select>
               </div>
 
               {/* Status Filter */}
@@ -694,12 +614,38 @@ export default function AdminTopicsView({ onShowToast }) {
                   <option value="name_asc">Name (A-Z)</option>
                   <option value="name_desc">Name (Z-A)</option>
                   <option value="articles_desc">Most Published Articles</option>
+                  <option value="drafts_desc">Most Draft Articles</option>
                   <option value="updated_desc">Recently Updated</option>
                 </select>
               </div>
             </div>
           )}
         </div>
+      
+        {/* + Add Topic Button */}
+        <button
+          type="button"
+          onClick={openCreateModal}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '0.55rem 1.25rem',
+            backgroundColor: 'var(--brand-primary, #dc2626)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9px',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+            transition: 'transform 0.15s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Plus size={16} />
+          <span>Add Topic</span>
+        </button>
       </div>
 
       {/* ── Sub-Header Bar: Select All, Bulk Actions, & Count (Exact match to AdminPostsView) ── */}
@@ -779,13 +725,13 @@ export default function AdminTopicsView({ onShowToast }) {
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                 <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Topic Name &amp; Description
+                  Topic Name
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   URL Slug
                 </th>
-                <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Associated Categories
+                <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center' }}>
+                  Draft Articles
                 </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center' }}>
                   Published Articles
@@ -841,19 +787,15 @@ export default function AdminTopicsView({ onShowToast }) {
                   </td>
                 </tr>
               ) : (
-                paginatedTopics.map((top) => {
+                filteredAndSorted.map((top) => {
                   const id = top._id || top.slug;
                   const isSelected = selectedIds.has(id);
                   const publishedCount = top.publishedArticlesCount || 0;
+                  const draftCount = top.draftArticlesCount || 0;
                   const isActive = top.isActive !== false;
                   const formattedDate = top.updatedAt 
                     ? new Date(top.updatedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
                     : 'Active Topic';
-
-                  // Categories associated
-                  const associatedCats = Array.isArray(top.categoryIds) 
-                    ? top.categoryIds.map(c => typeof c === 'object' && c?.name ? c.name : (categories.find(cat => cat._id === c || cat.slug === c)?.name)).filter(Boolean)
-                    : [];
 
                   return (
                     <tr
@@ -897,14 +839,7 @@ export default function AdminTopicsView({ onShowToast }) {
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
                           )}
-                          <div>
-                            <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{top.name}</strong>
-                            {top.description && (
-                              <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b', maxWidth: '340px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {top.description}
-                              </p>
-                            )}
-                          </div>
+                          <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>{top.name}</strong>
                         </div>
                       </td>
 
@@ -930,34 +865,25 @@ export default function AdminTopicsView({ onShowToast }) {
                           title="Click to view public topic archive"
                         >
                           <span>/topic/{top.slug}</span>
-                          <ExternalLink size={11} />
                         </a>
                       </td>
 
-                      {/* Associated Categories */}
-                      <td style={{ padding: '0.9rem 1rem' }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '240px' }}>
-                          {associatedCats.length > 0 ? (
-                            associatedCats.map((cn, i) => (
-                              <span
-                                key={i}
-                                style={{
-                                  fontSize: '0.72rem',
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  background: '#f8fafc',
-                                  border: '1px solid #e2e8f0',
-                                  color: '#475569',
-                                  fontWeight: 600
-                                }}
-                              >
-                                {cn}
-                              </span>
-                            ))
-                          ) : (
-                            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Universal (All)</span>
-                          )}
-                        </div>
+                      {/* Draft Count */}
+                      <td style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '3px 9px',
+                          borderRadius: '20px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          background: draftCount > 0 ? '#fef3c7' : '#f1f5f9',
+                          color: draftCount > 0 ? '#b45309' : '#94a3b8',
+                          border: `1px solid ${draftCount > 0 ? '#fde68a' : '#e2e8f0'}`
+                        }}>
+                          {draftCount}
+                        </span>
                       </td>
 
                       {/* Published Count */}
@@ -1074,86 +1000,6 @@ export default function AdminTopicsView({ onShowToast }) {
             </tbody>
           </table>
         </div>
-
-        {/* ── Table Footer & Pagination ── */}
-        <div style={{
-          padding: '0.85rem 1.25rem',
-          borderTop: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          background: '#f8fafc'
-        }}>
-          <div style={{ fontSize: '0.84rem', color: '#64748b' }}>
-            Showing <strong>{filteredAndSorted.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong>{Math.min(currentPage * pageSize, filteredAndSorted.length)}</strong> of <strong>{filteredAndSorted.length}</strong> topics
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Per page:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                style={{
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.8rem',
-                  background: '#ffffff'
-                }}
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === 1 ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
-                }}
-              >
-                Previous
-              </button>
-              <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600, padding: '0 4px' }}>
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === totalPages ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === totalPages ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
-                }}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── CREATE / EDIT TOPIC MODAL ── */}
@@ -1196,9 +1042,7 @@ export default function AdminTopicsView({ onShowToast }) {
                 <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingTopic ? `Edit Topic: ${editingTopic.name}` : 'Create New Topic'}
                 </h3>
-                <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                  Create curated subjects and connect them with relevant publication categories
-                </p>
+
               </div>
               <button
                 type="button"
@@ -1283,127 +1127,33 @@ export default function AdminTopicsView({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Row 2: Description */}
+
+
+              {/* Status */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Topic Description
+                  Status
                 </label>
-                <textarea
-                  rows={2}
-                  placeholder="Overview of this topic displayed at the top of the topic page..."
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit'
-                  }}
-                />
-              </div>
-
-              {/* Row 3: Associated Categories (Multi-Select Chips) */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Associated Categories (Click to toggle)
-                </label>
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '6px',
-                  background: '#f8fafc',
-                  padding: '0.85rem',
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  maxHeight: '140px',
-                  overflowY: 'auto'
+                <label style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: formData.isActive ? '#ecfdf5' : '#f8fafc',
+                  cursor: 'pointer'
                 }}>
-                  {categories.map(cat => {
-                    const id = cat._id || cat.slug;
-                    const isSelected = formData.categoryIds.includes(id);
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => toggleCategorySelection(id)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '5px 11px',
-                          borderRadius: '20px',
-                          fontSize: '0.82rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          border: `1px solid ${isSelected ? 'var(--brand-primary)' : '#cbd5e1'}`,
-                          background: isSelected ? '#fff1f2' : '#ffffff',
-                          color: isSelected ? 'var(--brand-primary)' : '#475569',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {isSelected ? <Check size={12} strokeWidth={3} /> : <Plus size={12} />}
-                        <span>{cat.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <span style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
-                  Selected: {formData.categoryIds.length === 0 ? 'Universal (All Categories)' : `${formData.categoryIds.length} categories`}
-                </span>
-              </div>
-
-              {/* Row 4: Image & Status */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '1rem', alignItems: 'end' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Featured Header / Hero Image URL (Optional)
-                  </label>
                   <input
-                    type="text"
-                    placeholder="https://images.unsplash.com/... or /uploads/..."
-                    value={formData.image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    style={{ cursor: 'pointer' }}
                   />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Status
-                  </label>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: formData.isActive ? '#ecfdf5' : '#f8fafc',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: formData.isActive ? '#059669' : '#64748b' }}>
-                      {formData.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </label>
-                </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: formData.isActive ? '#059669' : '#64748b' }}>
+                    {formData.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </label>
               </div>
 
               {/* Row 5: SEO Meta */}

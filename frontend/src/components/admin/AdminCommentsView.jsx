@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Search, X, ChevronLeft, ChevronRight, Filter, ChevronDown } from 'lucide-react';
 import { CommentService } from '../../services/commentService';
 import './AdminCommentsView.css';
 
@@ -57,12 +58,6 @@ const PRESET_REJECTION_REASONS = [
   'Unverified Claims / Misinformation'
 ];
 
-const PRESET_EDITORIAL_REPLIES = [
-  'Thank you for sharing your valuable perspective with our community.',
-  'Great insight! Our editorial desk has noted this point for our upcoming deep dive.',
-  'Appreciate the critical analysis on this ecosystem shift.',
-  'We have verified these metrics directly with source documentation.'
-];
 
 export default function AdminCommentsView({ onShowToast }) {
   const [comments, setComments] = useState([]);
@@ -88,9 +83,28 @@ export default function AdminCommentsView({ onShowToast }) {
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'likes'
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
-  // Pagination: Show only 5 cards at once
+  // Pagination & Page Size (Show 10 comments per page)
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(10);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Filter Popover State
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    }
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterOpen]);
 
   // Rejection Reason Modal State
   const [rejectModal, setRejectModal] = useState({
@@ -130,7 +144,8 @@ export default function AdminCommentsView({ onShowToast }) {
         storySlug: selectedStorySlug,
         status: statusFilter,
         search: searchQuery,
-        sortBy: sortBy
+        sortBy: sortBy,
+        limit: 500
       });
       if (res && res.data) {
         setComments(res.data);
@@ -142,6 +157,20 @@ export default function AdminCommentsView({ onShowToast }) {
       onShowToast?.(err.message || 'Failed to load reviews');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSyncComments = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await CommentService.syncComments();
+      onShowToast?.(res.message || 'Comments synchronized successfully from database.');
+      await loadComments();
+      await loadContentsList();
+    } catch (err) {
+      onShowToast?.(err.message || 'Failed to sync comments');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -158,7 +187,8 @@ export default function AdminCommentsView({ onShowToast }) {
       storySlug: selectedStorySlug,
       status: statusFilter, 
       search: '', 
-      sortBy: sortBy 
+      sortBy: sortBy,
+      limit: 500 
     })
       .then(res => {
         if (res && res.data) {
@@ -369,7 +399,7 @@ export default function AdminCommentsView({ onShowToast }) {
     setCurrentPage(1);
   }, [searchQuery, selectedStorySlug, statusFilter, contentTypeFilter, sortBy]);
 
-  // Total pages based on 5 cards per page
+  // Total pages based on 10 cards per page
   const totalPages = Math.max(1, Math.ceil(filteredSortedComments.length / pageSize));
 
   // Automatically keep currentPage within valid range
@@ -379,7 +409,7 @@ export default function AdminCommentsView({ onShowToast }) {
     }
   }, [currentPage, totalPages]);
 
-  // Sliced reviews: exactly 5 cards shown at once
+  // Sliced reviews: exactly 10 cards shown at once per page
   const paginatedComments = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredSortedComments.slice(startIndex, startIndex + pageSize);
@@ -391,31 +421,19 @@ export default function AdminCommentsView({ onShowToast }) {
 
   return (
     <div className="acv-container">
-      {/* ── Top Header with Live Content Badges ── */}
-      <div className="acv-header-row">
-        <div>
-          <h1 className="acv-page-title">
-            Reader Discussions &amp; Moderation
-          </h1>
-        </div>
-      </div>
-
-
-
-
       {/* ── 4 KPI Review Moderation Cards (Synchronized with selected filter) ── */}
       <div className="acv-stats-grid">
         {/* Total Reviews */}
         <div 
-          className={`acv-kpi-card ${statusFilter === 'all' ? 'active' : ''}`}
+          className={`acv-kpi-card kpi-total ${statusFilter === 'all' ? 'active' : ''}`}
           onClick={() => setStatusFilter('all')}
           title="Click to view all reviews"
         >
           <div className="acv-kpi-content">
-            <span className="acv-kpi-label">
+            <span className="acv-kpi-label" style={{ color: '#475569' }}>
               Total Reviews
             </span>
-            <div className="acv-kpi-number">
+            <div className="acv-kpi-number" style={{ color: '#0f172a' }}>
               {selectedStorySlug !== 'all' ? filteredSortedComments.length : (metrics.totalReviews || metrics.totalComments || comments.length)}
             </div>
           </div>
@@ -423,15 +441,15 @@ export default function AdminCommentsView({ onShowToast }) {
 
         {/* Approved & Live */}
         <div 
-          className={`acv-kpi-card ${statusFilter === 'approved' ? 'active' : ''}`}
+          className={`acv-kpi-card kpi-approved ${statusFilter === 'approved' ? 'active' : ''}`}
           onClick={() => setStatusFilter('approved')}
           title="Click to view approved & live reviews"
         >
           <div className="acv-kpi-content">
-            <span className="acv-kpi-label">
+            <span className="acv-kpi-label" style={{ color: '#15803d' }}>
               Approved &amp; Live
             </span>
-            <div className="acv-kpi-number">
+            <div className="acv-kpi-number" style={{ color: '#16a34a' }}>
               {selectedStorySlug !== 'all' ? filteredSortedComments.filter(c => (c.status || 'approved') === 'approved').length : (metrics.approvedCount || 0)}
             </div>
           </div>
@@ -439,15 +457,15 @@ export default function AdminCommentsView({ onShowToast }) {
 
         {/* Pending Review */}
         <div 
-          className={`acv-kpi-card ${statusFilter === 'pending_review' ? 'active' : ''}`}
+          className={`acv-kpi-card kpi-pending ${statusFilter === 'pending_review' ? 'active' : ''}`}
           onClick={() => setStatusFilter('pending_review')}
           title="Click to view reviews pending moderation"
         >
           <div className="acv-kpi-content">
-            <span className="acv-kpi-label">
+            <span className="acv-kpi-label" style={{ color: '#b45309' }}>
               Pending Review
             </span>
-            <div className="acv-kpi-number">
+            <div className="acv-kpi-number" style={{ color: '#d97706' }}>
               {selectedStorySlug !== 'all' ? filteredSortedComments.filter(c => c.status === 'pending' || c.status === 'pending_review').length : (metrics.pendingCount || 0)}
             </div>
           </div>
@@ -455,15 +473,15 @@ export default function AdminCommentsView({ onShowToast }) {
 
         {/* Rejected / Hidden */}
         <div 
-          className={`acv-kpi-card ${statusFilter === 'rejected_hidden' ? 'active' : ''}`}
+          className={`acv-kpi-card kpi-rejected ${statusFilter === 'rejected_hidden' ? 'active' : ''}`}
           onClick={() => setStatusFilter('rejected_hidden')}
           title="Click to view rejected and hidden reviews"
         >
           <div className="acv-kpi-content">
-            <span className="acv-kpi-label">
+            <span className="acv-kpi-label" style={{ color: '#b91c1c' }}>
               Rejected / Hidden
             </span>
-            <div className="acv-kpi-number">
+            <div className="acv-kpi-number" style={{ color: '#dc2626' }}>
               {selectedStorySlug !== 'all' ? filteredSortedComments.filter(c => c.status === 'rejected' || c.status === 'hidden').length : (metrics.rejectedHiddenCount !== undefined ? metrics.rejectedHiddenCount : (metrics.rejectedCount || 0))}
             </div>
           </div>
@@ -475,6 +493,7 @@ export default function AdminCommentsView({ onShowToast }) {
         {/* Search Box */}
         <form onSubmit={handleSearchSubmit} className="acv-search-box">
           <div className="acv-search-input-wrap">
+            <Search size={15} className="acv-search-icon" />
             <input 
               type="text" 
               placeholder="Search author, comment text, article, or video title..."
@@ -489,40 +508,88 @@ export default function AdminCommentsView({ onShowToast }) {
                 onClick={handleClearSearch}
                 title="Clear search"
               >
-                ✕
+                <X size={14} />
               </button>
             )}
           </div>
-          <button 
-            type="submit" 
-            className="acv-search-btn"
-            title="Search discussions"
-          >
-            Search
-          </button>
         </form>
 
-        {/* Sort Dropdown */}
-        <select 
-          value={sortBy} 
-          onChange={e => setSortBy(e.target.value)} 
-          className="acv-sort-select"
-        >
-          <option value="newest">Sort: Newest First</option>
-          <option value="oldest">Sort: Oldest First</option>
-          <option value="likes">Sort: Most Likes</option>
-        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Unified Filter Button & Popover */}
+          <div style={{ position: 'relative' }} ref={filterRef}>
+            <button 
+              type="button" 
+              className={`abv-filter-btn ${contentTypeFilter !== 'all' || sortBy !== 'newest' ? 'active' : ''} ${isFilterOpen ? 'open' : ''}`}
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              title="Filter by Content Type & Sort Order"
+            >
+              <Filter size={14} className="abv-filter-icon" />
+              <span>Filters</span>
+              {(contentTypeFilter !== 'all' || sortBy !== 'newest') && (
+                <span className="abv-filter-count-badge">
+                  {(contentTypeFilter !== 'all' ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0)}
+                </span>
+              )}
+              <ChevronDown size={13} className={`abv-filter-chevron ${isFilterOpen ? 'rotated' : ''}`} />
+            </button>
+
+            {isFilterOpen && (
+              <div className="abv-filter-popover" style={{ minWidth: '260px' }}>
+                <div className="abv-filter-popover-header">
+                  <span className="abv-filter-popover-title">
+                    <Filter size={13} />
+                    <span>Filter Comments</span>
+                  </span>
+                  {(contentTypeFilter !== 'all' || sortBy !== 'newest') && (
+                    <button 
+                      type="button" 
+                      className="abv-filter-reset-btn"
+                      onClick={() => {
+                        setContentTypeFilter('all');
+                        setSortBy('newest');
+                      }}
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className="abv-filter-popover-body">
+                  {/* Content Type Filter */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">CONTENT TYPE</label>
+                    <select 
+                      className="abv-popover-select"
+                      value={contentTypeFilter} 
+                      onChange={e => setContentTypeFilter(e.target.value)}
+                    >
+                      <option value="all">All (Articles &amp; Videos)</option>
+                      <option value="article">Articles Only</option>
+                      <option value="video">Videos Only</option>
+                    </select>
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">SORT ORDER</label>
+                    <select 
+                      className="abv-popover-select"
+                      value={sortBy} 
+                      onChange={e => setSortBy(e.target.value)}
+                    >
+                      <option value="newest">Sort: Newest First</option>
+                      <option value="oldest">Sort: Oldest First</option>
+                      <option value="likes">Sort: Most Likes</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* ── Results Count Bar ── */}
-      <div className="acv-count-bar">
-        <span>
-          Showing <strong>{filteredSortedComments.length === 0 ? 0 : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredSortedComments.length)}`}</strong> of <strong>{filteredSortedComments.length}</strong> {filteredSortedComments.length === 1 ? 'review' : 'reviews'}
-          {totalPages > 1 && <span style={{ color: '#94a3b8', marginLeft: '6px' }}>(Page {currentPage} of {totalPages})</span>}
-          {selectedStorySlug !== 'all' && ` on "${activeContentInfo?.contentTitle || selectedStorySlug}"`}
-          {contentTypeFilter !== 'all' && selectedStorySlug === 'all' && ` (${contentTypeFilter === 'video' ? 'Videos only' : 'Articles only'})`}
-        </span>
-      </div>
+
 
       {/* ── Reviews Feed ── */}
       {loading ? (
@@ -545,7 +612,7 @@ export default function AdminCommentsView({ onShowToast }) {
               ? 'No rejected or hidden reviews found.'
               : 'There are currently no review records matching these filters.'}
           </p>
-          {(searchQuery || statusFilter !== 'all' || selectedStorySlug !== 'all' || contentTypeFilter !== 'all') && (
+          {(searchQuery || statusFilter !== 'all' || selectedStorySlug !== 'all' || contentTypeFilter !== 'all' ) && (
             <button 
               type="button" 
               className="acv-refresh-btn" 
@@ -554,7 +621,7 @@ export default function AdminCommentsView({ onShowToast }) {
                 setStatusFilter('all'); 
                 setSelectedStorySlug('all'); 
                 setContentTypeFilter('all'); 
-              }}
+                }}
               style={{ margin: '0 auto' }}
             >
               Reset All Filters
@@ -632,6 +699,23 @@ export default function AdminCommentsView({ onShowToast }) {
 
                   {/* Right: Content Indicator & Badges (No Icons) */}
                   <div className="acv-card-right-cluster">
+                    {/* Target Article / Video Link & Badge */}
+                    <button
+                      type="button"
+                      className="acv-content-item-badge"
+                      onClick={() => {
+                        if (selectedStorySlug === comment.storySlug) {
+                          setSelectedStorySlug('all');
+                        } else {
+                          setSelectedStorySlug(comment.storySlug);
+                        }
+                      }}
+                      title={`Filter by "${titleToShow}" (${isVideo ? 'Video' : 'Article'})`}
+                    >
+                      <span className="acv-cib-text">
+                        <strong>{isVideo ? '[VIDEO]' : '[ARTICLE]'}</strong> {titleToShow}
+                      </span>
+                    </button>
 
                     {/* Pinned Badge */}
                     {isPinned && (
@@ -711,31 +795,10 @@ export default function AdminCommentsView({ onShowToast }) {
                       <span className="acv-rew-title">
                         <span>Reply as <strong>Editorial Desk</strong>:</span>
                       </span>
-                      <button
-                        type="button"
-                        className="acv-rew-close"
-                        onClick={() => toggleReplyBox(commentId)}
-                      >
-                        Cancel
-                      </button>
+
                     </div>
 
-                    {/* Quick Presets */}
-                    <div className="acv-preset-tags" style={{ margin: '4px 0 8px' }}>
-                      {PRESET_EDITORIAL_REPLIES.map((preset, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          className="acv-preset-tag"
-                          onClick={() => setReplyBoxes(prev => ({
-                            ...prev,
-                            [commentId]: { ...prev[commentId], text: preset }
-                          }))}
-                        >
-                          {preset.slice(0, 40)}...
-                        </button>
-                      ))}
-                    </div>
+
 
                     <textarea
                       className="acv-modal-textarea"
@@ -782,16 +845,9 @@ export default function AdminCommentsView({ onShowToast }) {
                       <span>{isPinned ? 'Unpin from Top' : 'Pin to Top'}</span>
                     </button>
 
-                    {/* Reply Action */}
-                    <button
-                      type="button"
-                      className={`acv-action-btn-reply ${replyBoxState.isOpen ? 'active' : ''}`}
-                      disabled={isProcessing}
-                      onClick={() => toggleReplyBox(commentId, comment.adminReply?.text || '')}
-                      title="Post or update reply"
-                    >
-                      <span>{comment.adminReply?.text ? 'Edit Reply' : 'Reply'}</span>
-                    </button>
+
+
+
                   </div>
 
                   {/* Right Actions: Workflow Moderation */}
@@ -909,26 +965,16 @@ export default function AdminCommentsView({ onShowToast }) {
           })}
         </div>
 
-        {/* ── Pagination Bar: Only 5 cards at once ── */}
+        {/* ── Modern Pagination Bar ── */}
         {totalPages > 1 && (
           <div className="acv-pagination-bar">
             <div className="acv-pagination-info">
-              Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> ({filteredSortedComments.length} total reviews • 5 per page)
+              Showing <span className="acv-pg-bold">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+              <span className="acv-pg-bold">{Math.min(currentPage * pageSize, filteredSortedComments.length)}</span> of{' '}
+              <span className="acv-pg-bold">{filteredSortedComments.length}</span> reviews
             </div>
 
             <div className="acv-pagination-actions">
-              <button
-                type="button"
-                className="acv-page-nav-btn"
-                disabled={currentPage === 1}
-                onClick={() => {
-                  setCurrentPage(1);
-                  window.scrollTo({ top: 320, behavior: 'smooth' });
-                }}
-                title="First Page"
-              >
-                « First
-              </button>
               <button
                 type="button"
                 className="acv-page-nav-btn"
@@ -939,7 +985,8 @@ export default function AdminCommentsView({ onShowToast }) {
                 }}
                 title="Previous Page"
               >
-                ‹ Prev
+                <ChevronLeft size={16} />
+                <span>Previous</span>
               </button>
 
               <div className="acv-page-numbers">
@@ -988,19 +1035,8 @@ export default function AdminCommentsView({ onShowToast }) {
                 }}
                 title="Next Page"
               >
-                Next ›
-              </button>
-              <button
-                type="button"
-                className="acv-page-nav-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => {
-                  setCurrentPage(totalPages);
-                  window.scrollTo({ top: 320, behavior: 'smooth' });
-                }}
-                title="Last Page"
-              >
-                Last »
+                <span>Next</span>
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>

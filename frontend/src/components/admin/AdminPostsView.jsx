@@ -1474,7 +1474,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   className={`aem-top-tab-btn ${isActive ? 'active' : ''}`}
                   onClick={() => setEditorTab(t.id)}
                 >
-                  <Icon size={16} className="aem-top-tab-icon" />
                   <span className="aem-top-tab-title">{t.label}</span>
                   {t.pill && <span className="aem-top-tab-pill">{t.pill}</span>}
                 </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Moon, Sun, Bookmark, Send, X, 
   ChevronDown, ChevronRight, LayoutDashboard,
@@ -181,21 +181,39 @@ export default function Header({
   });
 
   // Derive normalized dynamic nav links directly from MongoDB navigation API
+  // Priority: DB navigationTree > navLinks prop > static NAV_LINKS fallback
   const sourceNav = (Array.isArray(navigationTree) && navigationTree.length > 0)
     ? navigationTree
     : (navLinks && navLinks.length > 0 ? navLinks : NAV_LINKS);
 
-  const effectiveNavLinks = sourceNav
-    .filter(link => {
-      if (link.isActive === false || link.visible === false || link.isVisible === false) return false;
-      const vis = (link.visibility || 'PUBLIC').toUpperCase();
-      if (vis === 'MOBILE') return false; // Skip mobile-only on desktop
-      if (vis === 'LOGGED_IN' && !currentUser) return false;
-      if (vis === 'ADMIN_ONLY' && !AuthService.isStaff(currentUser)) return false;
-      return true;
-    })
-    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
-    .map(link => {
+  // Normalize slug/url aliases to a single dedup key so items like
+  // "just-in" (slug) and "latest" (slug) that both represent the same
+  // Latest section don't appear twice in the navbar.
+  const _navDedupeKey = (link) => {
+    const slug = (link.slug || link.id || '').toLowerCase();
+    const url  = (link.url || link.target || '').toLowerCase().replace(/\/$/, '');
+    if (slug === 'just-in' || slug === 'latest' || url === '/latest' || url === '/category/latest' || url === '/just-in') return '__latest__';
+    if (slug === 'trending' || url === '/trending' || url === '/category/trending') return '__trending__';
+    return slug || url || (link.title || link.label || '').toLowerCase();
+  };
+
+  const effectiveNavLinks = (() => {
+    const _seen = new Set();
+    return sourceNav
+      .filter(link => {
+        if (link.isActive === false || link.visible === false || link.isVisible === false) return false;
+        const vis = (link.visibility || 'PUBLIC').toUpperCase();
+        if (vis === 'MOBILE') return false; // Skip mobile-only on desktop
+        if (vis === 'LOGGED_IN' && !currentUser) return false;
+        if (vis === 'ADMIN_ONLY' && !AuthService.isStaff(currentUser)) return false;
+        // Deduplicate: keep only the first occurrence of each semantic nav item
+        const key = _navDedupeKey(link);
+        if (key && _seen.has(key)) return false;
+        if (key) _seen.add(key);
+        return true;
+      })
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+  })().map(link => {
       const id = link.slug || link.id || (link._id ? String(link._id) : '');
       const label = link.title || link.label || 'Menu';
       const isFromDb = Boolean(link._id);
@@ -249,7 +267,9 @@ export default function Header({
       if ((!columns || columns.length === 0) && fallbackData?.columns) {
         columns = fallbackData.columns;
       }
-      const dropdownData = fallbackData || (columns ? { columns } : null);
+      const dropdownData = (columns && columns.length > 0)
+        ? { columns, align: fallbackData?.align || 'center' }
+        : (fallbackData || null);
 
       const hasColumns = Boolean((columns && columns.length > 0) || (dropdownData && dropdownData.columns && dropdownData.columns.length > 0));
       const isBrands = id === 'brands' || link.slug === 'brands';
@@ -941,7 +961,7 @@ export default function Header({
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.04em', marginTop: '1px' }}>
-                      Read • Learn • Grow
+                      Read â€¢ Learn â€¢ Grow
                     </div>
                   </div>
                 </div>
@@ -968,7 +988,7 @@ export default function Header({
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.04em', marginTop: '1px' }}>
-                      Read • Learn • Grow
+                      Read â€¢ Learn â€¢ Grow
                     </div>
                   </div>
                 </div>

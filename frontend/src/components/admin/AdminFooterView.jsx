@@ -414,7 +414,6 @@ export default function AdminFooterView({ onShowToast }) {
                 transition: 'all 0.15s ease'
               }}
             >
-              <Icon size={16} />
               <span>{tab.label}</span>
             </button>
           );

@@ -3,11 +3,21 @@ import { AuthService } from './authService';
 const API_BASE = '/api/media';
 
 export const MediaService = {
-  // Get all media files (supports both getFiles and getMedia aliases)
-  async getMedia() {
+  // Get all media files (supports type filtering, search queries, getFiles alias)
+  async getMedia(params = {}) {
     try {
       const token = AuthService.getToken();
-      const res = await fetch(API_BASE, {
+      let url = API_BASE;
+      if (typeof params === 'string') {
+        url += `?type=${encodeURIComponent(params)}`;
+      } else if (params && typeof params === 'object') {
+        const queryParams = new URLSearchParams();
+        if (params.type) queryParams.set('type', params.type);
+        if (params.q || params.search) queryParams.set('q', params.q || params.search);
+        const qs = queryParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const res = await fetch(url, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -20,8 +30,23 @@ export const MediaService = {
     return [];
   },
 
-  async getFiles() {
-    return this.getMedia();
+  async getFiles(params) {
+    return this.getMedia(params);
+  },
+
+  // Sync all media assets from database
+  async syncMedia() {
+    try {
+      const token = AuthService.getToken();
+      const res = await fetch(`${API_BASE}/sync`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('MediaService.syncMedia error:', e);
+    }
+    return { success: false };
   },
 
   // Upload media using base64 payload

@@ -167,6 +167,7 @@ export const CommentService = {
     if (params.status && params.status !== 'all') query.append('status', params.status);
     if (params.contentType && params.contentType !== 'all') query.append('contentType', params.contentType);
     if (params.storySlug && params.storySlug !== 'all') query.append('storySlug', params.storySlug);
+    if (params.author && params.author !== 'all') query.append('author', params.author);
     if (params.search && params.search.trim()) query.append('search', params.search.trim());
     if (params.sortBy) query.append('sortBy', params.sortBy);
     if (params.limit) query.append('limit', params.limit);
@@ -339,6 +340,21 @@ export const CommentService = {
   /**
    * Admin: Delete review permanently
    */
+  /**
+   * Admin: Synchronize and seed database comments
+   */
+  async syncComments() {
+    const res = await fetch(`${ADMIN_API_BASE}/sync`, {
+      method: 'POST',
+      headers: AuthService.getAdminHeaders()
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to sync comments');
+    }
+    return json;
+  },
+
   async adminDeleteComment(commentId) {
     const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(commentId)}`, {
       method: 'DELETE',

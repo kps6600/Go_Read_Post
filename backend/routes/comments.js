@@ -6,6 +6,9 @@ import Article from '../models/Article.js';
 import Video from '../models/Video.js';
 import { isDbConnected } from '../db.js';
 import { protectAuth, verifyJwtToken } from '../middleware/auth.js';
+import { ensureCommentsSeeded } from '../scripts/seedComments.js';
+
+export { ensureCommentsSeeded };
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -677,12 +680,30 @@ router.delete('/:id', protectAuth, async (req, res) => {
 export const adminCommentsRouter = express.Router();
 
 /**
+ * POST /api/admin/comments/sync
+ * Re-seed and synchronize all discussions into MongoDB
+ */
+adminCommentsRouter.post('/sync', protectAuth, async (req, res) => {
+  try {
+    const result = await ensureCommentsSeeded(true);
+    res.json({
+      success: true,
+      message: 'Successfully synchronized comments into database.',
+      metrics: result.metrics,
+      count: result.count
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
  * GET /api/admin/comments
  * Query params: status, contentType, storySlug, search, sortBy, limit, page
  */
 adminCommentsRouter.get('/', protectAuth, async (req, res) => {
   try {
-    const { status, contentType, storySlug, search, sortBy = 'newest', limit = 100, page = 1 } = req.query;
+    const { status, contentType, storySlug, author, search, sortBy = 'newest', limit = 100, page = 1 } = req.query;
 
     if (isDbConnected()) {
       const filter = {};
@@ -706,6 +727,11 @@ adminCommentsRouter.get('/', protectAuth, async (req, res) => {
       // Specific Story / Video slug filter
       if (storySlug && storySlug !== 'all' && storySlug.trim()) {
         filter.storySlug = { $regex: new RegExp(`^${storySlug.trim()}$`, 'i') };
+      }
+
+      // Author filter
+      if (author && author !== 'all' && author.trim()) {
+        filter.author = { $regex: new RegExp('^' + author.trim() + '$', 'i') };
       }
 
       // Text search
@@ -786,6 +812,12 @@ adminCommentsRouter.get('/', protectAuth, async (req, res) => {
     if (storySlug && storySlug !== 'all' && storySlug.trim()) {
       const slugNorm = storySlug.trim().toLowerCase();
       comments = comments.filter(c => (c.storySlug || '').toLowerCase() === slugNorm);
+    }
+
+    // Author Filter
+    if (author && author !== 'all' && author.trim()) {
+      const aNorm = author.trim().toLowerCase();
+      comments = comments.filter(c => (c.author || '').toLowerCase() === aNorm);
     }
 
     // 4. Search Filter
