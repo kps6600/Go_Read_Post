@@ -994,7 +994,7 @@ export default function LiveHomepageStudio({
                                 <button
                                   type="button"
                                   className="lbe-btn-add-mini article"
-                                  onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                                  onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'articles' })}
                                   title="Open All Articles popup to add an article to Popular Posts (Max 5)"
                                 >
                                   <Plus size={12} strokeWidth={2.5} />
@@ -1003,7 +1003,7 @@ export default function LiveHomepageStudio({
                                 <button
                                   type="button"
                                   className="lbe-btn-add-mini video"
-                                  onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                                  onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'videos' })}
                                   title="Open All Videos popup to add a video to Popular Posts (Max 5)"
                                 >
                                   <Play size={9} fill="currentColor" />

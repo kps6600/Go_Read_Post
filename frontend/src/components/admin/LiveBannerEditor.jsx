@@ -481,7 +481,7 @@ export default function LiveBannerEditor({
     setPickerTarget(target);
     setPickerSearch('');
     setPickerCategory('All');
-    setPickerContentType(target?.defaultTab || 'articles');
+    setPickerContentType(target?.mode || target?.defaultTab || 'articles');
     setIsPickerOpen(true);
   };
 
@@ -763,7 +763,7 @@ export default function LiveBannerEditor({
                     <button
                       type="button"
                       className="lbe-btn-add-mini article"
-                      onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'articles' })}
                       title="Open All Articles popup to add an article to Popular Posts (Max 5)"
                     >
                       <Plus size={12} strokeWidth={2.5} />
@@ -772,7 +772,7 @@ export default function LiveBannerEditor({
                     <button
                       type="button"
                       className="lbe-btn-add-mini video"
-                      onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'videos' })}
                       title="Open All Videos popup to add a video to Popular Posts (Max 5)"
                     >
                       <Play size={9} fill="currentColor" />
@@ -857,17 +857,15 @@ export default function LiveBannerEditor({
                 <h4 className="lbe-picker-title">
                   <Layers size={18} color="#38bdf8" />
                   <span>
-                    {pickerTarget?.type?.startsWith('hero')
-                      ? 'Select Slide for Hero Slider'
-                      : pickerContentType === 'videos'
-                        ? 'All Videos Catalog (Select for Popular Posts)'
-                        : 'All Articles Library (Select for Popular Posts)'}
+                    {pickerTarget?.mode === 'videos' || pickerContentType === 'videos'
+                      ? 'All Videos Catalog (Select for Popular Posts)'
+                      : 'All Articles Library (Select for Popular Posts)'}
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
-                  {pickerContentType === 'videos'
-                    ? 'Browse all studio interviews, masterclasses, and videos. (Maximum 5 popular cards)'
-                    : 'Browse all published editorial articles. (Maximum 5 popular cards)'}
+                  {pickerTarget?.mode === 'videos' || pickerContentType === 'videos'
+                    ? 'Browse all studio interviews, masterclasses, and video episodes.'
+                    : 'Browse all published editorial articles.'}
                 </p>
                 {pickerTarget?.type === 'popular-add' && popularArticles.length >= 5 && (
                   <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#fef08a', background: 'rgba(234, 179, 8, 0.14)', border: '1px solid rgba(234, 179, 8, 0.35)', padding: '5px 12px', borderRadius: '7px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -886,36 +884,31 @@ export default function LiveBannerEditor({
 
             {/* Search, Tabs, and Category Filters */}
             <div className="lbe-picker-toolbar">
-              {/* Type Switcher Tabs: Articles Section vs Videos Section */}
-              <div className="lbe-picker-type-tabs">
-                <button
-                  type="button"
-                  className={`lbe-picker-type-tab ${pickerContentType === 'articles' ? 'active' : ''}`}
-                  onClick={() => handleSwitchPickerContentType('articles')}
-                >
-                  📄 Articles Section ({pool.length})
-                </button>
-                <button
-                  type="button"
-                  className={`lbe-picker-type-tab ${pickerContentType === 'videos' ? 'active' : ''}`}
-                  onClick={() => handleSwitchPickerContentType('videos')}
-                >
-                  🎬 Videos Section ({videoPool.length})
-                </button>
-                <button
-                  type="button"
-                  className={`lbe-picker-type-tab ${pickerContentType === 'all' ? 'active' : ''}`}
-                  onClick={() => handleSwitchPickerContentType('all')}
-                >
-                  🌐 All Content ({pool.length + videoPool.length})
-                </button>
-              </div>
+              {/* Only show tabs if not in dedicated mode */}
+              {!pickerTarget?.mode && (
+                <div className="lbe-picker-type-tabs">
+                  <button
+                    type="button"
+                    className={`lbe-picker-type-tab ${pickerContentType === 'articles' ? 'active' : ''}`}
+                    onClick={() => handleSwitchPickerContentType('articles')}
+                  >
+                    📄 Articles ({pool.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`lbe-picker-type-tab ${pickerContentType === 'videos' ? 'active' : ''}`}
+                    onClick={() => handleSwitchPickerContentType('videos')}
+                  >
+                    🎬 Videos ({videoPool.length})
+                  </button>
+                </div>
+              )}
 
               <div className="lbe-picker-search-wrap">
                 <Search size={16} color="#94a3b8" />
                 <input
                   type="text"
-                  placeholder="Search articles & videos by title, author, desk..."
+                  placeholder={pickerTarget?.mode === 'videos' || pickerContentType === 'videos' ? 'Search videos by title, series, guest...' : 'Search articles by title, author, desk...'}
                   value={pickerSearch}
                   onChange={e => setPickerSearch(e.target.value)}
                   className="lbe-picker-search-input"
