@@ -26,7 +26,7 @@ homepageSectionSchema.index({ order: 1 });
 export const DEFAULT_HOMEPAGE_SECTIONS = [
   {
     sectionKey: 'hero_popular',
-    title: 'Lead Stories & Popular Posts',
+    title: 'Hero Section - Lead Stories & Popular Posts',
     subtitle: 'Primary hero editorial slider & top 5 ranked sidebar',
     enabled: true,
     order: 1,

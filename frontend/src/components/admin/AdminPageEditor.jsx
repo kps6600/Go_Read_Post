@@ -83,12 +83,15 @@ export const isBannerSection = (sec) => {
   if (!sec) return false;
   const type = (sec.type || '').toLowerCase();
   const id = (sec.id || '').toLowerCase();
+  const sectionKey = (sec.sectionKey || '').toLowerCase();
   const title = (sec.data?.heading || sec.data?.title || sec.data?.headline || sec.title || '').toLowerCase();
   return (
     type === 'hero' ||
     type === 'banner' ||
     type === 'hero_popular' ||
     id === 'hero_popular' ||
+    sectionKey === 'hero_popular' ||
+    sectionKey.includes('hero') ||
     id.includes('hero') ||
     id.includes('banner') ||
     title.includes('hero') ||
@@ -920,7 +923,16 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                 const badgeColor = canon?.color || 'var(--brand-primary)';
                 const badgeBg = canon?.bg || 'rgba(234, 88, 12, 0.08)';
 
-                const titleText = 
+                const isHeroSec = 
+                  sec.sectionKey === 'hero_popular' || 
+                  sec.id === 'hero_popular' || 
+                  sec.type === 'hero' || 
+                  sec.type === 'hero_popular' || 
+                  (sec.id || '').toLowerCase().includes('hero') || 
+                  (sec.sectionKey || '').toLowerCase().includes('hero') || 
+                  (sec.title || '').toLowerCase().includes('hero');
+
+                let titleText = 
                   sec.data?.heading || 
                   sec.data?.title || 
                   sec.data?.headline || 
@@ -928,6 +940,10 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                   canon?.title || 
                   def.label || 
                   `Section ${idx + 1}`;
+
+                if (isHeroSec && !titleText.toLowerCase().includes('hero')) {
+                  titleText = `Hero Section - ${titleText}`;
+                }
 
                 const subText = 
                   sec.data?.subheadline || 
@@ -994,77 +1010,51 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                         <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
                       </button>
 
-                      {/* Live Visual WYSIWYG Editor Button (ONLY for Hero / Banner section) */}
-                      {isBannerSection(sec) && (
-                        <button
-                          type="button"
-                          className="btn-section-action live-edit"
-                          onClick={() => handleOpenLiveEditor(sec)}
-                          style={{
-                            background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                            color: '#ffffff',
-                            border: 'none',
-                            fontWeight: 750,
-                            padding: '6px 14px',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            cursor: 'pointer'
-                          }}
-                          title={`Open Live Visual Editor for "${def.label || sec.type}"`}
-                        >
-                          <Sparkles size={15} />
-                          <span>Live Edit</span>
-                        </button>
-                      )}
+                      {/* Edit Button for all sections */}
+                      <button
+                        type="button"
+                        className="btn-section-action live-edit"
+                        onClick={() => setEditingSection(sec)}
+                        style={{
+                          background: '#2563eb',
+                          color: '#ffffff',
+                          border: 'none',
+                          fontWeight: 750,
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                        title={`Edit content for "${def.label || sec.type || titleText}"`}
+                      >
+                        <Edit2 size={14} />
+                        <span>Edit</span>
+                      </button>
 
-                      {/* Custom Added Section: Edit and Delete buttons */}
-                      {!isCoreFeedSection(sec) && !isBannerSection(sec) && (
-                        <>
-                          <button
-                            type="button"
-                            className="btn-section-action live-edit"
-                            onClick={() => setEditingSection(sec)}
-                            style={{
-                              background: '#2563eb',
-                              color: '#ffffff',
-                              border: 'none',
-                              fontWeight: 750,
-                              padding: '6px 14px',
-                              borderRadius: '8px',
-                              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              cursor: 'pointer'
-                            }}
-                            title={`Edit content for "${def.label || sec.type}"`}
-                          >
-                            <Edit2 size={14} />
-                            <span>Edit</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn-section-action delete"
-                            onClick={() => handleDeleteSection(sec.id)}
-                            disabled={saving}
-                            title="Delete this section"
-                            style={{
-                              background: 'rgba(239, 68, 68, 0.08)',
-                              color: '#dc2626',
-                              border: '1px solid rgba(239, 68, 68, 0.2)',
-                              padding: '6px 10px',
-                              borderRadius: '8px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </>
-                      )}
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        className="btn-section-action delete"
+                        onClick={() => handleDeleteSection(sec.id)}
+                        disabled={saving}
+                        title="Delete this section"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.08)',
+                          color: '#dc2626',
+                          border: '1px solid rgba(239, 68, 68, 0.2)',
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 );

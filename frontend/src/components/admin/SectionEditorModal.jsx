@@ -89,8 +89,9 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
     onClose();
   };
 
-  const sectionMeta = SECTION_DEFINITIONS.find(d => d.type === section.type) || {
-    label: section.type.toUpperCase(),
+  const isHero = section?.type === 'hero' || section?.type === 'hero_popular' || section?.sectionKey === 'hero_popular' || section?.id === 'hero_popular' || (section?.id || '').toLowerCase().includes('hero') || (section?.title || '').toLowerCase().includes('hero');
+  const sectionMeta = SECTION_DEFINITIONS.find(d => d.type === (isHero ? 'hero' : section?.type)) || {
+    label: (isHero ? 'Hero Banner & Lead Stories' : (section?.type || section?.title || 'SECTION')).toUpperCase(),
     desc: 'Custom Page Section'
   };
 
@@ -154,7 +155,7 @@ export default function SectionEditorModal({ section, isOpen, onClose, onSave, o
           )}
 
           {/* 1. HERO SECTION */}
-          {section.type === 'hero' && (
+          {isHero && (
             <div className="form-fields-group">
 
               {/* Section Admin Heading & Badge */}

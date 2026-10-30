@@ -67,6 +67,27 @@ export const PageService = {
       try {
         homeSections = await HomepageService.getAdminSections();
       } catch (e) {}
+      const rawList = homeSections && homeSections.length > 0 ? homeSections : [
+        { id: 'hero_popular', sectionKey: 'hero_popular', type: 'hero', title: 'Hero Section - Lead Stories & Popular Posts', enabled: true },
+        { id: 'latest_blogs', sectionKey: 'latest_blogs', type: 'latest_blogs', title: 'Latest from the Blog', enabled: true },
+        { id: 'trending', sectionKey: 'trending', type: 'trending', title: 'Trending Now', enabled: true },
+        { id: 'popular_editors', sectionKey: 'popular_editors', type: 'popular_editors', title: "Most Popular & Editor's Picks", enabled: true },
+        { id: 'spotlight', sectionKey: 'spotlight', type: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true },
+        { id: 'newsletter', sectionKey: 'newsletter', type: 'newsletter', title: 'Newsletter Subscription Banner', enabled: true }
+      ];
+      const normalizedSections = rawList.map((s, idx) => {
+        const isHero = s.sectionKey === 'hero_popular' || s.id === 'hero_popular' || s.type === 'hero' || s.type === 'hero_popular';
+        const rawTitle = s.title || (isHero ? 'Hero Section - Lead Stories & Popular Posts' : `Section ${idx + 1}`);
+        const cleanTitle = isHero && !rawTitle.toLowerCase().includes('hero')
+          ? `Hero Section - ${rawTitle}`
+          : rawTitle;
+        return {
+          ...s,
+          id: s.id || s.sectionKey || s._id,
+          type: s.type || (isHero ? 'hero' : s.sectionKey) || 'section',
+          title: cleanTitle
+        };
+      });
       return {
         _id: 'home',
         id: 'home',
@@ -74,14 +95,7 @@ export const PageService = {
         slug: '',
         status: 'published',
         description: 'GoReadPost Main Editorial Homepage & Lead Portals',
-        sections: homeSections && homeSections.length > 0 ? homeSections : [
-          { id: 'hero_popular', type: 'hero_popular', title: 'Lead Stories & Editorial Hero Slider', enabled: true },
-          { id: 'latest_blogs', type: 'latest_blogs', title: 'Latest from the Blog', enabled: true },
-          { id: 'trending', type: 'trending', title: 'Trending Now', enabled: true },
-          { id: 'popular_editors', type: 'popular_editors', title: "Most Popular & Editor's Picks", enabled: true },
-          { id: 'spotlight', type: 'spotlight', title: 'Tech & Startup Spotlight', enabled: true },
-          { id: 'newsletter', type: 'newsletter', title: 'Newsletter Subscription Banner', enabled: true }
-        ],
+        sections: normalizedSections,
         seo: {
           title: 'GoReadPost | Stories of Founders, Technology & Startups',
           description: 'Definitive journal of startup breakdowns, deeptech, venture capital, and builder journeys.',
