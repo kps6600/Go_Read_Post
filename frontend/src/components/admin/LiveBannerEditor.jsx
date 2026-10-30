@@ -855,40 +855,6 @@ export default function LiveBannerEditor({
                     </div>
                   ))}
                 </div>
-
-                {/* Bottom Add Buttons Group (Split for Article vs Video) */}
-                {popularArticles.length < 5 ? (
-                  <div className="lbe-popular-bottom-add-group">
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, textAlign: 'center', margin: '4px 0 2px' }}>
-                      Add to Popular Posts ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left):
-                    </div>
-                    <div className="lbe-popular-bottom-add-group-btns">
-                      <button
-                        type="button"
-                        className="lbe-btn-add-popular-split article"
-                        onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
-                        title="Open Articles Section to Add Article"
-                      >
-                        <Plus size={15} />
-                        <span>+ Add Article</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="lbe-btn-add-popular-split video"
-                        onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
-                        title="Open Videos Section to Add Video"
-                      >
-                        <Play size={12} fill="currentColor" />
-                        <span>+ Add Video</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="lbe-popular-max-banner">
-                    <span className="lbe-popular-max-pill">5 / 5 Maximum Cards Reached</span>
-                    <span>Maximum 5 cards limit reached. Remove any card using the red trash icon to add another article or video.</span>
-                  </div>
-                )}
               </div>
             )}
           </section>
