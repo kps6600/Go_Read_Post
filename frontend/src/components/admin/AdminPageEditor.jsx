@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
-  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles
+  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles, Edit2
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 import { HomepageService } from '../../services/homepageService';
@@ -951,7 +951,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                             }}
                             title={`Edit content for "${def.label || sec.type}"`}
                           >
-                            <Sparkles size={14} />
+                            <Edit2 size={14} />
                             <span>Edit</span>
                           </button>
 
