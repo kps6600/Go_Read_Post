@@ -3,7 +3,7 @@ import {
   Upload, Image as ImageIcon, Trash2, Copy, Check, 
   ExternalLink, Search, RefreshCw, AlertCircle, File, 
   HardDrive, X, CheckSquare, Film, Eye, Download, Play, 
-  Layers, Sparkles, Filter, ArrowUpDown, ChevronDown
+  Layers, Sparkles, Filter, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { MediaService } from '../../services/mediaService';
 import './AdminMediaView.css';
@@ -16,6 +16,10 @@ export default function AdminMediaView({ onShowToast }) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'image' | 'video'
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'largest' | 'smallest' | 'name'
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(16); // Default 16 (4 rows of 4 cards)
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -264,6 +268,26 @@ export default function AdminMediaView({ onShowToast }) {
     return list;
   }, [files, search, typeFilter, sortBy]);
 
+  // Reset page when search, type filter, or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, typeFilter, sortBy, pageSize]);
+
+  // Pagination calculation
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredFiles.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedFiles = useMemo(() => {
+    if (pageSize === 'all') return filteredFiles;
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredFiles.slice(startIndex, startIndex + pageSize);
+  }, [filteredFiles, currentPage, pageSize]);
+
   const handleSelectAll = () => {
     if (selectedIds.size === filteredFiles.length && filteredFiles.length > 0) {
       setSelectedIds(new Set());
@@ -468,6 +492,62 @@ export default function AdminMediaView({ onShowToast }) {
         </div>
       )}
 
+      {/* ── Assets Count Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
+          <span>
+            {typeFilter === 'image' && 'Images: '}
+            {typeFilter === 'video' && 'Videos: '}
+            {typeFilter === 'all' && 'All Assets: '}
+            <strong style={{ color: '#0f172a' }}>{filteredFiles.length}</strong> {filteredFiles.length === 1 ? 'file' : 'files'}
+            {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
+          </span>
+        </div>
+
+        {selectedIds.size > 0 && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#dc2626', background: '#fef2f2', padding: '4px 10px', borderRadius: '6px', border: '1px solid #fecaca' }}>
+              {selectedIds.size} selected
+            </span>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                background: '#dc2626',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Trash2 size={13} />
+              <span>{bulkDeleting ? 'Deleting...' : 'Delete Selected'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* ── Media Grid ── */}
       {loading ? (
         <div className="amv-empty-container">
@@ -510,8 +590,9 @@ export default function AdminMediaView({ onShowToast }) {
           )}
         </div>
       ) : (
-        <div className="amv-media-grid">
-          {filteredFiles.map((file, idx) => {
+        <>
+          <div className="amv-media-grid">
+          {paginatedFiles.map((file, idx) => {
             const fileIdentifier = file._id || file.filename || file.url || `media-${idx}`;
             const isSelected = selectedIds.has(fileIdentifier);
             const isVideo = isAssetVideo(file);
@@ -671,7 +752,111 @@ export default function AdminMediaView({ onShowToast }) {
             );
           })}
         </div>
-      )}
+
+        {/* ── Modern Pagination Bar ── */}
+        {filteredFiles.length > 0 && (
+          <div className="abv-pagination-bar">
+            <div className="abv-pagination-left">
+              <div className="abv-pagination-info">
+                Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
+                <span className="abv-pg-bold">{pageSize === 'all' ? filteredFiles.length : Math.min(currentPage * pageSize, filteredFiles.length)}</span> of{' '}
+                <span className="abv-pg-bold">{filteredFiles.length}</span> media assets
+              </div>
+
+              <div className="abv-page-size-wrap">
+                <span>Per Page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                    setPageSize(val);
+                    setCurrentPage(1);
+                  }}
+                  className="abv-page-size-select"
+                  aria-label="Media files per page"
+                >
+                  <option value={12}>12 / page</option>
+                  <option value={16}>16 / page</option>
+                  <option value={24}>24 / page</option>
+                  <option value={48}>48 / page</option>
+                  <option value="all">Show All</option>
+                </select>
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="abv-pagination-actions">
+                <button
+                  type="button"
+                  className="abv-page-nav-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1));
+                    window.scrollTo({ top: 180, behavior: 'smooth' });
+                  }}
+                  title="Previous Page"
+                >
+                  <ChevronLeft size={16} />
+                  <span>Previous</span>
+                </button>
+
+                <div className="abv-page-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      return (
+                        page === 1 || 
+                        page === totalPages || 
+                        Math.abs(page - currentPage) <= 1 ||
+                        (currentPage <= 3 && page <= 4) ||
+                        (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                      );
+                    })
+                    .reduce((acc, page, idx, arr) => {
+                      if (idx > 0 && page - arr[idx - 1] > 1) {
+                        acc.push(`ellipsis-${page}`);
+                      }
+                      acc.push(page);
+                      return acc;
+                    }, [])
+                    .map(item => {
+                      if (typeof item === 'string') {
+                        return <span key={item} className="abv-page-ellipsis">…</span>;
+                      }
+                      return (
+                        <button
+                          key={item}
+                          type="button"
+                          className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                          onClick={() => {
+                            setCurrentPage(item);
+                            window.scrollTo({ top: 180, behavior: 'smooth' });
+                          }}
+                        >
+                          {item}
+                        </button>
+                      );
+                    })}
+                </div>
+
+                <button
+                  type="button"
+                  className="abv-page-nav-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1));
+                    window.scrollTo({ top: 180, behavior: 'smooth' });
+                  }}
+                  title="Next Page"
+                >
+                  <span>Next</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    )}
 
       {/* ── Fullscreen Lightbox Preview Modal ── */}
       {previewAsset && (
