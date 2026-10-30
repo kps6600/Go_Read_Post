@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
@@ -1167,8 +1167,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   >
                     {/* Sr. No & Select Checkbox */}
                     <div className="aav-sr-col" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                      <span className="aav-sr-no" title={`Sr. No #${serialNumber}`}>
-                        #{serialNumber}
+                      <span className="aav-sr-no" title={`Sr. No ${serialNumber}`}>
+                        {serialNumber}
                       </span>
                       <div className="aav-list-check">
                         <input
@@ -1367,8 +1367,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className="aav-grid-sr-badge" title={`Sr. No #${serialNumber}`}>
-                        #{serialNumber}
+                      <span className="aav-grid-sr-badge" title={`Sr. No ${serialNumber}`}>
+                        {serialNumber}
                       </span>
                       <input
                         type="checkbox"
