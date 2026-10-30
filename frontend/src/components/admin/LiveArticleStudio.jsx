@@ -2689,15 +2689,10 @@ export default function LiveArticleStudio({
 
               {/* CARD: STORY PLACEMENTS & DISTRIBUTION */}
               <div className="las-card las-placements-card">
-                <div className="las-card-title-row" style={{ alignItems: 'flex-start' }}>
-                  <div>
-                    <h3 className="las-card-title">
-                      <span>Story Placement & Distribution</span>
-                    </h3>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                      Choose exactly where this story appears across GoReadPost (Homepage Hero, Trending, Latest, etc.)
-                    </p>
-                  </div>
+                <div className="las-card-title-row">
+                  <h3 className="las-card-title">
+                    <span>Story Placement & Distribution</span>
+                  </h3>
                   <div className="las-placement-quick-actions">
                     <button 
                       type="button" 
