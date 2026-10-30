@@ -2974,9 +2974,7 @@ export default function LiveArticleStudio({
                     title="Toggle Homepage Hero Slider"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box hero">
-                        <Star size={18} />
-                      </div>
+                      <div className="las-placement-badge hero">HERO SECTION</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isHero || formData.placements?.includes('homepage_hero'))}
@@ -2986,11 +2984,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge hero">HERO SECTION</div>
                       <h4 className="las-placement-tile-title">Homepage Hero Slider</h4>
-                      <p className="las-placement-tile-desc">
-                        Featured as the primary headline story in the top hero slider on the Homepage.
-                      </p>
                     </div>
                   </div>
 
@@ -3001,9 +2995,7 @@ export default function LiveArticleStudio({
                     title="Toggle Trending Page and Homepage Trending rows"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box trending">
-                        <TrendingUp size={18} />
-                      </div>
+                      <div className="las-placement-badge trending">TRENDING</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isTrending || formData.placements?.includes('trending'))}
@@ -3013,11 +3005,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge trending">TRENDING</div>
                       <h4 className="las-placement-tile-title">Trending Page & Stories</h4>
-                      <p className="las-placement-tile-desc">
-                        Highlighted in the Trending page leaderboard and the Homepage trending stories row.
-                      </p>
                     </div>
                   </div>
 
@@ -3028,9 +3016,7 @@ export default function LiveArticleStudio({
                     title="Toggle Latest News and Just In feed"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box latest">
-                        <Clock size={18} />
-                      </div>
+                      <div className="las-placement-badge latest">LATEST FEED</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isLatest || formData.placements?.includes('latest'))}
@@ -3040,11 +3026,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge latest">LATEST FEED</div>
                       <h4 className="las-placement-tile-title">Latest Articles Page</h4>
-                      <p className="las-placement-tile-desc">
-                        Published to the dedicated Latest News / Just In page and chronological story archives.
-                      </p>
                     </div>
                   </div>
 
@@ -3055,9 +3037,7 @@ export default function LiveArticleStudio({
                     title="Toggle Editor's Choice spotlight"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box editors">
-                        <Award size={18} />
-                      </div>
+                      <div className="las-placement-badge editors">EDITOR'S CHOICE</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isEditorsPick || formData.placements?.includes('editors_pick'))}
@@ -3067,11 +3047,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge editors">EDITOR'S CHOICE</div>
                       <h4 className="las-placement-tile-title">Editor's Pick & Highlights</h4>
-                      <p className="las-placement-tile-desc">
-                        Curated badge on cards and placement in the Editor's Choice section of the homepage.
-                      </p>
                     </div>
                   </div>
 
@@ -3082,9 +3058,7 @@ export default function LiveArticleStudio({
                     title="Toggle Breaking Ticker Banner"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box breaking">
-                        <Zap size={18} />
-                      </div>
+                      <div className="las-placement-badge breaking">BREAKING TICKER</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isBreaking || formData.placements?.includes('breaking'))}
@@ -3094,11 +3068,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge breaking">BREAKING TICKER</div>
                       <h4 className="las-placement-tile-title">Breaking News Alert</h4>
-                      <p className="las-placement-tile-desc">
-                        Triggers a high-visibility breaking banner ticker and red flash badge across all headers.
-                      </p>
                     </div>
                   </div>
 
@@ -3109,9 +3079,7 @@ export default function LiveArticleStudio({
                     title="Toggle Category Top Story"
                   >
                     <div className="las-placement-tile-header">
-                      <div className="las-placement-icon-box category">
-                        <Layers size={18} />
-                      </div>
+                      <div className="las-placement-badge category">CATEGORY TOP</div>
                       <input 
                         type="checkbox" 
                         checked={Boolean(formData.isCategoryFeatured || formData.placements?.includes('category_top'))}
@@ -3121,11 +3089,7 @@ export default function LiveArticleStudio({
                       />
                     </div>
                     <div className="las-placement-tile-body">
-                      <div className="las-placement-badge category">CATEGORY TOP</div>
                       <h4 className="las-placement-tile-title">Category Top Story</h4>
-                      <p className="las-placement-tile-desc">
-                        Pinned at the very top of its designated category page ({formData.categoryName || 'Startups'}).
-                      </p>
                     </div>
                   </div>
                 </div>
