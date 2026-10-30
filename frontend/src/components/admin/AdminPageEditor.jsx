@@ -885,12 +885,9 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
                     {/* Section Information Preview */}
                     <div className="section-info-meta">
-                      <div className="section-type-badge">
-                        <span>{def.label}</span>
+                      <div className="section-headline-preview" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{titleText}</span>
                         {!isEnabled && <span className="disabled-pill">Disabled</span>}
-                      </div>
-                      <div className="section-headline-preview">
-                        {titleText}
                       </div>
                     </div>
 
