@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Play, Plus, Search, Filter, Trash2, Edit2, RefreshCw, 
-  ChevronDown, Check, X, ExternalLink, Clock, ThumbsUp, Layers,
+  ChevronDown, ChevronLeft, Check, X, ExternalLink, Clock, ThumbsUp, Layers,
   Film, Video as VideoIcon, Tv, Eye, User, FileText, Copy, Tag, Star, TrendingUp,
   LayoutGrid, List, AlertCircle, Save, CheckCircle2, ChevronRight, Upload
 } from 'lucide-react';
@@ -82,6 +82,10 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
   const [selectedSeries, setSelectedSeries] = useState('all');
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'views_desc' | 'title_asc'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9); // Default 9 (3 rows of 3 in grid)
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const filterDropdownRef = useRef(null);
 
@@ -258,6 +262,26 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
 
     return list;
   }, [videos, activeTab, selectedCategory, selectedSeries, search, sortBy]);
+
+  // Reset page when tab, category, series, search, or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, selectedCategory, selectedSeries, search, sortBy, pageSize]);
+
+  // Pagination calculation
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredVideos.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedVideos = useMemo(() => {
+    if (pageSize === 'all') return filteredVideos;
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredVideos.slice(startIndex, startIndex + pageSize);
+  }, [filteredVideos, currentPage, pageSize]);
 
   const activeFilterCount = (selectedCategory !== 'all' ? 1 : 0) + (selectedSeries !== 'all' ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0);
 
@@ -442,6 +466,40 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
         </div>
       </div>
 
+      {/* ── Count Header & View Toggle ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
+          <span>
+            {activeTab === 'draft' && 'Drafts: '}
+            {activeTab === 'published' && 'Published: '}
+            {activeTab === 'all' && 'All Videos: '}
+            <strong style={{ color: '#0f172a' }}>{filteredVideos.length}</strong> {filteredVideos.length === 1 ? 'episode' : 'episodes'}
+            {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button 
+            type="button" 
+            className={`abv-view-mode-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => setViewMode('grid')}
+            title="Grid View"
+            style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'grid' ? '#0f172a' : '#fff', color: viewMode === 'grid' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          >
+            <LayoutGrid size={14} />
+          </button>
+          <button 
+            type="button" 
+            className={`abv-view-mode-btn ${viewMode === 'table' ? 'active' : ''}`}
+            onClick={() => setViewMode('table')}
+            title="Table View"
+            style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'table' ? '#0f172a' : '#fff', color: viewMode === 'table' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          >
+            <List size={14} />
+          </button>
+        </div>
+      </div>
+
       {/* ── Content View: Loading, Empty, Grid or Table ── */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '4rem 1rem', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -466,10 +524,12 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
             <span>{search ? 'Clear Search' : 'Add First Video'}</span>
           </button>
         </div>
-      ) : viewMode === 'grid' ? (
-        /* ── Grid Cards View (16:9 Showcase Cards) ── */
+      ) : (
+        <>
+          {viewMode === 'grid' ? (
+            /* ── Grid Cards View (16:9 Showcase Cards) ── */
         <div className="abv-video-cards-grid">
-          {filteredVideos.map((v) => {
+          {paginatedVideos.map((v) => {
             const isPub = v.status !== 'draft' && v.enabled !== false;
             const thumbUrl = v.image || v.fallbackImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80';
 
@@ -599,7 +659,7 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
               </tr>
             </thead>
             <tbody>
-              {filteredVideos.map((v) => {
+              {paginatedVideos.map((v) => {
                 const isPub = v.status !== 'draft' && v.enabled !== false;
                 const thumbUrl = v.image || v.fallbackImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80';
 
@@ -694,6 +754,111 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
           </table>
         </div>
       )}
+
+      {/* ── Modern Pagination Bar ── */}
+      {filteredVideos.length > 0 && (
+        <div className="abv-pagination-bar">
+          <div className="abv-pagination-left">
+            <div className="abv-pagination-info">
+              Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
+              <span className="abv-pg-bold">{pageSize === 'all' ? filteredVideos.length : Math.min(currentPage * pageSize, filteredVideos.length)}</span> of{' '}
+              <span className="abv-pg-bold">{filteredVideos.length}</span> episodes
+            </div>
+
+            <div className="abv-page-size-wrap">
+              <span>Per Page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                  setPageSize(val);
+                  setCurrentPage(1);
+                }}
+                className="abv-page-size-select"
+                aria-label="Episodes per page"
+              >
+                <option value={6}>6 / page</option>
+                <option value={9}>9 / page</option>
+                <option value={12}>12 / page</option>
+                <option value={24}>24 / page</option>
+                <option value="all">Show All</option>
+              </select>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="abv-pagination-actions">
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Previous Page"
+              >
+                <ChevronLeft size={16} />
+                <span>Previous</span>
+              </button>
+
+              <div className="abv-page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 || 
+                      page === totalPages || 
+                      Math.abs(page - currentPage) <= 1 ||
+                      (currentPage <= 3 && page <= 4) ||
+                      (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                    );
+                  })
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) {
+                      acc.push(`ellipsis-${page}`);
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map(item => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="abv-page-ellipsis">…</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentPage(item);
+                          window.scrollTo({ top: 180, behavior: 'smooth' });
+                        }}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Next Page"
+              >
+                <span>Next</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )}
 
       {/* ── Video Player Modal ── */}
       {previewVideo && (
