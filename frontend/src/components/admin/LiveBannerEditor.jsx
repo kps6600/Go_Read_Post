@@ -759,18 +759,6 @@ export default function LiveBannerEditor({
                 <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{data.popularTitle || 'Popular Posts'}</span>
-                    <span style={{ 
-                      fontSize: '0.75rem', 
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      background: popularArticles.length >= 5 ? '#fef2f2' : '#f0fdf4',
-                      color: popularArticles.length >= 5 ? '#dc2626' : '#16a34a',
-                      border: popularArticles.length >= 5 ? '1px solid #fecaca' : '1px solid #bbf7d0',
-                      marginLeft: '4px'
-                    }}>
-                      {popularArticles.length}/5 Slots
-                    </span>
                   </div>
 
                   {/* Header Add Buttons: Split for Article vs Video */}
