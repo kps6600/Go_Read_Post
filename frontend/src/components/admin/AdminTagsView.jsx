@@ -1,9 +1,9 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Tag as TagIcon, Plus, Filter, ChevronDown, Edit2, Trash2, Search, 
   RefreshCw, AlertCircle, AlertTriangle, CheckCircle, Check, 
   X, FileText, CheckSquare, GitMerge, Sparkles, 
-  Eye, EyeOff
+  Eye, EyeOff, Clock
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 
@@ -318,6 +318,23 @@ export default function AdminTagsView({ onShowToast }) {
       loadTags();
     } catch (err) {
       alert('Error during bulk delete: ' + err.message);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const handleBulkStatus = async (isActive) => {
+    if (selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    try {
+      for (const id of selectedIds) {
+        await TaxonomyService.updateTag(id, { isActive });
+      }
+      onShowToast?.(`Updated status for ${selectedIds.size} tags`);
+      setSelectedIds(new Set());
+      loadTags();
+    } catch (err) {
+      alert('Error updating tags: ' + err.message);
     } finally {
       setBulkProcessing(false);
     }
@@ -666,72 +683,68 @@ export default function AdminTagsView({ onShowToast }) {
         </button>
       </div>
 
-      {/* ── Bulk Actions Bar ── */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '10px 16px',
-          borderRadius: '10px',
-          marginBottom: '1rem',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 700,
-              fontSize: '0.78rem'
-            }}>
-              {selectedIds.size} Selected
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set(filteredAndSorted.map(t => t._id || t.slug)))}
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'underline' }}
-            >
-              Select All ({filteredAndSorted.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.82rem', textDecoration: 'underline' }}
-            >
-              Clear Selection
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={bulkProcessing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 14px',
-                backgroundColor: '#dc2626',
-                border: 'none',
-                borderRadius: '7px',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                cursor: 'pointer'
+      {/* ── Sub-Header Bar: Select All, Bulk Actions, & Count (Matches Categories, Topics & Posts) ── */}
+      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label className="abv-select-all-label" title="Select all tags">
+            <input 
+              type="checkbox" 
+              checked={selectedIds.size > 0 && selectedIds.size === filteredAndSorted.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filteredAndSorted.map(t => t._id || t.slug)));
+                } else {
+                  setSelectedIds(new Set());
+                }
               }}
-            >
-              <Trash2 size={14} />
-              {bulkProcessing ? 'Processing...' : `Delete Selected (${selectedIds.size})`}
-            </button>
+              style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+            />
+            <span>Select All</span>
+          </label>
+          {selectedIds.size > 0 && (
+            <span className="abv-selected-pill">
+              {selectedIds.size} of {filteredAndSorted.length} selected
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <div className="abv-bulk-actions-group">
+              <button
+                type="button"
+                onClick={() => handleBulkStatus(false)}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-draft"
+                title="Set selected tag(s) to inactive"
+              >
+                <Clock size={14} />
+                <span>Send Draft</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkProcessing}
+                className="abv-bulk-btn abv-bulk-btn-delete"
+                title="Delete selected tag(s)"
+              >
+                <Trash2 size={14} />
+                <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+              </button>
+            </div>
+          )}
+
+          <div className="abv-cards-count-badge">
+            <span>
+              {statusFilter === 'active' && 'Active Tags: '}
+              {statusFilter === 'inactive' && 'Inactive Tags: '}
+              {statusFilter === 'all' && 'All Tags: '}
+              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'tag' : 'tags'}
+            </span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Tags Table Card ── */}
       <div style={{
@@ -745,7 +758,29 @@ export default function AdminTagsView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '780px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
+                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}>
+                  <input 
+                    type="checkbox"
+                    checked={paginatedTags.length > 0 && paginatedTags.every(t => selectedIds.has(t._id || t.slug))}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          paginatedTags.forEach(t => next.add(t._id || t.slug));
+                          return next;
+                        });
+                      } else {
+                        setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          paginatedTags.forEach(t => next.delete(t._id || t.slug));
+                          return next;
+                        });
+                      }
+                    }}
+                    style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+                    title="Select page tags"
+                  />
+                </th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   Tag Name
                 </th>
