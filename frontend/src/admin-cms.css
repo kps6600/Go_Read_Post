@@ -4000,7 +4000,9 @@ table input[type="checkbox"]:checked::after {
   border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 1rem 1.25rem;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  position: relative;
+  will-change: transform;
 }
 .section-stack-card:hover {
   border-color: var(--border-medium);

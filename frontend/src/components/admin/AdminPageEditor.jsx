@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
@@ -116,6 +116,8 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+  const cardRefs = useRef({});
   const [activeTab, setActiveTab] = useState('sections'); // 'sections' | 'seo'
   const [editingSection, setEditingSection] = useState(null);
   const [liveBannerEditingSection, setLiveBannerEditingSection] = useState(null);
@@ -268,23 +270,72 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
   };
 
-  // Section Reordering with immediate database persistence
+  // Section Reordering with animated sliding and immediate database persistence
   const handleMoveSection = async (index, direction) => {
+    if (isReordering) return;
     const targetIdx = direction === 'up' ? index - 1 : index + 1;
     if (targetIdx < 0 || targetIdx >= sections.length) return;
+
+    const currentSec = sections[index];
+    const targetSec = sections[targetIdx];
+    const currentId = currentSec?.id || index;
+    const targetId = targetSec?.id || targetIdx;
+
+    const currentEl = cardRefs.current[currentId];
+    const targetEl = cardRefs.current[targetId];
 
     const reordered = [...sections];
     const [moved] = reordered.splice(index, 1);
     reordered.splice(targetIdx, 0, moved);
-
-    // Update orders
     const updated = reordered.map((sec, i) => ({ ...sec, order: i + 1 }));
-    setSections(updated);
 
-    try {
-      await persistSections(updated, 'Section order updated and saved live.');
-    } catch (err) {
-      setSections(sections);
+    if (currentEl && targetEl) {
+      setIsReordering(true);
+      const currentRect = currentEl.getBoundingClientRect();
+      const targetRect = targetEl.getBoundingClientRect();
+      const deltaY = targetRect.top - currentRect.top;
+
+      // Animate current and target cards sliding past each other
+      currentEl.style.transition = 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 300ms ease';
+      currentEl.style.transform = `translateY(${deltaY}px)`;
+      currentEl.style.zIndex = '10';
+      currentEl.style.boxShadow = '0 12px 28px -4px rgba(0, 0, 0, 0.14), 0 8px 12px -6px rgba(0, 0, 0, 0.08)';
+
+      targetEl.style.transition = 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)';
+      targetEl.style.transform = `translateY(${-deltaY}px)`;
+      targetEl.style.zIndex = '5';
+
+      setTimeout(async () => {
+        // Freeze transition to prevent back-transition jump
+        currentEl.style.transition = 'none';
+        targetEl.style.transition = 'none';
+        currentEl.style.transform = '';
+        targetEl.style.transform = '';
+        currentEl.style.zIndex = '';
+        currentEl.style.boxShadow = '';
+        targetEl.style.zIndex = '';
+
+        setSections(updated);
+        setIsReordering(false);
+
+        requestAnimationFrame(() => {
+          if (currentEl) currentEl.style.transition = '';
+          if (targetEl) targetEl.style.transition = '';
+        });
+
+        try {
+          await persistSections(updated, 'Section order updated and saved live.');
+        } catch (err) {
+          setSections(sections);
+        }
+      }, 300);
+    } else {
+      setSections(updated);
+      try {
+        await persistSections(updated, 'Section order updated and saved live.');
+      } catch (err) {
+        setSections(sections);
+      }
     }
   };
 
@@ -858,6 +909,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                 return (
                   <div
                     key={sec.id || idx}
+                    ref={(el) => { if (el) cardRefs.current[sec.id || idx] = el; }}
                     className={`section-stack-card ${!isEnabled ? 'disabled' : ''}`}
                   >
                     {/* Drag / Reorder Buttons */}
@@ -866,7 +918,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       <button
                         type="button"
                         className="reorder-btn"
-                        disabled={idx === 0}
+                        disabled={idx === 0 || isReordering}
                         onClick={() => handleMoveSection(idx, 'up')}
                         title="Move Up"
                       >
@@ -875,7 +927,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       <button
                         type="button"
                         className="reorder-btn"
-                        disabled={idx === sections.length - 1}
+                        disabled={idx === sections.length - 1 || isReordering}
                         onClick={() => handleMoveSection(idx, 'down')}
                         title="Move Down"
                       >
