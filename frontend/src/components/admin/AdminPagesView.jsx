@@ -339,64 +339,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     const editPageId = selectedPage.id || selectedPage._id || selectedPage.slug || 'home';
     return (
       <div className="admin-page-container">
-        {/* Top Header Toolbar */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '0.65rem 1.15rem',
-          marginBottom: '0.85rem',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-        }}>
-          <button
-            type="button"
-            onClick={() => { setActiveMode('list'); setSelectedPage(null); }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.45rem 0.95rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#334155',
-              fontSize: '0.84rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            <ArrowLeft size={16} />
-            <span>Back</span>
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={() => setActiveMode('preview')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.45rem 0.95rem',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                background: '#ffffff',
-                color: '#0284c7',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              <Eye size={14} />
-              <span>Live Preview</span>
-            </button>
-          </div>
-        </div>
 
         {/* Page Editor rendered right in the same space */}
         <AdminPageEditor
