@@ -791,42 +791,81 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const displaySlug = isHomepage ? '/' : (slug ? `/${slug.replace(/^\/+/, '')}` : (pageId && !pageId.match(/^[0-9a-fA-F]{24}$/) ? `/${pageId}` : '/'));
 
   return (
-    <div className="admin-fullpage-root" style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
-      {/* ── Fullpage Studio Top Header Bar ── */}
-      <header className="atv-studio-topbar">
-        <div className="atv-topbar-left">
+    <div className="admin-inpage-editor-root" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* In-place Header Toolbar Card */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '14px',
+        padding: '0.85rem 1.25rem',
+        marginBottom: '1rem',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             type="button"
-            className="atv-back-nav-btn"
             onClick={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
             title="Return to Pages Management"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1.05rem',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#334155',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
           >
             <ArrowLeft size={16} />
             <span>Back</span>
           </button>
 
-          <div className="atv-topbar-divider" />
+          <div style={{ width: '1px', height: '22px', background: '#e2e8f0' }} />
 
-          <div className="atv-topbar-title-wrap">
-            <span className="atv-topbar-title">{displayTitle}</span>
-          </div>
+          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+            {displayTitle}
+          </span>
         </div>
 
-        <div className="atv-topbar-right">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             type="button"
-            className="atv-btn-primary"
             onClick={() => handleSavePage('published')}
             disabled={saving}
-            style={{ borderRadius: '8px', padding: '7px 18px', fontSize: '0.82rem' }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1.25rem',
+              borderRadius: '8px',
+              border: 'none',
+              background: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)',
+              opacity: saving ? 0.7 : 1,
+              transition: 'all 0.15s ease'
+            }}
           >
             <Check size={15} />
             <span>{saving ? 'Publishing...' : 'Publish Live'}</span>
           </button>
         </div>
-      </header>
+      </div>
 
-      <div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', padding: '1.75rem 2.5rem 4rem', boxSizing: 'border-box' }}>
+      <div style={{ width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
         {/* Segmented Editor Tabs */}
         <div className="admin-segmented-tabs-bar">
         <button
