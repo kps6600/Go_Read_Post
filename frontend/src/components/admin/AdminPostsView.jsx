@@ -3,7 +3,7 @@ import {
   Plus, Edit2, Trash2, Search, Filter, Eye, EyeOff, 
   ExternalLink, Calendar, User, Tag, CheckCircle, Clock, 
   RefreshCw, AlertCircle, Save, Sparkles, FileText, Image as ImageIcon,
-  X, Check, ChevronDown, BookOpen, Layers, ArrowUpRight, Flame,
+  X, Check, ChevronDown, ChevronLeft, ChevronRight, BookOpen, Layers, ArrowUpRight, Flame,
   Share2, Hash, Globe, Video, Link2, List, ListOrdered, Quote, Code,
   Heading1, Heading2, Heading3, Bold, Italic, Underline, Upload, CheckSquare, Square, Send,
   Lock, Unlock, Copy, ArrowLeft, Archive, RotateCcw, FileEdit,
@@ -37,6 +37,10 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
 
   // Filters & Tabs
   const [activeTab, setActiveTab] = useState(() => {
@@ -1253,6 +1257,26 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     }
     return 0;
   });
+
+  // Reset page when tab, search, or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, search, selectedCategory, selectedDesk, selectedPlacement, pageSize]);
+
+  // Pagination calculation
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredArticles.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedArticles = useMemo(() => {
+    if (pageSize === 'all') return filteredArticles;
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredArticles.slice(startIndex, startIndex + pageSize);
+  }, [filteredArticles, currentPage, pageSize]);
 
   // KPI Stats
   const publishedCount = articles.filter(a => a.status === 'published').length;
@@ -3908,20 +3932,28 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           {/* Cards Header: Select All, Conditional Actions, & Count */}
           <div className="abv-cards-header-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <label className="abv-select-all-label" title="Select all articles">
+              <label className="abv-select-all-label" title="Select articles on this page">
                 <input 
                   type="checkbox" 
                   className="admin-table-checkbox"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedIds(new Set(filteredArticles.map(a => a._id || a.id)));
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        paginatedArticles.forEach(a => next.add(a._id || a.id));
+                        return next;
+                      });
                     } else {
-                      setSelectedIds(new Set());
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        paginatedArticles.forEach(a => next.delete(a._id || a.id));
+                        return next;
+                      });
                     }
                   }}
-                  checked={selectedIds.size > 0 && selectedIds.size === filteredArticles.length}
+                  checked={paginatedArticles.length > 0 && paginatedArticles.every(a => selectedIds.has(a._id || a.id))}
                 />
-                <span>Select All</span>
+                <span>Select Page</span>
               </label>
               {selectedIds.size > 0 && (
                 <span className="abv-selected-pill">
@@ -3977,7 +4009,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                   {activeTab === 'scheduled' && 'Scheduled: '}
                   {activeTab === 'views' && 'Most Viewed: '}
                   {activeTab === 'all' && 'All Posts: '}
-                  {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}
+                  {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}{totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
                 </span>
               </div>
             </div>
@@ -4004,8 +4036,9 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               </button>
             </div>
           ) : (
-            <div className="abv-cards-grid">
-              {filteredArticles.map(article => {
+            <>
+              <div className="abv-cards-grid">
+              {paginatedArticles.map(article => {
                 const id = article._id || article.id;
                 const isSelected = selectedIds.has(id);
                 const slug = article.slug || slugify(article.title);
@@ -4202,6 +4235,110 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 );
               })}
             </div>
+
+            {/* ── Modern Pagination Bar ── */}
+            {filteredArticles.length > 0 && (
+              <div className="abv-pagination-bar">
+                <div className="abv-pagination-left">
+                  <div className="abv-pagination-info">
+                    Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
+                    <span className="abv-pg-bold">{pageSize === 'all' ? filteredArticles.length : Math.min(currentPage * pageSize, filteredArticles.length)}</span> of{' '}
+                    <span className="abv-pg-bold">{filteredArticles.length}</span> articles
+                  </div>
+
+                  <div className="abv-page-size-wrap">
+                    <span>Per Page:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                        setPageSize(val);
+                        setCurrentPage(1);
+                      }}
+                      className="abv-page-size-select"
+                      aria-label="Articles per page"
+                    >
+                      <option value={9}>9 / page</option>
+                      <option value={12}>12 / page</option>
+                      <option value={24}>24 / page</option>
+                      <option value={48}>48 / page</option>
+                      <option value="all">Show All</option>
+                    </select>
+                  </div>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="abv-pagination-actions">
+                    <button
+                      type="button"
+                      className="abv-page-nav-btn"
+                      disabled={currentPage === 1}
+                      onClick={() => {
+                        setCurrentPage(p => Math.max(1, p - 1));
+                        window.scrollTo({ top: 180, behavior: 'smooth' });
+                      }}
+                      title="Previous Page"
+                    >
+                      <ChevronLeft size={16} />
+                      <span>Previous</span>
+                    </button>
+
+                    <div className="abv-page-numbers">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => {
+                          return (
+                            page === 1 || 
+                            page === totalPages || 
+                            Math.abs(page - currentPage) <= 1 ||
+                            (currentPage <= 3 && page <= 4) ||
+                            (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                          );
+                        })
+                        .reduce((acc, page, idx, arr) => {
+                          if (idx > 0 && page - arr[idx - 1] > 1) {
+                            acc.push(`ellipsis-${page}`);
+                          }
+                          acc.push(page);
+                          return acc;
+                        }, [])
+                        .map(item => {
+                          if (typeof item === 'string') {
+                            return <span key={item} className="abv-page-ellipsis">…</span>;
+                          }
+                          return (
+                            <button
+                              key={item}
+                              type="button"
+                              className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                              onClick={() => {
+                                setCurrentPage(item);
+                                window.scrollTo({ top: 180, behavior: 'smooth' });
+                              }}
+                            >
+                              {item}
+                            </button>
+                          );
+                        })}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="abv-page-nav-btn"
+                      disabled={currentPage === totalPages}
+                      onClick={() => {
+                        setCurrentPage(p => Math.min(totalPages, p + 1));
+                        window.scrollTo({ top: 180, behavior: 'smooth' });
+                      }}
+                      title="Next Page"
+                    >
+                      <span>Next</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            </>
           )}
         </div>
       {/* MEDIA LIBRARY SELECTOR MODAL */}
