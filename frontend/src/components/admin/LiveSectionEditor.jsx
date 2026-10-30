@@ -102,7 +102,15 @@ export default function LiveSectionEditor({
   if (!isOpen || !section) return null;
 
   // Delegate Hero sections directly to specialized LiveBannerEditor
-  const isHero = section.type === 'hero' || section.type === 'hero_popular' || section.id === 'hero_popular' || (section.type || '').toLowerCase().includes('hero');
+  const isHero = 
+    section.type === 'hero' || 
+    section.type === 'hero_popular' || 
+    section.sectionKey === 'hero_popular' || 
+    section.id === 'hero_popular' || 
+    (section.id || '').toLowerCase().includes('hero') ||
+    (section.sectionKey || '').toLowerCase().includes('hero') ||
+    (section.type || '').toLowerCase().includes('hero') ||
+    (section.title || '').toLowerCase().includes('hero');
   if (isHero) {
     return (
       <SectionEditorErrorBoundary onClose={onClose}>

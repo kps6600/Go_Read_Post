@@ -642,7 +642,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
   // Handlers for Dedicated Full-Page Live Studio (Allowed only for Banner section)
   const handleOpenLiveEditor = (sec) => {
-    if (!isBannerSection(sec)) return;
+    if (!sec) return;
     setLiveEditingSection(sec);
     try {
       const url = new URL(window.location.href);
@@ -685,65 +685,46 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
   const handleAutoSaveLiveSection = async (updatedData) => {
     if (!liveEditingSection) return;
-    const targetId = liveEditingSection.id || liveEditingSection._id;
-    const updatedSections = sections.map(s => (s.id || s._id) === targetId ? { ...s, data: updatedData } : s);
+    const targetId = liveEditingSection.id || liveEditingSection._id || liveEditingSection.sectionKey;
+    const updatedSections = sections.map(s => {
+      const sId = s.id || s._id || s.sectionKey;
+      if (sId === targetId) {
+        return {
+          ...s,
+          data: updatedData,
+          title: updatedData.heading || updatedData.title || s.title
+        };
+      }
+      return s;
+    });
     setSections(updatedSections);
 
     try {
-      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
-      const targetSlug = isHome ? '' : (slug || page?.slug || '').trim();
-      const rawTitle = title || page?.title || (isHome ? 'Homepage' : 'Custom Page');
-      const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
-      const payload = {
-        title: cleanTitle,
-        slug: targetSlug,
-        description: (description || page?.description || '').trim(),
-        status: status || page?.status || 'published',
-        seo: {
-          title: (seo?.title || page?.seo?.title || '').trim() || `${cleanTitle} | GoReadPost`,
-          description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-          keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-          ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-        },
-        sections: updatedSections
-      };
-      const updatedPage = await PageService.updatePage(pageId, payload);
-      if (updatedPage) setPage(updatedPage);
-      return updatedPage;
+      return await persistSections(updatedSections);
     } catch (err) {
       console.error('Failed to auto-save section:', err);
-      throw err;
     }
   };
 
   const handleSaveLiveSection = async (updatedData) => {
     if (!liveEditingSection) return;
-    const targetId = liveEditingSection.id || liveEditingSection._id;
-    const updatedSections = sections.map(s => (s.id || s._id) === targetId ? { ...s, data: updatedData } : s);
+    const targetId = liveEditingSection.id || liveEditingSection._id || liveEditingSection.sectionKey;
+    const updatedSections = sections.map(s => {
+      const sId = s.id || s._id || s.sectionKey;
+      if (sId === targetId) {
+        return {
+          ...s,
+          data: updatedData,
+          title: updatedData.heading || updatedData.title || s.title
+        };
+      }
+      return s;
+    });
     setSections(updatedSections);
     handleCloseLiveEditor();
 
     try {
-      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
-      const targetSlug = isHome ? '' : (slug || page?.slug || '').trim();
-      const rawTitle = title || page?.title || (isHome ? 'Homepage' : 'Custom Page');
-      const cleanTitle = isHome ? rawTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTitle.replace(/\s*-\s*Live Portal/i, '').trim();
-      const payload = {
-        title: cleanTitle,
-        slug: targetSlug,
-        description: (description || page?.description || '').trim(),
-        status: status || page?.status || 'published',
-        seo: {
-          title: (seo?.title || page?.seo?.title || '').trim() || `${cleanTitle} | GoReadPost`,
-          description: (seo?.description || page?.seo?.description || '').trim() || (description || page?.description || '').trim(),
-          keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
-          ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
-        },
-        sections: updatedSections
-      };
-      const updatedPage = await PageService.updatePage(pageId, payload);
-      if (updatedPage) setPage(updatedPage);
-      onShowToast?.(`Section "${updatedData.title || updatedData.heading || liveEditingSection.type}" saved and published live!`);
+      await persistSections(updatedSections, `Section "${updatedData?.title || updatedData?.heading || liveEditingSection.type || 'content'}" saved and published live!`);
     } catch (err) {
       console.error('Failed to save section:', err);
       onShowToast?.('Section updated in editor. Click "Publish Live" to save.');
@@ -1027,7 +1008,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       <button
                         type="button"
                         className="btn-section-action live-edit"
-                        onClick={() => setEditingSection(sec)}
+                        onClick={() => handleOpenLiveEditor(sec)}
                         style={{
                           background: '#2563eb',
                           color: '#ffffff',
