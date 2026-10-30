@@ -21,16 +21,16 @@ export const identifyEditablePage = (page) => {
 };
 
 const EDITABLE_PAGE_GROUPS = {
-  home: { label: 'Primary Landing', color: '#ea580c', bg: 'rgba(234, 88, 12, 0.12)' },
-  category: { label: 'Editorial Feed & Desks', color: '#059669', bg: 'rgba(5, 150, 105, 0.12)' },
-  contact: { label: 'Newsroom & Bureaus', color: '#0284c7', bg: 'rgba(2, 132, 199, 0.12)' },
-  about: { label: 'Company & Mission', color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.12)' },
-  advertise: { label: 'Media Kit & Partnerships', color: '#dc2626', bg: 'rgba(220, 38, 38, 0.12)' }
+  home: { label: 'Primary Landing', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
+  category: { label: 'Editorial Feed & Desks', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
+  contact: { label: 'Newsroom & Bureaus', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
+  about: { label: 'Company & Mission', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
+  advertise: { label: 'Media Kit & Partnerships', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' }
 };
 
 const getPageGroup = (page) => {
   const type = identifyEditablePage(page) || 'home';
-  return EDITABLE_PAGE_GROUPS[type] || { label: 'Site Page', color: '#2563eb', bg: 'rgba(37, 99, 235, 0.12)' };
+  return EDITABLE_PAGE_GROUPS[type] || { label: 'Site Page', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' };
 };
 
 export default function AdminPagesView({ onNavigate, onShowToast, filterCategory }) {
@@ -543,6 +543,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                                 borderRadius: '6px',
                                 color: grp.color,
                                 background: grp.bg,
+                                border: '1px solid ' + (grp.border || '#e2e8f0'),
                                 letterSpacing: '0.03em',
                                 textTransform: 'uppercase'
                               }}
