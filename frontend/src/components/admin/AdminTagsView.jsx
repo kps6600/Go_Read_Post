@@ -758,29 +758,7 @@ export default function AdminTagsView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '780px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}>
-                  <input 
-                    type="checkbox"
-                    checked={paginatedTags.length > 0 && paginatedTags.every(t => selectedIds.has(t._id || t.slug))}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(prev => {
-                          const next = new Set(prev);
-                          paginatedTags.forEach(t => next.add(t._id || t.slug));
-                          return next;
-                        });
-                      } else {
-                        setSelectedIds(prev => {
-                          const next = new Set(prev);
-                          paginatedTags.forEach(t => next.delete(t._id || t.slug));
-                          return next;
-                        });
-                      }
-                    }}
-                    style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
-                    title="Select page tags"
-                  />
-                </th>
+                <th style={{ width: '42px', padding: '0.85rem 0.95rem' }}></th>
                 <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   Tag Name
                 </th>
