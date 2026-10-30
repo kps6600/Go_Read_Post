@@ -495,7 +495,7 @@
   border: 1px solid #e2e8f0;
   transition: all 0.18s ease;
   position: relative;
-  margin-bottom: 6px;
+  margin-bottom: 0;
 }
 
 .lbe-popular-manage-item:hover {
