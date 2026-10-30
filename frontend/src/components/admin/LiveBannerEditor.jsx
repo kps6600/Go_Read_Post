@@ -867,11 +867,6 @@ export default function LiveBannerEditor({
                     ? 'Browse all studio interviews, masterclasses, and video episodes.'
                     : 'Browse all published editorial articles.'}
                 </p>
-                {pickerTarget?.type === 'popular-add' && popularArticles.length >= 5 && (
-                  <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#fef08a', background: 'rgba(234, 179, 8, 0.14)', border: '1px solid rgba(234, 179, 8, 0.35)', padding: '5px 12px', borderRadius: '7px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span>ℹ️ Popular Posts currently has 5/5 cards. Selecting an item will update slot #5.</span>
-                  </div>
-                )}
               </div>
               <button 
                 type="button" 
