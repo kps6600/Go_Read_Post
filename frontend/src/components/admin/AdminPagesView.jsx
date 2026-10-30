@@ -20,18 +20,38 @@ export const identifyEditablePage = (page) => {
   return null;
 };
 
-const EDITABLE_PAGE_GROUPS = {
-  home: { label: 'Primary Landing', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
-  category: { label: 'Editorial Feed & Desks', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
-  contact: { label: 'Newsroom & Bureaus', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
-  about: { label: 'Company & Mission', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' },
-  advertise: { label: 'Media Kit & Partnerships', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' }
-};
+export const CANONICAL_FRONTEND_PAGES = [
+  // 1. Core Platform Pages
+  { id: 'home', title: 'Homepage', slug: '', route: '/', status: 'published', order: 1, sectionsCount: 12 },
+  { id: 'latest', title: 'Latest Articles', slug: 'latest', route: '/latest', status: 'published', order: 2, sectionsCount: 4 },
+  { id: 'trending', title: 'Trending Stories', slug: 'trending', route: '/trending', status: 'published', order: 3, sectionsCount: 4 },
+  { id: 'category', title: 'Category Page & Desks', slug: 'categories', route: '/categories', status: 'published', order: 4, sectionsCount: 2 },
+  { id: 'topics', title: 'Topics & Tags Directory', slug: 'topics', route: '/topics', status: 'published', order: 5, sectionsCount: 3 },
+  { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 6, sectionsCount: 5 },
+  { id: 'newsletter', title: 'Newsletter Dispatches', slug: 'newsletter', route: '/newsletter', status: 'published', order: 7, sectionsCount: 3 },
+  { id: 'search', title: 'Search & Archive Discovery', slug: 'search', route: '/search', status: 'published', order: 8, sectionsCount: 2 },
 
-const getPageGroup = (page) => {
-  const type = identifyEditablePage(page) || 'home';
-  return EDITABLE_PAGE_GROUPS[type] || { label: 'Site Page', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' };
-};
+  // 2. Specialty Hubs & Curated Brands
+  { id: 'ai-story', title: 'AI & DeepTech (AI Story)', slug: 'ai-story', route: '/ai-story', status: 'published', order: 9, sectionsCount: 3 },
+  { id: 'her-story', title: 'HerStory', slug: 'her-story', route: '/her-story', status: 'published', order: 10, sectionsCount: 3 },
+  { id: 'social-story', title: 'SocialStory', slug: 'social-story', route: '/social-story', status: 'published', order: 11, sectionsCount: 3 },
+  { id: 'smbstory', title: 'SMBStory', slug: 'smbstory', route: '/smbstory', status: 'published', order: 12, sectionsCount: 3 },
+  { id: 'enterprise', title: 'Enterprise Story', slug: 'enterprise', route: '/enterprise', status: 'published', order: 13, sectionsCount: 3 },
+  { id: 'founder-first', title: 'Founder First Playbooks', slug: 'founder-first', route: '/founder-first', status: 'published', order: 14, sectionsCount: 2 },
+  { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 15, sectionsCount: 2 },
+  { id: 'techsparks', title: 'TechSparks Summit', slug: 'techsparks', route: '/techsparks', status: 'published', order: 16, sectionsCount: 2 },
+
+  // 3. Company, Trust & Information Pages
+  { id: 'about', title: 'About Us', slug: 'about', route: '/about', status: 'published', order: 17, sectionsCount: 3 },
+  { id: 'contact', title: 'Contact Us', slug: 'contact', route: '/contact', status: 'published', order: 18, sectionsCount: 4 },
+  { id: 'advertise', title: 'Advertise With Us', slug: 'advertise', route: '/advertise', status: 'published', order: 19, sectionsCount: 3 },
+  { id: 'editorial-team', title: 'Editorial Team & Masthead', slug: 'editorial-team', route: '/editorial-team', status: 'published', order: 20, sectionsCount: 3 },
+  { id: 'careers', title: 'Careers', slug: 'careers', route: '/careers', status: 'published', order: 21, sectionsCount: 2 },
+  { id: 'pitch', title: 'Pitch Story', slug: 'pitch', route: '/pitch', status: 'published', order: 22, sectionsCount: 2 },
+  { id: 'privacy', title: 'Privacy Policy', slug: 'privacy', route: '/privacy', status: 'published', order: 23, sectionsCount: 1 },
+  { id: 'terms', title: 'Terms of Service', slug: 'terms', route: '/terms', status: 'published', order: 24, sectionsCount: 1 },
+  { id: 'disclaimer', title: 'Disclaimer', slug: 'disclaimer', route: '/disclaimer', status: 'published', order: 25, sectionsCount: 1 }
+];
 
 export default function AdminPagesView({ onNavigate, onShowToast, filterCategory }) {
   const [pages, setPages] = useState([]);
@@ -60,26 +80,61 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     try {
       const data = await PageService.getPages();
       const rawList = Array.isArray(data) ? data : [];
-      const ORDERED_KEYS = ['home', 'category', 'contact', 'about', 'advertise'];
-      const editablePages = [];
 
-      ORDERED_KEYS.forEach((targetKey, idx) => {
-        const found = rawList.find(p => identifyEditablePage(p) === targetKey);
+      // Merge canonical frontend pages with MongoDB data
+      const mergedPages = CANONICAL_FRONTEND_PAGES.map((canon) => {
+        const found = rawList.find(p => {
+          const pId = (p.id || p._id || '').toLowerCase();
+          const pSlug = (p.slug || '').toLowerCase().replace(/^\/+/, '');
+          const canonSlug = (canon.slug || '').toLowerCase().replace(/^\/+/, '');
+          return pId === canon.id || (canonSlug && pSlug === canonSlug);
+        });
+
         if (found) {
-          editablePages.push(found);
-        } else {
-          const fallbackMap = {
-            home: { id: 'home', title: 'Homepage', slug: '', status: 'published', order: 1, sections: [] },
-            category: { id: 'category', title: 'Category Page & Desks', slug: 'categories', status: 'published', order: 2, sections: [] },
-            contact: { id: 'contact', title: 'Contact Us', slug: 'contact', status: 'published', order: 3, sections: [] },
-            about: { id: 'about', title: 'About Us', slug: 'about', status: 'published', order: 4, sections: [] },
-            advertise: { id: 'page_advertise', title: 'Advertise With Us', slug: 'advertise', status: 'published', order: 5, sections: [] }
+          return {
+            ...canon,
+            ...found,
+            id: found.id || found._id || canon.id,
+            title: found.title || canon.title,
+            slug: found.slug !== undefined ? found.slug : canon.slug,
+            route: canon.route,
+            status: found.status || canon.status,
+            sections: found.sections || [],
+            sectionsCount: (found.sections && found.sections.length > 0) ? found.sections.length : canon.sectionsCount
           };
-          editablePages.push(fallbackMap[targetKey]);
+        }
+        return {
+          ...canon,
+          sections: canon.sections || [],
+          sectionsCount: canon.sectionsCount
+        };
+      });
+
+      // Include any user-created custom dynamic pages from backend
+      rawList.forEach(p => {
+        const pId = (p.id || p._id || '').toLowerCase();
+        const pSlug = (p.slug || '').toLowerCase().replace(/^\/+/, '');
+        const alreadyIncluded = mergedPages.some(m => {
+          const mId = (m.id || '').toLowerCase();
+          const mSlug = (m.slug || '').toLowerCase().replace(/^\/+/, '');
+          return mId === pId || (pSlug && mSlug === pSlug);
+        });
+
+        if (!alreadyIncluded) {
+          mergedPages.push({
+            id: p.id || p._id,
+            title: p.title || 'Custom Landing Page',
+            slug: p.slug || '',
+            route: `/${p.slug || ''}`,
+            status: p.status || 'published',
+            sections: p.sections || [],
+            sectionsCount: p.sections?.length || 0,
+            isCustom: true
+          });
         }
       });
 
-      setPages(editablePages);
+      setPages(mergedPages);
     } catch (err) {
       console.error('Failed to load pages:', err);
     } finally {
@@ -142,7 +197,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
 
   const publishedCount = pages.filter(p => p.status === 'published' || p.status === 'active').length;
   const draftCount = pages.length - publishedCount;
-  const totalSections = pages.reduce((acc, p) => acc + (p.sections?.length || 0), 0);
+  const totalSections = pages.reduce((acc, p) => acc + ((p.sections && p.sections.length > 0) ? p.sections.length : (p.sectionsCount || 0)), 0);
 
   // Delete confirm modal
   const DeleteModal = ({ page }) => (
@@ -492,17 +547,11 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
               <tbody>
                 {filteredPages.map((page, index) => {
                   const isLive = page.status === 'published' || page.status === 'active';
-                  const sections = page.sections?.length || 0;
+                  const sections = (page.sections && page.sections.length > 0) ? page.sections.length : (page.sectionsCount || 0);
                   const isActing = actionLoadingId === page.id;
                   const pageType = identifyEditablePage(page);
                   const targetSlug = page.slug || page.id || '';
-                  
-                  let previewUrl = '/';
-                  if (pageType === 'category') previewUrl = '/categories';
-                  else if (pageType === 'contact') previewUrl = '/contact';
-                  else if (pageType === 'about') previewUrl = '/about';
-                  else if (pageType === 'advertise') previewUrl = '/advertise';
-                  else previewUrl = '/';
+                  const previewUrl = page.route || (page.slug ? `/${page.slug.replace(/^\/+/, '')}` : '/');
 
                   return (
                     <tr 
@@ -611,16 +660,24 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                           <button
                             type="button"
                             onClick={() => {
-                              if (pageType === 'home') {
+                              if (pageType === 'home' || page.id === 'home' || page.slug === '') {
                                 onNavigate('/admin/homepage');
-                              } else if (pageType === 'category') {
+                              } else if (pageType === 'category' || page.id === 'category' || page.slug === 'categories') {
                                 onNavigate('/admin/category');
-                              } else if (pageType === 'about') {
+                              } else if (pageType === 'about' || page.id === 'about' || page.slug === 'about') {
                                 onNavigate('/admin/about');
-                              } else if (pageType === 'contact') {
+                              } else if (pageType === 'contact' || page.id === 'contact' || page.slug === 'contact') {
                                 onNavigate('/admin/pages/contact/edit');
-                              } else if (pageType === 'advertise') {
+                              } else if (pageType === 'advertise' || page.id === 'advertise' || page.id === 'page_advertise' || page.slug === 'advertise') {
                                 onNavigate('/admin/pages/page_advertise/edit');
+                              } else if (page.id === 'trending' || page.slug === 'trending') {
+                                onNavigate('/admin/trending');
+                              } else if (page.id === 'videos' || page.slug === 'videos') {
+                                onNavigate('/admin/videos');
+                              } else if (page.id === 'newsletter' || page.slug === 'newsletter') {
+                                onNavigate('/admin/newsletters');
+                              } else if (page.id === 'founder-first' || page.slug === 'founder-first') {
+                                onNavigate('/admin/founder');
                               } else {
                                 onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`);
                               }
