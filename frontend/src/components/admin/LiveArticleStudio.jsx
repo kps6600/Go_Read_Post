@@ -2973,19 +2973,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('homepage_hero', 'isHero')}
                     title="Toggle Homepage Hero Slider"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge hero">HERO SECTION</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isHero || formData.placements?.includes('homepage_hero'))}
-                        onChange={() => togglePlacement('homepage_hero', 'isHero')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Homepage Hero Slider</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Homepage Hero Slider</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isHero || formData.placements?.includes('homepage_hero'))}
+                      onChange={() => togglePlacement('homepage_hero', 'isHero')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
 
                   {/* 2. Trending Page & Section */}
@@ -2994,19 +2989,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('trending', 'isTrending')}
                     title="Toggle Trending Page and Homepage Trending rows"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge trending">TRENDING</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isTrending || formData.placements?.includes('trending'))}
-                        onChange={() => togglePlacement('trending', 'isTrending')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Trending Page & Stories</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Trending Page & Stories</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isTrending || formData.placements?.includes('trending'))}
+                      onChange={() => togglePlacement('trending', 'isTrending')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
 
                   {/* 3. Latest Stories Feed */}
@@ -3015,19 +3005,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('latest', 'isLatest')}
                     title="Toggle Latest News and Just In feed"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge latest">LATEST FEED</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isLatest || formData.placements?.includes('latest'))}
-                        onChange={() => togglePlacement('latest', 'isLatest')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Latest Articles Page</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Latest Articles Page</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isLatest || formData.placements?.includes('latest'))}
+                      onChange={() => togglePlacement('latest', 'isLatest')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
 
                   {/* 4. Editor's Pick & Top Stories */}
@@ -3036,19 +3021,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('editors_pick', 'isEditorsPick')}
                     title="Toggle Editor's Choice spotlight"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge editors">EDITOR'S CHOICE</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isEditorsPick || formData.placements?.includes('editors_pick'))}
-                        onChange={() => togglePlacement('editors_pick', 'isEditorsPick')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Editor's Pick & Highlights</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Editor's Pick & Highlights</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isEditorsPick || formData.placements?.includes('editors_pick'))}
+                      onChange={() => togglePlacement('editors_pick', 'isEditorsPick')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
 
                   {/* 5. Breaking News Alert */}
@@ -3057,19 +3037,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('breaking', 'isBreaking')}
                     title="Toggle Breaking Ticker Banner"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge breaking">BREAKING TICKER</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isBreaking || formData.placements?.includes('breaking'))}
-                        onChange={() => togglePlacement('breaking', 'isBreaking')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Breaking News Alert</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Breaking News Alert</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isBreaking || formData.placements?.includes('breaking'))}
+                      onChange={() => togglePlacement('breaking', 'isBreaking')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
 
                   {/* 6. Category Top Story */}
@@ -3078,19 +3053,14 @@ export default function LiveArticleStudio({
                     onClick={() => togglePlacement('category_top', 'isCategoryFeatured')}
                     title="Toggle Category Top Story"
                   >
-                    <div className="las-placement-tile-header">
-                      <div className="las-placement-badge category">CATEGORY TOP</div>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(formData.isCategoryFeatured || formData.placements?.includes('category_top'))}
-                        onChange={() => togglePlacement('category_top', 'isCategoryFeatured')}
-                        className="las-placement-checkbox"
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="las-placement-tile-body">
-                      <h4 className="las-placement-tile-title">Category Top Story</h4>
-                    </div>
+                    <h4 className="las-placement-tile-title">Category Top Story</h4>
+                    <input 
+                      type="checkbox" 
+                      checked={Boolean(formData.isCategoryFeatured || formData.placements?.includes('category_top'))}
+                      onChange={() => togglePlacement('category_top', 'isCategoryFeatured')}
+                      className="las-placement-checkbox"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
                 </div>
               </div>
