@@ -750,7 +750,7 @@ export default function LiveBannerEditor({
                       <div className="lbe-item-reorder-group">
                         <button
                           type="button"
-                          className="lbe-reorder-btn"
+                          className="lbe-reorder-btn arrow-btn"
                           disabled={idx === 0}
                           onClick={() => handleMovePopularUp(idx)}
                           title={`Move Up to Position #${idx}`}
@@ -759,7 +759,7 @@ export default function LiveBannerEditor({
                         </button>
                         <button
                           type="button"
-                          className="lbe-reorder-btn"
+                          className="lbe-reorder-btn arrow-btn"
                           disabled={idx === popularArticles.length - 1}
                           onClick={() => handleMovePopularDown(idx)}
                           title={`Move Down to Position #${idx + 2}`}
@@ -768,7 +768,7 @@ export default function LiveBannerEditor({
                         </button>
                         <button
                           type="button"
-                          className="lbe-reorder-btn"
+                          className="lbe-reorder-btn replace"
                           onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
                           title="Change / Replace this article"
                         >
