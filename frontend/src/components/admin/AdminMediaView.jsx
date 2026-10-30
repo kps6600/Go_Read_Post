@@ -758,29 +758,43 @@ export default function AdminMediaView({ onShowToast }) {
           <div className="abv-pagination-bar">
             <div className="abv-pagination-left">
               <div className="abv-pagination-info">
-                Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
-                <span className="abv-pg-bold">{pageSize === 'all' ? filteredFiles.length : Math.min(currentPage * pageSize, filteredFiles.length)}</span> of{' '}
-                <span className="abv-pg-bold">{filteredFiles.length}</span> media assets
+                {pageSize === 'all' ? (
+                  <>Showing all <span className="abv-pg-bold">{filteredFiles.length}</span> media assets</>
+                ) : (
+                  <>
+                    Showing{' '}
+                    <span className="abv-pg-bold">
+                      {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredFiles.length)
+                        ? (currentPage - 1) * pageSize + 1
+                        : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredFiles.length)}`}
+                    </span>{' '}
+                    of <span className="abv-pg-bold">{filteredFiles.length}</span> media assets
+                  </>
+                )}
               </div>
 
+              <span className="abv-pagination-divider" aria-hidden="true" />
+
               <div className="abv-page-size-wrap">
-                <span>Per Page:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
-                    setPageSize(val);
-                    setCurrentPage(1);
-                  }}
-                  className="abv-page-size-select"
-                  aria-label="Media files per page"
-                >
-                  <option value={12}>12 / page</option>
-                  <option value={16}>16 / page</option>
-                  <option value={24}>24 / page</option>
-                  <option value={48}>48 / page</option>
-                  <option value="all">Show All</option>
-                </select>
+                <div className="abv-select-shell">
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                      setPageSize(val);
+                      setCurrentPage(1);
+                    }}
+                    className="abv-page-size-select"
+                    aria-label="Media files per page"
+                  >
+                    <option value={12}>12 per page</option>
+                    <option value={16}>16 per page</option>
+                    <option value={24}>24 per page</option>
+                    <option value={48}>48 per page</option>
+                    <option value="all">Show all</option>
+                  </select>
+                  <ChevronDown size={14} className="abv-select-chevron" aria-hidden="true" />
+                </div>
               </div>
             </div>
 

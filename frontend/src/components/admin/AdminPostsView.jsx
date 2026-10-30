@@ -4241,29 +4241,43 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               <div className="abv-pagination-bar">
                 <div className="abv-pagination-left">
                   <div className="abv-pagination-info">
-                    Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
-                    <span className="abv-pg-bold">{pageSize === 'all' ? filteredArticles.length : Math.min(currentPage * pageSize, filteredArticles.length)}</span> of{' '}
-                    <span className="abv-pg-bold">{filteredArticles.length}</span> articles
+                    {pageSize === 'all' ? (
+                      <>Showing all <span className="abv-pg-bold">{filteredArticles.length}</span> articles</>
+                    ) : (
+                      <>
+                        Showing{' '}
+                        <span className="abv-pg-bold">
+                          {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredArticles.length)
+                            ? (currentPage - 1) * pageSize + 1
+                            : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredArticles.length)}`}
+                        </span>{' '}
+                        of <span className="abv-pg-bold">{filteredArticles.length}</span> articles
+                      </>
+                    )}
                   </div>
 
+                  <span className="abv-pagination-divider" aria-hidden="true" />
+
                   <div className="abv-page-size-wrap">
-                    <span>Per Page:</span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
-                        setPageSize(val);
-                        setCurrentPage(1);
-                      }}
-                      className="abv-page-size-select"
-                      aria-label="Articles per page"
-                    >
-                      <option value={9}>9 / page</option>
-                      <option value={12}>12 / page</option>
-                      <option value={24}>24 / page</option>
-                      <option value={48}>48 / page</option>
-                      <option value="all">Show All</option>
-                    </select>
+                    <div className="abv-select-shell">
+                      <select
+                        value={pageSize}
+                        onChange={(e) => {
+                          const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                          setPageSize(val);
+                          setCurrentPage(1);
+                        }}
+                        className="abv-page-size-select"
+                        aria-label="Articles per page"
+                      >
+                        <option value={9}>9 per page</option>
+                        <option value={12}>12 per page</option>
+                        <option value={24}>24 per page</option>
+                        <option value={48}>48 per page</option>
+                        <option value="all">Show all</option>
+                      </select>
+                      <ChevronDown size={14} className="abv-select-chevron" aria-hidden="true" />
+                    </div>
                   </div>
                 </div>
 
