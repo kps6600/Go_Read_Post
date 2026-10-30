@@ -994,8 +994,19 @@ export default function LiveHomepageStudio({
                                 <button
                                   type="button"
                                   className="lbe-btn-add-mini article"
-                                  onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'articles' })}
-                                  title="Open All Articles popup to add an article to Popular Posts (Max 5)"
+                                  disabled={popularArticles.length >= 5}
+                                  style={{
+                                    opacity: popularArticles.length >= 5 ? 0.45 : 1,
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                  }}
+                                  onClick={() => {
+                                    if (popularArticles.length >= 5) {
+                                      alert("Popular Posts is full (5/5 cards). Delete a card first to select new ones.");
+                                      return;
+                                    }
+                                    handleOpenPicker({ type: 'popular-add', mode: 'articles' });
+                                  }}
+                                  title={popularArticles.length >= 5 ? "Popular Posts is full (5/5 cards). Delete a card first to select new ones." : "Open All Articles popup to add an article to Popular Posts (Max 5)"}
                                 >
                                   <Plus size={12} strokeWidth={2.5} />
                                   <span>Article</span>
@@ -1003,8 +1014,19 @@ export default function LiveHomepageStudio({
                                 <button
                                   type="button"
                                   className="lbe-btn-add-mini video"
-                                  onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'videos' })}
-                                  title="Open All Videos popup to add a video to Popular Posts (Max 5)"
+                                  disabled={popularArticles.length >= 5}
+                                  style={{
+                                    opacity: popularArticles.length >= 5 ? 0.45 : 1,
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                  }}
+                                  onClick={() => {
+                                    if (popularArticles.length >= 5) {
+                                      alert("Popular Posts is full (5/5 cards). Delete a card first to select new ones.");
+                                      return;
+                                    }
+                                    handleOpenPicker({ type: 'popular-add', mode: 'videos' });
+                                  }}
+                                  title={popularArticles.length >= 5 ? "Popular Posts is full (5/5 cards). Delete a card first to select new ones." : "Open All Videos popup to add a video to Popular Posts (Max 5)"}
                                 >
                                   <Play size={9} fill="currentColor" />
                                   <span>Video</span>

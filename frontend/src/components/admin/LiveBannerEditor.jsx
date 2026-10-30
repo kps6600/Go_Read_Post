@@ -112,6 +112,7 @@ export default function LiveBannerEditor({
   const [pickerCategory, setPickerCategory] = useState('All');
   const [availableVideos, setAvailableVideos] = useState(VIDEO_EPISODES);
   const [pickerContentType, setPickerContentType] = useState('all'); // 'all' | 'articles' | 'videos'
+  const [selectedPickerCards, setSelectedPickerCards] = useState([]);
 
   // Slide Content Edit Modal State
   const [isSlideEditOpen, setIsSlideEditOpen] = useState(false);
@@ -478,11 +479,33 @@ export default function LiveBannerEditor({
   };
 
   const handleOpenPicker = (target) => {
+    if (target?.type === 'popular-add' && popularArticles.length >= 5) {
+      alert("Popular Posts is full (5/5 cards). Please delete a card before selecting more.");
+      return;
+    }
+    setSelectedPickerCards([]);
     setPickerTarget(target);
     setPickerSearch('');
     setPickerCategory('All');
     setPickerContentType(target?.mode || target?.defaultTab || 'articles');
     setIsPickerOpen(true);
+  };
+
+  const handleConfirmAddSelected = () => {
+    if (selectedPickerCards.length === 0) return;
+    const remaining = Math.max(0, 5 - popularArticles.length);
+    if (remaining <= 0) {
+      alert("Popular Posts is full (5/5 cards).");
+      setIsPickerOpen(false);
+      setSelectedPickerCards([]);
+      return;
+    }
+    const toAdd = selectedPickerCards.slice(0, remaining).map(formatForPopularPost);
+    const nextPop = [...popularArticles, ...toAdd].slice(0, 5);
+    updatePopularState(nextPop);
+    persistToDatabase(slides, nextPop);
+    setIsPickerOpen(false);
+    setSelectedPickerCards([]);
   };
 
   const handleSelectArticleFromPicker = (article) => {
@@ -500,14 +523,14 @@ export default function LiveBannerEditor({
       updateSlidesState(nextSlides, targetIdx);
       persistToDatabase(nextSlides, popularArticles);
     } else if (pickerTarget.type === 'popular-add') {
-      const newPop = formatForPopularPost(article);
-      let nextPop;
-      if (popularArticles.length >= 5) {
-        // Replace slot #5 so total never exceeds 5 cards
-        nextPop = [...popularArticles.slice(0, 4), newPop];
-      } else {
-        nextPop = [...popularArticles, newPop].slice(0, 5);
+      const remaining = Math.max(0, 5 - popularArticles.length);
+      if (remaining <= 0) {
+        alert("Popular Posts is full (5/5 cards). You cannot select more cards.");
+        setIsPickerOpen(false);
+        return;
       }
+      const newPop = formatForPopularPost(article);
+      const nextPop = [...popularArticles, newPop].slice(0, 5);
       updatePopularState(nextPop);
       persistToDatabase(slides, nextPop);
     } else if (pickerTarget.type === 'popular-replace') {
@@ -550,6 +573,10 @@ export default function LiveBannerEditor({
       setSaveStatus('error');
     }
   };
+
+  const remainingPopularSlots = Math.max(0, 5 - popularArticles.length);
+  const isPopularAdd = pickerTarget?.type === 'popular-add';
+  const maxSelectable = isPopularAdd ? remainingPopularSlots : 1;
 
   return (
     <div className="lbe-overlay">
@@ -763,8 +790,19 @@ export default function LiveBannerEditor({
                     <button
                       type="button"
                       className="lbe-btn-add-mini article"
-                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'articles' })}
-                      title="Open All Articles popup to add an article to Popular Posts (Max 5)"
+                      disabled={popularArticles.length >= 5}
+                      style={{
+                        opacity: popularArticles.length >= 5 ? 0.45 : 1,
+                        cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                      }}
+                      onClick={() => {
+                        if (popularArticles.length >= 5) {
+                          alert("Popular Posts is full (5/5 cards). Delete a card first to select new ones.");
+                          return;
+                        }
+                        handleOpenPicker({ type: 'popular-add', mode: 'articles' });
+                      }}
+                      title={popularArticles.length >= 5 ? "Popular Posts is full (5/5 cards). Delete a card first to select new ones." : "Open All Articles popup to add an article to Popular Posts (Max 5)"}
                     >
                       <Plus size={12} strokeWidth={2.5} />
                       <span>Article</span>
@@ -772,8 +810,19 @@ export default function LiveBannerEditor({
                     <button
                       type="button"
                       className="lbe-btn-add-mini video"
-                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'videos' })}
-                      title="Open All Videos popup to add a video to Popular Posts (Max 5)"
+                      disabled={popularArticles.length >= 5}
+                      style={{
+                        opacity: popularArticles.length >= 5 ? 0.45 : 1,
+                        cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                      }}
+                      onClick={() => {
+                        if (popularArticles.length >= 5) {
+                          alert("Popular Posts is full (5/5 cards). Delete a card first to select new ones.");
+                          return;
+                        }
+                        handleOpenPicker({ type: 'popular-add', mode: 'videos' });
+                      }}
+                      title={popularArticles.length >= 5 ? "Popular Posts is full (5/5 cards). Delete a card first to select new ones." : "Open All Videos popup to add a video to Popular Posts (Max 5)"}
                     >
                       <Play size={9} fill="currentColor" />
                       <span>Video</span>
@@ -853,8 +902,8 @@ export default function LiveBannerEditor({
             
             {/* Modal Header */}
             <div className="lbe-picker-header">
-              <div>
-                <h4 className="lbe-picker-title">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h4 className="lbe-picker-title" style={{ margin: 0 }}>
                   <Layers size={18} color="#38bdf8" />
                   <span>
                     {pickerTarget?.mode === 'videos' || pickerContentType === 'videos'
@@ -862,11 +911,32 @@ export default function LiveBannerEditor({
                       : 'All Articles Library (Select for Popular Posts)'}
                   </span>
                 </h4>
+                {isPopularAdd && (
+                  <span style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    padding: '3px 10px',
+                    borderRadius: '999px',
+                    background: selectedPickerCards.length === maxSelectable ? 'rgba(34, 197, 94, 0.16)' : 'rgba(56, 189, 248, 0.14)',
+                    color: selectedPickerCards.length === maxSelectable ? '#4ade80' : '#38bdf8',
+                    border: '1px solid ' + (selectedPickerCards.length === maxSelectable ? 'rgba(34, 197, 94, 0.35)' : 'rgba(56, 189, 248, 0.3)'),
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
+                    {selectedPickerCards.length > 0 
+                      ? selectedPickerCards.length + '/' + maxSelectable + ' Selected' 
+                      : maxSelectable + ' slot' + (maxSelectable > 1 ? 's' : '') + ' left to select'}
+                  </span>
+                )}
               </div>
               <button 
                 type="button" 
                 className="lbe-picker-close-btn"
-                onClick={() => setIsPickerOpen(false)}
+                onClick={() => {
+                  setIsPickerOpen(false);
+                  setSelectedPickerCards([]);
+                }}
               >
                 <X size={18} />
               </button>
@@ -939,25 +1009,100 @@ export default function LiveBannerEditor({
               ) : (
                 <div className="lbe-picker-grid">
                   {filteredPickerArticles.map(article => {
-                    const artId = article._id || article.id;
+                    const artId = article._id || article.id || article.slug || article.title;
                     const artTitle = article.title || 'Untitled';
                     const artImg = article.image || article.coverImage || article.fallbackImage || article.thumbnail || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
                     const isVid = article.itemType === 'video' || !!article.duration || !!article.youtubeEmbedUrl;
                     const artCat = article.categoryLabel || article.category || (isVid ? 'Video' : 'Article');
                     const artAuthor = typeof article.author === 'object' ? (article.author?.name || 'Author') : (article.author || article.host || article.guest || 'Author');
-                    const artDate = isVid ? (article.duration ? `🎬 ${article.duration}` : '🎬 Video') : (article.publishedAt || article.date || 'Recent');
+                    const artDate = isVid ? (article.duration ? ('\u{1F3AC} ' + article.duration) : '\u{1F3AC} Video') : (article.publishedAt || article.date || 'Recent');
+
+                    const alreadyInPopular = isPopularAdd && popularArticles.some(p => {
+                      const pId = p._id || p.id || p.slug || p.title;
+                      return pId && artId && String(pId).trim().toLowerCase() === String(artId).trim().toLowerCase();
+                    });
+
+                    const isSelected = selectedPickerCards.some(a => {
+                      const aId = a._id || a.id || a.slug || a.title;
+                      return aId && artId && String(aId).trim().toLowerCase() === String(artId).trim().toLowerCase();
+                    });
+
+                    const isSlotsFull = isPopularAdd && !isSelected && selectedPickerCards.length >= maxSelectable;
+
+                    const handleCardInteraction = () => {
+                      if (alreadyInPopular) return;
+
+                      if (!isPopularAdd || maxSelectable <= 1) {
+                        handleSelectArticleFromPicker(article);
+                        return;
+                      }
+
+                      // Multi-select mode
+                      if (isSelected) {
+                        setSelectedPickerCards(prev => prev.filter(a => {
+                          const aId = a._id || a.id || a.slug || a.title;
+                          return String(aId).trim().toLowerCase() !== String(artId).trim().toLowerCase();
+                        }));
+                      } else {
+                        if (selectedPickerCards.length >= maxSelectable) {
+                          alert('You can select only max ' + maxSelectable + ' card' + (maxSelectable > 1 ? 's' : '') + ' (' + maxSelectable + ' slot' + (maxSelectable > 1 ? 's' : '') + ' left to select).');
+                          return;
+                        }
+                        setSelectedPickerCards(prev => [...prev, article]);
+                      }
+                    };
 
                     return (
                       <div 
                         key={artId} 
-                        className="lbe-picker-card"
-                        onClick={() => handleSelectArticleFromPicker(article)}
+                        className={'lbe-picker-card' + (isSelected ? ' selected' : '') + (alreadyInPopular ? ' already-added' : '')}
+                        style={{
+                          ...(isSelected ? { borderColor: '#38bdf8', boxShadow: '0 0 0 2px rgba(56, 189, 248, 0.45)' } : {}),
+                          ...(alreadyInPopular ? { opacity: 0.55, cursor: 'not-allowed' } : {})
+                        }}
+                        onClick={handleCardInteraction}
                       >
                         <div className="lbe-picker-card-thumb-wrap">
                           <img src={artImg} alt={artTitle} className="lbe-picker-card-thumb" />
-                          <span className={`lbe-picker-card-category ${isVid ? 'video' : ''}`}>
-                            {isVid ? `🎬 ${artCat}` : artCat}
+                          <span className={'lbe-picker-card-category' + (isVid ? ' video' : '')}>
+                            {isVid ? ('\u{1F3AC} ' + artCat) : artCat}
                           </span>
+                          {alreadyInPopular && (
+                            <span style={{
+                              position: 'absolute',
+                              top: '8px',
+                              right: '8px',
+                              background: 'rgba(15, 23, 42, 0.85)',
+                              color: '#94a3b8',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(148, 163, 184, 0.3)'
+                            }}>
+                              In Popular
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span style={{
+                              position: 'absolute',
+                              top: '8px',
+                              right: '8px',
+                              background: '#22c55e',
+                              color: '#ffffff',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              padding: '3px 8px',
+                              borderRadius: '999px',
+                              boxShadow: '0 2px 8px rgba(34, 197, 94, 0.5)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              <Check size={11} strokeWidth={3} />
+                              <span>Selected</span>
+                            </span>
+                          )}
                         </div>
                         <div className="lbe-picker-card-content">
                           <h5 className="lbe-picker-card-title">{artTitle}</h5>
@@ -968,14 +1113,45 @@ export default function LiveBannerEditor({
                           </div>
                           <button 
                             type="button" 
-                            className={`lbe-picker-select-btn ${isVid ? 'video' : 'article'}`}
+                            disabled={alreadyInPopular || isSlotsFull}
+                            className={'lbe-picker-select-btn ' + (isVid ? 'video' : 'article') + (isSelected ? ' selected' : '')}
+                            style={
+                              alreadyInPopular
+                                ? { opacity: 0.5, cursor: 'not-allowed', background: '#334155', color: '#94a3b8' }
+                                : isSelected
+                                ? { background: '#16a34a', color: '#ffffff', borderColor: '#22c55e' }
+                                : isSlotsFull
+                                ? { opacity: 0.45, cursor: 'not-allowed', background: '#1e293b', color: '#64748b' }
+                                : {}
+                            }
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSelectArticleFromPicker(article);
+                              handleCardInteraction();
                             }}
                           >
-                            {isVid ? <Play size={11} fill="currentColor" /> : <Check size={13} />}
-                            <span>{isVid ? 'Select This Video' : 'Select This Article'}</span>
+                            {alreadyInPopular ? (
+                              <span>Already in Popular</span>
+                            ) : isSelected ? (
+                              <>
+                                <Check size={13} strokeWidth={3} />
+                                <span>Selected ({selectedPickerCards.findIndex(a => {
+                                  const aId = a._id || a.id || a.slug || a.title;
+                                  return String(aId).trim().toLowerCase() === String(artId).trim().toLowerCase();
+                                }) + 1}/{maxSelectable})</span>
+                              </>
+                            ) : isSlotsFull ? (
+                              <span>Max ({maxSelectable}) Selected</span>
+                            ) : isVid ? (
+                              <>
+                                <Play size={11} fill="currentColor" />
+                                <span>{maxSelectable > 1 ? 'Select Video' : 'Select This Video'}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check size={13} />
+                                <span>{maxSelectable > 1 ? 'Select Article' : 'Select This Article'}</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -984,11 +1160,83 @@ export default function LiveBannerEditor({
                 </div>
               )}
             </div>
+
+            {/* Multi-Select Floating Footer Bar when more than 1 slot is open */}
+            {isPopularAdd && maxSelectable > 1 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 20px',
+                background: '#0b1120',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#e2e8f0' }}>
+                    <strong>{selectedPickerCards.length}</strong> of <strong>{maxSelectable}</strong> card{maxSelectable > 1 ? 's' : ''} selected
+                  </span>
+                  {selectedPickerCards.length < maxSelectable && (
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                      ({maxSelectable - selectedPickerCards.length} slot{maxSelectable - selectedPickerCards.length > 1 ? 's' : ''} left)
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {selectedPickerCards.length > 0 && (
+                    <button
+                      type="button"
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#cbd5e1',
+                        padding: '6px 14px',
+                        borderRadius: '7px',
+                        fontSize: '0.82rem',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setSelectedPickerCards([])}
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={selectedPickerCards.length === 0}
+                    style={{
+                      background: selectedPickerCards.length > 0 ? '#2563eb' : 'rgba(255, 255, 255, 0.08)',
+                      color: selectedPickerCards.length > 0 ? '#ffffff' : '#64748b',
+                      border: 'none',
+                      padding: '7px 18px',
+                      borderRadius: '7px',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      cursor: selectedPickerCards.length > 0 ? 'pointer' : 'not-allowed',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onClick={handleConfirmAddSelected}
+                  >
+                    <Check size={15} strokeWidth={2.5} />
+                    <span>
+                      {selectedPickerCards.length > 0
+                        ? ('Add ' + selectedPickerCards.length + ' Card' + (selectedPickerCards.length > 1 ? 's' : '') + ' to Popular Posts')
+                        : ('Select up to ' + maxSelectable + ' Cards')}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* ── Slide Content & Photo Editor Modal ── */}
+      {/* —— Slide Content & Photo Editor Modal —— */}
       {isSlideEditOpen && (
         <div className="lbe-slide-edit-overlay" onClick={() => setIsSlideEditOpen(false)}>
           <div className="lbe-slide-edit-modal" onClick={e => e.stopPropagation()}>
