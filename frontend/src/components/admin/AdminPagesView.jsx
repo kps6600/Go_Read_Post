@@ -4,7 +4,7 @@ import {
   Plus, Search, Edit2, Trash2, Eye,
   Layers, X, Filter, Check,
   ChevronDown, Sparkles,
-  ExternalLink, ArrowLeft
+  ArrowLeft
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
@@ -304,27 +304,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
             >
               <Edit2 size={13} />
               <span>Edit Page</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => window.open(previewUrl, '_blank')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '0.55rem 0.95rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#64748b',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <ExternalLink size={13} />
-              <span>Open Tab</span>
             </button>
           </div>
         </div>
