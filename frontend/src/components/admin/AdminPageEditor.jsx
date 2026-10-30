@@ -863,13 +863,13 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             <div className="section-builder-stack">
               {sections.map((sec, idx) => {
                 const def = SECTION_DEFINITIONS.find(d => d.type === sec.type) || {
-                  label: sec.type.toUpperCase()
+                  label: (sec.type || sec.id || 'SECTION').toUpperCase()
                 };
                 const isEnabled = sec.enabled !== false;
                 const secKey = sec.id ? sec.id.replace(/^sec_/, '') : '';
                 const canon = CANONICAL_SECTION_META[sec.id] || CANONICAL_SECTION_META[secKey] || CANONICAL_SECTION_META[sec.type];
 
-                const badgeText = canon?.badge || def.label?.toUpperCase() || sec.type.toUpperCase();
+                const badgeText = canon?.badge || def.label?.toUpperCase() || (sec.type || sec.id || 'SECTION').toUpperCase();
                 const badgeColor = canon?.color || 'var(--brand-primary)';
                 const badgeBg = canon?.bg || 'rgba(234, 88, 12, 0.08)';
 

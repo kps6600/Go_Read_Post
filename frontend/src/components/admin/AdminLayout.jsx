@@ -337,55 +337,12 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       );
     }
 
-    // 14. Pages Editor: /admin/pages/:id/edit
+    // 14. Pages Editor: /admin/pages/:id/edit (Unified in same space)
     if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
       const cleanPath = currentPath.split('?')[0];
       const parts = cleanPath.split('/');
       const editIndex = parts.indexOf('edit');
-      const pageId = editIndex > 0 ? parts[editIndex - 1] : null;
-      if (pageId === 'home') {
-        return (
-          <AdminPageEditor 
-            pageId="home" 
-            onNavigate={handleNavigate} 
-            onShowToast={onShowToast} 
-          />
-        );
-      }
-      if (pageId === 'category' || pageId === 'categories') {
-        return (
-          <AdminCategoryStudioView 
-            onShowToast={onShowToast} 
-            onNavigate={handleNavigate} 
-          />
-        );
-      }
-      if (pageId === 'about' || pageId === 'about-us') {
-        return (
-          <AdminAboutView 
-            onShowToast={onShowToast} 
-            onNavigate={handleNavigate} 
-          />
-        );
-      }
-      if (pageId === 'contact' || pageId === 'contact-us') {
-        return (
-          <AdminPageEditor 
-            pageId="contact" 
-            onNavigate={handleNavigate} 
-            onShowToast={onShowToast} 
-          />
-        );
-      }
-      if (pageId === 'advertise' || pageId === 'page_advertise' || pageId === 'advertise-with-us') {
-        return (
-          <AdminPageEditor 
-            pageId="page_advertise" 
-            onNavigate={handleNavigate} 
-            onShowToast={onShowToast} 
-          />
-        );
-      }
+      const pageId = editIndex > 0 ? parts[editIndex - 1] : 'home';
       return (
         <AdminPageEditor 
           pageId={pageId} 

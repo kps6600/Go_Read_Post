@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Eye,
   Layers, X, Filter, Check,
-  ChevronDown, Sparkles
+  ChevronDown, Sparkles,
+  Laptop, Tablet, Smartphone, ExternalLink
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
@@ -61,6 +62,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const [previewPage, setPreviewPage] = useState(null);
+  const [previewDevice, setPreviewDevice] = useState('desktop');
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -638,8 +641,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                           <button
                             type="button"
-                            onClick={() => window.open(previewUrl, '_blank')}
-                            title="Preview public page"
+                            onClick={() => setPreviewPage(page)}
+                            title={`Preview ${page.title} in same space`}
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -660,27 +663,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                           <button
                             type="button"
                             onClick={() => {
-                              if (pageType === 'home' || page.id === 'home' || page.slug === '') {
-                                onNavigate('/admin/homepage');
-                              } else if (pageType === 'category' || page.id === 'category' || page.slug === 'categories') {
-                                onNavigate('/admin/category');
-                              } else if (pageType === 'about' || page.id === 'about' || page.slug === 'about') {
-                                onNavigate('/admin/about');
-                              } else if (pageType === 'contact' || page.id === 'contact' || page.slug === 'contact') {
-                                onNavigate('/admin/pages/contact/edit');
-                              } else if (pageType === 'advertise' || page.id === 'advertise' || page.id === 'page_advertise' || page.slug === 'advertise') {
-                                onNavigate('/admin/pages/page_advertise/edit');
-                              } else if (page.id === 'trending' || page.slug === 'trending') {
-                                onNavigate('/admin/trending');
-                              } else if (page.id === 'videos' || page.slug === 'videos') {
-                                onNavigate('/admin/videos');
-                              } else if (page.id === 'newsletter' || page.slug === 'newsletter') {
-                                onNavigate('/admin/newsletters');
-                              } else if (page.id === 'founder-first' || page.slug === 'founder-first') {
-                                onNavigate('/admin/founder');
-                              } else {
-                                onNavigate(`/admin/pages/${page.id || page._id || targetSlug}/edit`);
-                              }
+                              const targetId = page.id || page._id || page.slug || 'home';
+                              onNavigate(`/admin/pages/${targetId}/edit`);
                             }}
                             title="Edit page & sections"
                             style={{
@@ -730,6 +714,217 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
           </div>
         )}
       </div>
+      {/* ── Same Space Live Page Preview Modal ── */}
+      {previewPage && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(15, 23, 42, 0.72)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem'
+          }}
+          onClick={() => setPreviewPage(null)}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              width: '95vw',
+              maxWidth: '1360px',
+              height: '90vh',
+              maxHeight: '920px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header Bar */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.85rem 1.25rem',
+              borderBottom: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              {/* Page Title & Route */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a' }}>
+                  {previewPage.title}
+                </span>
+                <code style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.8rem',
+                  background: '#e2e8f0',
+                  color: '#334155',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  fontWeight: 600
+                }}>
+                  {previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/')}
+                </code>
+              </div>
+
+              {/* Viewport Device Switcher */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: '#e2e8f0',
+                padding: '3px',
+                borderRadius: '9px',
+                gap: '2px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('desktop')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '7px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: previewDevice === 'desktop' ? '#ffffff' : 'transparent',
+                    color: previewDevice === 'desktop' ? '#0f172a' : '#64748b',
+                    boxShadow: previewDevice === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Laptop size={14} />
+                  <span>Desktop</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('tablet')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '7px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: previewDevice === 'tablet' ? '#ffffff' : 'transparent',
+                    color: previewDevice === 'tablet' ? '#0f172a' : '#64748b',
+                    boxShadow: previewDevice === 'tablet' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Tablet size={14} />
+                  <span>Tablet (768px)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('mobile')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '7px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: previewDevice === 'mobile' ? '#ffffff' : 'transparent',
+                    color: previewDevice === 'mobile' ? '#0f172a' : '#64748b',
+                    boxShadow: previewDevice === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Smartphone size={14} />
+                  <span>Mobile (375px)</span>
+                </button>
+              </div>
+
+              {/* Actions: External & Close */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => window.open(previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/'), '_blank')}
+                  title="Open live site in external browser tab"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <ExternalLink size={13} />
+                  <span>Open Tab</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewPage(null)}
+                  title="Close preview"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Iframe Content */}
+            <div style={{
+              flex: 1,
+              background: '#f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              padding: previewDevice === 'desktop' ? '0' : '1.5rem'
+            }}>
+              <iframe
+                title={`Preview of ${previewPage.title}`}
+                src={previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/')}
+                style={{
+                  width: previewDevice === 'desktop' ? '100%' : (previewDevice === 'tablet' ? '768px' : '375px'),
+                  height: '100%',
+                  border: previewDevice === 'desktop' ? 'none' : '1px solid #cbd5e1',
+                  borderRadius: previewDevice === 'desktop' ? '0' : '12px',
+                  boxShadow: previewDevice === 'desktop' ? 'none' : '0 10px 25px -5px rgba(0,0,0,0.15)',
+                  background: '#ffffff',
+                  transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
