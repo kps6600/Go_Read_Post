@@ -4,7 +4,7 @@ import {
   Plus, Search, Edit2, Trash2, Eye,
   Layers, X, Filter, Check,
   ChevronDown, Sparkles,
-  Laptop, Tablet, Smartphone, ExternalLink, ArrowLeft
+  ExternalLink, ArrowLeft
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
@@ -65,7 +65,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [activeMode, setActiveMode] = useState('list'); // 'list' | 'preview' | 'edit'
   const [selectedPage, setSelectedPage] = useState(null);
-  const [previewDevice, setPreviewDevice] = useState('desktop');
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -281,82 +280,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
               }}>
                 {previewUrl}
               </code>
-            </div>
-          </div>
-
-          {/* Viewport Device Switcher */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            background: '#f1f5f9',
-            padding: '3px',
-            borderRadius: '9px',
-            gap: '2px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <button
-              type="button"
-              onClick={() => setPreviewDevice('desktop')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '5px 12px',
-                borderRadius: '7px',
-                border: 'none',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: previewDevice === 'desktop' ? '#ffffff' : 'transparent',
-                color: previewDevice === 'desktop' ? '#0f172a' : '#64748b',
-                boxShadow: previewDevice === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              <Laptop size={14} />
-              <span>Desktop</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPreviewDevice('tablet')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '5px 12px',
-                borderRadius: '7px',
-                border: 'none',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: previewDevice === 'tablet' ? '#ffffff' : 'transparent',
-                color: previewDevice === 'tablet' ? '#0f172a' : '#64748b',
-                boxShadow: previewDevice === 'tablet' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              <Tablet size={14} />
-              <span>Tablet (768px)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPreviewDevice('mobile')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '5px 12px',
-                borderRadius: '7px',
-                border: 'none',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: previewDevice === 'mobile' ? '#ffffff' : 'transparent',
-                color: previewDevice === 'mobile' ? '#0f172a' : '#64748b',
-                boxShadow: previewDevice === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              <Smartphone size={14} />
-              <span>Mobile (375px)</span>
-            </button>
+                        </div>
           </div>
 
           {/* Quick Actions */}
@@ -413,21 +337,18 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
           overflow: 'hidden',
           display: 'flex',
           justifyContent: 'center',
-          padding: previewDevice === 'desktop' ? 0 : '1.5rem',
-          minHeight: '750px',
+          padding: 0,
+          minHeight: '800px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
         }}>
           <iframe
             title={`Live view of ${selectedPage.title}`}
             src={previewUrl}
             style={{
-              width: previewDevice === 'desktop' ? '100%' : (previewDevice === 'tablet' ? '768px' : '375px'),
-              height: '800px',
-              border: previewDevice === 'desktop' ? 'none' : '1px solid #cbd5e1',
-              borderRadius: previewDevice === 'desktop' ? '0' : '12px',
-              boxShadow: previewDevice === 'desktop' ? 'none' : '0 10px 25px -5px rgba(0,0,0,0.15)',
-              background: '#ffffff',
-              transition: 'width 0.2s ease'
+              width: '100%',
+              height: '820px',
+              border: 'none',
+              background: '#ffffff'
             }}
           />
         </div>
