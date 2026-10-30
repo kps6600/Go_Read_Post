@@ -1,9 +1,10 @@
+import AdminPageEditor from './AdminPageEditor';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Eye,
   Layers, X, Filter, Check,
   ChevronDown, Sparkles,
-  Laptop, Tablet, Smartphone, ExternalLink
+  Laptop, Tablet, Smartphone, ExternalLink, ArrowLeft
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 
@@ -62,7 +63,8 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
-  const [previewPage, setPreviewPage] = useState(null);
+  const [activeMode, setActiveMode] = useState('list'); // 'list' | 'preview' | 'edit'
+  const [selectedPage, setSelectedPage] = useState(null);
   const [previewDevice, setPreviewDevice] = useState('desktop');
   const filterRef = useRef(null);
 
@@ -223,9 +225,298 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     </div>
   );
 
+    if (activeMode === 'preview' && selectedPage) {
+    const previewUrl = selectedPage.route || (selectedPage.slug ? `/${selectedPage.slug.replace(/^\/+/, '')}` : '/');
+    return (
+      <div className="admin-page-container">
+        {/* Header toolbar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '14px',
+          padding: '0.85rem 1.25rem',
+          marginBottom: '1rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={() => { setActiveMode('list'); setSelectedPage(null); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1.05rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Pages List</span>
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                {selectedPage.title}
+              </span>
+              <code style={{
+                fontFamily: 'monospace',
+                fontSize: '0.82rem',
+                background: '#f1f5f9',
+                color: '#475569',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                fontWeight: 600
+              }}>
+                {previewUrl}
+              </code>
+            </div>
+          </div>
+
+          {/* Viewport Device Switcher */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            background: '#f1f5f9',
+            padding: '3px',
+            borderRadius: '9px',
+            gap: '2px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <button
+              type="button"
+              onClick={() => setPreviewDevice('desktop')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 12px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: previewDevice === 'desktop' ? '#ffffff' : 'transparent',
+                color: previewDevice === 'desktop' ? '#0f172a' : '#64748b',
+                boxShadow: previewDevice === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              <Laptop size={14} />
+              <span>Desktop</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewDevice('tablet')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 12px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: previewDevice === 'tablet' ? '#ffffff' : 'transparent',
+                color: previewDevice === 'tablet' ? '#0f172a' : '#64748b',
+                boxShadow: previewDevice === 'tablet' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              <Tablet size={14} />
+              <span>Tablet (768px)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewDevice('mobile')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 12px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: previewDevice === 'mobile' ? '#ffffff' : 'transparent',
+                color: previewDevice === 'mobile' ? '#0f172a' : '#64748b',
+                boxShadow: previewDevice === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              <Smartphone size={14} />
+              <span>Mobile (375px)</span>
+            </button>
+          </div>
+
+          {/* Quick Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setActiveMode('edit')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                color: 'var(--brand-primary, #dc2626)',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Edit2 size={13} />
+              <span>Edit Page</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.open(previewUrl, '_blank')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '0.55rem 0.95rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#64748b',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <ExternalLink size={13} />
+              <span>Open Tab</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Embedded Iframe right in the same space */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '14px',
+          overflow: 'hidden',
+          display: 'flex',
+          justifyContent: 'center',
+          padding: previewDevice === 'desktop' ? 0 : '1.5rem',
+          minHeight: '750px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        }}>
+          <iframe
+            title={`Live view of ${selectedPage.title}`}
+            src={previewUrl}
+            style={{
+              width: previewDevice === 'desktop' ? '100%' : (previewDevice === 'tablet' ? '768px' : '375px'),
+              height: '800px',
+              border: previewDevice === 'desktop' ? 'none' : '1px solid #cbd5e1',
+              borderRadius: previewDevice === 'desktop' ? '0' : '12px',
+              boxShadow: previewDevice === 'desktop' ? 'none' : '0 10px 25px -5px rgba(0,0,0,0.15)',
+              background: '#ffffff',
+              transition: 'width 0.2s ease'
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeMode === 'edit' && selectedPage) {
+    const editPageId = selectedPage.id || selectedPage._id || selectedPage.slug || 'home';
+    return (
+      <div className="admin-page-container">
+        {/* Top Header Toolbar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          padding: '0.65rem 1.15rem',
+          marginBottom: '0.85rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        }}>
+          <button
+            type="button"
+            onClick={() => { setActiveMode('list'); setSelectedPage(null); }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.45rem 0.95rem',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#334155',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Pages List</span>
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setActiveMode('preview')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.45rem 0.95rem',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                color: '#0284c7',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Eye size={14} />
+              <span>Live Preview</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Page Editor rendered right in the same space */}
+        <AdminPageEditor
+          pageId={editPageId}
+          onNavigate={(target) => {
+            if (target === '/admin/pages' || target === 'pages' || target === '/admin/pages/') {
+              setActiveMode('list');
+              setSelectedPage(null);
+            } else {
+              onNavigate?.(target);
+            }
+          }}
+          onShowToast={onShowToast}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="admin-page-container">
-
       {/* Delete Confirm Modal */}
       {deleteConfirmId && (() => {
         const page = pages.find(p => p.id === deleteConfirmId);
@@ -641,8 +932,11 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                           <button
                             type="button"
-                            onClick={() => setPreviewPage(page)}
-                            title={`Preview ${page.title} in same space`}
+                            onClick={() => {
+                              setSelectedPage(page);
+                              setActiveMode('preview');
+                            }}
+                            title={`Preview ${page.title} right here`}
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -663,10 +957,10 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                           <button
                             type="button"
                             onClick={() => {
-                              const targetId = page.id || page._id || page.slug || 'home';
-                              onNavigate(`/admin/pages/${targetId}/edit`);
+                              setSelectedPage(page);
+                              setActiveMode('edit');
                             }}
-                            title="Edit page & sections"
+                            title="Edit page & sections right here"
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -714,217 +1008,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
           </div>
         )}
       </div>
-      {/* ── Same Space Live Page Preview Modal ── */}
-      {previewPage && (
-        <div 
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            background: 'rgba(15, 23, 42, 0.72)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1.25rem'
-          }}
-          onClick={() => setPreviewPage(null)}
-        >
-          <div 
-            style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              width: '95vw',
-              maxWidth: '1360px',
-              height: '90vh',
-              maxHeight: '920px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              overflow: 'hidden'
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Header Bar */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.85rem 1.25rem',
-              borderBottom: '1px solid #e2e8f0',
-              background: '#f8fafc',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
-            }}>
-              {/* Page Title & Route */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a' }}>
-                  {previewPage.title}
-                </span>
-                <code style={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.8rem',
-                  background: '#e2e8f0',
-                  color: '#334155',
-                  padding: '2px 8px',
-                  borderRadius: '6px',
-                  fontWeight: 600
-                }}>
-                  {previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/')}
-                </code>
-              </div>
-
-              {/* Viewport Device Switcher */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                background: '#e2e8f0',
-                padding: '3px',
-                borderRadius: '9px',
-                gap: '2px'
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice('desktop')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '4px 10px',
-                    borderRadius: '7px',
-                    border: 'none',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: previewDevice === 'desktop' ? '#ffffff' : 'transparent',
-                    color: previewDevice === 'desktop' ? '#0f172a' : '#64748b',
-                    boxShadow: previewDevice === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Laptop size={14} />
-                  <span>Desktop</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice('tablet')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '4px 10px',
-                    borderRadius: '7px',
-                    border: 'none',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: previewDevice === 'tablet' ? '#ffffff' : 'transparent',
-                    color: previewDevice === 'tablet' ? '#0f172a' : '#64748b',
-                    boxShadow: previewDevice === 'tablet' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Tablet size={14} />
-                  <span>Tablet (768px)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice('mobile')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '4px 10px',
-                    borderRadius: '7px',
-                    border: 'none',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: previewDevice === 'mobile' ? '#ffffff' : 'transparent',
-                    color: previewDevice === 'mobile' ? '#0f172a' : '#64748b',
-                    boxShadow: previewDevice === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Smartphone size={14} />
-                  <span>Mobile (375px)</span>
-                </button>
-              </div>
-
-              {/* Actions: External & Close */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => window.open(previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/'), '_blank')}
-                  title="Open live site in external browser tab"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 10px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#64748b',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <ExternalLink size={13} />
-                  <span>Open Tab</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPreviewPage(null)}
-                  title="Close preview"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Iframe Content */}
-            <div style={{
-              flex: 1,
-              background: '#f1f5f9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              padding: previewDevice === 'desktop' ? '0' : '1.5rem'
-            }}>
-              <iframe
-                title={`Preview of ${previewPage.title}`}
-                src={previewPage.route || (previewPage.slug ? `/${previewPage.slug.replace(/^\/+/, '')}` : '/')}
-                style={{
-                  width: previewDevice === 'desktop' ? '100%' : (previewDevice === 'tablet' ? '768px' : '375px'),
-                  height: '100%',
-                  border: previewDevice === 'desktop' ? 'none' : '1px solid #cbd5e1',
-                  borderRadius: previewDevice === 'desktop' ? '0' : '12px',
-                  boxShadow: previewDevice === 'desktop' ? 'none' : '0 10px 25px -5px rgba(0,0,0,0.15)',
-                  background: '#ffffff',
-                  transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
