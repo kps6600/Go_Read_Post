@@ -700,6 +700,71 @@ function MultiSelectField({
   );
 }
 
+// Derive active story placements based on article flags and placements array
+export const deriveArticlePlacements = (article = {}) => {
+  const isHero = Boolean(
+    article.isHero || 
+    article.isFeatured || 
+    article.tag === 'HERO' || 
+    article.tag === 'FEATURED' || 
+    (Array.isArray(article.placements) && article.placements.includes('homepage_hero'))
+  );
+  const isTrending = Boolean(
+    article.isTrending || 
+    article.tag === 'TRENDING' || 
+    (Array.isArray(article.placements) && article.placements.includes('trending'))
+  );
+  const isLatest = Boolean(
+    article.isLatest !== undefined 
+      ? article.isLatest 
+      : (article.status === 'published' || (Array.isArray(article.placements) && article.placements.includes('latest')))
+  );
+  const isEditorsPick = Boolean(
+    article.isEditorsPick || 
+    article.tag === 'EDITOR' || 
+    (Array.isArray(article.placements) && article.placements.includes('editors_pick'))
+  );
+  const isBreaking = Boolean(
+    article.isBreaking || 
+    article.tag === 'BREAKING' || 
+    (Array.isArray(article.placements) && article.placements.includes('breaking'))
+  );
+  const isCategoryFeatured = Boolean(
+    article.isCategoryFeatured || 
+    (Array.isArray(article.placements) && article.placements.includes('category_top'))
+  );
+
+  const placements = Array.isArray(article.placements) && article.placements.length > 0
+    ? [...article.placements]
+    : [
+        ...(isHero ? ['homepage_hero'] : []),
+        ...(isTrending ? ['trending'] : []),
+        ...(isLatest ? ['latest'] : []),
+        ...(isEditorsPick ? ['editors_pick'] : []),
+        ...(isBreaking ? ['breaking'] : []),
+        ...(isCategoryFeatured ? ['category_top'] : []),
+      ];
+
+  // Keep placements array synchronized with active booleans
+  if (isHero && !placements.includes('homepage_hero')) placements.push('homepage_hero');
+  if (isTrending && !placements.includes('trending')) placements.push('trending');
+  if (isLatest && !placements.includes('latest')) placements.push('latest');
+  if (isEditorsPick && !placements.includes('editors_pick')) placements.push('editors_pick');
+  if (isBreaking && !placements.includes('breaking')) placements.push('breaking');
+  if (isCategoryFeatured && !placements.includes('category_top')) placements.push('category_top');
+
+  return {
+    isHero,
+    isFeatured: isHero || Boolean(article.isFeatured),
+    isTrending,
+    isLatest,
+    isEditorsPick,
+    isBreaking,
+    isCategoryFeatured,
+    placements
+  };
+};
+
 export default function LiveArticleStudio({
   article = null,
   onClose,
@@ -1113,6 +1178,7 @@ export default function LiveArticleStudio({
   const [formData, setFormData] = useState(() => {
     if (article) {
       const initialBlocks = extractInitialBlocks(article);
+      const placementsData = deriveArticlePlacements(article);
 
       return {
         _id: article._id || article.id || null,
@@ -1137,9 +1203,14 @@ export default function LiveArticleStudio({
         readingTime: article.readingTime || article.readTime || '1 min read',
         scheduledAt: article.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : '',
         status: article.status || 'published',
-        isFeatured: Boolean(article.isFeatured),
-        isTrending: Boolean(article.isTrending),
-        isBreaking: Boolean(article.isBreaking),
+        isHero: placementsData.isHero,
+        isFeatured: placementsData.isFeatured,
+        isTrending: placementsData.isTrending,
+        isLatest: placementsData.isLatest,
+        isEditorsPick: placementsData.isEditorsPick,
+        isBreaking: placementsData.isBreaking,
+        isCategoryFeatured: placementsData.isCategoryFeatured,
+        placements: placementsData.placements,
         tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
         topics: Array.isArray(article.topics) ? article.topics : ['Startups'],
         titleAlign: article.titleAlign || 'left',
@@ -1177,9 +1248,14 @@ export default function LiveArticleStudio({
       readingTime: '1 min read',
       scheduledAt: '',
       status: 'published',
+      isHero: false,
       isFeatured: false,
-      isTrending: true,
+      isTrending: false,
+      isLatest: true,
+      isEditorsPick: false,
       isBreaking: false,
+      isCategoryFeatured: false,
+      placements: ['latest'],
       tags: '',
       topics: ['Startups'],
       titleAlign: 'left',
@@ -1257,10 +1333,26 @@ export default function LiveArticleStudio({
         const currentId = prev._id;
         const incomingId = article._id || article.id;
         if (currentId && currentId === incomingId && prev.featuredImage?.url) {
+          if (prev.placements === undefined || prev.isHero === undefined) {
+            const placementsData = deriveArticlePlacements(article);
+            return {
+              ...prev,
+              isHero: placementsData.isHero,
+              isFeatured: placementsData.isFeatured,
+              isTrending: placementsData.isTrending,
+              isLatest: placementsData.isLatest,
+              isEditorsPick: placementsData.isEditorsPick,
+              isBreaking: placementsData.isBreaking,
+              isCategoryFeatured: placementsData.isCategoryFeatured,
+              placements: placementsData.placements
+            };
+          }
           return prev;
         }
 
         const initialBlocks = extractInitialBlocks(article);
+        const placementsData = deriveArticlePlacements(article);
+
         return {
           _id: article._id || article.id || null,
           title: article.title || '',
@@ -1284,9 +1376,14 @@ export default function LiveArticleStudio({
           readingTime: article.readingTime || article.readTime || '1 min read',
           scheduledAt: article.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : '',
           status: article.status || 'published',
-          isFeatured: Boolean(article.isFeatured),
-          isTrending: Boolean(article.isTrending),
-          isBreaking: Boolean(article.isBreaking),
+          isHero: placementsData.isHero,
+          isFeatured: placementsData.isFeatured,
+          isTrending: placementsData.isTrending,
+          isLatest: placementsData.isLatest,
+          isEditorsPick: placementsData.isEditorsPick,
+          isBreaking: placementsData.isBreaking,
+          isCategoryFeatured: placementsData.isCategoryFeatured,
+          placements: placementsData.placements,
           tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
           topics: Array.isArray(article.topics) ? article.topics : ['Startups'],
           titleAlign: article.titleAlign || 'left',
@@ -1763,7 +1860,16 @@ export default function LiveArticleStudio({
   const togglePlacement = (placementKey, booleanKey) => {
     setFormData(prev => {
       const currentPlacements = new Set(Array.isArray(prev.placements) ? prev.placements : []);
-      const newBool = !prev[booleanKey];
+      let currentBool = false;
+      if (booleanKey === 'isHero') {
+        currentBool = Boolean(prev.isHero || prev.isFeatured || currentPlacements.has('homepage_hero'));
+      } else if (booleanKey === 'isLatest') {
+        currentBool = Boolean(prev.isLatest !== undefined ? prev.isLatest : (prev.status === 'published' || currentPlacements.has('latest')));
+      } else {
+        currentBool = Boolean(prev[booleanKey] || currentPlacements.has(placementKey));
+      }
+
+      const newBool = !currentBool;
       if (newBool) {
         currentPlacements.add(placementKey);
       } else {
@@ -1772,7 +1878,7 @@ export default function LiveArticleStudio({
       return {
         ...prev,
         [booleanKey]: newBool,
-        ...(booleanKey === 'isHero' ? { isFeatured: newBool } : {}),
+        ...(booleanKey === 'isHero' ? { isFeatured: newBool, isHero: newBool } : {}),
         placements: Array.from(currentPlacements)
       };
     });
@@ -1977,9 +2083,14 @@ export default function LiveArticleStudio({
         publishedAt: targetStatus === 'published' 
           ? (formData.publishedAt || new Date().toISOString()) 
           : (targetStatus === 'scheduled' ? null : (formData.publishedAt || null)),
-        isFeatured: formData.isFeatured,
-        isTrending: formData.isTrending,
-        isBreaking: formData.isBreaking,
+        isHero: Boolean(formData.isHero),
+        isFeatured: Boolean(formData.isFeatured || formData.isHero),
+        isTrending: Boolean(formData.isTrending),
+        isLatest: Boolean(formData.isLatest),
+        isEditorsPick: Boolean(formData.isEditorsPick),
+        isBreaking: Boolean(formData.isBreaking),
+        isCategoryFeatured: Boolean(formData.isCategoryFeatured),
+        placements: Array.isArray(formData.placements) ? formData.placements : [],
         tags: typeof formData.tags === 'string' ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : (formData.tags || []),
         topics: formData.topics || ['Startups'],
         content: compiledHtml,
@@ -2969,14 +3080,14 @@ export default function LiveArticleStudio({
                 <div className="las-placement-grid">
                   {/* 1. Homepage Hero */}
                   <div 
-                    className={`las-placement-tile ${(formData.isHero || formData.placements?.includes('homepage_hero')) ? 'active hero' : ''}`}
+                    className={`las-placement-tile ${(formData.isHero || formData.isFeatured || formData.placements?.includes('homepage_hero')) ? 'active hero' : ''}`}
                     onClick={() => togglePlacement('homepage_hero', 'isHero')}
                     title="Toggle Homepage Hero Slider"
                   >
                     <h4 className="las-placement-tile-title">Homepage Hero Slider</h4>
                     <input 
                       type="checkbox" 
-                      checked={Boolean(formData.isHero || formData.placements?.includes('homepage_hero'))}
+                      checked={Boolean(formData.isHero || formData.isFeatured || formData.placements?.includes('homepage_hero'))}
                       onChange={() => togglePlacement('homepage_hero', 'isHero')}
                       className="las-placement-checkbox"
                       onClick={e => e.stopPropagation()}
