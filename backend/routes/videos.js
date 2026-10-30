@@ -12,8 +12,17 @@ export const adminVideosRouter = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fallbackVideosPath = path.join(__dirname, '..', 'videos_data_store.json');
+const seedsFilePath = path.join(__dirname, '..', 'videoSeeds.json');
 
-const INITIAL_VIDEO_SEEDS = [
+let INITIAL_VIDEO_SEEDS = [];
+try {
+  if (fs.existsSync(seedsFilePath)) {
+    INITIAL_VIDEO_SEEDS = JSON.parse(fs.readFileSync(seedsFilePath, 'utf-8'));
+  }
+} catch (e) {}
+
+if (!Array.isArray(INITIAL_VIDEO_SEEDS) || INITIAL_VIDEO_SEEDS.length === 0) {
+  INITIAL_VIDEO_SEEDS = [
   {
     title: 'Building India’s Sovereign AI Stack: Bhavish Aggarwal on Krutrim, Chips & Gigafactories',
     slug: 'building-indias-sovereign-ai-stack-bhavish-aggarwal',
@@ -105,6 +114,7 @@ const INITIAL_VIDEO_SEEDS = [
     order: 3
   }
 ];
+}
 
 function readFallbackVideos() {
   try {

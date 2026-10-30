@@ -524,6 +524,33 @@
   justify-content: center;
 }
 
+.amv-video-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.amv-media-card:hover .amv-video-poster-img {
+  transform: scale(1.05);
+}
+
+.amv-video-duration-pill {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  z-index: 2;
+}
+
 .amv-video-preview {
   width: 100%;
   height: 100%;

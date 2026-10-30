@@ -7,6 +7,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import Media from '../models/Media.js';
 import Article from '../models/Article.js';
 import Video from '../models/Video.js';
+import { ensureVideosSeeded } from './videos.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin } from '../middleware/auth.js';
 
@@ -98,7 +99,7 @@ export async function ensureMediaSeeded() {
       }
     }
 
-    // 3. Sync video thumbnails into MongoDB Media collection
+        // 3. Sync video thumbnails into MongoDB Media collection
     if (Video) {
       const videos = await Video.find({ image: { $exists: true, $ne: '' } });
       for (const v of videos) {
@@ -123,6 +124,41 @@ export async function ensureMediaSeeded() {
               createdAt: new Date()
             });
           }
+        }
+      }
+    }
+
+    // 4. Sync video productions into MongoDB Media collection as mediaType: 'video'
+    if (Video) {
+      const allVideos = await Video.find({});
+      for (const v of allVideos) {
+        const targetUrl = v.videoUrl || v.youtubeEmbedUrl;
+        if (!targetUrl) continue;
+        const cleanFilename = `${(v.slug || 'video').replace(/[^a-zA-Z0-9_-]/g, '_')}.mp4`;
+        const poster = v.image || v.fallbackImage || '';
+
+        const existingMedia = await Media.findOne({ filename: cleanFilename });
+        const mediaData = {
+          filename: cleanFilename,
+          url: targetUrl,
+          mediaType: 'video',
+          type: 'video/mp4',
+          size: 45000000 + (Math.floor(Math.random() * 30000000)),
+          duration: v.duration || '24:00',
+          poster: poster,
+          thumbnail: poster,
+          altText: v.title,
+          caption: v.title,
+          credit: `${v.series || 'GoReadPost Video Series'} • ${v.guest || 'Editorial Desk'}`,
+          provider: targetUrl.includes('youtube') ? 'youtube' : 'external',
+          uploadedBy: v.host || 'admin',
+          createdAt: v.createdAt || new Date()
+        };
+
+        if (existingMedia) {
+          await Media.updateOne({ _id: existingMedia._id }, { $set: mediaData });
+        } else {
+          await Media.create(mediaData);
         }
       }
     }
@@ -169,7 +205,8 @@ router.get('/', async (req, res) => {
       const filter = conditions.length > 1 ? { $and: conditions } : (conditions[0] || {});
 
       const count = await Media.countDocuments();
-      if (count === 0) {
+      const videoCount = await Media.countDocuments({ mediaType: 'video' });
+      if (count === 0 || videoCount < 2) {
         await ensureMediaSeeded();
       }
 
@@ -221,6 +258,7 @@ router.get('/', async (req, res) => {
 // Sync media assets on demand
 router.post('/sync', protectAdmin, async (req, res) => {
   try {
+    try { await ensureVideosSeeded(); } catch (e) {}
     await ensureMediaSeeded();
     const count = await Media.countDocuments();
     res.json({ success: true, message: `Media library synced. Total assets in database: ${count}`, count });

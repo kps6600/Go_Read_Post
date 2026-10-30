@@ -10,6 +10,8 @@ const mediaSchema = new mongoose.Schema(
     width: { type: Number, default: 0 },
     height: { type: Number, default: 0 },
     duration: { type: String, default: '' },
+    poster: { type: String, default: '' },
+    thumbnail: { type: String, default: '' },
     altText: { type: String, default: '' },
     caption: { type: String, default: '' },
     credit: { type: String, default: '' },

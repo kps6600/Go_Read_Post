@@ -554,23 +554,41 @@ export default function AdminMediaView({ onShowToast }) {
                   {/* Thumbnail Visuals */}
                   {isVideo ? (
                     <div className="amv-video-thumb-container">
-                      <video 
-                        src={file.url} 
-                        className="amv-video-preview" 
-                        preload="metadata"
-                        muted 
-                        playsInline
-                        onMouseEnter={(e) => {
-                          e.target.play().catch(() => {});
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.pause();
-                          e.target.currentTime = 0;
-                        }}
-                      />
+                      {(file.poster || file.thumbnail || file.image) ? (
+                        <img 
+                          src={file.poster || file.thumbnail || file.image}
+                          alt={cleanTitle}
+                          className="amv-video-poster-img"
+                          loading="lazy"
+                          onError={(e) => {
+                            const yt = (file.url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                            if (yt && yt[1]) {
+                              e.target.src = `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <video 
+                          src={file.url} 
+                          className="amv-video-preview" 
+                          preload="metadata"
+                          muted 
+                          playsInline
+                          onMouseEnter={(e) => {
+                            e.target.play().catch(() => {});
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.pause();
+                            e.target.currentTime = 0;
+                          }}
+                        />
+                      )}
                       <div className="amv-video-play-center" title="Click to preview video">
                         <Play size={18} fill="currentColor" />
                       </div>
+                      {file.duration && (
+                        <span className="amv-video-duration-pill">{file.duration}</span>
+                      )}
                     </div>
                   ) : isBroken ? (
                     <div className="amv-fallback-preview">
@@ -686,12 +704,31 @@ export default function AdminMediaView({ onShowToast }) {
             {/* Content Preview */}
             <div className="amv-lightbox-content">
               {isAssetVideo(previewAsset) ? (
-                <video 
-                  src={previewAsset.url} 
-                  controls 
-                  autoPlay
-                  className="amv-lightbox-full-video"
-                />
+                (() => {
+                  const url = previewAsset.url || '';
+                  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+                  if (yt && yt[1]) {
+                    return (
+                      <div style={{ width: '100%', height: '100%', minHeight: '420px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <iframe 
+                          src={`https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0`}
+                          title={getCleanTitle(previewAsset)}
+                          style={{ width: '100%', height: '100%', minHeight: '440px', border: 'none', borderRadius: '8px' }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
+                    );
+                  }
+                  return (
+                    <video 
+                      src={previewAsset.url} 
+                      controls 
+                      autoPlay
+                      className="amv-lightbox-full-video"
+                    />
+                  );
+                })()
               ) : (
                 <img 
                   src={previewAsset.url} 

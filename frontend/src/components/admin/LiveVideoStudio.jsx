@@ -1579,15 +1579,45 @@ export default function LiveVideoStudio({
                       title={`Click to select ${file.filename || file.originalName || 'video'}`}
                     >
                       <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', background: '#090d16', overflow: 'hidden' }}>
-                        <video
-                          src={file.url || file.path}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          preload="metadata"
-                          muted
-                          playsInline
-                          onMouseEnter={(e) => { e.target.play().catch(() => {}); }}
-                          onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
-                        />
+                        {(file.poster || file.thumbnail || file.image) ? (
+                          <img
+                            src={file.poster || file.thumbnail || file.image}
+                            alt={file.altText || file.filename}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={(e) => {
+                              const yt = (file.url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                              if (yt && yt[1]) {
+                                e.target.src = `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <video
+                            src={file.url || file.path}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            onMouseEnter={(e) => { e.target.play().catch(() => {}); }}
+                            onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+                          />
+                        )}
+                        {file.duration && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '6px',
+                            right: '6px',
+                            background: 'rgba(0, 0, 0, 0.8)',
+                            color: '#ffffff',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            padding: '2px 5px',
+                            borderRadius: '4px',
+                            zIndex: 2
+                          }}>
+                            {file.duration}
+                          </div>
+                        )}
                         <div style={{
                           position: 'absolute',
                           top: '50%',
