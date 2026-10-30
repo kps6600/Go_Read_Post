@@ -338,14 +338,14 @@ export default function ModernHomepageView({
     const data = heroConfig?.data || {};
 
     // Mode A: Curated Popular Articles selected by Admin
-    if (Array.isArray(data.popularArticles) && data.popularArticles.length > 0) {
-      const livePopular = data.popularArticles.filter(item => {
+    if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
+      const livePopular = (data.popularArticles || []).filter(item => {
         if (!item) return false;
         if (item.isCustom || !item.articleId) return true;
         const id = String(item._id || item.id || item.articleId || item.slug);
         return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
       });
-      if (livePopular.length > 0) return livePopular.slice(0, 5);
+      return livePopular.slice(0, 5);
     }
 
     // Mode B: Dynamic Trending fallback
@@ -739,14 +739,14 @@ export default function ModernHomepageView({
     // Popular posts resolved for THIS specific hero section
     const displayedPopular = useMemo(() => {
       if (!showPopular) return [];
-      if (Array.isArray(data.popularArticles) && data.popularArticles.length > 0) {
-        const livePopular = data.popularArticles.filter(item => {
+      if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
+        const livePopular = (data.popularArticles || []).filter(item => {
           if (!item) return false;
           if (item.isCustom || !item.articleId) return true;
           const id = String(item.articleId || item._id || item.id || item.slug);
           return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
         });
-        if (livePopular.length > 0) return livePopular.slice(0, popularLimit);
+        return livePopular.slice(0, popularLimit);
       }
 
       const heroId = getStoryId(activeSlide);

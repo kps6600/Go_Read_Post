@@ -314,8 +314,8 @@ export default function LiveHomepageStudio({
   // Popular posts curation
   const popularArticles = useMemo(() => {
     const data = heroSection?.data || {};
-    if (Array.isArray(data.popularArticles) && data.popularArticles.length > 0) {
-      return data.popularArticles.slice(0, 5);
+    if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
+      return (data.popularArticles || []).slice(0, 5);
     }
     const trending = pool.filter(s => s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING');
     if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
@@ -335,7 +335,7 @@ export default function LiveHomepageStudio({
 
   const handleDeletePopular = (idx) => {
     const nextPop = popularArticles.filter((_, i) => i !== idx);
-    handleUpdateHeroData({ popularArticles: nextPop });
+    handleUpdateHeroData({ popularArticles: nextPop, hasCustomPopular: true });
   };
 
   // ─────────────────────────────────────────────────────────

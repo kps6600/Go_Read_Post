@@ -260,16 +260,17 @@ export default function LiveBannerEditor({
       ];
 
   // Initialize or retrieve popular articles (Sidebar 1-5)
-  const rawPopular = Array.isArray(data.popularArticles) && data.popularArticles.length > 0
-    ? data.popularArticles.filter(item => {
+  // If data.hasCustomPopular is true or data.popularArticles is explicitly an array (even empty []), respect it!
+  const rawPopular = Array.isArray(data.popularArticles) || data.hasCustomPopular
+    ? (Array.isArray(data.popularArticles) ? data.popularArticles : []).filter(item => {
         if (!item) return false;
         if (item.isCustom || !item.articleId) return true;
         const id = String(item.articleId || item._id || item.id || item.slug);
         return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
       })
-    : [];
+    : null;
 
-  const popularArticles = (rawPopular.length > 0
+  const popularArticles = (rawPopular !== null
     ? rawPopular
     : pool.slice(0, Number(data.popularLimit) || 5).map(formatForPopularPost)).slice(0, 5);
 
@@ -287,6 +288,7 @@ export default function LiveBannerEditor({
       ...data,
       slides: sl,
       popularArticles: pop,
+      hasCustomPopular: true,
       heroSource: 'custom',
       showPopular: showPopular,
       headline: sl[0]?.title || data.headline,
@@ -437,7 +439,8 @@ export default function LiveBannerEditor({
   const updatePopularState = (newPopular) => {
     setData(prev => ({
       ...prev,
-      popularArticles: newPopular
+      popularArticles: newPopular,
+      hasCustomPopular: true
     }));
   };
 
