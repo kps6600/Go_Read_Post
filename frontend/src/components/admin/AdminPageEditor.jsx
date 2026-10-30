@@ -1002,11 +1002,24 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                     <div className="section-card-actions">
                       <button
                         type="button"
-                        className="btn-section-action"
+                        className={`btn-section-action ${isEnabled ? 'enabled' : 'disabled'}`}
                         onClick={() => handleToggleSectionEnabled(sec.id)}
                         title={isEnabled ? 'Hide section from live page' : 'Show section on live page'}
+                        style={{
+                          background: isEnabled ? '#ecfdf5' : '#f8fafc',
+                          color: isEnabled ? '#059669' : '#64748b',
+                          border: isEnabled ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                          fontWeight: 700,
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
                       >
-                        {isEnabled ? <Eye size={15} /> : <EyeOff size={15} color="var(--text-muted)" />}
+                        {isEnabled ? <Eye size={15} color="#059669" /> : <EyeOff size={15} color="#94a3b8" />}
                         <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
                       </button>
 

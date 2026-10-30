@@ -4099,6 +4099,27 @@ table input[type="checkbox"]:checked::after {
   cursor: pointer;
   transition: all 0.15s ease;
 }
+.btn-section-action.enabled {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-weight: 700 !important;
+}
+.btn-section-action.enabled:hover {
+  background: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+  color: #047857 !important;
+}
+.btn-section-action.disabled {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+.btn-section-action.disabled:hover {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+}
 .btn-section-action:hover {
   border-color: var(--border-medium);
   color: var(--text-primary);
