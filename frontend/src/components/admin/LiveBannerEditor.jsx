@@ -831,7 +831,25 @@ export default function LiveBannerEditor({
                 </div>
 
                 <div className="mhp-popular-list">
-                  {popularArticles.map((item, idx) => (
+                  {popularArticles.length === 0 ? (
+                    <div style={{
+                      padding: '3rem 1.5rem',
+                      textAlign: 'center',
+                      color: '#94a3b8',
+                      fontSize: '0.88rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <Layers size={24} color="#64748b" style={{ opacity: 0.7 }} />
+                      <span style={{ fontWeight: 600, color: '#64748b' }}>No popular posts selected</span>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                        Click "+ Article" or "▶ Video" above to add up to 5 cards.
+                      </span>
+                    </div>
+                  ) : (
+                    popularArticles.map((item, idx) => (
                     <div key={item.id || idx} className="lbe-popular-manage-item">
                       {/* Rank Number */}
                       <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
@@ -885,7 +903,8 @@ export default function LiveBannerEditor({
                         </button>
                       </div>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </div>
               </div>
             )}
