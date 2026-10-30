@@ -862,11 +862,6 @@ export default function LiveBannerEditor({
                       : 'All Articles Library (Select for Popular Posts)'}
                   </span>
                 </h4>
-                <p className="lbe-picker-subtitle">
-                  {pickerTarget?.mode === 'videos' || pickerContentType === 'videos'
-                    ? 'Browse all studio interviews, masterclasses, and video episodes.'
-                    : 'Browse all published editorial articles.'}
-                </p>
               </div>
               <button 
                 type="button" 

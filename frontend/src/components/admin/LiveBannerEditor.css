@@ -870,14 +870,14 @@
 
 .lbe-picker-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
+  padding: 1.1rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .lbe-picker-title {
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
   color: #ffffff;
