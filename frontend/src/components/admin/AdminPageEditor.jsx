@@ -862,6 +862,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                   >
                     {/* Drag / Reorder Buttons */}
                     <div className="section-reorder-controls">
+                      <span className="section-order-num">{idx + 1}</span>
                       <button
                         type="button"
                         className="reorder-btn"
@@ -871,7 +872,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                       >
                         <ArrowUp size={14} />
                       </button>
-                      <span className="section-order-num">{idx + 1}</span>
                       <button
                         type="button"
                         className="reorder-btn"
