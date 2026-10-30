@@ -166,7 +166,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
   );
 
   return (
-    <div className="apv-root">
+    <div className="admin-page-container">
 
       {/* Delete Confirm Modal */}
       {deleteConfirmId && (() => {
@@ -174,188 +174,333 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
         return page ? <DeleteModal page={page} /> : null;
       })()}
 
-      {/* ── Top Bar: KPI Chips & Actions ── */}
+      {/* ── Summary Stats Strip (Responsive Full Width Grid) ── */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1rem',
-        marginBottom: '1rem',
-        marginTop: '0.25rem'
+        marginBottom: '1.25rem'
       }}>
-        <div className="apv-stats-row" style={{ margin: 0 }}>
-          <div className="apv-stat-chip">
-            <div>
-              <span className="apv-stat-val">{pages.length}</span>
-              <span className="apv-stat-lbl">Total Pages</span>
-            </div>
-          </div>
-          <div className="apv-stat-chip">
-            <div>
-              <span className="apv-stat-val">{publishedCount}</span>
-              <span className="apv-stat-lbl">Published</span>
-            </div>
-          </div>
-          <div className="apv-stat-chip">
-            <div>
-              <span className="apv-stat-val">{draftCount}</span>
-              <span className="apv-stat-lbl">Drafts</span>
-            </div>
-          </div>
-          <div className="apv-stat-chip">
-            <div>
-              <span className="apv-stat-val">{totalSections}</span>
-              <span className="apv-stat-lbl">Total Sections</span>
-            </div>
-          </div>
+        {/* Total Pages */}
+        <div 
+          onClick={() => setStatusFilter('all')}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'all' ? '1.5px solid #0f172a' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+          }}
+          title="Filter by all pages"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{pages.length}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Pages</div>
+        </div>
+
+        {/* Published */}
+        <div 
+          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'published' ? '1.5px solid #059669' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+          }}
+          title="Filter by published pages"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{publishedCount}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Published / Live</div>
+        </div>
+
+        {/* Drafts */}
+        <div 
+          onClick={() => setStatusFilter(statusFilter === 'draft' ? 'all' : 'draft')}
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: statusFilter === 'draft' ? '1.5px solid #dc2626' : '1px solid #e2e8f0', 
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+          }}
+          title="Filter by draft pages"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{draftCount}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Drafts</div>
+        </div>
+
+        {/* Total Sections */}
+        <div 
+          style={{ 
+            background: '#ffffff', 
+            padding: '1rem 1.25rem', 
+            borderRadius: '12px', 
+            border: '1px solid #e2e8f0', 
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+          }}
+          title="Total configured sections across all pages"
+        >
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#2563eb', lineHeight: 1 }}>{totalSections}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Sections</div>
         </div>
       </div>
 
-      {/* ── Filters & Search Bar ── */}
-      <div className="apv-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div className="apv-search-wrap" style={{ flex: '1', minWidth: '260px' }}>
-          <Search size={15} className="apv-search-icon" />
+      {/* ── Search, Filters & Controls Bar ── */}
+      <div style={{
+        background: '#ffffff',
+        padding: '0.85rem 1.15rem',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.85rem',
+        marginBottom: '0.75rem',
+        flexWrap: 'wrap'
+      }}>
+        {/* Search */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#f8fafc',
+          padding: '0.55rem 0.95rem',
+          borderRadius: '9px',
+          border: '1px solid #e2e8f0',
+          flex: 1,
+          minWidth: '240px'
+        }}>
+          <Search size={16} style={{ color: '#94a3b8' }} />
           <input
             type="text"
-            className="apv-search-input"
             placeholder="Search by title, description, or slug…"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              outline: 'none',
+              fontSize: '0.88rem',
+              color: '#0f172a',
+              width: '100%',
+              fontWeight: 500
+            }}
           />
           {searchQuery && (
-            <button className="apv-search-clear" onClick={() => setSearchQuery('')}>
-              <X size={14} />
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+            >
+              <X size={15} />
             </button>
           )}
         </div>
 
-        <div className="apv-filter-wrap" ref={filterRef}>
+        {/* Filter Dropdown */}
+        <div style={{ position: 'relative' }} ref={filterRef}>
           <button
             type="button"
-            className={`apv-filter-btn ${statusFilter !== 'all' ? 'active' : ''}`}
             onClick={() => setFilterDropdownOpen(prev => !prev)}
-            aria-expanded={filterDropdownOpen}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1rem',
+              background: statusFilter !== 'all' ? '#fff1f2' : '#ffffff',
+              border: statusFilter !== 'all' ? '1px solid #fecaca' : '1px solid #e2e8f0',
+              borderRadius: '9px',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              color: statusFilter !== 'all' ? '#dc2626' : '#334155',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
           >
             <Filter size={15} />
             <span>
               {statusFilter === 'all'
-                ? 'Filter'
+                ? 'All Status'
                 : statusFilter === 'published'
-                ? 'Filter: Live'
-                : 'Filter: Draft'}
+                ? 'Live Only'
+                : 'Draft Only'}
             </span>
-            <span className="apv-filter-count-badge">
-              {statusFilter === 'all' ? pages.length : statusFilter === 'published' ? publishedCount : draftCount}
+            <span style={{
+              background: statusFilter !== 'all' ? '#dc2626' : '#f1f5f9',
+              color: statusFilter !== 'all' ? '#ffffff' : '#64748b',
+              padding: '1px 6px',
+              borderRadius: '10px',
+              fontSize: '0.74rem',
+              fontWeight: 700
+            }}>
+              {filteredPages.length}
             </span>
-            <ChevronDown
-              size={13}
-              style={{
-                transform: filterDropdownOpen ? 'rotate(180deg)' : 'none',
-                transition: 'transform 0.18s ease'
-              }}
-            />
+            <ChevronDown size={13} style={{ transform: filterDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} />
           </button>
 
           {filterDropdownOpen && (
-            <div className="apv-filter-popover">
-              <div className="apv-filter-popover-header">Filter by Status</div>
-
+            <div style={{
+              position: 'absolute',
+              top: 'calc(100% + 6px)',
+              right: 0,
+              zIndex: 50,
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+              padding: '6px',
+              minWidth: '200px'
+            }}>
+              <div style={{ padding: '6px 10px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.04em' }}>
+                Filter Status
+              </div>
               {[
-                { key: 'all', label: 'All Status', count: pages.length },
-                { key: 'published', label: 'Live / Published', count: publishedCount, dot: '#10b981' },
-                { key: 'draft', label: 'Draft', count: draftCount, dot: '#f59e0b' },
+                { key: 'all', label: 'All Pages', count: pages.length },
+                { key: 'published', label: 'Published / Live', count: publishedCount, dot: '#10b981' },
+                { key: 'draft', label: 'Draft', count: draftCount, dot: '#f59e0b' }
               ].map(opt => {
                 const isSelected = statusFilter === opt.key;
                 return (
                   <button
                     key={opt.key}
                     type="button"
-                    className={`apv-filter-option ${isSelected ? 'selected' : ''}`}
-                    onClick={() => {
-                      setStatusFilter(opt.key);
-                      setFilterDropdownOpen(false);
+                    onClick={() => { setStatusFilter(opt.key); setFilterDropdownOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      padding: '8px 10px',
+                      background: isSelected ? '#f8fafc' : 'transparent',
+                      border: 'none',
+                      borderRadius: '7px',
+                      fontSize: '0.84rem',
+                      fontWeight: isSelected ? 700 : 500,
+                      color: isSelected ? '#0f172a' : '#475569',
+                      cursor: 'pointer',
+                      textAlign: 'left'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {opt.dot ? (
-                        <span
-                          style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: opt.dot,
-                            flexShrink: 0
-                          }}
-                        />
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: opt.dot }} />
                       ) : (
                         <span style={{ width: '8px' }} />
                       )}
                       <span>{opt.label}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <span className="apv-filter-option-count">{opt.count}</span>
-                      {isSelected && <Check size={14} className="apv-filter-check" />}
-                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{opt.count}</span>
                   </button>
                 );
               })}
-
-              {statusFilter !== 'all' && (
-                <>
-                  <div className="apv-filter-popover-divider" />
-                  <button
-                    type="button"
-                    className="apv-filter-reset-btn"
-                    onClick={() => {
-                      setStatusFilter('all');
-                      setFilterDropdownOpen(false);
-                    }}
-                  >
-                    Reset to All Status
-                  </button>
-                </>
-              )}
             </div>
           )}
         </div>
+
+        {/* + Create Page Button */}
+        <button
+          type="button"
+          onClick={() => onNavigate('/admin/pages/create')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '0.55rem 1.25rem',
+            backgroundColor: 'var(--brand-primary, #dc2626)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9px',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+            transition: 'transform 0.15s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Plus size={16} />
+          <span>Create Page</span>
+        </button>
       </div>
 
-      {/* ── Content Area ── */}
-      <div className="apv-content-card">
+      {/* ── Sub-Header Bar: Info & Count ── */}
+      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#64748b' }}>
+            System Core & Custom Landing Pages
+          </span>
+        </div>
+        <div className="abv-cards-count-badge">
+          <span>
+            {statusFilter === 'published' && 'Published: '}
+            {statusFilter === 'draft' && 'Draft: '}
+            {statusFilter === 'all' && 'All Pages: '}
+            {filteredPages.length} {filteredPages.length === 1 ? 'page' : 'pages'}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Table Card ── */}
+      <div style={{
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '14px',
+        overflow: 'hidden',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+      }}>
         {loading ? (
-          <div className="apv-loading">
-            <div className="apv-loading-spinner" />
-            <p>Loading pages…</p>
+          <div style={{ padding: '3.5rem', textAlign: 'center', color: '#64748b' }}>
+            <div className="apv-loading-spinner" style={{ margin: '0 auto 0.75rem' }} />
+            <p style={{ fontSize: '0.92rem', fontWeight: 600 }}>Loading pages…</p>
           </div>
         ) : filteredPages.length === 0 ? (
-          <div className="apv-empty">
-            <div className="apv-empty-icon">
+          <div style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: '#94a3b8' }}>
               <Sparkles size={28} />
             </div>
-            <h4>No pages found</h4>
-            <p>
+            <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem' }}>No pages found</h4>
+            <p style={{ color: '#64748b', fontSize: '0.88rem', maxWidth: '400px', margin: '0 auto 1.25rem' }}>
               {searchQuery
                 ? `No results for "${searchQuery}". Try a different search.`
                 : 'No pages match the active filters.'}
             </p>
             {!searchQuery && (
-              <button className="apv-btn-primary" onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}>
-                <span>Reset Filters</span>
+              <button 
+                type="button"
+                onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
+                style={{ padding: '0.55rem 1.15rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', fontWeight: 600, fontSize: '0.84rem', cursor: 'pointer' }}
+              >
+                Reset Filters
               </button>
             )}
           </div>
         ) : (
           /* TABLE VIEW */
-          <div className="apv-table-wrap">
-            <table className="apv-table">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '820px' }}>
               <thead>
-                <tr>
-                  <th className="apv-th" style={{ width: '38%' }}>Page</th>
-                  <th className="apv-th" style={{ width: '16%' }}>Slug</th>
-                  <th className="apv-th" style={{ width: '12%' }}>Sections</th>
-                  <th className="apv-th" style={{ width: '14%' }}>Status</th>
-                  <th className="apv-th" style={{ width: '20%', textAlign: 'right' }}>Actions</th>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '38%' }}>
+                    Page Title & Group
+                  </th>
+                  <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '18%' }}>
+                    Route / Slug
+                  </th>
+                  <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center', width: '12%' }}>
+                    Sections
+                  </th>
+                  <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center', width: '14%' }}>
+                    Status
+                  </th>
+                  <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'right', width: '18%' }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -375,69 +520,131 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                   else previewUrl = '/';
 
                   return (
-                    <tr key={page.id || page._id || targetSlug} className="apv-tr">
-                      <td className="apv-td">
-                        <div className="apv-page-cell">
-                          <div className="apv-page-info">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                              <span className="apv-page-title">{(page.title || '').replace(/\s*-\s*Live Portal/i, '')}</span>
-                              <span 
-                                style={{
-                                  fontSize: '0.7rem',
-                                  fontWeight: 750,
-                                  padding: '0.15rem 0.5rem',
-                                  borderRadius: '6px',
-                                  color: grp.color,
-                                  background: grp.bg,
-                                  letterSpacing: '0.02em',
-                                  textTransform: 'uppercase'
-                                }}
-                              >
-                                {grp.label}
-                              </span>
-                            </div>
-                            {page.description && (
-                              <span className="apv-page-desc">{page.description}</span>
-                            )}
+                    <tr 
+                      key={page.id || page._id || targetSlug} 
+                      style={{ 
+                        borderBottom: '1px solid #f1f5f9',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <td style={{ padding: '1rem 1.25rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
+                              {(page.title || '').replace(/\s*-\s*Live Portal/i, '')}
+                            </span>
+                            <span 
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 750,
+                                padding: '0.18rem 0.55rem',
+                                borderRadius: '6px',
+                                color: grp.color,
+                                background: grp.bg,
+                                letterSpacing: '0.03em',
+                                textTransform: 'uppercase'
+                              }}
+                            >
+                              {grp.label}
+                            </span>
                           </div>
+                          {page.description && (
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '3px', maxWidth: '420px', lineHeight: 1.4 }}>
+                              {page.description}
+                            </div>
+                          )}
                         </div>
                       </td>
 
-                      <td className="apv-td">
-                        <code className="apv-slug">{previewUrl}</code>
+                      <td style={{ padding: '1rem' }}>
+                        <code style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.82rem',
+                          background: '#f1f5f9',
+                          color: '#475569',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontWeight: 600
+                        }}>
+                          {previewUrl}
+                        </code>
                       </td>
 
-                      <td className="apv-td">
-                        <span className="apv-sections-badge">
-                          <Layers size={12} />
+                      <td style={{ padding: '1rem', textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          background: '#f1f5f9',
+                          color: '#334155',
+                          padding: '4px 9px',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700
+                        }}>
+                          <Layers size={13} style={{ color: '#64748b' }} />
                           {sections}
                         </span>
                       </td>
 
-                      <td className="apv-td">
+                      <td style={{ padding: '1rem', textAlign: 'center' }}>
                         <button
-                          className={`apv-status-btn ${isLive ? 'live' : 'draft'}`}
+                          type="button"
                           onClick={() => handleTogglePublish(page)}
                           disabled={isActing}
                           title={isLive ? 'Click to unpublish' : 'Click to publish'}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 10px',
+                            borderRadius: '20px',
+                            border: isLive ? '1px solid #a7f3d0' : '1px solid #fed7aa',
+                            background: isLive ? '#ecfdf5' : '#fffbeb',
+                            color: isLive ? '#065f46' : '#9a3412',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
                         >
-                          <span className="apv-status-dot" />
+                          <span style={{
+                            width: '7px',
+                            height: '7px',
+                            borderRadius: '50%',
+                            background: isLive ? '#10b981' : '#f59e0b'
+                          }} />
                           {isActing ? '…' : isLive ? 'Live' : 'Draft'}
-                          <ChevronDown size={11} />
                         </button>
                       </td>
 
-                      <td className="apv-td" style={{ textAlign: 'right' }}>
-                        <div className="apv-actions">
+                      <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                           <button
-                            className="apv-action-btn preview"
+                            type="button"
                             onClick={() => window.open(previewUrl, '_blank')}
                             title="Preview public page"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: '#ffffff',
+                              color: '#64748b',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
                           >
-                            <Eye size={14} />
+                            <Eye size={15} />
                           </button>
+
                           <button
-                            className="apv-action-btn edit"
+                            type="button"
                             onClick={() => {
                               if (pageType === 'home') {
                                 onNavigate('/admin/homepage');
@@ -454,8 +661,23 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                               }
                             }}
                             title="Edit page & sections"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '5px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: '#ffffff',
+                              color: 'var(--brand-primary, #dc2626)',
+                              fontSize: '0.82rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                              transition: 'all 0.15s ease'
+                            }}
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={13} />
                             <span>Edit</span>
                           </button>
                         </div>
@@ -470,8 +692,19 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
 
         {/* Footer row count */}
         {!loading && filteredPages.length > 0 && (
-          <div className="apv-footer-row">
-            <span>Showing <strong>{filteredPages.length}</strong> of <strong>{pages.length}</strong> pages</span>
+          <div style={{
+            padding: '0.85rem 1.25rem',
+            borderTop: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            background: '#f8fafc'
+          }}>
+            <div style={{ fontSize: '0.84rem', color: '#64748b' }}>
+              Showing <strong>{filteredPages.length}</strong> of <strong>{pages.length}</strong> pages
+            </div>
           </div>
         )}
       </div>
