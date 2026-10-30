@@ -7,27 +7,35 @@ import {
   Edit2, Edit3, Image as ImageIcon, Type
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
+import { VideoService } from '../../services/videoService';
 import { ALL_STORIES } from '../../data/storiesData';
+import { VIDEO_EPISODES } from '../../data/videoData';
 import './LiveBannerEditor.css';
 import './LiveSectionEditor.css';
 import '../ModernHomepage.css';
 
-// Formatter to standardize an article object for Hero Slider
-const formatForHeroSlide = (article) => {
-  const id = article._id || article.id || `slide-${Date.now()}`;
-  const title = article.title || 'Featured Story';
-  const excerpt = article.summary || article.excerpt || article.description || 
-    (typeof article.content === 'string' ? article.content.slice(0, 160) : '') || 
+// Formatter to standardize an article or video object for Hero Slider
+const formatForHeroSlide = (item) => {
+  const id = item._id || item.id || `slide-${Date.now()}`;
+  const title = item.title || 'Featured Story';
+  const isVideo = item.itemType === 'video' || item.type === 'video' || !!item.duration || !!item.youtubeEmbedUrl;
+  const excerpt = item.summary || item.excerpt || item.description || 
+    (typeof item.content === 'string' ? item.content.slice(0, 160) : '') || 
     'Comprehensive reporting on innovation and founder journeys.';
-  const category = article.categoryLabel || article.category || 'Startups';
-  const image = article.image || article.coverImage || article.bannerImage || article.fallbackImage || 
+  const category = item.categoryLabel || item.category || (isVideo ? 'Video' : 'Startups');
+  const image = item.image || item.coverImage || item.bannerImage || item.fallbackImage || item.thumbnail ||
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80';
-  const authorName = typeof article.author === 'object' ? (article.author?.name || 'Editorial Bureau') : (article.author || 'Editorial Bureau');
-  const authorAvatar = article.author?.avatar || article.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-  const date = article.publishedAt || article.date || article.formattedDate || 'Today';
-  const readTime = article.readTime || (article.readingTime ? `${article.readingTime} min read` : '4 min read');
-  const slug = article.slug || id;
-  const link = `/stories/${slug}`;
+  const authorName = typeof item.author === 'object' 
+    ? (item.author?.name || 'Editorial Bureau') 
+    : (item.author || item.host || item.guest || 'Editorial Bureau');
+  const authorAvatar = item.author?.avatar || item.authorAvatar || item.guestAvatar || 
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+  const date = item.publishedAt || item.date || item.formattedDate || 'Today';
+  const readTime = isVideo 
+    ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video') 
+    : (item.readTime || (item.readingTime ? `${item.readingTime} min read` : '4 min read'));
+  const slug = item.slug || id;
+  const link = isVideo ? `/videos/${slug}` : `/stories/${slug}`;
 
   return {
     id,
@@ -40,28 +48,32 @@ const formatForHeroSlide = (article) => {
     authorAvatar,
     date,
     readTime,
-    primaryBtnText: 'Read More',
+    primaryBtnText: isVideo ? 'Watch Video' : 'Read More',
     link,
-    slug
+    slug,
+    itemType: isVideo ? 'video' : 'article'
   };
 };
 
-// Formatter to standardize an article object for Popular Posts Sidebar
-const formatForPopularPost = (article) => {
-  const id = article._id || article.id || `popular-${Date.now()}`;
-  const title = article.title || 'Popular Story';
-  const image = article.image || article.coverImage || article.fallbackImage || 
+// Formatter to standardize an article or video object for Popular Posts Sidebar
+const formatForPopularPost = (item) => {
+  const id = item._id || item.id || `popular-${Date.now()}`;
+  const title = item.title || 'Popular Story';
+  const isVideo = item.itemType === 'video' || item.type === 'video' || !!item.duration || !!item.youtubeEmbedUrl;
+  const image = item.image || item.coverImage || item.fallbackImage || item.thumbnail || 
     'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
-  const readTime = article.readTime || (article.readingTime ? `${article.readingTime} min read` : '3 min read');
-  const category = article.categoryLabel || article.category || 'Trending';
-  const slug = article.slug || id;
-  const link = `/stories/${slug}`;
-  const author = article.author;
-  const date = article.publishedAt || article.date || 'Today';
+  const readTime = isVideo
+    ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video')
+    : (item.readTime || (item.readingTime ? `${item.readingTime} min read` : '3 min read'));
+  const category = item.categoryLabel || item.category || (isVideo ? 'Video' : 'Trending');
+  const slug = item.slug || id;
+  const link = isVideo ? `/videos/${slug}` : `/stories/${slug}`;
+  const author = typeof item.author === 'object' ? (item.author?.name || 'Author') : (item.author || item.host || item.guest || 'Editorial');
+  const date = item.publishedAt || item.date || 'Today';
 
   return {
     id,
-    _id: article._id || id,
+    _id: item._id || id,
     title,
     image,
     coverImage: image,
@@ -70,7 +82,8 @@ const formatForPopularPost = (article) => {
     slug,
     link,
     author,
-    date
+    date,
+    itemType: isVideo ? 'video' : 'article'
   };
 };
 
@@ -97,6 +110,8 @@ export default function LiveBannerEditor({
   const [pickerTarget, setPickerTarget] = useState(null); // { type: 'hero-add' | 'hero-replace' | 'popular-add' | 'popular-replace', index?: number }
   const [pickerSearch, setPickerSearch] = useState('');
   const [pickerCategory, setPickerCategory] = useState('All');
+  const [availableVideos, setAvailableVideos] = useState(VIDEO_EPISODES);
+  const [pickerContentType, setPickerContentType] = useState('all'); // 'all' | 'articles' | 'videos'
 
   // Slide Content Edit Modal State
   const [isSlideEditOpen, setIsSlideEditOpen] = useState(false);
@@ -145,34 +160,51 @@ export default function LiveBannerEditor({
     }
   }, [section]);
 
-  // Pool of available stories
+  // Pool of available stories & videos
   const pool = useMemo(() => {
-    return availableArticles.length > 0 ? availableArticles : ALL_STORIES;
-  }, [availableArticles]);
+    return availableArticles.length > 0 ? availableArticles : (stories.length ? stories : ALL_STORIES);
+  }, [availableArticles, stories]);
 
-  // Filtered articles inside the Picker Modal
+  const videoPool = useMemo(() => {
+    return availableVideos.length > 0 ? availableVideos : VIDEO_EPISODES;
+  }, [availableVideos]);
+
+  const combinedPool = useMemo(() => {
+    const arts = pool.map(a => ({ ...a, itemType: 'article' }));
+    const vids = videoPool.map(v => ({ 
+      ...v, 
+      itemType: 'video', 
+      categoryLabel: v.categoryLabel || v.series || 'Video',
+      category: v.categoryLabel || v.series || 'Video'
+    }));
+    if (pickerContentType === 'articles') return arts;
+    if (pickerContentType === 'videos') return vids;
+    return [...arts, ...vids];
+  }, [pool, videoPool, pickerContentType]);
+
+  // Filtered articles & videos inside the Picker Modal
   const filteredPickerArticles = useMemo(() => {
-    return pool.filter(a => {
+    return combinedPool.filter(a => {
       const title = (a.title || '').toLowerCase();
       const cat = (a.categoryLabel || a.category || '').toLowerCase();
-      const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || '')).toLowerCase();
+      const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || a.host || a.guest || '')).toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
 
       const matchesSearch = !q || title.includes(q) || cat.includes(q) || author.includes(q);
       const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
       return matchesSearch && matchesCat;
     });
-  }, [pool, pickerSearch, pickerCategory]);
+  }, [combinedPool, pickerSearch, pickerCategory]);
 
   // Unique categories for picker filtering
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    pool.forEach(a => {
+    combinedPool.forEach(a => {
       const c = a.categoryLabel || a.category;
       if (c && typeof c === 'string') cats.add(c.trim());
     });
     return Array.from(cats).slice(0, 10);
-  }, [pool]);
+  }, [combinedPool]);
 
   if (!isOpen || !section) return null;
 
@@ -451,6 +483,7 @@ export default function LiveBannerEditor({
       persistToDatabase(nextSlides, popularArticles);
     } else if (pickerTarget.type === 'popular-add') {
       if (popularArticles.length >= 5) {
+        alert('Maximum of 5 cards allowed. Please remove a card before adding another.');
         setIsPickerOpen(false);
         return;
       }
@@ -701,24 +734,40 @@ export default function LiveBannerEditor({
             {/* ── Right Popular Posts Sidebar (With Position Up/Down Reorder) ── */}
             {showPopular && (
               <div className="mhp-popular-card">
-                <div className="mhp-section-header" style={{ marginBottom: '1rem' }}>
+                <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{data.popularTitle || 'Popular Posts'}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '6px' }}>
-                      ({popularArticles.length}/5 Slots)
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      background: popularArticles.length >= 5 ? '#fef2f2' : '#f0fdf4',
+                      color: popularArticles.length >= 5 ? '#dc2626' : '#16a34a',
+                      border: popularArticles.length >= 5 ? '1px solid #fecaca' : '1px solid #bbf7d0',
+                      marginLeft: '4px'
+                    }}>
+                      {popularArticles.length}/5 Slots
                     </span>
                   </div>
-                  {popularArticles.length < 5 && (
-                    <button
-                      type="button"
-                      className="lbe-btn-add-mini"
-                      onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                      title="Add an article to popular posts (Max 5)"
-                    >
-                      <Plus size={13} />
-                      <span>Add Article</span>
-                    </button>
-                  )}
+
+                  {/* Header Add Button (Always visible; Disabled if 5 cards reached) */}
+                  <button
+                    type="button"
+                    className={`lbe-btn-add-mini ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                    disabled={popularArticles.length >= 5}
+                    onClick={() => {
+                      if (popularArticles.length >= 5) {
+                        alert('Maximum 5 cards limit reached. Please remove an existing card to add a new article or video.');
+                        return;
+                      }
+                      handleOpenPicker({ type: 'popular-add' });
+                    }}
+                    title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Add an article or video to popular posts (Max 5)'}
+                  >
+                    <Plus size={13} />
+                    <span>{popularArticles.length >= 5 ? 'Max 5 Cards' : 'Add Article / Video'}</span>
+                  </button>
                 </div>
 
                 <div className="mhp-popular-list">
@@ -779,7 +828,23 @@ export default function LiveBannerEditor({
                   ))}
                 </div>
 
-
+                {/* Bottom Add Button (when slots available) or Max Notice */}
+                {popularArticles.length < 5 ? (
+                  <button
+                    type="button"
+                    className="lbe-btn-add-popular-full"
+                    onClick={() => handleOpenPicker({ type: 'popular-add' })}
+                    title="Add an article or video to popular posts"
+                  >
+                    <Plus size={15} />
+                    <span>+ Add Article or Video ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left)</span>
+                  </button>
+                ) : (
+                  <div className="lbe-popular-max-banner">
+                    <span className="lbe-popular-max-pill">5 / 5 Maximum Cards Reached</span>
+                    <span>To add another article or video, remove any existing card using the red trash icon.</span>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -817,13 +882,38 @@ export default function LiveBannerEditor({
               </button>
             </div>
 
-            {/* Search and Category Filters */}
+            {/* Search, Tabs, and Category Filters */}
             <div className="lbe-picker-toolbar">
+              {/* Type Switcher Tabs: All / Articles / Videos */}
+              <div className="lbe-picker-type-tabs">
+                <button
+                  type="button"
+                  className={`lbe-picker-type-tab ${pickerContentType === 'all' ? 'active' : ''}`}
+                  onClick={() => setPickerContentType('all')}
+                >
+                  All Content ({pool.length + videoPool.length})
+                </button>
+                <button
+                  type="button"
+                  className={`lbe-picker-type-tab ${pickerContentType === 'articles' ? 'active' : ''}`}
+                  onClick={() => setPickerContentType('articles')}
+                >
+                  📄 Articles ({pool.length})
+                </button>
+                <button
+                  type="button"
+                  className={`lbe-picker-type-tab ${pickerContentType === 'videos' ? 'active' : ''}`}
+                  onClick={() => setPickerContentType('videos')}
+                >
+                  🎬 Videos ({videoPool.length})
+                </button>
+              </div>
+
               <div className="lbe-picker-search-wrap">
                 <Search size={16} color="#94a3b8" />
                 <input
                   type="text"
-                  placeholder="Search articles by title, author, desk..."
+                  placeholder="Search articles & videos by title, author, desk..."
                   value={pickerSearch}
                   onChange={e => setPickerSearch(e.target.value)}
                   className="lbe-picker-search-input"
@@ -855,21 +945,22 @@ export default function LiveBannerEditor({
               </div>
             </div>
 
-            {/* Articles List / Grid */}
+            {/* Articles & Videos List / Grid */}
             <div className="lbe-picker-body">
               {filteredPickerArticles.length === 0 ? (
                 <div className="lbe-picker-empty">
-                  <p>No articles found matching "{pickerSearch}".</p>
+                  <p>No content found matching "{pickerSearch}".</p>
                 </div>
               ) : (
                 <div className="lbe-picker-grid">
                   {filteredPickerArticles.map(article => {
                     const artId = article._id || article.id;
-                    const artTitle = article.title || 'Untitled Article';
-                    const artImg = article.image || article.coverImage || article.fallbackImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
-                    const artCat = article.categoryLabel || article.category || 'Article';
-                    const artAuthor = typeof article.author === 'object' ? (article.author?.name || 'Author') : (article.author || 'Author');
-                    const artDate = article.publishedAt || article.date || 'Recent';
+                    const artTitle = article.title || 'Untitled';
+                    const artImg = article.image || article.coverImage || article.fallbackImage || article.thumbnail || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
+                    const isVid = article.itemType === 'video' || !!article.duration || !!article.youtubeEmbedUrl;
+                    const artCat = article.categoryLabel || article.category || (isVid ? 'Video' : 'Article');
+                    const artAuthor = typeof article.author === 'object' ? (article.author?.name || 'Author') : (article.author || article.host || article.guest || 'Author');
+                    const artDate = isVid ? (article.duration ? `🎬 ${article.duration}` : '🎬 Video') : (article.publishedAt || article.date || 'Recent');
 
                     return (
                       <div 

@@ -583,45 +583,87 @@
 .lbe-btn-add-mini {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: rgba(59, 130, 246, 0.18);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #60a5fa;
-  border-radius: 6px;
-  font-size: 0.74rem;
+  gap: 5px;
+  padding: 5px 12px;
+  background: #2563eb;
+  border: 1px solid #1d4ed8;
+  color: #ffffff;
+  border-radius: 7px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.lbe-btn-add-mini:hover {
-  background: rgba(59, 130, 246, 0.3);
-  color: #ffffff;
+.lbe-btn-add-mini:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+.lbe-btn-add-mini:disabled,
+.lbe-btn-add-mini.disabled {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.75;
 }
 
 .lbe-btn-add-popular-full {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 14px;
   margin-top: 12px;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px dashed rgba(59, 130, 246, 0.4);
-  border-radius: 8px;
-  color: #60a5fa;
-  font-size: 0.8rem;
+  background: #eff6ff;
+  border: 1.5px dashed #93c5fd;
+  border-radius: 9px;
+  color: #1d4ed8;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
-.lbe-btn-add-popular-full:hover {
-  background: rgba(59, 130, 246, 0.22);
-  border-color: #3b82f6;
-  color: #ffffff;
+.lbe-btn-add-popular-full:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1e40af;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+}
+
+.lbe-popular-max-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 0.76rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.lbe-popular-max-pill {
+  display: inline-block;
+  align-self: center;
+  padding: 3px 10px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 12px;
+  font-size: 0.73rem;
+  font-weight: 700;
 }
 
 /* ── Slides Strip Underneath ── */
@@ -816,6 +858,39 @@
   gap: 0.75rem;
 }
 
+.lbe-picker-type-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lbe-picker-type-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lbe-picker-type-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.lbe-picker-type-tab.active {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
 .lbe-picker-search-wrap {
   display: flex;
   align-items: center;
@@ -934,6 +1009,12 @@
   padding: 2px 7px;
   border-radius: 4px;
   border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.lbe-picker-card-category.video {
+  background: rgba(220, 38, 38, 0.9);
+  color: #ffffff;
+  border-color: rgba(254, 202, 202, 0.4);
 }
 
 .lbe-picker-card-content {

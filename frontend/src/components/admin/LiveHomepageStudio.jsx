@@ -986,9 +986,38 @@ export default function LiveHomepageStudio({
 
                           {/* Right Popular Sidebar */}
                           <div className="mhp-popular-card">
-                            <div className="mhp-section-header" style={{ marginBottom: '1rem' }}>
-                              <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Popular Posts</span>
-                              <span style={{ fontSize: '0.8rem', color: '#ea580c', fontWeight: 700 }}>Top 5</span>
+                            <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Popular Posts</span>
+                                <span style={{ 
+                                  fontSize: '0.75rem', 
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '12px',
+                                  background: popularArticles.length >= 5 ? '#fef2f2' : '#f0fdf4',
+                                  color: popularArticles.length >= 5 ? '#dc2626' : '#16a34a',
+                                  border: popularArticles.length >= 5 ? '1px solid #fecaca' : '1px solid #bbf7d0',
+                                  marginLeft: '4px'
+                                }}>
+                                  {popularArticles.length}/5 Slots
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className={`lbe-btn-add-mini ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                                disabled={popularArticles.length >= 5}
+                                onClick={() => {
+                                  if (popularArticles.length >= 5) {
+                                    alert('Maximum 5 cards limit reached. Please remove an existing card to add a new article or video.');
+                                    return;
+                                  }
+                                  handleOpenPicker({ type: 'popular-add' });
+                                }}
+                                title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Add an article or video to popular posts (Max 5)'}
+                              >
+                                <Plus size={13} />
+                                <span>{popularArticles.length >= 5 ? 'Max 5 Cards' : 'Add Article / Video'}</span>
+                              </button>
                             </div>
 
                             <div className="mhp-popular-list">
@@ -1035,14 +1064,22 @@ export default function LiveHomepageStudio({
                               ))}
                             </div>
 
-                            <button
-                              type="button"
-                              className="lbe-btn-add-popular-full"
-                              onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                            >
-                              <Plus size={14} />
-                              <span>+ Add Article to Popular</span>
-                            </button>
+                            {popularArticles.length < 5 ? (
+                              <button
+                                type="button"
+                                className="lbe-btn-add-popular-full"
+                                onClick={() => handleOpenPicker({ type: 'popular-add' })}
+                                title="Add an article or video to popular posts"
+                              >
+                                <Plus size={14} />
+                                <span>+ Add Article or Video ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left)</span>
+                              </button>
+                            ) : (
+                              <div className="lbe-popular-max-banner">
+                                <span className="lbe-popular-max-pill">5 / 5 Maximum Cards Reached</span>
+                                <span>Maximum 5 cards limit reached. Remove any card using the red trash icon to add another article or video.</span>
+                              </div>
+                            )}
                           </div>
                         </section>
                       )}
