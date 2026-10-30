@@ -906,7 +906,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                 onClick={() => setIsAddSectionOpen(true)}
               >
                 <Plus size={16} />
-                <span>+ Add First Section</span>
+                <span>Add First Section</span>
               </button>
             </div>
           ) : (
@@ -1086,7 +1086,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
               title="Add another section to the home page"
             >
               <Plus size={18} color="var(--brand-primary)" />
-              <span>+ Add Another Section</span>
+              <span>Add Another Section</span>
             </button>
           </div>
         </div>
