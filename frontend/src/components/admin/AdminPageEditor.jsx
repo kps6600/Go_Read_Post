@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
-  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles, ExternalLink
+  Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 import { HomepageService } from '../../services/homepageService';
@@ -758,53 +758,10 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
           <div className="atv-topbar-title-wrap">
             <span className="atv-topbar-title">{displayTitle}</span>
-            <span className="atv-topbar-slug">{displaySlug}</span>
-            <span className={`atv-topbar-pill ${isLive ? 'live' : 'draft'}`} style={{
-              background: isLive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(148, 163, 184, 0.15)',
-              color: isLive ? '#059669' : '#64748b',
-              border: `1px solid ${isLive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(148, 163, 184, 0.3)'}`
-            }}>
-              {isLive ? 'Live' : 'Draft'}
-            </span>
           </div>
         </div>
 
         <div className="atv-topbar-right">
-          {(isHomepage || pageId === 'home') && (
-            <button
-              type="button"
-              className="btn-admin-secondary"
-              onClick={handleOpenWholeHomeStudio}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                fontSize: '0.82rem',
-                borderRadius: '8px',
-                fontWeight: 700,
-                border: '1px solid #fed7aa',
-                background: '#fff7ed',
-                color: '#ea580c'
-              }}
-              title="Open full interactive live studio"
-            >
-              <Sparkles size={14} />
-              <span>Interactive Live Studio</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            className="atv-btn-secondary"
-            onClick={() => window.open(displaySlug, '_blank')}
-            title="View live public page"
-            style={{ borderRadius: '8px', padding: '7px 14px', fontSize: '0.82rem' }}
-          >
-            <ExternalLink size={13} />
-            <span>View Live Page</span>
-          </button>
-
           <button
             type="button"
             className="atv-btn-primary"
