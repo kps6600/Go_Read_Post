@@ -478,10 +478,6 @@ export default function LiveBannerEditor({
   };
 
   const handleOpenPicker = (target) => {
-    if (target?.type === 'popular-add' && popularArticles.length >= 5) {
-      alert('You have reached the maximum limit of 5 cards. Please remove an existing card before adding a new article or video.');
-      return;
-    }
     setPickerTarget(target);
     setPickerSearch('');
     setPickerCategory('All');
@@ -504,13 +500,14 @@ export default function LiveBannerEditor({
       updateSlidesState(nextSlides, targetIdx);
       persistToDatabase(nextSlides, popularArticles);
     } else if (pickerTarget.type === 'popular-add') {
-      if (popularArticles.length >= 5) {
-        alert('Maximum of 5 cards allowed. Please remove a card before adding another.');
-        setIsPickerOpen(false);
-        return;
-      }
       const newPop = formatForPopularPost(article);
-      const nextPop = [...popularArticles, newPop].slice(0, 5);
+      let nextPop;
+      if (popularArticles.length >= 5) {
+        // Replace slot #5 so total never exceeds 5 cards
+        nextPop = [...popularArticles.slice(0, 4), newPop];
+      } else {
+        nextPop = [...popularArticles, newPop].slice(0, 5);
+      }
       updatePopularState(nextPop);
       persistToDatabase(slides, nextPop);
     } else if (pickerTarget.type === 'popular-replace') {
@@ -762,26 +759,24 @@ export default function LiveBannerEditor({
                   </div>
 
                   {/* Header Add Buttons: Split for Article vs Video */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button
                       type="button"
-                      className={`lbe-btn-add-mini article ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                      disabled={popularArticles.length >= 5}
+                      className="lbe-btn-add-mini article"
                       onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
-                      title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Articles section to add article (Max 5)'}
+                      title="Open All Articles popup to add an article to Popular Posts (Max 5)"
                     >
-                      <Plus size={13} />
-                      <span>{popularArticles.length >= 5 ? 'Max 5' : '+ Article'}</span>
+                      <Plus size={12} strokeWidth={2.5} />
+                      <span>Article</span>
                     </button>
                     <button
                       type="button"
-                      className={`lbe-btn-add-mini video ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                      disabled={popularArticles.length >= 5}
+                      className="lbe-btn-add-mini video"
                       onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
-                      title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Videos section to add video (Max 5)'}
+                      title="Open All Videos popup to add a video to Popular Posts (Max 5)"
                     >
-                      <Play size={10} fill="currentColor" />
-                      <span>{popularArticles.length >= 5 ? 'Reached' : '+ Video'}</span>
+                      <Play size={9} fill="currentColor" />
+                      <span>Video</span>
                     </button>
                   </div>
                 </div>
@@ -865,15 +860,20 @@ export default function LiveBannerEditor({
                     {pickerTarget?.type?.startsWith('hero')
                       ? 'Select Slide for Hero Slider'
                       : pickerContentType === 'videos'
-                        ? `Select Video for Popular Slot #${popularArticles.length + 1}`
-                        : `Select Article for Popular Slot #${popularArticles.length + 1}`}
+                        ? 'All Videos Catalog (Select for Popular Posts)'
+                        : 'All Articles Library (Select for Popular Posts)'}
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
                   {pickerContentType === 'videos'
-                    ? 'Choose any studio interview, keynote, or video episode to add to popular posts.'
-                    : 'Choose any published editorial article to add to popular posts.'}
+                    ? 'Browse all studio interviews, masterclasses, and videos. (Maximum 5 popular cards)'
+                    : 'Browse all published editorial articles. (Maximum 5 popular cards)'}
                 </p>
+                {pickerTarget?.type === 'popular-add' && popularArticles.length >= 5 && (
+                  <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#fef08a', background: 'rgba(234, 179, 8, 0.14)', border: '1px solid rgba(234, 179, 8, 0.35)', padding: '5px 12px', borderRadius: '7px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span>ℹ️ Popular Posts currently has 5/5 cards. Selecting an item will update slot #5.</span>
+                  </div>
+                )}
               </div>
               <button 
                 type="button" 

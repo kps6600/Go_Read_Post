@@ -585,44 +585,39 @@
   align-items: center;
   gap: 5px;
   padding: 5px 12px;
-  background: #2563eb;
-  border: 1px solid #1d4ed8;
-  color: #ffffff;
-  border-radius: 7px;
-  font-size: 0.78rem;
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 20px;
+  font-size: 0.77rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
-.lbe-btn-add-mini:hover:not(:disabled) {
-  background: #1d4ed8;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+.lbe-btn-add-mini:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.3);
   transform: translateY(-1px);
 }
 
 .lbe-btn-add-mini.video {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.08);
+}
+
+.lbe-btn-add-mini.video:hover {
   background: #dc2626;
   border-color: #b91c1c;
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
-}
-
-.lbe-btn-add-mini.video:hover:not(:disabled) {
-  background: #b91c1c;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
-}
-
-.lbe-btn-add-mini:disabled,
-.lbe-btn-add-mini.disabled {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #94a3b8;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-  opacity: 0.75;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
+  transform: translateY(-1px);
 }
 
 .lbe-btn-add-popular-full {

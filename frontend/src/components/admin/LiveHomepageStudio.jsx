@@ -990,26 +990,24 @@ export default function LiveHomepageStudio({
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>Popular Posts</span>
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <button
                                   type="button"
-                                  className={`lbe-btn-add-mini article ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                                  disabled={popularArticles.length >= 5}
+                                  className="lbe-btn-add-mini article"
                                   onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
-                                  title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Articles section to add article (Max 5)'}
+                                  title="Open All Articles popup to add an article to Popular Posts (Max 5)"
                                 >
-                                  <Plus size={13} />
-                                  <span>{popularArticles.length >= 5 ? 'Max 5' : '+ Article'}</span>
+                                  <Plus size={12} strokeWidth={2.5} />
+                                  <span>Article</span>
                                 </button>
                                 <button
                                   type="button"
-                                  className={`lbe-btn-add-mini video ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                                  disabled={popularArticles.length >= 5}
+                                  className="lbe-btn-add-mini video"
                                   onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
-                                  title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Videos section to add video (Max 5)'}
+                                  title="Open All Videos popup to add a video to Popular Posts (Max 5)"
                                 >
-                                  <Play size={10} fill="currentColor" />
-                                  <span>{popularArticles.length >= 5 ? 'Reached' : '+ Video'}</span>
+                                  <Play size={9} fill="currentColor" />
+                                  <span>Video</span>
                                 </button>
                               </div>
                             </div>
