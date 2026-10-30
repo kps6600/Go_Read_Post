@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Moon, Sun, Bookmark, Send, X, 
   ChevronDown, ChevronRight, LayoutDashboard,
@@ -240,13 +240,13 @@ export default function Header({
                   label: gc.title || gc.label,
                   url: gc.url || (gc.slug ? `/${gc.slug}` : '#'),
                   target: gc.url || (gc.slug ? `/${gc.slug}` : '#'),
-                  badge: gc.description || gc.badge || gc.badgeText
+                  badge: gc.badge || gc.badgeText || null
                 }))
               : [{ 
                   label: child.title || child.label, 
                   url: child.url || (child.slug ? `/${child.slug}` : '#'), 
                   target: child.url || (child.slug ? `/${child.slug}` : '#'),
-                  badge: child.description || child.badge || child.badgeText 
+                  badge: child.badge || child.badgeText || null 
                 }]
           }));
         } else {
@@ -257,7 +257,7 @@ export default function Header({
                 label: child.title || child.label,
                 url: child.url || (child.slug ? `/${child.slug}` : '#'),
                 target: child.url || (child.slug ? `/${child.slug}` : '#'),
-                badge: child.description || child.badge || child.badgeText
+                badge: child.badge || child.badgeText || null
               }))
             }
           ];
@@ -1499,12 +1499,6 @@ export default function Header({
                                   >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                       <span>{subItem.label}</span>
-                                      {subItem.badge && (
-                                        <span className="nav-sub-badge">
-                                          <span className="nav-badge-dot" />
-                                          <span>{subItem.badge}</span>
-                                        </span>
-                                      )}
                                     </div>
                                     <ChevronRight size={16} className="sub-item-chevron" />
                                   </a>
@@ -1636,12 +1630,6 @@ export default function Header({
                                           }}
                                         >
                                           <span>{subItem.label}</span>
-                                          {subItem.badge && (
-                                            <span className="nav-sub-badge">
-                                              <span className="nav-badge-dot" />
-                                              <span>{subItem.badge}</span>
-                                            </span>
-                                          )}
                                         </a>
                                       </li>
                                     ))}
