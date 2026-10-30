@@ -1,4 +1,4 @@
-﻿/* â”€â”€ Admin Authors Management View â”€â”€ */
+/* â”€â”€ Admin Authors Management View â”€â”€ */
 
 .aav-root {
   padding: 0;
@@ -241,11 +241,53 @@
   background: #b91c1c;
 }
 
-/* â”€â”€ Authors Horizontal List View â”€â”€ */
+/* Authors Horizontal List View */
 .aav-list {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+.aav-list-row-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.aav-list-check-outside {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+.aav-list-row-item .aav-list-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.aav-grid-row-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.aav-grid-check-outside {
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+}
+
+.aav-grid-row-wrapper .aav-card {
+  flex: 1;
+  min-width: 0;
 }
 
 .aav-list-card {

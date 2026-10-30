@@ -1161,29 +1161,31 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 const socials = author.socialLinks || {};
 
                 return (
-                  <div
-                    key={id}
-                    className={`aav-list-card ${isSelected ? 'selected' : ''}`}
-                  >
-                    {/* Sr. No & Select Checkbox */}
-                    <div className="aav-sr-col" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                      <span className="aav-sr-no" title={`Sr. No ${serialNumber}`}>
-                        {serialNumber}
-                      </span>
-                      <div className="aav-list-check">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            const next = new Set(selectedIds);
-                            if (e.target.checked) next.add(id);
-                            else next.delete(id);
-                            setSelectedIds(next);
-                          }}
-                          style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
-                        />
-                      </div>
+                  <div key={id} className="aav-list-row-item">
+                    {/* Checkbox (Left side outside of card) */}
+                    <div className="aav-list-check-outside">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const next = new Set(selectedIds);
+                          if (e.target.checked) next.add(id);
+                          else next.delete(id);
+                          setSelectedIds(next);
+                        }}
+                        style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: '#dc2626' }}
+                      />
                     </div>
+
+                    <div
+                      className={`aav-list-card ${isSelected ? 'selected' : ''}`}
+                    >
+                      {/* Sr. No */}
+                      <div className="aav-sr-col" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                        <span className="aav-sr-no" title={`Sr. No ${serialNumber}`}>
+                          {serialNumber}
+                        </span>
+                      </div>
 
                 {/* Author Avatar, Name & Designation */}
                 <div className="aav-list-author-info">
@@ -1315,7 +1317,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   </div>
                 </div>
               </div>
-            );
+            </div>
+          );
           })}
         </div>
       ) : (
@@ -1329,13 +1332,28 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             const socials = author.socialLinks || {};
 
             return (
-              <div
-                key={id}
-                className={`aav-card ${isSelected ? 'selected' : ''}`}
-              >
-                <div>
-                  {/* Top Row: Avatar, Names, Checkbox with Sr. No */}
-                  <div className="aav-card-top">
+              <div key={id} className="aav-grid-row-wrapper">
+                {/* Checkbox (Left side outside of card) */}
+                <div className="aav-grid-check-outside">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      const next = new Set(selectedIds);
+                      if (e.target.checked) next.add(id);
+                      else next.delete(id);
+                      setSelectedIds(next);
+                    }}
+                    style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: '#dc2626' }}
+                  />
+                </div>
+
+                <div
+                  className={`aav-card ${isSelected ? 'selected' : ''}`}
+                >
+                  <div>
+                    {/* Top Row: Avatar, Names, Sr. No */}
+                    <div className="aav-card-top">
                     <div className="aav-card-author-info">
                       <img
                         src={avatarUrl}
@@ -1370,17 +1388,6 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                       <span className="aav-grid-sr-badge" title={`Sr. No ${serialNumber}`}>
                         {serialNumber}
                       </span>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) => {
-                          const next = new Set(selectedIds);
-                          if (e.target.checked) next.add(id);
-                          else next.delete(id);
-                          setSelectedIds(next);
-                        }}
-                        style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
-                      />
                     </div>
                   </div>
 
@@ -1492,7 +1499,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   </div>
                 </div>
               </div>
-            );
+            </div>
+          );
           })}
         </div>
       )}
