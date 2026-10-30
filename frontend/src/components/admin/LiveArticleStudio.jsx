@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, RemoveFormatting,
   Image as ImageIcon, UploadCloud, FolderOpen, Trash2, RefreshCw,
-  Search, Check, X, ChevronDown, Plus, Tag, Bookmark, Calendar, Clock, Eye, Globe, Share2, Sparkles, Link2
+  Search, Check, X, ChevronDown, Plus, Tag, Bookmark, Calendar, Clock, Eye, Globe, Share2, Sparkles, Link2, Star, TrendingUp, Award, Zap, Layers
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -1759,6 +1759,25 @@ export default function LiveArticleStudio({
   };
 
   // ── Block Operations ──
+    // Toggle story placement in sections
+  const togglePlacement = (placementKey, booleanKey) => {
+    setFormData(prev => {
+      const currentPlacements = new Set(Array.isArray(prev.placements) ? prev.placements : []);
+      const newBool = !prev[booleanKey];
+      if (newBool) {
+        currentPlacements.add(placementKey);
+      } else {
+        currentPlacements.delete(placementKey);
+      }
+      return {
+        ...prev,
+        [booleanKey]: newBool,
+        ...(booleanKey === 'isHero' ? { isFeatured: newBool } : {}),
+        placements: Array.from(currentPlacements)
+      };
+    });
+  };
+
   const handleAddBlock = (type) => {
     const id = 'blk_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
     let newBlock = null;
@@ -2665,6 +2684,254 @@ export default function LiveArticleStudio({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* CARD: STORY PLACEMENTS & DISTRIBUTION */}
+              <div className="las-card las-placements-card">
+                <div className="las-card-title-row" style={{ alignItems: 'flex-start' }}>
+                  <div>
+                    <h3 className="las-card-title">
+                      <span>Story Placement & Distribution</span>
+                    </h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                      Choose exactly where this story appears across GoReadPost (Homepage Hero, Trending, Latest, etc.)
+                    </p>
+                  </div>
+                  <div className="las-placement-quick-actions">
+                    <button 
+                      type="button" 
+                      className="las-placement-action-pill"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          isHero: true,
+                          isFeatured: true,
+                          isTrending: true,
+                          isLatest: true,
+                          isEditorsPick: true,
+                          isBreaking: false,
+                          isCategoryFeatured: true,
+                          placements: ['homepage_hero', 'trending', 'latest', 'editors_pick', 'category_top']
+                        }));
+                      }}
+                      title="Show everywhere across hero, trending, and feeds"
+                    >
+                      🌟 All Major Sections
+                    </button>
+                    <button 
+                      type="button" 
+                      className="las-placement-action-pill"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          isHero: true,
+                          isFeatured: true,
+                          isLatest: true,
+                          placements: ['homepage_hero', 'latest']
+                        }));
+                      }}
+                    >
+                      🏠 Hero + Latest
+                    </button>
+                    <button 
+                      type="button" 
+                      className="las-placement-action-pill"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          isTrending: true,
+                          isLatest: true,
+                          placements: ['trending', 'latest']
+                        }));
+                      }}
+                    >
+                      🔥 Trending + Latest
+                    </button>
+                    <button 
+                      type="button" 
+                      className="las-placement-action-pill reset"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          isHero: false,
+                          isFeatured: false,
+                          isTrending: false,
+                          isLatest: true,
+                          isEditorsPick: false,
+                          isBreaking: false,
+                          isCategoryFeatured: false,
+                          placements: ['latest']
+                        }));
+                      }}
+                    >
+                      Standard Feed Only
+                    </button>
+                  </div>
+                </div>
+
+                <div className="las-placement-grid">
+                  {/* 1. Homepage Hero */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isHero || formData.placements?.includes('homepage_hero')) ? 'active hero' : ''}`}
+                    onClick={() => togglePlacement('homepage_hero', 'isHero')}
+                    title="Toggle Homepage Hero Slider"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box hero">
+                        <Star size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isHero || formData.placements?.includes('homepage_hero'))}
+                        onChange={() => togglePlacement('homepage_hero', 'isHero')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge hero">HERO SECTION</div>
+                      <h4 className="las-placement-tile-title">Homepage Hero Slider</h4>
+                      <p className="las-placement-tile-desc">
+                        Featured as the primary headline story in the top hero slider on the Homepage.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 2. Trending Page & Section */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isTrending || formData.placements?.includes('trending')) ? 'active trending' : ''}`}
+                    onClick={() => togglePlacement('trending', 'isTrending')}
+                    title="Toggle Trending Page and Homepage Trending rows"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box trending">
+                        <TrendingUp size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isTrending || formData.placements?.includes('trending'))}
+                        onChange={() => togglePlacement('trending', 'isTrending')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge trending">TRENDING</div>
+                      <h4 className="las-placement-tile-title">Trending Page & Stories</h4>
+                      <p className="las-placement-tile-desc">
+                        Highlighted in the Trending page leaderboard and the Homepage trending stories row.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 3. Latest Stories Feed */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isLatest || formData.placements?.includes('latest')) ? 'active latest' : ''}`}
+                    onClick={() => togglePlacement('latest', 'isLatest')}
+                    title="Toggle Latest News and Just In feed"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box latest">
+                        <Clock size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isLatest || formData.placements?.includes('latest'))}
+                        onChange={() => togglePlacement('latest', 'isLatest')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge latest">LATEST FEED</div>
+                      <h4 className="las-placement-tile-title">Latest Articles Page</h4>
+                      <p className="las-placement-tile-desc">
+                        Published to the dedicated Latest News / Just In page and chronological story archives.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 4. Editor's Pick & Top Stories */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isEditorsPick || formData.placements?.includes('editors_pick')) ? 'active editors' : ''}`}
+                    onClick={() => togglePlacement('editors_pick', 'isEditorsPick')}
+                    title="Toggle Editor's Choice spotlight"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box editors">
+                        <Award size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isEditorsPick || formData.placements?.includes('editors_pick'))}
+                        onChange={() => togglePlacement('editors_pick', 'isEditorsPick')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge editors">EDITOR'S CHOICE</div>
+                      <h4 className="las-placement-tile-title">Editor's Pick & Highlights</h4>
+                      <p className="las-placement-tile-desc">
+                        Curated badge on cards and placement in the Editor's Choice section of the homepage.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 5. Breaking News Alert */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isBreaking || formData.placements?.includes('breaking')) ? 'active breaking' : ''}`}
+                    onClick={() => togglePlacement('breaking', 'isBreaking')}
+                    title="Toggle Breaking Ticker Banner"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box breaking">
+                        <Zap size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isBreaking || formData.placements?.includes('breaking'))}
+                        onChange={() => togglePlacement('breaking', 'isBreaking')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge breaking">BREAKING TICKER</div>
+                      <h4 className="las-placement-tile-title">Breaking News Alert</h4>
+                      <p className="las-placement-tile-desc">
+                        Triggers a high-visibility breaking banner ticker and red flash badge across all headers.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 6. Category Top Story */}
+                  <div 
+                    className={`las-placement-tile ${(formData.isCategoryFeatured || formData.placements?.includes('category_top')) ? 'active category' : ''}`}
+                    onClick={() => togglePlacement('category_top', 'isCategoryFeatured')}
+                    title="Toggle Category Top Story"
+                  >
+                    <div className="las-placement-tile-header">
+                      <div className="las-placement-icon-box category">
+                        <Layers size={18} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={Boolean(formData.isCategoryFeatured || formData.placements?.includes('category_top'))}
+                        onChange={() => togglePlacement('category_top', 'isCategoryFeatured')}
+                        className="las-placement-checkbox"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="las-placement-tile-body">
+                      <div className="las-placement-badge category">CATEGORY TOP</div>
+                      <h4 className="las-placement-tile-title">Category Top Story</h4>
+                      <p className="las-placement-tile-desc">
+                        Pinned at the very top of its designated category page ({formData.categoryName || 'Startups'}).
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -316,11 +316,20 @@ export default function ModernHomepageView({
     }
 
     const maxSlides = data.slideLimit || 5;
-    const featured = sourcePool.filter(s => 
+    const heroPool = sourcePool.filter(s => 
+      s.isHero || 
+      (Array.isArray(s.placements) && s.placements.includes('homepage_hero')) ||
       s.isFeatured || s.tag === 'FEATURED' || s.tag === 'BREAKING' || s.isLead || s.tag === 'TOP PICK'
     );
-    if (featured.length >= 3) return featured.slice(0, maxSlides);
-    const combined = [...featured, ...sourcePool.filter(s => !featured.some(f => getStoryId(f) === getStoryId(s)))];
+    heroPool.sort((a, b) => {
+      const aHero = Boolean(a.isHero || (Array.isArray(a.placements) && a.placements.includes('homepage_hero')));
+      const bHero = Boolean(b.isHero || (Array.isArray(b.placements) && b.placements.includes('homepage_hero')));
+      if (aHero && !bHero) return -1;
+      if (!aHero && bHero) return 1;
+      return new Date(b.publishedAt || b.createdAt || 0) - new Date(a.publishedAt || a.createdAt || 0);
+    });
+    if (heroPool.length >= 3) return heroPool.slice(0, maxSlides);
+    const combined = [...heroPool, ...sourcePool.filter(s => !heroPool.some(f => getStoryId(f) === getStoryId(s)))];
     return combined.slice(0, maxSlides);
   }, [pool, heroConfig]);
 
@@ -367,8 +376,15 @@ export default function ModernHomepageView({
     const heroIds = new Set(heroSlides.map(s => getStoryId(s)));
     const trending = pool.filter(s => 
       !heroIds.has(getStoryId(s)) && 
-      (s.isTrending || s.trending || s.tag === 'TRENDING' || s.tag === 'POPULAR' || s.tag === 'VIRAL')
+      (s.isTrending || (Array.isArray(s.placements) && s.placements.includes('trending')) || s.trending || s.tag === 'TRENDING' || s.tag === 'POPULAR' || s.tag === 'VIRAL')
     );
+    trending.sort((a, b) => {
+      const aTrend = Boolean(a.isTrending || (Array.isArray(a.placements) && a.placements.includes('trending')));
+      const bTrend = Boolean(b.isTrending || (Array.isArray(b.placements) && b.placements.includes('trending')));
+      if (aTrend && !bTrend) return -1;
+      if (!aTrend && bTrend) return 1;
+      return (b.views || 0) - (a.views || 0);
+    });
     const backup = [...SPOTLIGHT_STORIES, ...TOP_PICKS, ...pool];
     const combined = [...trending];
     for (const b of backup) {
@@ -385,8 +401,15 @@ export default function ModernHomepageView({
     const heroIds = new Set(heroSlides.map(s => getStoryId(s)));
     const picks = pool.filter(s => 
       !heroIds.has(getStoryId(s)) && 
-      (s.isFeatured || s.tag === 'TOP PICK' || s.tag === 'FEATURED' || s.tag === 'EDITOR' || s.isLead)
+      (s.isEditorsPick || (Array.isArray(s.placements) && s.placements.includes('editors_pick')) || s.isFeatured || s.tag === 'TOP PICK' || s.tag === 'FEATURED' || s.tag === 'EDITOR' || s.isLead)
     );
+    picks.sort((a, b) => {
+      const aPick = Boolean(a.isEditorsPick || (Array.isArray(a.placements) && a.placements.includes('editors_pick')));
+      const bPick = Boolean(b.isEditorsPick || (Array.isArray(b.placements) && b.placements.includes('editors_pick')));
+      if (aPick && !bPick) return -1;
+      if (!aPick && bPick) return 1;
+      return 0;
+    });
     const backup = [...TOP_PICKS, ...CAPTABLE_STORIES, ...pool];
     const combined = [...picks];
     for (const b of backup) {

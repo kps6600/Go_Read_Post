@@ -48,6 +48,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDesk, setSelectedDesk] = useState('all');
   const [selectedAuthor, setSelectedAuthor] = useState('all');
+  const [selectedPlacement, setSelectedPlacement] = useState('all');
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const filterDropdownRef = useRef(null);
 
@@ -65,7 +66,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     };
   }, [isFilterDropdownOpen]);
 
-  const activeFilterCount = (selectedDesk !== 'all' ? 1 : 0) + (selectedCategory !== 'all' ? 1 : 0);
+  const activeFilterCount = (selectedDesk !== 'all' ? 1 : 0) + (selectedCategory !== 'all' ? 1 : 0) + (selectedPlacement !== 'all' ? 1 : 0);
   
   // Taxonomies from DB
   const [categories, setCategories] = useState([]);

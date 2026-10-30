@@ -255,7 +255,15 @@ const normalizeMongoArticle = (art) => {
     categoryTag: art.categoryName || 'Startups',
     categoryName: art.categoryName || 'Startups',
     categoryLabel: art.categoryName || 'Startups',
-    tag: art.isFeatured ? 'FEATURED' : art.isBreaking ? 'BREAKING' : art.isTrending ? 'TRENDING' : 'LATEST',
+    tag: art.isHero ? 'HERO' : art.isEditorsPick ? 'EDITOR' : art.isFeatured ? 'FEATURED' : art.isBreaking ? 'BREAKING' : art.isTrending ? 'TRENDING' : 'LATEST',
+    isHero: Boolean(art.isHero || art.placements?.includes('homepage_hero')),
+    isFeatured: Boolean(art.isFeatured || art.isHero),
+    isTrending: Boolean(art.isTrending || art.placements?.includes('trending')),
+    isLatest: art.isLatest !== undefined ? Boolean(art.isLatest) : true,
+    isEditorsPick: Boolean(art.isEditorsPick || art.placements?.includes('editors_pick')),
+    isBreaking: Boolean(art.isBreaking || art.placements?.includes('breaking')),
+    isCategoryFeatured: Boolean(art.isCategoryFeatured || art.placements?.includes('category_top')),
+    placements: Array.isArray(art.placements) ? art.placements : [],
     image: img || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
     fallbackImage: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
     author: {
@@ -501,6 +509,12 @@ export default function LatestArticlesPage({
   // Filtered stories according to category pill, active tag, and search query
   const filteredStories = useMemo(() => {
     return pool.filter(story => {
+      // Placements filter (if explicitly excluded from latest)
+      if (story.isLatest === false) return false;
+      if (Array.isArray(story.placements) && story.placements.length > 0 && !story.placements.includes('latest')) {
+        return false;
+      }
+
       // Category filter
       if (activeCategory !== 'All') {
         const cat = getStoryCategory(story);

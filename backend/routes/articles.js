@@ -72,7 +72,19 @@ async function syncToStories(article) {
       brand: 'GoReadPost',
       category: (article.categoryName || 'startups').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       categoryTag: article.categoryName || 'Startups',
-      tag: article.isFeatured ? 'FEATURED' : article.isBreaking ? 'BREAKING' : article.isTrending ? 'TRENDING' : 'LATEST',
+      tag: (article.isHero || (Array.isArray(article.placements) && article.placements.includes('homepage_hero'))) ? 'HERO' :
+           (article.isEditorsPick || (Array.isArray(article.placements) && article.placements.includes('editors_pick'))) ? 'EDITOR' :
+           article.isFeatured ? 'FEATURED' :
+           (article.isBreaking || (Array.isArray(article.placements) && article.placements.includes('breaking'))) ? 'BREAKING' :
+           (article.isTrending || (Array.isArray(article.placements) && article.placements.includes('trending'))) ? 'TRENDING' : 'LATEST',
+      isHero: Boolean(article.isHero || (Array.isArray(article.placements) && article.placements.includes('homepage_hero'))),
+      isFeatured: Boolean(article.isFeatured || article.isHero),
+      isTrending: Boolean(article.isTrending || (Array.isArray(article.placements) && article.placements.includes('trending'))),
+      isLatest: article.isLatest !== undefined ? Boolean(article.isLatest) : true,
+      isEditorsPick: Boolean(article.isEditorsPick || (Array.isArray(article.placements) && article.placements.includes('editors_pick'))),
+      isBreaking: Boolean(article.isBreaking || (Array.isArray(article.placements) && article.placements.includes('breaking'))),
+      isCategoryFeatured: Boolean(article.isCategoryFeatured || (Array.isArray(article.placements) && article.placements.includes('category_top'))),
+      placements: Array.isArray(article.placements) ? article.placements : [],
       image: storyImage,
       authorName: article.authorName || 'Editorial Desk',
       authorTitle: article.authorTitle || 'Staff Reporter',
@@ -128,7 +140,11 @@ router.get('/', async (req, res) => {
       topic = '', 
       featured, 
       trending, 
-      breaking 
+      breaking,
+      hero,
+      latest,
+      editorsPick,
+      placement
     } = req.query;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
@@ -153,6 +169,12 @@ router.get('/', async (req, res) => {
     if (featured === 'true' || featured === true) query.isFeatured = true;
     if (trending === 'true' || trending === true) query.isTrending = true;
     if (breaking === 'true' || breaking === true) query.isBreaking = true;
+    if (hero === 'true' || hero === true) query.isHero = true;
+    if (latest === 'true' || latest === true) query.isLatest = true;
+    if (editorsPick === 'true' || editorsPick === true) query.isEditorsPick = true;
+    if (placement) {
+      query.placements = placement;
+    }
 
     if (isDbConnected()) {
       let count = await Article.countDocuments();
@@ -381,6 +403,40 @@ function sanitizeArticlePayload(raw) {
       ogImg = ogImg.url || '';
     }
     payload.seo.ogImage = typeof ogImg === 'string' ? ogImg : (payload.featuredImage?.url || '');
+  }
+
+  // Normalize placements array and sync boolean flags
+  if (Array.isArray(payload.placements)) {
+    payload.placements = payload.placements.map(p => String(p).trim().toLowerCase()).filter(Boolean);
+  } else if (typeof payload.placements === 'string' && payload.placements.trim()) {
+    payload.placements = payload.placements.split(',').map(p => p.trim().toLowerCase()).filter(Boolean);
+  }
+
+  if (payload.placements && Array.isArray(payload.placements)) {
+    if (payload.isHero === undefined && payload.placements.includes('homepage_hero')) {
+      payload.isHero = true;
+    }
+    if (payload.isTrending === undefined && payload.placements.includes('trending')) {
+      payload.isTrending = true;
+    }
+    if (payload.isEditorsPick === undefined && payload.placements.includes('editors_pick')) {
+      payload.isEditorsPick = true;
+    }
+    if (payload.isBreaking === undefined && payload.placements.includes('breaking')) {
+      payload.isBreaking = true;
+    }
+    if (payload.isCategoryFeatured === undefined && payload.placements.includes('category_top')) {
+      payload.isCategoryFeatured = true;
+    }
+    if (payload.isLatest === undefined && payload.placements.includes('latest')) {
+      payload.isLatest = true;
+    }
+  }
+
+  if (payload.isHero) {
+    payload.isFeatured = true;
+    if (!Array.isArray(payload.placements)) payload.placements = [];
+    if (!payload.placements.includes('homepage_hero')) payload.placements.push('homepage_hero');
   }
 
   return payload;

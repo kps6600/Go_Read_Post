@@ -94,9 +94,37 @@ const storySchema = new mongoose.Schema(
       type: Number,
       default: 142
     },
+    isHero: {
+      type: Boolean,
+      default: false
+    },
     isFeatured: {
       type: Boolean,
       default: false
+    },
+    isTrending: {
+      type: Boolean,
+      default: false
+    },
+    isLatest: {
+      type: Boolean,
+      default: true
+    },
+    isEditorsPick: {
+      type: Boolean,
+      default: false
+    },
+    isBreaking: {
+      type: Boolean,
+      default: false
+    },
+    isCategoryFeatured: {
+      type: Boolean,
+      default: false
+    },
+    placements: {
+      type: [String],
+      default: ['latest']
     }
   },
   {

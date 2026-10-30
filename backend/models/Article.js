@@ -33,10 +33,20 @@ const articleSchema = new mongoose.Schema(
     readingTime: { type: String, default: '4 min read' },
     language: { type: String, default: 'English' },
     location: { type: String, default: 'Bengaluru / India' },
+
+    // Placement & Distribution Flags
+    isHero: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
     isBreaking: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
+    isLatest: { type: Boolean, default: true },
     isEditorsPick: { type: Boolean, default: false },
+    isCategoryFeatured: { type: Boolean, default: false },
+    placements: { 
+      type: [String], 
+      default: ['latest'] 
+    },
+
     disabledFromFrontend: { type: Boolean, default: false },
     status: { 
       type: String, 
@@ -61,8 +71,11 @@ const articleSchema = new mongoose.Schema(
 );
 
 articleSchema.index({ status: 1, publishedAt: -1 });
+articleSchema.index({ isHero: 1 });
 articleSchema.index({ isFeatured: 1 });
 articleSchema.index({ isTrending: 1 });
+articleSchema.index({ isLatest: 1 });
+articleSchema.index({ placements: 1 });
 articleSchema.index({ categoryName: 1 });
 
 export default mongoose.models.Article || mongoose.model('Article', articleSchema);

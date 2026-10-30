@@ -2087,6 +2087,28 @@ table input[type="checkbox"]:checked::after {
   border: 1px solid rgba(245, 158, 11, 0.38);
   color: #fef3c7;
 }
+
+.abv-flag-badge.flag-hero {
+  background: rgba(180, 83, 9, 0.88);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  color: #fef3c7;
+}
+.abv-flag-badge.flag-editors {
+  background: rgba(109, 40, 217, 0.88);
+  border: 1px solid rgba(196, 181, 253, 0.55);
+  color: #ede9fe;
+}
+.abv-flag-badge.flag-breaking {
+  background: rgba(185, 28, 28, 0.9);
+  border: 1px solid rgba(252, 165, 165, 0.6);
+  color: #fee2e2;
+}
+.abv-flag-badge.flag-category {
+  background: rgba(4, 120, 87, 0.88);
+  border: 1px solid rgba(110, 231, 183, 0.55);
+  color: #d1fae5;
+}
+
 .abv-flag-badge.flag-trending {
   background: rgba(6, 78, 59, 0.72);
   border: 1px solid rgba(52, 211, 153, 0.38);

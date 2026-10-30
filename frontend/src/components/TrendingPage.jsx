@@ -281,8 +281,12 @@ export default function TrendingPage({
 
     const allList = Array.from(map.values());
 
-    // Sort strictly according to active sortMode (views | likes | trending)
+    // Sort strictly according to active sortMode (views | likes | trending), prioritizing explicit trending placement
     return allList.sort((a, b) => {
+      const aTrend = Boolean(a.isTrending || (Array.isArray(a.placements) && a.placements.includes('trending')));
+      const bTrend = Boolean(b.isTrending || (Array.isArray(b.placements) && b.placements.includes('trending')));
+      if (aTrend && !bTrend) return -1;
+      if (!aTrend && bTrend) return 1;
       if (sortMode === 'views') {
         const diff = getStoryViews(b) - getStoryViews(a);
         if (diff !== 0) return diff;
@@ -362,8 +366,12 @@ export default function TrendingPage({
       });
     }
 
-    // Sort strictly according to active sortMode (most viewed or most liked)
+    // Sort strictly according to active sortMode (most viewed or most liked), prioritizing trending placement
     return result.sort((a, b) => {
+      const aTrend = Boolean(a.isTrending || (Array.isArray(a.placements) && a.placements.includes('trending')));
+      const bTrend = Boolean(b.isTrending || (Array.isArray(b.placements) && b.placements.includes('trending')));
+      if (aTrend && !bTrend) return -1;
+      if (!aTrend && bTrend) return 1;
       if (sortMode === 'views') {
         const diff = getStoryViews(b) - getStoryViews(a);
         if (diff !== 0) return diff;
