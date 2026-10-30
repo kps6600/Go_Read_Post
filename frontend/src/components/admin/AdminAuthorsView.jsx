@@ -1,8 +1,8 @@
-﻿﻿﻿import React, { useState, useEffect, useRef } from 'react';
+﻿﻿﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
-  Calendar, FileText, User, LayoutGrid, List, SlidersHorizontal, Filter, ChevronDown
+  Calendar, FileText, User, LayoutGrid, List, SlidersHorizontal, Filter, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { AuthService } from '../../services/authService';
@@ -58,6 +58,10 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
   const [sortBy, setSortBy] = useState('name');
   const [filterHasArticles, setFilterHasArticles] = useState('all');
   const filterRef = useRef(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Default 10 authors per page
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -377,6 +381,26 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
       if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       return 0;
     });
+
+  // Reset page when search, sort, or article filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy, filterHasArticles, pageSize]);
+
+  // Pagination calculation
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredAuthors.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedAuthors = useMemo(() => {
+    if (pageSize === 'all') return filteredAuthors;
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredAuthors.slice(startIndex, startIndex + pageSize);
+  }, [filteredAuthors, currentPage, pageSize]);
 
   // â”€â”€ Modal Form Renderer â”€â”€
   const renderEditModal = () => {
@@ -1047,25 +1071,33 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
       {/* Sub-Header Bar: Select All & Bulk Actions (Above Cards) */}
       {filteredAuthors.length > 0 && (
         <div className="abv-cards-header-bar" style={{ marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <label className="abv-select-all-label" title="Select all authors">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <label className="abv-select-all-label" title="Select authors on this page">
               <input
                 type="checkbox"
-                checked={selectedIds.size > 0 && selectedIds.size === filteredAuthors.length}
+                checked={paginatedAuthors.length > 0 && paginatedAuthors.every(a => selectedIds.has(a._id || a.slug))}
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setSelectedIds(new Set(filteredAuthors.map(a => a._id || a.slug)));
+                    setSelectedIds(prev => {
+                      const next = new Set(prev);
+                      paginatedAuthors.forEach(a => next.add(a._id || a.slug));
+                      return next;
+                    });
                   } else {
-                    setSelectedIds(new Set());
+                    setSelectedIds(prev => {
+                      const next = new Set(prev);
+                      paginatedAuthors.forEach(a => next.delete(a._id || a.slug));
+                      return next;
+                    });
                   }
                 }}
                 style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
               />
-              <span>Select All</span>
+              <span>Select Page</span>
             </label>
             {selectedIds.size > 0 && (
               <span className="abv-selected-pill">
-                {selectedIds.size} of {filteredAuthors.length} selected
+                {selectedIds.size} selected
               </span>
             )}
           </div>
@@ -1086,7 +1118,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             )}
             <div className="abv-cards-count-badge">
               <span>
-                {filteredAuthors.length} {filteredAuthors.length === 1 ? 'author' : 'authors'}
+                {filteredAuthors.length} {filteredAuthors.length === 1 ? 'author' : 'authors'}{totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
               </span>
             </div>
           </div>
@@ -1116,34 +1148,42 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             <span>Add Author Profile</span>
           </button>
         </div>
-      ) : viewMode === 'list' ? (
-        <div className="aav-list">
-          {filteredAuthors.map((author) => {
-            const avatarUrl = author.image || author.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80';
-            const id = author._id || author.slug;
-            const isSelected = selectedIds.has(id);
-            const publishedCount = author.publishedArticlesCount ?? author.totalPublishedArticles ?? 0;
-            const socials = author.socialLinks || {};
+      ) : (
+        <>
+          {viewMode === 'list' ? (
+            <div className="aav-list">
+              {paginatedAuthors.map((author, index) => {
+                const serialNumber = pageSize === 'all' ? index + 1 : (currentPage - 1) * pageSize + index + 1;
+                const avatarUrl = author.image || author.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80';
+                const id = author._id || author.slug;
+                const isSelected = selectedIds.has(id);
+                const publishedCount = author.publishedArticlesCount ?? author.totalPublishedArticles ?? 0;
+                const socials = author.socialLinks || {};
 
-            return (
-              <div
-                key={id}
-                className={`aav-list-card ${isSelected ? 'selected' : ''}`}
-              >
-                {/* Select Checkbox */}
-                <div className="aav-list-check">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => {
-                      const next = new Set(selectedIds);
-                      if (e.target.checked) next.add(id);
-                      else next.delete(id);
-                      setSelectedIds(next);
-                    }}
-                    style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
-                  />
-                </div>
+                return (
+                  <div
+                    key={id}
+                    className={`aav-list-card ${isSelected ? 'selected' : ''}`}
+                  >
+                    {/* Sr. No & Select Checkbox */}
+                    <div className="aav-sr-col" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                      <span className="aav-sr-no" title={`Sr. No #${serialNumber}`}>
+                        #{serialNumber}
+                      </span>
+                      <div className="aav-list-check">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const next = new Set(selectedIds);
+                            if (e.target.checked) next.add(id);
+                            else next.delete(id);
+                            setSelectedIds(next);
+                          }}
+                          style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
+                        />
+                      </div>
+                    </div>
 
                 {/* Author Avatar, Name & Designation */}
                 <div className="aav-list-author-info">
@@ -1280,7 +1320,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
         </div>
       ) : (
         <div className="aav-grid">
-          {filteredAuthors.map((author) => {
+          {paginatedAuthors.map((author, index) => {
+            const serialNumber = pageSize === 'all' ? index + 1 : (currentPage - 1) * pageSize + index + 1;
             const avatarUrl = author.image || author.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80';
             const id = author._id || author.slug;
             const isSelected = selectedIds.has(id);
@@ -1293,7 +1334,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 className={`aav-card ${isSelected ? 'selected' : ''}`}
               >
                 <div>
-                  {/* Top Row: Avatar, Names, Checkbox */}
+                  {/* Top Row: Avatar, Names, Checkbox with Sr. No */}
                   <div className="aav-card-top">
                     <div className="aav-card-author-info">
                       <img
@@ -1325,17 +1366,22 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                       </div>
                     </div>
 
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        const next = new Set(selectedIds);
-                        if (e.target.checked) next.add(id);
-                        else next.delete(id);
-                        setSelectedIds(next);
-                      }}
-                      style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="aav-grid-sr-badge" title={`Sr. No #${serialNumber}`}>
+                        #{serialNumber}
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const next = new Set(selectedIds);
+                          if (e.target.checked) next.add(id);
+                          else next.delete(id);
+                          setSelectedIds(next);
+                        }}
+                        style={{ cursor: 'pointer', width: '17px', height: '17px', accentColor: '#dc2626' }}
+                      />
+                    </div>
                   </div>
 
                   {/* 4. Short Biography Snippet */}
@@ -1450,6 +1496,111 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
           })}
         </div>
       )}
+
+      {/* ── Modern Pagination Bar ── */}
+      {filteredAuthors.length > 0 && (
+        <div className="abv-pagination-bar">
+          <div className="abv-pagination-left">
+            <div className="abv-pagination-info">
+              Showing <span className="abv-pg-bold">{pageSize === 'all' ? 1 : (currentPage - 1) * pageSize + 1}</span> to{' '}
+              <span className="abv-pg-bold">{pageSize === 'all' ? filteredAuthors.length : Math.min(currentPage * pageSize, filteredAuthors.length)}</span> of{' '}
+              <span className="abv-pg-bold">{filteredAuthors.length}</span> authors
+            </div>
+
+            <div className="abv-page-size-wrap">
+              <span>Per Page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                  setPageSize(val);
+                  setCurrentPage(1);
+                }}
+                className="abv-page-size-select"
+                aria-label="Authors per page"
+              >
+                <option value={10}>10 / page</option>
+                <option value={15}>15 / page</option>
+                <option value={25}>25 / page</option>
+                <option value={50}>50 / page</option>
+                <option value="all">Show All</option>
+              </select>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="abv-pagination-actions">
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Previous Page"
+              >
+                <ChevronLeft size={16} />
+                <span>Previous</span>
+              </button>
+
+              <div className="abv-page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 || 
+                      page === totalPages || 
+                      Math.abs(page - currentPage) <= 1 ||
+                      (currentPage <= 3 && page <= 4) ||
+                      (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                    );
+                  })
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) {
+                      acc.push(`ellipsis-${page}`);
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map(item => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="abv-page-ellipsis">…</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentPage(item);
+                          window.scrollTo({ top: 180, behavior: 'smooth' });
+                        }}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Next Page"
+              >
+                <span>Next</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )}
 
       {/* Modal Dialog: Edit / Create Author Profile */}
       {renderEditModal()}
