@@ -774,30 +774,6 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
                 </>
               )}
             </div>
-
-            <span className="abv-pagination-divider" aria-hidden="true" />
-
-            <div className="abv-page-size-wrap">
-              <div className="abv-select-shell">
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
-                    setPageSize(val);
-                    setCurrentPage(1);
-                  }}
-                  className="abv-page-size-select"
-                  aria-label="Episodes per page"
-                >
-                  <option value={6}>6 per page</option>
-                  <option value={9}>9 per page</option>
-                  <option value={12}>12 per page</option>
-                  <option value={24}>24 per page</option>
-                  <option value="all">Show all</option>
-                </select>
-                <ChevronDown size={14} className="abv-select-chevron" aria-hidden="true" />
-              </div>
-            </div>
           </div>
 
           {totalPages > 1 && (

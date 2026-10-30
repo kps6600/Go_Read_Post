@@ -1,4 +1,4 @@
-﻿﻿﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
@@ -1515,30 +1515,6 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   of <span className="abv-pg-bold">{filteredAuthors.length}</span> authors
                 </>
               )}
-            </div>
-
-            <span className="abv-pagination-divider" aria-hidden="true" />
-
-            <div className="abv-page-size-wrap">
-              <div className="abv-select-shell">
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
-                    setPageSize(val);
-                    setCurrentPage(1);
-                  }}
-                  className="abv-page-size-select"
-                  aria-label="Authors per page"
-                >
-                  <option value={10}>10 per page</option>
-                  <option value={15}>15 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
-                  <option value="all">Show all</option>
-                </select>
-                <ChevronDown size={14} className="abv-select-chevron" aria-hidden="true" />
-              </div>
             </div>
           </div>
 

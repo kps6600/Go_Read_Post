@@ -1036,30 +1036,7 @@ export default function AdminTagsView({ onShowToast }) {
             Showing <strong>{filteredAndSorted.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong>{Math.min(currentPage * pageSize, filteredAndSorted.length)}</strong> of <strong>{filteredAndSorted.length}</strong> tags
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Per page:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                style={{
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.8rem',
-                  background: '#ffffff'
-                }}
-              >
-                <option value={15}>15</option>
-                <option value={30}>30</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <button
                 type="button"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -1098,7 +1075,6 @@ export default function AdminTagsView({ onShowToast }) {
                 Next
               </button>
             </div>
-          </div>
         </div>
       </div>
 
