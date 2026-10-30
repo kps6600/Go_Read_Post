@@ -473,7 +473,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                     S.No.
                   </th>
                   <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '35%' }}>
-                    Page Title & Group
+                    Page Title
                   </th>
                   <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '18%' }}>
                     Route / Slug
@@ -494,7 +494,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                   const isLive = page.status === 'published' || page.status === 'active';
                   const sections = page.sections?.length || 0;
                   const isActing = actionLoadingId === page.id;
-                  const grp = getPageGroup(page);
                   const pageType = identifyEditablePage(page);
                   const targetSlug = page.slug || page.id || '';
                   
@@ -519,28 +518,9 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                         {index + 1}
                       </td>
                       <td style={{ padding: '1rem 1.25rem' }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
-                              {(page.title || '').replace(/\s*-\s*Live Portal/i, '')}
-                            </span>
-                            <span 
-                              style={{
-                                fontSize: '0.68rem',
-                                fontWeight: 750,
-                                padding: '0.18rem 0.55rem',
-                                borderRadius: '6px',
-                                color: grp.color,
-                                background: grp.bg,
-                                border: '1px solid ' + (grp.border || '#e2e8f0'),
-                                letterSpacing: '0.03em',
-                                textTransform: 'uppercase'
-                              }}
-                            >
-                              {grp.label}
-                            </span>
-                          </div>
-                        </div>
+                        <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
+                          {(page.title || '').replace(/\s*-\s*Live Portal/i, '')}
+                        </span>
                       </td>
 
                       <td style={{ padding: '1rem' }}>
