@@ -3,7 +3,7 @@ import {
   X, Check, Sparkles, Plus, Trash2, 
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight,
   Monitor, Smartphone, Search, RefreshCw, Layers, Eye, EyeOff,
-  Edit2, Edit3, Image as ImageIcon, Type, Mail, Zap, Flame, LayoutGrid,
+  Edit2, Edit3, Image as ImageIcon, Type, Play, Mail, Zap, Flame, LayoutGrid,
   ExternalLink, CheckCircle2, ChevronDown, Heart, Bookmark
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
@@ -1002,22 +1002,28 @@ export default function LiveHomepageStudio({
                                   {popularArticles.length}/5 Slots
                                 </span>
                               </div>
-                              <button
-                                type="button"
-                                className={`lbe-btn-add-mini ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                                disabled={popularArticles.length >= 5}
-                                onClick={() => {
-                                  if (popularArticles.length >= 5) {
-                                    alert('Maximum 5 cards limit reached. Please remove an existing card to add a new article or video.');
-                                    return;
-                                  }
-                                  handleOpenPicker({ type: 'popular-add' });
-                                }}
-                                title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Add an article or video to popular posts (Max 5)'}
-                              >
-                                <Plus size={13} />
-                                <span>{popularArticles.length >= 5 ? 'Max 5 Cards' : 'Add Article / Video'}</span>
-                              </button>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button
+                                  type="button"
+                                  className={`lbe-btn-add-mini article ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                                  disabled={popularArticles.length >= 5}
+                                  onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                                  title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Articles section to add article (Max 5)'}
+                                >
+                                  <Plus size={13} />
+                                  <span>{popularArticles.length >= 5 ? 'Max 5' : '+ Article'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`lbe-btn-add-mini video ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                                  disabled={popularArticles.length >= 5}
+                                  onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                                  title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Videos section to add video (Max 5)'}
+                                >
+                                  <Play size={10} fill="currentColor" />
+                                  <span>{popularArticles.length >= 5 ? 'Reached' : '+ Video'}</span>
+                                </button>
+                              </div>
                             </div>
 
                             <div className="mhp-popular-list">
@@ -1065,15 +1071,31 @@ export default function LiveHomepageStudio({
                             </div>
 
                             {popularArticles.length < 5 ? (
-                              <button
-                                type="button"
-                                className="lbe-btn-add-popular-full"
-                                onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                                title="Add an article or video to popular posts"
-                              >
-                                <Plus size={14} />
-                                <span>+ Add Article or Video ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left)</span>
-                              </button>
+                              <div className="lbe-popular-bottom-add-group">
+                                <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, textAlign: 'center', margin: '4px 0 2px' }}>
+                                  Add to Popular Posts ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left):
+                                </div>
+                                <div className="lbe-popular-bottom-add-group-btns">
+                                  <button
+                                    type="button"
+                                    className="lbe-btn-add-popular-split article"
+                                    onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                                    title="Open Articles Section to Add Article"
+                                  >
+                                    <Plus size={15} />
+                                    <span>+ Add Article</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="lbe-btn-add-popular-split video"
+                                    onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                                    title="Open Videos Section to Add Video"
+                                  >
+                                    <Play size={12} fill="currentColor" />
+                                    <span>+ Add Video</span>
+                                  </button>
+                                </div>
+                              </div>
                             ) : (
                               <div className="lbe-popular-max-banner">
                                 <span className="lbe-popular-max-pill">5 / 5 Maximum Cards Reached</span>

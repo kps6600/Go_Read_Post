@@ -4,7 +4,7 @@ import {
   ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, Layers, Eye, EyeOff,
-  Edit2, Edit3, Image as ImageIcon, Type
+  Edit2, Edit3, Image as ImageIcon, Type, Play
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
 import { VideoService } from '../../services/videoService';
@@ -196,15 +196,27 @@ export default function LiveBannerEditor({
     });
   }, [combinedPool, pickerSearch, pickerCategory]);
 
-  // Unique categories for picker filtering
+  // Unique categories for picker filtering, strictly matched to active content type
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    combinedPool.forEach(a => {
-      const c = a.categoryLabel || a.category;
-      if (c && typeof c === 'string') cats.add(c.trim());
-    });
-    return Array.from(cats).slice(0, 10);
-  }, [combinedPool]);
+    if (pickerContentType === 'articles') {
+      pool.forEach(a => {
+        const c = a.categoryLabel || a.category;
+        if (c && typeof c === 'string') cats.add(c.trim());
+      });
+    } else if (pickerContentType === 'videos') {
+      videoPool.forEach(v => {
+        const c = v.categoryLabel || v.category || v.series;
+        if (c && typeof c === 'string') cats.add(c.trim());
+      });
+    } else {
+      combinedPool.forEach(a => {
+        const c = a.categoryLabel || a.category;
+        if (c && typeof c === 'string') cats.add(c.trim());
+      });
+    }
+    return Array.from(cats).slice(0, 12);
+  }, [pool, videoPool, combinedPool, pickerContentType]);
 
   if (!isOpen || !section) return null;
 
@@ -460,10 +472,20 @@ export default function LiveBannerEditor({
   // ─────────────────────────────────────────────────────────
   // ARTICLE PICKER HANDLER
   // ─────────────────────────────────────────────────────────
+  const handleSwitchPickerContentType = (type) => {
+    setPickerContentType(type);
+    setPickerCategory('All');
+  };
+
   const handleOpenPicker = (target) => {
+    if (target?.type === 'popular-add' && popularArticles.length >= 5) {
+      alert('You have reached the maximum limit of 5 cards. Please remove an existing card before adding a new article or video.');
+      return;
+    }
     setPickerTarget(target);
     setPickerSearch('');
     setPickerCategory('All');
+    setPickerContentType(target?.defaultTab || 'articles');
     setIsPickerOpen(true);
   };
 
@@ -751,23 +773,29 @@ export default function LiveBannerEditor({
                     </span>
                   </div>
 
-                  {/* Header Add Button (Always visible; Disabled if 5 cards reached) */}
-                  <button
-                    type="button"
-                    className={`lbe-btn-add-mini ${popularArticles.length >= 5 ? 'disabled' : ''}`}
-                    disabled={popularArticles.length >= 5}
-                    onClick={() => {
-                      if (popularArticles.length >= 5) {
-                        alert('Maximum 5 cards limit reached. Please remove an existing card to add a new article or video.');
-                        return;
-                      }
-                      handleOpenPicker({ type: 'popular-add' });
-                    }}
-                    title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Add an article or video to popular posts (Max 5)'}
-                  >
-                    <Plus size={13} />
-                    <span>{popularArticles.length >= 5 ? 'Max 5 Cards' : 'Add Article / Video'}</span>
-                  </button>
+                  {/* Header Add Buttons: Split for Article vs Video */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      className={`lbe-btn-add-mini article ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                      disabled={popularArticles.length >= 5}
+                      onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                      title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Articles section to add article (Max 5)'}
+                    >
+                      <Plus size={13} />
+                      <span>{popularArticles.length >= 5 ? 'Max 5' : '+ Article'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`lbe-btn-add-mini video ${popularArticles.length >= 5 ? 'disabled' : ''}`}
+                      disabled={popularArticles.length >= 5}
+                      onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                      title={popularArticles.length >= 5 ? 'Maximum 5 cards reached. Remove a card below to add another.' : 'Open Videos section to add video (Max 5)'}
+                    >
+                      <Play size={10} fill="currentColor" />
+                      <span>{popularArticles.length >= 5 ? 'Reached' : '+ Video'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mhp-popular-list">
@@ -828,21 +856,37 @@ export default function LiveBannerEditor({
                   ))}
                 </div>
 
-                {/* Bottom Add Button (when slots available) or Max Notice */}
+                {/* Bottom Add Buttons Group (Split for Article vs Video) */}
                 {popularArticles.length < 5 ? (
-                  <button
-                    type="button"
-                    className="lbe-btn-add-popular-full"
-                    onClick={() => handleOpenPicker({ type: 'popular-add' })}
-                    title="Add an article or video to popular posts"
-                  >
-                    <Plus size={15} />
-                    <span>+ Add Article or Video ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left)</span>
-                  </button>
+                  <div className="lbe-popular-bottom-add-group">
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, textAlign: 'center', margin: '4px 0 2px' }}>
+                      Add to Popular Posts ({5 - popularArticles.length} slot{5 - popularArticles.length > 1 ? 's' : ''} left):
+                    </div>
+                    <div className="lbe-popular-bottom-add-group-btns">
+                      <button
+                        type="button"
+                        className="lbe-btn-add-popular-split article"
+                        onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'articles' })}
+                        title="Open Articles Section to Add Article"
+                      >
+                        <Plus size={15} />
+                        <span>+ Add Article</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="lbe-btn-add-popular-split video"
+                        onClick={() => handleOpenPicker({ type: 'popular-add', defaultTab: 'videos' })}
+                        title="Open Videos Section to Add Video"
+                      >
+                        <Play size={12} fill="currentColor" />
+                        <span>+ Add Video</span>
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="lbe-popular-max-banner">
                     <span className="lbe-popular-max-pill">5 / 5 Maximum Cards Reached</span>
-                    <span>To add another article or video, remove any existing card using the red trash icon.</span>
+                    <span>Maximum 5 cards limit reached. Remove any card using the red trash icon to add another article or video.</span>
                   </div>
                 )}
               </div>
@@ -864,13 +908,17 @@ export default function LiveBannerEditor({
                 <h4 className="lbe-picker-title">
                   <Layers size={18} color="#38bdf8" />
                   <span>
-                    {pickerTarget?.type?.startsWith('hero') 
-                      ? 'Select Article for Hero Slider' 
-                      : `Select Article for Popular Position #${(pickerTarget?.index ?? popularArticles.length) + 1}`}
+                    {pickerTarget?.type?.startsWith('hero')
+                      ? 'Select Slide for Hero Slider'
+                      : pickerContentType === 'videos'
+                        ? `Select Video for Popular Slot #${popularArticles.length + 1}`
+                        : `Select Article for Popular Slot #${popularArticles.length + 1}`}
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
-                  Choose any published article from your library. It will automatically load its title, cover image, category, and author.
+                  {pickerContentType === 'videos'
+                    ? 'Choose any studio interview, keynote, or video episode to add to popular posts.'
+                    : 'Choose any published editorial article to add to popular posts.'}
                 </p>
               </div>
               <button 
@@ -884,28 +932,28 @@ export default function LiveBannerEditor({
 
             {/* Search, Tabs, and Category Filters */}
             <div className="lbe-picker-toolbar">
-              {/* Type Switcher Tabs: All / Articles / Videos */}
+              {/* Type Switcher Tabs: Articles Section vs Videos Section */}
               <div className="lbe-picker-type-tabs">
                 <button
                   type="button"
-                  className={`lbe-picker-type-tab ${pickerContentType === 'all' ? 'active' : ''}`}
-                  onClick={() => setPickerContentType('all')}
-                >
-                  All Content ({pool.length + videoPool.length})
-                </button>
-                <button
-                  type="button"
                   className={`lbe-picker-type-tab ${pickerContentType === 'articles' ? 'active' : ''}`}
-                  onClick={() => setPickerContentType('articles')}
+                  onClick={() => handleSwitchPickerContentType('articles')}
                 >
-                  📄 Articles ({pool.length})
+                  📄 Articles Section ({pool.length})
                 </button>
                 <button
                   type="button"
                   className={`lbe-picker-type-tab ${pickerContentType === 'videos' ? 'active' : ''}`}
-                  onClick={() => setPickerContentType('videos')}
+                  onClick={() => handleSwitchPickerContentType('videos')}
                 >
-                  🎬 Videos ({videoPool.length})
+                  🎬 Videos Section ({videoPool.length})
+                </button>
+                <button
+                  type="button"
+                  className={`lbe-picker-type-tab ${pickerContentType === 'all' ? 'active' : ''}`}
+                  onClick={() => handleSwitchPickerContentType('all')}
+                >
+                  🌐 All Content ({pool.length + videoPool.length})
                 </button>
               </div>
 
@@ -970,7 +1018,9 @@ export default function LiveBannerEditor({
                       >
                         <div className="lbe-picker-card-thumb-wrap">
                           <img src={artImg} alt={artTitle} className="lbe-picker-card-thumb" />
-                          <span className="lbe-picker-card-category">{artCat}</span>
+                          <span className={`lbe-picker-card-category ${isVid ? 'video' : ''}`}>
+                            {isVid ? `🎬 ${artCat}` : artCat}
+                          </span>
                         </div>
                         <div className="lbe-picker-card-content">
                           <h5 className="lbe-picker-card-title">{artTitle}</h5>
@@ -981,14 +1031,14 @@ export default function LiveBannerEditor({
                           </div>
                           <button 
                             type="button" 
-                            className="lbe-picker-select-btn"
+                            className={`lbe-picker-select-btn ${isVid ? 'video' : 'article'}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSelectArticleFromPicker(article);
                             }}
                           >
-                            <Check size={13} />
-                            <span>Select This Article</span>
+                            {isVid ? <Play size={11} fill="currentColor" /> : <Check size={13} />}
+                            <span>{isVid ? 'Select This Video' : 'Select This Article'}</span>
                           </button>
                         </div>
                       </div>
