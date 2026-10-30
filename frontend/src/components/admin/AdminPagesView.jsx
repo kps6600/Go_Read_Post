@@ -429,23 +429,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
         </button>
       </div>
 
-      {/* ── Sub-Header Bar: Info & Count ── */}
-      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#64748b' }}>
-            System Core & Custom Landing Pages
-          </span>
-        </div>
-        <div className="abv-cards-count-badge">
-          <span>
-            {statusFilter === 'published' && 'Published: '}
-            {statusFilter === 'draft' && 'Draft: '}
-            {statusFilter === 'all' && 'All Pages: '}
-            {filteredPages.length} {filteredPages.length === 1 ? 'page' : 'pages'}
-          </span>
-        </div>
-      </div>
-
       {/* ── Table Card ── */}
       <div style={{
         background: '#ffffff',
@@ -486,7 +469,10 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '820px' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '38%' }}>
+                  <th style={{ padding: '0.85rem 0.75rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', textAlign: 'center', width: '65px' }}>
+                    S.No.
+                  </th>
+                  <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '35%' }}>
                     Page Title & Group
                   </th>
                   <th style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', width: '18%' }}>
@@ -504,7 +490,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                 </tr>
               </thead>
               <tbody>
-                {filteredPages.map((page) => {
+                {filteredPages.map((page, index) => {
                   const isLive = page.status === 'published' || page.status === 'active';
                   const sections = page.sections?.length || 0;
                   const isActing = actionLoadingId === page.id;
@@ -529,6 +515,9 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
+                      <td style={{ padding: '1rem 0.75rem', textAlign: 'center', fontSize: '0.86rem', fontWeight: 700, color: '#64748b' }}>
+                        {index + 1}
+                      </td>
                       <td style={{ padding: '1rem 1.25rem' }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
