@@ -550,11 +550,6 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
                               {grp.label}
                             </span>
                           </div>
-                          {page.description && (
-                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '3px', maxWidth: '420px', lineHeight: 1.4 }}>
-                              {page.description}
-                            </div>
-                          )}
                         </div>
                       </td>
 
