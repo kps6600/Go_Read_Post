@@ -751,7 +751,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             title="Return to Pages Management"
           >
             <ArrowLeft size={16} />
-            <span>Back to Pages</span>
+            <span>Back</span>
           </button>
 
           <div className="atv-topbar-divider" />

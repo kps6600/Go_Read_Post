@@ -262,7 +262,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
               }}
             >
               <ArrowLeft size={16} />
-              <span>Back to Pages List</span>
+              <span>Back</span>
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -371,7 +371,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
             }}
           >
             <ArrowLeft size={16} />
-            <span>Back to Pages List</span>
+            <span>Back</span>
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
