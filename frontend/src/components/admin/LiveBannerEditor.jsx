@@ -845,7 +845,6 @@ export default function LiveBannerEditor({
                       alignItems: 'center',
                       gap: '8px'
                     }}>
-                      <Layers size={24} color="#64748b" style={{ opacity: 0.7 }} />
                       <span style={{ fontWeight: 600, color: '#64748b' }}>No popular posts selected</span>
                       <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
                         Click "+ Article" or "▶ Video" above to add up to 5 cards.
