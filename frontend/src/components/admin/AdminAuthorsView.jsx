@@ -842,7 +842,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                                     </span>
                                   )}
                                   {typeof art.views === 'number' && (
-                                    <span>â€¢ {art.views} views</span>
+                                    <span>• {art.views} views</span>
                                   )}
                                 </div>
                               </div>

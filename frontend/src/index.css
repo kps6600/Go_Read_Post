@@ -443,7 +443,7 @@ main {
   transition: all 0.2s ease;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 860px) {
   .modern-menu-btn {
     display: none !important;
   }
@@ -526,7 +526,7 @@ main {
   white-space: nowrap;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 859px) {
   .edition-badge {
     display: none !important;
   }
@@ -567,7 +567,7 @@ main {
   background: var(--bg-card);
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 859px) {
   .modern-search-box {
     display: none !important;
   }
@@ -704,7 +704,7 @@ main {
   color: var(--brand-primary);
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 859px) {
   .header-link-btn,
   .header-btn-pro {
     display: none !important;

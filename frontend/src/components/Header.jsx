@@ -961,7 +961,7 @@ export default function Header({
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.04em', marginTop: '1px' }}>
-                      Read â€¢ Learn â€¢ Grow
+                      Read • Learn • Grow
                     </div>
                   </div>
                 </div>
@@ -988,7 +988,7 @@ export default function Header({
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.04em', marginTop: '1px' }}>
-                      Read â€¢ Learn â€¢ Grow
+                      Read • Learn • Grow
                     </div>
                   </div>
                 </div>

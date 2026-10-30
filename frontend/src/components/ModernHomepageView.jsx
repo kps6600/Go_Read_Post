@@ -648,7 +648,7 @@ export default function ModernHomepageView({
     const [currentSlide, setCurrentSlide] = useState(0);
     const data = sec?.data || {};
     const showPopular = data.showPopular !== false;
-    const popularTitle = data.popularTitle || sec?.subtitle || sec?.customConfig?.popularTitle || "Popular Posts";
+    const popularTitle = data.popularTitle || sec?.customConfig?.popularTitle || (sec?.subtitle && !sec?.subtitle.toLowerCase().includes('slider') && !sec?.subtitle.toLowerCase().includes('sidebar') ? sec?.subtitle : 'Top 5 Ranked Articles') || 'Popular Posts';
     const viewAllText = data.viewAllText || sec?.customConfig?.viewAllText || "View All";
     const viewAllUrl = data.viewAllUrl || sec?.customConfig?.viewAllUrl || "/trending";
     const popularLimit = Number(data.popularLimit) || 5;

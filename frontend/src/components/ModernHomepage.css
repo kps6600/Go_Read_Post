@@ -24,7 +24,7 @@
   grid-template-columns: 1fr;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   .mhp-hero-popular-grid {
     grid-template-columns: 1fr;
     gap: 1.35rem;
