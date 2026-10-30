@@ -3,7 +3,7 @@ import {
   X, Check, Sparkles, Plus, Trash2, 
   ArrowLeft, ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
-  Search, RefreshCw, Layers, Eye, EyeOff,
+  Search, RefreshCw, ArrowLeftRight, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type,
   Mail, Bookmark, Zap, CheckCircle, LayoutGrid, Heart,
   Sliders, Filter, FileText, ExternalLink
@@ -930,7 +930,7 @@ function LiveGenericSectionStudio({
                                   transition: 'all 0.15s ease'
                                 }}
                               >
-                                <RefreshCw size={13} />
+                                <ArrowLeftRight size={13} />
                               </button>
                               <button
                                 type="button"

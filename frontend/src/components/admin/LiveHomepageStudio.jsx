@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   X, Check, Sparkles, Plus, Trash2, 
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight,
-  Monitor, Smartphone, Search, RefreshCw, Layers, Eye, EyeOff,
+  Monitor, Smartphone, Search, RefreshCw, ArrowLeftRight, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type, Mail, Zap, Flame, LayoutGrid,
   ExternalLink, CheckCircle2, ChevronDown, Heart, Bookmark
 } from 'lucide-react';

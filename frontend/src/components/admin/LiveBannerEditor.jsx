@@ -3,7 +3,7 @@ import {
   X, Check, Sparkles, Plus, Trash2, 
   ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
-  Search, RefreshCw, Layers, Eye, EyeOff,
+  Search, RefreshCw, ArrowLeftRight, Layers, Eye, EyeOff,
   Edit2, Edit3, Image as ImageIcon, Type
 } from 'lucide-react';
 import { ArticleService } from '../../services/articleService';
@@ -772,7 +772,7 @@ export default function LiveBannerEditor({
                           onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
                           title="Change / Replace this article"
                         >
-                          <RefreshCw size={12} />
+                          <ArrowLeftRight size={13} />
                         </button>
                         <button
                           type="button"
