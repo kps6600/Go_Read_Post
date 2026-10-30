@@ -2123,3 +2123,93 @@
   margin: 0;
   line-height: 1.45;
 }
+
+/* Taxonomy Distribution Box (Category, Topics, Tags) */
+.las-taxonomy-distribution-box {
+  margin-top: 1.35rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.las-tax-dist-header {
+  margin-bottom: 0.85rem;
+}
+
+.las-tax-dist-heading {
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: #475569;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.las-tax-dist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.las-tax-dist-col {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.las-tax-dist-col:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.las-tax-dist-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.las-tax-dist-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.las-tax-dist-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.las-tax-dist-pill.category {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.las-tax-dist-pill.topic {
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+
+.las-tax-dist-pill.tag {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.las-tax-dist-empty {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+}

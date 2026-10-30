@@ -2735,13 +2735,29 @@ export default function LiveArticleStudio({
 
                 {/* Collapsible Advanced Toggle */}
                 <div style={{ marginTop: '0.85rem' }}>
-                  <button
-                    type="button"
-                    className="las-advanced-toggle-btn"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                  >
-                    <span>{showAdvanced ? 'Hide Advanced Settings (URL Slug, Topics, Tags)' : 'Advanced Settings (URL Slug, Topics, Tags)'}</span>
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="las-advanced-toggle-btn"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                    >
+                      <span>{showAdvanced ? 'Hide Advanced Settings (URL Slug, Topics, Tags)' : 'Advanced Settings (URL Slug, Topics, Tags)'}</span>
+                    </button>
+                    {!showAdvanced && (currentTopics.length > 0 || currentTags.length > 0) && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        {currentTopics.map(t => (
+                          <span key={t} style={{ fontSize: '0.74rem', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}>
+                            {t}
+                          </span>
+                        ))}
+                        {currentTags.map(t => (
+                          <span key={t} style={{ fontSize: '0.74rem', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
+                            #{t.replace(/^#/, '')}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {showAdvanced && (
                     <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -3162,9 +3178,11 @@ export default function LiveArticleStudio({
                   <div 
                     className={`las-placement-tile ${(formData.isCategoryFeatured || formData.placements?.includes('category_top')) ? 'active category' : ''}`}
                     onClick={() => togglePlacement('category_top', 'isCategoryFeatured')}
-                    title="Toggle Category Top Story"
+                    title={`Toggle Category Top Story (${formData.categoryName || 'General'})`}
                   >
-                    <h4 className="las-placement-tile-title">Category Top Story</h4>
+                    <h4 className="las-placement-tile-title">
+                      Category Top Story {formData.categoryName ? `(${formData.categoryName})` : ''}
+                    </h4>
                     <input 
                       type="checkbox" 
                       checked={Boolean(formData.isCategoryFeatured || formData.placements?.includes('category_top'))}
@@ -3172,6 +3190,57 @@ export default function LiveArticleStudio({
                       className="las-placement-checkbox"
                       onClick={e => e.stopPropagation()}
                     />
+                  </div>
+                </div>
+
+                {/* Where this article is added: Category, Topics & Tags */}
+                <div className="las-taxonomy-distribution-box">
+                  <div className="las-tax-dist-header">
+                    <span className="las-tax-dist-heading">Article Added In Category, Topics & Tags:</span>
+                  </div>
+
+                  <div className="las-tax-dist-grid">
+                    {/* Category */}
+                    <div className="las-tax-dist-col">
+                      <span className="las-tax-dist-label">Category Page</span>
+                      <div className="las-tax-dist-items">
+                        <span className="las-tax-dist-pill category">
+                          {formData.categoryName || 'General'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Topics */}
+                    <div className="las-tax-dist-col">
+                      <span className="las-tax-dist-label">
+                        Topic Pages {currentTopics.length > 0 ? `(${currentTopics.length})` : ''}
+                      </span>
+                      <div className="las-tax-dist-items">
+                        {currentTopics.length > 0 ? (
+                          currentTopics.map(t => (
+                            <span key={t} className="las-tax-dist-pill topic">{t}</span>
+                          ))
+                        ) : (
+                          <span className="las-tax-dist-empty">No topics assigned</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div className="las-tax-dist-col">
+                      <span className="las-tax-dist-label">
+                        Tag Pages {currentTags.length > 0 ? `(${currentTags.length})` : ''}
+                      </span>
+                      <div className="las-tax-dist-items">
+                        {currentTags.length > 0 ? (
+                          currentTags.map(t => (
+                            <span key={t} className="las-tax-dist-pill tag">#{t.replace(/^#/, '')}</span>
+                          ))
+                        ) : (
+                          <span className="las-tax-dist-empty">No tags assigned</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
