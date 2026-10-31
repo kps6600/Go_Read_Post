@@ -818,25 +818,6 @@ export default function LatestArticlesPage({
         >
           {pageConfig?.title || "Latest Articles & Dispatches"}
         </h1>
-        <p
-          contentEditable={isAdminUser && isEditMode}
-          suppressContentEditableWarning={true}
-          className={isAdminUser && isEditMode ? "lap-subtitle lse-direct-editable" : "lap-subtitle"}
-          onBlur={(e) => {
-            const val = e.currentTarget.textContent.trim();
-            handleUpdatePageSettings({ description: val });
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              e.currentTarget.blur();
-            }
-          }}
-          title={isAdminUser && isEditMode ? "Click directly to edit page subtitle" : undefined}
-          style={isAdminUser && isEditMode ? { cursor: 'text' } : {}}
-        >
-          {pageConfig?.description || "Real-time dispatches, founder stories, deeptech, venture capital reporting, and latest scoops."}
-        </p>
       </div>
 
       {/* ── Category Filter Pills Bar ── */}

@@ -77,16 +77,16 @@ export const DEFAULT_PAGES = [
     title: "Latest Articles",
     slug: "latest",
     brand: "GoReadPost",
-    description: "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
+    description: "",
     heroHeadline: "Latest Articles & Dispatches",
-    heroSubhead: "Unfiltered founder reporting, deep tech breakthroughs, and market movements updated continuously.",
+    heroSubhead: "",
     heroBanner: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&auto=format&fit=crop&q=80",
     status: "published",
     showInNav: true,
     order: 2,
     seo: {
       title: "Latest Articles & Newsroom Dispatches | GoReadPost",
-      description: "Real-time dispatches, founder stories, deeptech, venture capital reporting, and latest scoops.",
+      description: "",
       keywords: ["latest articles", "breaking news", "startups", "technology", "venture capital"]
     },
     sections: [
@@ -98,7 +98,7 @@ export const DEFAULT_PAGES = [
         data: {
           title: "Latest Articles",
           heading: "Latest Articles",
-          subtitle: "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
+          subtitle: "",
           category: "",
           limit: 16,
           viewAllText: "Load More Stories",
