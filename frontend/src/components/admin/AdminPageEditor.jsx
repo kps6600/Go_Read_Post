@@ -1151,26 +1151,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => window.open(displaySlug, '_blank')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.55rem 1.05rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#334155',
-              fontSize: '0.86rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            <ExternalLink size={15} />
-            <span>View Live Page</span>
-          </button>
 
           <button
             type="button"

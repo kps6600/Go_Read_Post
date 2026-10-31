@@ -252,14 +252,7 @@ export default function AdminAboutView({ onShowToast, onNavigate, isStudioView =
         </div>
 
         <div className="aav-topbar-right">
-          <button
-            type="button"
-            className="aav-btn-secondary"
-            onClick={() => window.open('/about', '_blank')}
-            title="Open live public about page in new window"
-          >
-            <span>View Live Page</span>
-          </button>
+          
 
           <button
             type="button"

@@ -924,15 +924,7 @@ export default function LiveWholePageStudio({
               </button>
             )}
 
-            <button
-              type="button"
-              className="lhs-btn-preview"
-              onClick={() => window.open(pageSlug ? `/${pageSlug.replace(/^\/+/, '')}` : (pageId === 'home' ? '/' : `/${pageId}`), '_blank')}
-              title="Open live public page in new tab"
-            >
-              <ExternalLink size={14} />
-              <span>View Live Page</span>
-            </button>
+            
 
             <button
               type="button"

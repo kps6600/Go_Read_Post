@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T12:27:30.720Z",
+        "updatedAt": "2026-10-31T12:32:11.096Z",
         "data": {
           "slides": [
             {
@@ -380,7 +380,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:27:30.726Z",
+        "updatedAt": "2026-10-31T12:32:11.098Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -540,64 +540,47 @@
               "isCustom": true
             },
             {
-              "featuredImage": {
-                "url": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=900&auto=format&fit=crop&q=80",
-                "alt": "How a mobile bicycle library is educating 5,000 rural girls in Bihar",
-                "caption": "",
-                "credit": "GoReadPost"
+              "_id": "6ae1f555d132e2796bff4f6c",
+              "id": "lead-1",
+              "title": "Andhra, Chhattisgarh, Bihar are outsmarting richer states on investments (without outspending)",
+              "subtitle": "A licence, a statute and a purchase contract: how three challenger states are gaining ground without simply writing bigger subsidy cheques.",
+              "summary": "How challenger states attract major industrial capital through regulatory speed and certainty.",
+              "excerpt": "How challenger states attract major industrial capital through regulatory speed and certainty.",
+              "slug": "lead-1",
+              "brand": "GoReadPost",
+              "category": "enterprise",
+              "categoryTag": "Enterprise",
+              "categoryLabel": "Enterprise",
+              "tag": "FEATURED",
+              "image": "https://images.yourstory.com/cs/2/1a70b4f0170611edbdd8b5d28d859895/HowAndhraChhattisgarhandBiharareoutsmartingIndiasricheststatesoninvestmentswithoutoutspending-1785988535145.jpg?mode=min&ar=2%3A1&format=auto&w=1200&q=80",
+              "fallbackImage": "https://images.yourstory.com/cs/2/1a70b4f0170611edbdd8b5d28d859895/HowAndhraChhattisgarhandBiharareoutsmartingIndiasricheststatesoninvestmentswithoutoutspending-1785988535145.jpg?mode=min&ar=2%3A1&format=auto&w=1200&q=80",
+              "author": {
+                "name": "Editorial Desk",
+                "title": "Staff Reporter",
+                "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
               },
-              "seo": {
-                "title": "",
-                "description": "",
-                "keywords": "",
-                "canonicalUrl": "",
-                "ogTitle": "",
-                "ogDescription": "",
-                "ogImage": ""
-              },
-              "isHero": false,
-              "isLatest": true,
-              "isCategoryFeatured": false,
-              "placements": [
-                "latest"
+              "authorName": "Editorial Desk",
+              "authorTitle": "Staff Reporter",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+              "readTime": "9 min read",
+              "readingTime": "9 min read",
+              "publishedAt": "Oct 7, 2026",
+              "content": [
+                "For years, industrial capital in India flowed overwhelmingly towards established coastal hubs like Maharashtra, Gujarat, and Tamil Nadu.\n\nHowever, a structural shift is taking place. Andhra Pradesh, Chhattisgarh, and Bihar are securing massive renewable and manufacturing commitments through statutory single-window approvals and plug-and-play industrial infrastructure.\n\n“Capital seeks certainty and speed rather than temporary tax sops,” explains an infrastructure policy director."
               ],
-              "_id": "6ae1f556d132e2796bff4fb8",
-              "title": "How a mobile bicycle library is educating 5,000 rural girls in Bihar",
-              "slug": "sim-6",
-              "subtitle": "Pedaling through unpaved roads with STEM kits and illustrated books to foster grassroots literacy.",
-              "excerpt": "Pedaling through unpaved roads with STEM kits and illustrated books to foster grassroots literacy.",
-              "content": "",
-              "contentBlocks": [],
-              "authorId": null,
-              "authorName": "Vandana Shukla",
-              "authorTitle": "Education Initiatives Reporter, HerStory",
-              "authorAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80",
-              "categoryId": null,
-              "categoryName": "Startups",
-              "subCategoryId": null,
-              "topicIds": [],
-              "tagIds": [],
-              "tags": [],
-              "topics": [
-                "EDUCATION"
+              "tags": [
+                "goreadpost",
+                "leadership"
               ],
-              "contentType": "article",
-              "readingTime": "4 min read",
-              "language": "English",
-              "location": "India",
-              "isFeatured": false,
-              "isBreaking": false,
-              "isTrending": false,
-              "isEditorsPick": false,
-              "disabledFromFrontend": false,
               "status": "published",
-              "publishedAt": "2026-10-07T12:30:18.839Z",
-              "scheduledAt": null,
-              "views": 3223,
-              "claps": 210,
-              "createdAt": "2026-10-28T13:15:02.121Z",
-              "updatedAt": "2026-10-28T13:15:02.121Z",
-              "__v": 0
+              "views": 2039,
+              "claps": 154,
+              "isFeatured": true,
+              "isTrending": false,
+              "isBreaking": false,
+              "isEditorsPick": false,
+              "createdAt": "2026-10-28T13:15:01.872Z",
+              "updatedAt": "2026-10-28T13:15:01.872Z"
             }
           ],
           "limit": 4,
@@ -606,7 +589,7 @@
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fbc",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fb8"
+            "6ae1f555d132e2796bff4f6c"
           ]
         },
         "id": "latest_blogs",
@@ -629,7 +612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:27:30.730Z",
+        "updatedAt": "2026-10-31T12:32:11.100Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending",
@@ -1143,7 +1126,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:27:30.745Z",
+        "updatedAt": "2026-10-31T12:32:11.103Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1629,7 +1612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:27:30.755Z",
+        "updatedAt": "2026-10-31T12:32:11.106Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -2201,7 +2184,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:27:30.758Z",
+        "updatedAt": "2026-10-31T12:32:11.107Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2903,7 +2886,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T12:27:30.760Z",
+        "updatedAt": "2026-10-31T12:32:11.109Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2938,7 +2921,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T12:27:30.761Z",
+        "updatedAt": "2026-10-31T12:32:11.111Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -2973,7 +2956,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T12:27:30.763Z",
+        "updatedAt": "2026-10-31T12:32:11.112Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -3219,7 +3202,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T12:27:30.768Z",
+        "updatedAt": "2026-10-31T12:32:11.114Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }
