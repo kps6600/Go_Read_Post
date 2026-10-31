@@ -280,6 +280,29 @@ export default function LiveBannerEditor({
   const showPopular = data.showPopular !== false && pageId !== 'trending' && section?.id !== 'trending_hero';
 
   // ─────────────────────────────────────────────────────────
+  
+  const handleInlineSlideUpdate = (updates) => {
+    if (slides.length === 0) return;
+    const nextSlides = [...slides];
+    nextSlides[activeSlideIdx] = {
+      ...nextSlides[activeSlideIdx],
+      ...updates
+    };
+    updateSlidesState(nextSlides, activeSlideIdx);
+    persistToDatabase(nextSlides, popularArticles);
+  };
+
+  const handleInlinePopularUpdate = (idx, updates) => {
+    if (!popularArticles[idx]) return;
+    const nextPop = [...popularArticles];
+    nextPop[idx] = {
+      ...nextPop[idx],
+      ...updates
+    };
+    updatePopularState(nextPop);
+    persistToDatabase(slides, nextPop);
+  };
+
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
   // ─────────────────────────────────────────────────────────
   const persistToDatabase = async (nextSlides, nextPopular) => {
@@ -764,6 +787,40 @@ export default function LiveBannerEditor({
                 <>
                   <div className="mhp-hero-overlay" />
 
+                  {/* Direct Change Photo Overlay Button */}
+                  <div className="lse-card-img-overlay" style={{ top: '16px', right: '16px', zIndex: 30 }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const currentImg = currentSlide.image || '';
+                        const newImg = window.prompt("Enter new background photo URL for this hero slide:", currentImg);
+                        if (newImg && newImg.trim() && newImg !== currentImg) {
+                          handleInlineSlideUpdate({ image: newImg.trim(), bgImage: newImg.trim() });
+                        }
+                      }}
+                      style={{
+                        background: 'rgba(15, 23, 42, 0.92)',
+                        color: '#ffffff',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        padding: '6px 12px',
+                        fontSize: '0.78rem',
+                        fontWeight: 750,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
+                      }}
+                      title="Change Hero Background Photo URL"
+                    >
+                      <ImageIcon size={14} />
+                      <span>Change Photo</span>
+                    </button>
+                  </div>
+
 
 
                   {/* Real Article Content on Hero Slide */}
@@ -785,26 +842,74 @@ export default function LiveBannerEditor({
                             alignItems: 'center'
                           }}
                         >
-                          <span>{currentSlide.category}</span>
+                          <span 
+                          contentEditable={true}
+                          suppressContentEditableWarning={true}
+                          className="lse-direct-editable"
+                          onBlur={(e) => {
+                            const val = e.currentTarget.textContent.trim();
+                            if (val && val !== currentSlide.category) {
+                              handleInlineSlideUpdate({ category: val, badge: val });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          title="Click directly to edit category badge"
+                          style={{ cursor: 'text' }}
+                        >
+                          {currentSlide.category}
+                        </span>
                         </span>
                       </div>
                     )}
 
                     <h1 
-                      className="mhp-hero-title" 
-                      style={{ margin: '0 0 1rem', lineHeight: 1.2 }}
+                      contentEditable={true}
+                      suppressContentEditableWarning={true}
+                      className="mhp-hero-title lse-direct-editable" 
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== currentSlide.title) {
+                          handleInlineSlideUpdate({ title: val, headline: val });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      title="Click directly on text to edit headline"
+                      style={{ margin: '0 0 1rem', lineHeight: 1.2, cursor: 'text' }}
                     >
                       {currentSlide.title}
                     </h1>
 
-                    {currentSlide.excerpt && (
-                      <p 
-                        className="mhp-hero-desc" 
-                        style={{ margin: '0 0 1.25rem' }}
+                    <p 
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        className="mhp-hero-desc lse-direct-editable" 
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val !== currentSlide.excerpt) {
+                            handleInlineSlideUpdate({ excerpt: val, subheadline: val });
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        title="Click directly on text to edit excerpt"
+                        style={{ margin: '0 0 1.25rem', cursor: 'text' }}
                       >
-                        {currentSlide.excerpt}
+                        {currentSlide.excerpt || 'Click directly to edit excerpt'}
                       </p>
-                    )}
 
                     <div className="mhp-author-meta" style={{ flexWrap: 'wrap', gap: '8px' }}>
                       {currentSlide.authorAvatar && (
@@ -833,7 +938,27 @@ export default function LiveBannerEditor({
 
                     <div className="mhp-hero-bottom-actions">
                       <div className="mhp-hero-read-btn">
-                        <span>{currentSlide.primaryBtnText || 'Read More'}</span>
+                        <span
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        className="lse-direct-editable"
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== (currentSlide.primaryBtnText || 'Read More')) {
+                            handleInlineSlideUpdate({ primaryBtnText: val });
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        title="Click directly to edit button label"
+                        style={{ cursor: 'text' }}
+                      >
+                        {currentSlide.primaryBtnText || 'Read More'}
+                      </span>
                         <ArrowRight size={15} color="#0f172a" />
                       </div>
                       {currentSlide.category && (
@@ -888,7 +1013,29 @@ export default function LiveBannerEditor({
               <div className="mhp-popular-card">
                 <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{data.popularTitle || 'Popular Posts'}</span>
+                    <span 
+                      contentEditable={true}
+                      suppressContentEditableWarning={true}
+                      className="lse-direct-editable"
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== (data.popularTitle || 'Popular Posts')) {
+                          setData(prev => ({ ...prev, popularTitle: val }));
+                          const finalData = { ...data, popularTitle: val, slides, popularArticles };
+                          if (onAutoSave) onAutoSave(finalData);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      title="Click directly to edit section title"
+                      style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'text' }}
+                    >
+                      {data.popularTitle || 'Popular Posts'}
+                    </span>
                   </div>
 
                   {/* Header Add Buttons: Split for Article vs Video */}
@@ -959,9 +1106,51 @@ export default function LiveBannerEditor({
 
                         {/* Info */}
                         <div className="mhp-popular-info">
-                          <h4 className="mhp-popular-title">{item.title}</h4>
+                          <h4 
+                          contentEditable={true}
+                          suppressContentEditableWarning={true}
+                          className="mhp-popular-title lse-direct-editable"
+                          onBlur={(e) => {
+                            const val = e.currentTarget.textContent.trim();
+                            if (val && val !== item.title) {
+                              handleInlinePopularUpdate(idx, { title: val });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          title="Click directly to edit title"
+                          style={{ cursor: 'text' }}
+                        >
+                          {item.title}
+                        </h4>
                           <span className="mhp-popular-meta">
-                            {item.category && <span style={{ color: '#fb923c', marginRight: '4px' }}>{item.category} •</span>}
+                            {item.category && (
+                            <span 
+                              contentEditable={true}
+                              suppressContentEditableWarning={true}
+                              className="lse-direct-editable"
+                              onBlur={(e) => {
+                                const val = e.currentTarget.textContent.trim();
+                                if (val && val !== item.category) {
+                                  handleInlinePopularUpdate(idx, { category: val });
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              title="Click directly to edit category"
+                              style={{ color: '#fb923c', marginRight: '4px', cursor: 'text' }}
+                            >
+                              {item.category} •
+                            </span>
+                          )}
                             {item.readTime || '3 min read'}
                           </span>
                         </div>
