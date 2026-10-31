@@ -794,146 +794,148 @@ export default function LiveWholePageStudio({
 
   return (
     <div className={`lhs-overlay ${inPageMode ? 'in-page-mode' : ''}`}>
-      {/* ── Studio Top Header Bar ── */}
-      <header className="lhs-header">
-        <div className="lhs-header-left">
-          <button
-            type="button"
-            className="lhs-btn-cancel"
-            onClick={onClose}
-            title="Return to Pages Manager"
-            style={{ marginRight: '8px' }}
-          >
-            <ArrowLeft size={16} />
-            <span>Back to Pages</span>
-          </button>
+      {/* ── Studio Top Header Bar (Hidden in same-page mode because AdminPageEditor already renders the top header toolbar) ── */}
+      {!inPageMode && (
+        <header className="lhs-header">
+          <div className="lhs-header-left">
+            <button
+              type="button"
+              className="lhs-btn-cancel"
+              onClick={onClose}
+              title="Return to Pages Manager"
+              style={{ marginRight: '8px' }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Pages</span>
+            </button>
 
-          <div className="lhs-brand-title">
-            <h2>
-              <Sparkles size={18} color="#ea580c" />
-              <span>GoReadPost Live Studio: {pageTitle || 'Latest Articles'}</span>
-            </h2>
-            <span className="lhs-live-tag">
-              <span className="lhs-live-dot" />
-              WHOLE PAGE STUDIO
-            </span>
+            <div className="lhs-brand-title">
+              <h2>
+                <Sparkles size={18} color="#ea580c" />
+                <span>GoReadPost Live Studio: {pageTitle || 'Latest Articles'}</span>
+              </h2>
+              <span className="lhs-live-tag">
+                <span className="lhs-live-dot" />
+                WHOLE PAGE STUDIO
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Studio Center: Viewport Switcher */}
-        <div className="lhs-viewport-switcher">
-          <button
-            type="button"
-            className={`lhs-viewport-btn ${deviceView === 'desktop' ? 'active' : ''}`}
-            onClick={() => setDeviceView('desktop')}
-          >
-            <Monitor size={14} />
-            <span>Desktop</span>
-          </button>
-          <button
-            type="button"
-            className={`lhs-viewport-btn ${deviceView === 'mobile' ? 'active' : ''}`}
-            onClick={() => setDeviceView('mobile')}
-          >
-            <Smartphone size={14} />
-            <span>Mobile</span>
-          </button>
-        </div>
+          {/* Studio Center: Viewport Switcher */}
+          <div className="lhs-viewport-switcher">
+            <button
+              type="button"
+              className={`lhs-viewport-btn ${deviceView === 'desktop' ? 'active' : ''}`}
+              onClick={() => setDeviceView('desktop')}
+            >
+              <Monitor size={14} />
+              <span>Desktop</span>
+            </button>
+            <button
+              type="button"
+              className={`lhs-viewport-btn ${deviceView === 'mobile' ? 'active' : ''}`}
+              onClick={() => setDeviceView('mobile')}
+            >
+              <Smartphone size={14} />
+              <span>Mobile</span>
+            </button>
+          </div>
 
-        {/* Studio Right: Save Status & Actions */}
-        <div className="lhs-header-actions">
-          {saveStatus === 'saving' && (
-            <span className="lhs-save-indicator saving">
-              <RefreshCw size={13} className="lhs-spin" />
-              <span>Saving...</span>
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="lhs-save-indicator saved">
-              <Check size={13} />
-              <span>Saved permanently</span>
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="lhs-save-indicator error">
-              <X size={13} />
-              <span>Save error</span>
-            </span>
-          )}
+          {/* Studio Right: Save Status & Actions */}
+          <div className="lhs-header-actions">
+            {saveStatus === 'saving' && (
+              <span className="lhs-save-indicator saving">
+                <RefreshCw size={13} className="lhs-spin" />
+                <span>Saving...</span>
+              </span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="lhs-save-indicator saved">
+                <Check size={13} />
+                <span>Saved permanently</span>
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="lhs-save-indicator error">
+                <X size={13} />
+                <span>Save error</span>
+              </span>
+            )}
 
-          {(pageId === 'latest' || pageSlug === 'latest') && (
+            {(pageId === 'latest' || pageSlug === 'latest') && (
+              <button
+                type="button"
+                className="lhs-btn-preview"
+                onClick={() => {
+                  const titlePrompt = window.prompt("Add article title to latest feed:");
+                  if (titlePrompt && titlePrompt.trim()) {
+                    const newArt = {
+                      id: 'art_' + Date.now(),
+                      title: titlePrompt.trim(),
+                      subtitle: 'Exclusive reporting from GoReadPost newsroom.',
+                      summary: 'Exclusive reporting from GoReadPost newsroom.',
+                      category: 'Startups',
+                      categoryName: 'Startups',
+                      categoryLabel: 'Startups',
+                      authorName: 'Editorial Desk',
+                      author: { name: 'Editorial Desk' },
+                      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+                      publishedAt: new Date().toISOString(),
+                      readTime: '4 min read',
+                      isNewlyAdded: true
+                    };
+                    ArticleService.createArticle(newArt).then(() => {
+                      window.dispatchEvent(new CustomEvent('article:change'));
+                      setSaveStatus('saved');
+                      setTimeout(() => setSaveStatus('idle'), 2500);
+                    }).catch(() => {});
+                  }
+                }}
+                title="Add a new article card directly to Latest feed"
+                style={{ background: '#ea580c', color: '#ffffff', border: 'none' }}
+              >
+                <Plus size={14} />
+                <span>+ Add Article</span>
+              </button>
+            )}
+
+            {onOpenSettings && (
+              <button
+                type="button"
+                className="lhs-btn-preview"
+                onClick={onOpenSettings}
+                title="Open Page Info & SEO Settings"
+                style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+              >
+                <Settings size={14} />
+                <span>Page Settings</span>
+              </button>
+            )}
+
             <button
               type="button"
               className="lhs-btn-preview"
+              onClick={() => window.open(pageSlug ? `/${pageSlug.replace(/^\/+/, '')}` : (pageId === 'home' ? '/' : `/${pageId}`), '_blank')}
+              title="Open live public page in new tab"
+            >
+              <ExternalLink size={14} />
+              <span>View Live Page</span>
+            </button>
+
+            <button
+              type="button"
+              className="lhs-btn-save"
               onClick={() => {
-                const titlePrompt = window.prompt("Add article title to latest feed:");
-                if (titlePrompt && titlePrompt.trim()) {
-                  const newArt = {
-                    id: 'art_' + Date.now(),
-                    title: titlePrompt.trim(),
-                    subtitle: 'Exclusive reporting from GoReadPost newsroom.',
-                    summary: 'Exclusive reporting from GoReadPost newsroom.',
-                    category: 'Startups',
-                    categoryName: 'Startups',
-                    categoryLabel: 'Startups',
-                    authorName: 'Editorial Desk',
-                    author: { name: 'Editorial Desk' },
-                    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
-                    publishedAt: new Date().toISOString(),
-                    readTime: '4 min read',
-                    isNewlyAdded: true
-                  };
-                  ArticleService.createArticle(newArt).then(() => {
-                    window.dispatchEvent(new CustomEvent('article:change'));
-                    setSaveStatus('saved');
-                    setTimeout(() => setSaveStatus('idle'), 2500);
-                  }).catch(() => {});
-                }
+                persistPageToDatabase();
+                onClose?.();
               }}
-              title="Add a new article card directly to Latest feed"
-              style={{ background: '#ea580c', color: '#ffffff', border: 'none' }}
             >
-              <Plus size={14} />
-              <span>+ Add Article</span>
+              <Check size={16} />
+              <span>Publish Live</span>
             </button>
-          )}
-
-          {onOpenSettings && (
-            <button
-              type="button"
-              className="lhs-btn-preview"
-              onClick={onOpenSettings}
-              title="Open Page Info & SEO Settings"
-              style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-            >
-              <Settings size={14} />
-              <span>Page Settings</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            className="lhs-btn-preview"
-            onClick={() => window.open(pageSlug ? `/${pageSlug.replace(/^\/+/, '')}` : (pageId === 'home' ? '/' : `/${pageId}`), '_blank')}
-            title="Open live public page in new tab"
-          >
-            <ExternalLink size={14} />
-            <span>View Live Page</span>
-          </button>
-
-          <button
-            type="button"
-            className="lhs-btn-save"
-            onClick={() => {
-              persistPageToDatabase();
-              onClose?.();
-            }}
-          >
-            <Check size={16} />
-            <span>Publish Live</span>
-          </button>
-        </div>
-      </header>
+          </div>
+        </header>
+      )}
 
       {/* ── Main Scrollable Canvas ── */}
       <main className="lhs-workspace">
@@ -948,19 +950,58 @@ export default function LiveWholePageStudio({
               </span>
             </div>
 
-            {!isLatestPage && (
-              <button
-                type="button"
-                className="lse-toolbar-btn primary"
-                onClick={() => {
-                  setInsertAtIndex(null);
-                  setIsAddSectionModalOpen(true);
-                }}
-              >
-                <Plus size={14} />
-                <span>+ Add Section to Page</span>
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {inPageMode && (
+                <>
+                  {saveStatus === 'saving' && (
+                    <span className="lhs-save-indicator saving" style={{ fontSize: '0.75rem', padding: '3px 8px' }}>
+                      <RefreshCw size={12} className="lhs-spin" />
+                      <span>Saving...</span>
+                    </span>
+                  )}
+                  {saveStatus === 'saved' && (
+                    <span className="lhs-save-indicator saved" style={{ fontSize: '0.75rem', padding: '3px 8px' }}>
+                      <Check size={12} />
+                      <span>Saved</span>
+                    </span>
+                  )}
+                  <div className="lhs-viewport-switcher" style={{ margin: 0, padding: '2px 4px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '6px' }}>
+                    <button
+                      type="button"
+                      className={`lhs-viewport-btn ${deviceView === 'desktop' ? 'active' : ''}`}
+                      onClick={() => setDeviceView('desktop')}
+                      style={{ padding: '3px 8px', fontSize: '0.75rem' }}
+                    >
+                      <Monitor size={12} />
+                      <span>Desktop</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`lhs-viewport-btn ${deviceView === 'mobile' ? 'active' : ''}`}
+                      onClick={() => setDeviceView('mobile')}
+                      style={{ padding: '3px 8px', fontSize: '0.75rem' }}
+                    >
+                      <Smartphone size={12} />
+                      <span>Mobile</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {!isLatestPage && (
+                <button
+                  type="button"
+                  className="lse-toolbar-btn primary"
+                  onClick={() => {
+                    setInsertAtIndex(null);
+                    setIsAddSectionModalOpen(true);
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>+ Add Section to Page</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* ── Real Page Content Canvas ── */}
