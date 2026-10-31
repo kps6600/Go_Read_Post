@@ -451,11 +451,8 @@ export default function ModernHomepageView({
     };
 
     // 1. Curated section articles from admin
-    if (sec?.data?.articles && Array.isArray(sec.data.articles)) {
-      addArticles(sec.data.articles);
-      if (sec.data.hasCustomArticles && sec.data.articles.length > 0) {
-        return result.slice(0, limit);
-      }
+    if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
+      return sec.data.articles.filter(Boolean).slice(0, limit);
     }
     if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
       addArticles(sec.articles);

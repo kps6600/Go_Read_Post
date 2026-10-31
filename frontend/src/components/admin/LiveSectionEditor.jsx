@@ -433,11 +433,26 @@ function LiveGenericSectionStudio({
     setData(finalData);
     setSaveStatus('saving');
     try {
+      const targetSecKey = section.sectionKey || section.id || section.type;
+      if (targetSecKey && (pageId === 'home' || !pageId)) {
+        HomepageService.updateSection(targetSecKey, {
+          data: finalData,
+          customConfig: finalData
+        }).catch(() => {});
+      }
       if (onAutoSave) {
         await onAutoSave(finalData);
-        setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 2500);
       }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homepage:change'));
+        window.dispatchEvent(new CustomEvent('page:change'));
+        try {
+          localStorage.setItem('homepage_last_updated', Date.now().toString());
+          localStorage.setItem('pages_last_updated', Date.now().toString());
+        } catch (e) {}
+      }
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2500);
     } catch (err) {
       console.error('Failed to auto-save section:', err);
       setSaveStatus('error');
@@ -448,19 +463,9 @@ function LiveGenericSectionStudio({
   const frontendArticles = useMemo(() => {
     const limit = maxArticlesFit;
 
-    // 1. If custom curated articles are set in data.articles, use exactly those curated articles (reflecting deletions immediately)
+    // 1. If custom curated articles are set in data.articles, use exactly those curated articles (reflecting deletions and additions immediately)
     if (Array.isArray(data.articles)) {
-      const unique = [];
-      const seen = new Set();
-      for (const a of data.articles.filter(Boolean)) {
-        const k = String(a.id || a._id || a.articleId || a.slug || a.title || '').trim().toLowerCase();
-        if (k && !seen.has(k)) {
-          seen.add(k);
-          unique.push(a);
-          if (unique.length >= maxArticlesFit) break;
-        }
-      }
-      return unique.slice(0, maxArticlesFit);
+      return data.articles.filter(Boolean).slice(0, maxArticlesFit);
     }
     
     // 2. Otherwise compute default frontend pool matching ModernHomepageView
@@ -687,7 +692,7 @@ function LiveGenericSectionStudio({
     const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Editorial Bureau'));
 
     const formatted = {
-      id: article._id || article.id || `art-${Date.now()}`,
+      id: article._id || article.id || `art-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       articleId: article._id || article.id,
       title: article.title || 'Untitled Article',
       excerpt: article.excerpt || article.summary || article.description || '',
@@ -715,7 +720,14 @@ function LiveGenericSectionStudio({
       nextArticles.push(formatted);
     }
 
-    const nextData = { ...data, articles: nextArticles, limit: maxArticlesFit, hasCustomArticles: true };
+    const nextData = { 
+      ...data, 
+      articles: nextArticles, 
+      articleIds: nextArticles.map(a => a._id || a.id || a.articleId).filter(Boolean),
+      limit: maxArticlesFit, 
+      hasCustomArticles: true 
+    };
+    setData(nextData);
     persistToDatabase(nextData);
     setIsPickerOpen(false);
   };
@@ -944,7 +956,7 @@ function LiveGenericSectionStudio({
 
                         return (
                           <article 
-                            key={artId} 
+                            key={`${artId}-${idx}`} 
                             className="lap-card lse-hover-item"
                             style={{ 
                               position: 'relative',
@@ -2260,22 +2272,49 @@ function LiveGenericSectionStudio({
                 </div>
               ) : (
                 <div className="lbe-picker-grid">
-                  {filteredPickerArticles.map(article => {
-                    const artId = article._id || article.id;
+                  {filteredPickerArticles.map((article, pIdx) => {
+                    const artId = article._id || article.id || `picker-${pIdx}`;
                     const artTitle = article.title || 'Untitled Article';
                     const artImg = getSafeArticleImage(article);
                     const artCat = (article.categoryName || article.categoryLabel || article.categoryTag || article.category || 'Article').toUpperCase();
                     const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Author'));
 
+                    const existingIndex = activeArticles.findIndex(a => 
+                      (a._id && (a._id === article._id || a._id === article.id)) ||
+                      (a.id && (a.id === article._id || a.id === article.id)) ||
+                      (a.articleId && (a.articleId === article._id || a.articleId === article.id)) ||
+                      (a.slug && article.slug && a.slug === article.slug)
+                    );
+                    const isAlreadyAdded = existingIndex !== -1;
+
                     return (
                       <div 
-                        key={artId} 
-                        className="lbe-picker-card"
+                        key={`${artId}-${pIdx}`} 
+                        className={`lbe-picker-card ${isAlreadyAdded ? 'lbe-picker-card-already-added' : ''}`}
                         onClick={() => handleSelectArticle(article)}
                       >
                         <div className="lbe-picker-card-thumb-wrap">
                           <img src={artImg} alt={artTitle} className="lbe-picker-card-thumb" />
                           <span className="lbe-picker-card-category">{artCat}</span>
+                          {isAlreadyAdded && (
+                            <span 
+                              style={{
+                                position: 'absolute',
+                                top: '8px',
+                                right: '8px',
+                                background: 'rgba(16, 185, 129, 0.95)',
+                                color: '#ffffff',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                                zIndex: 12
+                              }}
+                            >
+                              ✓ Slot #{existingIndex + 1}
+                            </span>
+                          )}
                         </div>
                         <div className="lbe-picker-card-content">
                           <h5 className="lbe-picker-card-title">{artTitle}</h5>
@@ -2291,7 +2330,7 @@ function LiveGenericSectionStudio({
                             }}
                           >
                             <Check size={13} />
-                            <span>Select This Article</span>
+                            <span>{isAlreadyAdded ? `Select Article (Currently Slot #${existingIndex + 1})` : 'Select This Article'}</span>
                           </button>
                         </div>
                       </div>

@@ -422,17 +422,7 @@ export default function LiveHomepageStudio({
     const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
 
     if (Array.isArray(data.articles)) {
-      const unique = [];
-      const seen = new Set();
-      for (const a of data.articles.filter(Boolean)) {
-        const k = String(a.id || a._id || a.articleId || a.slug || a.title || '').trim().toLowerCase();
-        if (k && !seen.has(k)) {
-          seen.add(k);
-          unique.push(a);
-          if (unique.length >= maxFit) break;
-        }
-      }
-      return unique.slice(0, maxFit);
+      return data.articles.filter(Boolean).slice(0, maxFit);
     }
     return sorted.slice(0, maxFit);
   };

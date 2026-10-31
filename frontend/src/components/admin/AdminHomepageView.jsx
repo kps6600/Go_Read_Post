@@ -638,7 +638,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
           onClose={() => setLiveEditingHomepageSec(null)}
           onAutoSave={async (updatedData) => {
             const updatedSections = sections.map(s => {
-              if (s.sectionKey === liveEditingHomepageSec.id) {
+              if (s.sectionKey === (liveEditingHomepageSec.sectionKey || liveEditingHomepageSec.id) || s.id === (liveEditingHomepageSec.sectionKey || liveEditingHomepageSec.id)) {
                 return {
                   ...s,
                   title: updatedData.title || updatedData.heading || s.title,
@@ -663,7 +663,7 @@ export default function AdminHomepageView({ onShowToast, onNavigate }) {
           }}
           onSave={async (updatedData) => {
             const updatedSections = sections.map(s => {
-              if (s.sectionKey === liveEditingHomepageSec.id) {
+              if (s.sectionKey === (liveEditingHomepageSec.sectionKey || liveEditingHomepageSec.id) || s.id === (liveEditingHomepageSec.sectionKey || liveEditingHomepageSec.id)) {
                 return {
                   ...s,
                   title: updatedData.title || updatedData.heading || s.title,
