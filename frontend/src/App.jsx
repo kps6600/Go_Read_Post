@@ -550,31 +550,68 @@ export default function App() {
     const pageSecs = homePage && Array.isArray(homePage.sections) && homePage.sections.length > 0 ? homePage.sections : [];
     const cmsSecs = Array.isArray(homepageSections) && homepageSections.length > 0 ? homepageSections : [];
 
-    if (cmsSecs.length > 0) {
-      return cmsSecs.map(cms => {
-        const match = pageSecs.find(p => (p.sectionKey || p.id || p.type) === (cms.sectionKey || cms.id || cms.type));
-        if (match && (match.data?.hasCustomPopular || match.data?.hasCustomSlides || (match.data?.slides && match.data.slides.length > 0) || (match.data?.popularArticles && match.data.popularArticles.length > 0))) {
-          return {
-            ...cms,
-            ...match,
-            data: { ...(cms.data || {}), ...(cms.customConfig || {}), ...(match.data || {}), ...(match.customConfig || {}) },
-            customConfig: { ...(cms.customConfig || {}), ...(cms.data || {}), ...(match.customConfig || {}), ...(match.data || {}) }
-          };
-        }
-        return {
-          ...cms,
-          data: cms.data || cms.customConfig || {},
-          customConfig: cms.customConfig || cms.data || {}
-        };
-      });
+    // Prioritize sections from whichever source has the latest curated content
+    // Build a unified list preserving order and merging all section data (articles, slides, popular, config)
+    const baseList = cmsSecs.length > 0 ? cmsSecs : pageSecs;
+    const secondaryList = cmsSecs.length > 0 ? pageSecs : cmsSecs;
+
+    const merged = baseList.map(item => {
+      const match = secondaryList.find(s => (s.sectionKey || s.id || s.type) === (item.sectionKey || item.id || item.type));
+      const itemData = item.data || item.customConfig || {};
+      const matchData = match ? (match.data || match.customConfig || {}) : {};
+      
+      const combinedData = {
+        ...matchData,
+        ...itemData,
+        articles: (Array.isArray(itemData.articles) && itemData.articles.length > 0) 
+          ? itemData.articles 
+          : ((Array.isArray(matchData.articles) && matchData.articles.length > 0) ? matchData.articles : item.articles),
+        slides: (Array.isArray(itemData.slides) && itemData.slides.length > 0)
+          ? itemData.slides
+          : matchData.slides,
+        popularArticles: (Array.isArray(itemData.popularArticles) && itemData.popularArticles.length > 0)
+          ? itemData.popularArticles
+          : matchData.popularArticles
+      };
+
+      return {
+        ...item,
+        ...(match || {}),
+        ...item,
+        enabled: item.enabled !== undefined ? item.enabled : (match?.enabled !== undefined ? match.enabled : true),
+        data: combinedData,
+        customConfig: combinedData,
+        articles: combinedData.articles || item.articles || match?.articles
+      };
+    });
+
+    for (const sec of secondaryList) {
+      const key = sec.sectionKey || sec.id || sec.type;
+      if (!merged.some(m => (m.sectionKey || m.id || m.type) === key)) {
+        merged.push(sec);
+      }
     }
 
-    if (pageSecs.length > 0) return pageSecs;
-    return [];
+    return merged.sort((a, b) => (a.order || 0) - (b.order || 0));
   }, [sitePages, homepageSections]);
 
   // Load live stories, navigation tree, pages, and homepage layout from Express / MongoDB API on mount
+    // Refresh homepage sections and pages whenever navigating away from admin
   useEffect(() => {
+    if (currentRoute?.route !== 'admin') {
+      HomepageService.getPublicHomepage().then(secs => {
+        if (Array.isArray(secs) && secs.length > 0) setHomepageSections(secs);
+      }).catch(() => {});
+      PageService.getPages().then(pgs => {
+        if (Array.isArray(pgs) && pgs.length > 0) setSitePages(pgs);
+      }).catch(() => {});
+      StoryService.getStories().then(res => {
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) setStories(res.data);
+      }).catch(() => {});
+    }
+  }, [currentRoute?.route]);
+
+useEffect(() => {
     const fetchAllData = () => {
       StoryService.getStories().then((res) => {
         if (res && res.data && res.data.length > 0) {
@@ -616,7 +653,6 @@ export default function App() {
     };
 
     const handleArticleChange = () => {
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
       StoryService.getStories().then((res) => {
         if (res && res.data && res.data.length > 0) {
           setStories(res.data);
@@ -638,7 +674,6 @@ export default function App() {
     };
 
     const handlePageChange = () => {
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
       PageService.getPages().then((pgs) => {
         if (Array.isArray(pgs)) {
           setSitePages(pgs);
@@ -646,8 +681,10 @@ export default function App() {
       }).catch(() => {});
     };
 
-    const handleHomepageChange = () => {
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
+    const handleHomepageChange = (e) => {
+      if (e?.detail && Array.isArray(e.detail)) {
+        setHomepageSections(e.detail);
+      }
       HomepageService.getPublicHomepage().then((sections) => {
         if (Array.isArray(sections)) {
           setHomepageSections(sections);

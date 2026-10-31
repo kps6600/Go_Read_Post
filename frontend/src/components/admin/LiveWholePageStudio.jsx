@@ -73,6 +73,7 @@ const formatForPopularPost = (article) => {
     title,
     image,
     coverImage: image,
+    isCustom: true,
     readTime,
     category,
     slug,
@@ -87,6 +88,7 @@ export default function LiveWholePageStudio({
   onClose,
   initialSections = null,
   onSaveSuccess = null,
+  onSectionsChange = null,
   stories = [],
   pageId = 'latest',
   pageTitle = 'Latest Articles',
@@ -115,6 +117,17 @@ export default function LiveWholePageStudio({
   const sectionRefs = useRef({});
   const isLatestPage = pageId === 'latest' || pageSlug === 'latest';
   const currentLoadedPageIdRef = useRef(null);
+
+  // Listen for external Publish Live trigger from AdminPageEditor toolbar
+  useEffect(() => {
+    const handleStudioPublish = () => {
+      persistPageToDatabase();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('admin:publish-live-studio', handleStudioPublish);
+      return () => window.removeEventListener('admin:publish-live-studio', handleStudioPublish);
+    }
+  }, [sections]);
 
   // Load sections from MongoDB on mount
   useEffect(() => {
@@ -388,6 +401,7 @@ export default function LiveWholePageStudio({
   const persistPageToDatabase = async (nextSections) => {
     const sectionsToSave = nextSections || sections;
     setSections(sectionsToSave);
+    onSectionsChange?.(sectionsToSave);
     setSaveStatus('saving');
 
     try {

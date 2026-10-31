@@ -175,6 +175,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const [saving, setSaving] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const cardRefs = useRef({});
+  const latestStudioSectionsRef = useRef([]);
   const [activeTab, setActiveTab] = useState('sections'); // 'sections' | 'seo'
   const [editingSection, setEditingSection] = useState(null);
   const [liveBannerEditingSection, setLiveBannerEditingSection] = useState(null);
@@ -686,7 +687,16 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
       const targetStatus = publishOverride || status;
       const targetSlug = isHome ? '' : slug.trim();
-      await persistSections(sections, null, targetStatus);
+
+      const sectionsToPersist = (latestStudioSectionsRef.current && latestStudioSectionsRef.current.length > 0)
+        ? latestStudioSectionsRef.current
+        : sections;
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('admin:publish-live-studio', { detail: { targetStatus } }));
+      }
+
+      await persistSections(sectionsToPersist, null, targetStatus);
       onShowToast?.(
         publishOverride === 'published'
           ? (isHome || !targetSlug ? 'Homepage is now published live!' : `Page "/${targetSlug}" is now published live!`)
@@ -1024,8 +1034,17 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         initialSections={sections}
         stories={allStories.length ? allStories : ALL_STORIES}
         onClose={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+        onSectionsChange={(updated) => {
+          if (Array.isArray(updated)) {
+            latestStudioSectionsRef.current = updated;
+            setSections(updated);
+          }
+        }}
         onSaveSuccess={(updated) => {
-          if (updated) setSections(updated);
+          if (updated) {
+            latestStudioSectionsRef.current = updated;
+            setSections(updated);
+          }
           onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
         }}
         onOpenSettings={() => setActiveTab('seo')}
@@ -1124,7 +1143,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
               }}
             >
               <Plus size={15} />
-              <span>+ Add Section</span>
+              <span>Add Section</span>
             </button>
           )}
 
@@ -1147,7 +1166,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
               }}
             >
               <Plus size={15} />
-              <span>+ Add Card</span>
+              <span>Add Card</span>
             </button>
           )}
 

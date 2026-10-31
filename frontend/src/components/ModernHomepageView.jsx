@@ -454,8 +454,11 @@ export default function ModernHomepageView({
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
       return sec.data.articles.filter(Boolean);
     }
-    if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
-      addArticles(sec.articles);
+    if (sec?.customConfig?.articles && Array.isArray(sec.customConfig.articles) && sec.customConfig.articles.length > 0) {
+      return sec.customConfig.articles.filter(Boolean);
+    }
+    if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
+      return sec.articles.filter(Boolean);
     }
 
     // 2. Curated article IDs

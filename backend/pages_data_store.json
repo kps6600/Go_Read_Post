@@ -4,7 +4,7 @@
     "title": "Homepage",
     "slug": "",
     "brand": "GoReadPost",
-    "description": "Comprehensive reporting on technology, startups, AI, and business.",
+    "description": "GoReadPost Main Editorial Homepage & Lead Portals",
     "heroHeadline": "Stories That Matter in Indian & Global Startups",
     "heroSubhead": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
     "heroBanner": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T12:33:53.486Z",
+        "updatedAt": "2026-10-31T12:52:05.570Z",
         "data": {
           "slides": [
             {
@@ -380,7 +380,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:33:53.490Z",
+        "updatedAt": "2026-10-31T12:52:05.571Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -612,7 +612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:33:53.498Z",
+        "updatedAt": "2026-10-31T12:52:05.573Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending",
@@ -1126,7 +1126,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:33:53.501Z",
+        "updatedAt": "2026-10-31T12:52:05.574Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1612,7 +1612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:33:53.504Z",
+        "updatedAt": "2026-10-31T12:52:05.576Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -2184,7 +2184,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:33:53.506Z",
+        "updatedAt": "2026-10-31T12:52:05.577Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2932,7 +2932,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T12:33:53.515Z",
+        "updatedAt": "2026-10-31T12:52:05.580Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2967,7 +2967,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T12:33:53.518Z",
+        "updatedAt": "2026-10-31T12:52:05.584Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -3002,7 +3002,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T12:33:53.521Z",
+        "updatedAt": "2026-10-31T12:52:05.586Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -3232,12 +3232,53 @@
               "createdAt": "2026-10-28T13:15:02.130Z",
               "updatedAt": "2026-10-28T13:15:02.130Z",
               "__v": 0
+            },
+            {
+              "_id": "6ae1f556d132e2796bff4fb5",
+              "id": "sim-3",
+              "title": "Women farmers of Vidarbha turning dryland tracts into organic profit",
+              "subtitle": "Overcoming droughts and debt through millet cultivation and farmer collective bargaining.",
+              "summary": "Overcoming droughts and debt through millet cultivation and farmer collective bargaining.",
+              "excerpt": "Overcoming droughts and debt through millet cultivation and farmer collective bargaining.",
+              "slug": "sim-3",
+              "brand": "GoReadPost",
+              "category": "startups",
+              "categoryTag": "Startups",
+              "categoryLabel": "Startups",
+              "tag": "LATEST",
+              "image": "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=900&auto=format&fit=crop&q=80",
+              "fallbackImage": "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=900&auto=format&fit=crop&q=80",
+              "author": {
+                "name": "Sunita Sharma",
+                "title": "Agrarian Affairs Editor, HerStory",
+                "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=100&auto=format&fit=crop&q=80"
+              },
+              "authorName": "Sunita Sharma",
+              "authorTitle": "Agrarian Affairs Editor, HerStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=100&auto=format&fit=crop&q=80",
+              "readTime": "6 min read",
+              "readingTime": "6 min read",
+              "publishedAt": "Oct 7, 2026",
+              "content": [
+                ""
+              ],
+              "tags": [],
+              "status": "published",
+              "views": 3204,
+              "claps": 210,
+              "isFeatured": false,
+              "isTrending": false,
+              "isBreaking": false,
+              "isEditorsPick": false,
+              "createdAt": "2026-10-28T13:15:02.114Z",
+              "updatedAt": "2026-10-28T13:15:02.114Z"
             }
           ],
           "articleIds": [
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fbc"
+            "6ae1f556d132e2796bff4fbc",
+            "6ae1f556d132e2796bff4fb5"
           ],
           "hasCustomArticles": true
         },
@@ -3248,7 +3289,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T12:33:53.523Z",
+        "updatedAt": "2026-10-31T12:52:05.587Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }

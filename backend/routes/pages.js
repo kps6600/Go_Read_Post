@@ -718,22 +718,6 @@ router.put('/:id', protectAdmin, async (req, res) => {
       const query = buildPageQuery(id);
 
       let updateSections = updates.sections;
-      if (isHome && Array.isArray(updates.sections)) {
-        const existingPage = await Page.findOne(query);
-        if (existingPage && Array.isArray(existingPage.sections) && existingPage.sections.length > 0) {
-          const merged = [...existingPage.sections];
-          for (const s of updates.sections) {
-            const key = s.sectionKey || s.id || s.type;
-            const idx = merged.findIndex(m => (m.sectionKey || m.id || m.type) === key);
-            if (idx !== -1) {
-              merged[idx] = { ...merged[idx], ...s, data: s.data || s.customConfig || merged[idx].data || {}, customConfig: s.customConfig || s.data || merged[idx].customConfig || {} };
-            } else {
-              merged.push(s);
-            }
-          }
-          updateSections = merged;
-        }
-      }
       
       const updateDoc = {
         ...updates,
@@ -750,19 +734,29 @@ router.put('/:id', protectAdmin, async (req, res) => {
 
       if (isHome && updateSections && Array.isArray(updateSections)) {
         try {
+          const keys = updateSections.map(s => s.sectionKey || s.id || s.type).filter(Boolean);
+          if (keys.length > 0) {
+            await HomepageSection.deleteMany({ sectionKey: { $nin: keys } });
+          }
           for (const s of updateSections) {
             const key = s.sectionKey || s.id || s.type;
             if (!key) continue;
+            const sData = s.data !== undefined ? s.data : (s.customConfig || {});
+            const sCustom = s.customConfig !== undefined ? s.customConfig : (s.data || {});
+            const artIds = Array.isArray(sData?.articleIds)
+              ? sData.articleIds
+              : (Array.isArray(sData?.articles) ? sData.articles.map(a => a._id || a.id).filter(Boolean) : []);
             await HomepageSection.findOneAndUpdate(
               { sectionKey: key },
               {
                 sectionKey: key,
-                title: s.title || (s.data && (s.data.heading || s.data.title)) || key,
-                subtitle: s.subtitle || '',
+                title: s.title || (sData && (sData.heading || sData.title)) || key,
+                subtitle: s.subtitle || (sData && sData.subtitle) || '',
                 enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
                 order: Number(s.order || 0),
-                customConfig: s.customConfig !== undefined ? s.customConfig : (s.data || {}),
-                data: s.data !== undefined ? s.data : (s.customConfig || {})
+                articleIds: artIds,
+                customConfig: sCustom,
+                data: sData
               },
               { upsert: true, new: true }
             );

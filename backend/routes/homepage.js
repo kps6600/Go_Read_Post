@@ -61,11 +61,20 @@ router.get('/', async (req, res) => {
           select: 'title slug subtitle excerpt featuredImage authorName categoryName publishedAt views claps readingTime isFeatured isTrending isBreaking'
         });
 
-      // For any section that doesn't have manually assigned articles, dynamically pull relevant published articles
+      // For any section, prioritize custom curated articles if present
       const populatedSections = await Promise.all(
         sections.map(async (sec) => {
           const doc = sec.toObject();
-          if (!doc.articleIds || doc.articleIds.length === 0) {
+          const sData = doc.data || doc.customConfig || {};
+          const customArticles = (Array.isArray(sData.articles) && sData.articles.length > 0)
+            ? sData.articles
+            : ((Array.isArray(doc.articles) && doc.articles.length > 0) ? doc.articles : null);
+
+          if (customArticles && customArticles.length > 0) {
+            doc.articles = customArticles.map(formatHomepageArticle);
+          } else if (doc.articleIds && doc.articleIds.length > 0) {
+            doc.articles = (doc.articleIds || []).map(formatHomepageArticle);
+          } else {
             let filter = { status: 'published' };
             if (doc.sectionKey === 'hero') {
               filter = { status: 'published', isFeatured: true };
@@ -89,11 +98,9 @@ router.get('/', async (req, res) => {
                 .select('title slug subtitle excerpt featuredImage authorName categoryName publishedAt views claps readingTime isFeatured isTrending isBreaking');
             }
             doc.articles = (fallbackArticles || []).map(formatHomepageArticle);
-          } else {
-            doc.articles = (doc.articleIds || []).map(formatHomepageArticle);
           }
-          doc.data = doc.data || doc.customConfig || {};
-          doc.customConfig = doc.customConfig || doc.data || {};
+          doc.data = { ...(doc.customConfig || {}), ...(doc.data || {}) };
+          doc.customConfig = { ...(doc.data || {}), ...(doc.customConfig || {}) };
           return doc;
         })
       );
@@ -133,21 +140,28 @@ adminHomepageRouter.put('/', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN'),
     }
 
     if (isDbConnected()) {
+      const currentKeys = sections.map(s => s.sectionKey || s.id || s.type).filter(Boolean);
+      if (currentKeys.length > 0) {
+        await HomepageSection.deleteMany({ sectionKey: { $nin: currentKeys } });
+      }
       for (const s of sections) {
         const key = s.sectionKey || s.id || s.type;
         if (!key) continue;
         const configData = s.customConfig !== undefined ? s.customConfig : (s.data || {});
         const sectionData = s.data !== undefined ? s.data : (s.customConfig || {});
+        const artIds = Array.isArray(sectionData?.articleIds)
+          ? sectionData.articleIds
+          : (Array.isArray(sectionData?.articles) ? sectionData.articles.map(a => a._id || a.id).filter(Boolean) : (s.articleIds || []));
         await HomepageSection.findOneAndUpdate(
           { sectionKey: key },
           {
             sectionKey: key,
-            title: s.title || (s.data && (s.data.heading || s.data.title)) || key,
+            title: s.title || (sectionData && (sectionData.heading || sectionData.title)) || key,
             subtitle: s.subtitle || '',
             enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
             order: Number(s.order || 0),
             limit: Number(s.limit || 6),
-            articleIds: s.articleIds || [],
+            articleIds: artIds,
             filterCategory: s.filterCategory || '',
             filterTag: s.filterTag || '',
             customConfig: configData,
