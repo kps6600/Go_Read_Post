@@ -37,6 +37,23 @@ export default function DynamicPageRenderer({
       return;
     }
     loadPage(slug);
+
+    const handlePageChange = () => {
+      if (slug && slug !== '404' && slug !== 'not-found') {
+        loadPage(slug);
+      }
+    };
+    const handleStorageChange = (e) => {
+      if (e.key === 'pages_last_updated' || e.key === 'homepage_last_updated') {
+        handlePageChange();
+      }
+    };
+    window.addEventListener('page:change', handlePageChange);
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('page:change', handlePageChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [slug]);
 
   const loadPage = async (pageSlug) => {

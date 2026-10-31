@@ -44,6 +44,7 @@ export const SettingService = {
       if (res.ok && json.success) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data));
+          localStorage.setItem('settings_last_updated', Date.now().toString());
         } catch (e) {}
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('settings:change', { detail: json.data }));

@@ -256,6 +256,14 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         setSections(updatedSections);
       }
 
+      // Always broadcast page change and storage timestamp for instant multi-tab sync
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('page:change', { detail: updated }));
+        try {
+          localStorage.setItem('pages_last_updated', Date.now().toString());
+        } catch (e) {}
+      }
+
       // If editing homepage, also sync to HomepageService so both endpoints stay 100% aligned
       if (pageId === 'home' || page?.id === 'home' || isHome) {
         try {

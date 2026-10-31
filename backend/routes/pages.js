@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import Page from '../models/Page.js';
+import HomepageSection from '../models/Homepage.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin, verifyJwtToken } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
@@ -696,6 +697,30 @@ router.put('/:id', protectAdmin, async (req, res) => {
         { $set: updateDoc },
         { new: true, upsert: true, setDefaultsOnInsert: true }
       );
+
+      if (isHome && updateSections && Array.isArray(updateSections)) {
+        try {
+          for (const s of updateSections) {
+            const key = s.sectionKey || s.id || s.type;
+            if (!key) continue;
+            await HomepageSection.findOneAndUpdate(
+              { sectionKey: key },
+              {
+                sectionKey: key,
+                title: s.title || (s.data && (s.data.heading || s.data.title)) || key,
+                subtitle: s.subtitle || '',
+                enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
+                order: Number(s.order || 0),
+                customConfig: s.customConfig !== undefined ? s.customConfig : (s.data || {}),
+                data: s.data !== undefined ? s.data : (s.customConfig || {})
+              },
+              { upsert: true, new: true }
+            );
+          }
+        } catch (e) {
+          console.error('Error syncing Page home sections to HomepageSection:', e);
+        }
+      }
       try {
         const list = readFallbackPages();
         const found = findFallbackPage(list, id);

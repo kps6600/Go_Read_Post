@@ -9,8 +9,11 @@ const API_BASE = '/api/pages';
 function notifyPageChange() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem('pages_last_updated', Date.now().toString());
+    localStorage.setItem('homepage_last_updated', Date.now().toString());
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('page:change'));
+      window.dispatchEvent(new CustomEvent('homepage:change'));
     }
   } catch (e) {}
 }
@@ -172,6 +175,13 @@ export const PageService = {
           await HomepageService.updateSections(updates.sections);
         } catch (e) {}
       }
+      try {
+        await fetch(`${API_BASE}/home`, {
+          method: 'PUT',
+          headers: AuthService.getAuthHeaders(),
+          body: JSON.stringify(updates)
+        });
+      } catch (e) {}
       notifyPageChange();
       return {
         id: 'home',

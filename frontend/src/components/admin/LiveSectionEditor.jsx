@@ -408,10 +408,25 @@ function LiveGenericSectionStudio({
     };
     setSaveStatus('saving');
     try {
+      const targetSecKey = section.sectionKey || section.id || section.type;
+      if (targetSecKey && (pageId === 'home' || !pageId)) {
+        HomepageService.updateSection(targetSecKey, {
+          data: finalData,
+          customConfig: finalData
+        }).catch(() => {});
+      }
       if (onSave) {
         await onSave(finalData);
       } else if (onAutoSave) {
         await onAutoSave(finalData);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homepage:change'));
+        window.dispatchEvent(new CustomEvent('page:change'));
+        try {
+          localStorage.setItem('homepage_last_updated', Date.now().toString());
+          localStorage.setItem('pages_last_updated', Date.now().toString());
+        } catch (e) {}
       }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);

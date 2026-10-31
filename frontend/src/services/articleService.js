@@ -9,6 +9,7 @@ function notifyArticleChange() {
       localStorage.removeItem('goreadpost_dynamic_stories');
       localStorage.removeItem('goreadpost_stories_v2');
       localStorage.removeItem('goreadpost_stories_v3');
+      localStorage.setItem('articles_last_updated', Date.now().toString());
     } catch (e) {}
     window.dispatchEvent(new CustomEvent('article:change'));
     window.dispatchEvent(new CustomEvent('story:change'));

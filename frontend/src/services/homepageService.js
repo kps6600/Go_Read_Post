@@ -42,7 +42,14 @@ export const HomepageService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update homepage');
-    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('homepage:change', { detail: json.data }));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('homepage_last_updated', Date.now().toString());
+        localStorage.setItem('pages_last_updated', Date.now().toString());
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('homepage:change', { detail: json.data }));
+      window.dispatchEvent(new CustomEvent('page:change'));
+    }
     return json.data;
   },
 
@@ -58,7 +65,14 @@ export const HomepageService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update section');
-    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('homepage:change', { detail: json.data }));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('homepage_last_updated', Date.now().toString());
+        localStorage.setItem('pages_last_updated', Date.now().toString());
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('homepage:change', { detail: json.data }));
+      window.dispatchEvent(new CustomEvent('page:change'));
+    }
     return json.data;
   }
 };

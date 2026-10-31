@@ -1852,5 +1852,59 @@
     "createdAt": "2026-10-29T07:31:36.826Z",
     "__v": 0,
     "updatedAt": "2026-10-30T07:31:36.827Z"
+  },
+  {
+    "storySlug": "undefined",
+    "contentType": "article",
+    "contentTitle": "Undefined",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": true,
+    "adminReply": {
+      "text": "Spot on analysis, Vikramaditya. Our follow-up piece on Q4 capital allocation will dive deeper into Series B valuations.",
+      "author": "Editorial Desk",
+      "repliedAt": "2026-10-31T04:48:15.612Z"
+    },
+    "rejection_reason": "",
+    "author": "Vikramaditya Shah",
+    "role": "Principal, Peak Capital",
+    "text": "Crucial analysis on this ecosystem shift. The capital discipline we are seeing across the current cohort will set a much stronger foundation for the next decade.",
+    "likes": 18,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae5811f5ae1a64958c4b333",
+    "createdAt": "2026-10-31T03:48:15.612Z",
+    "__v": 0,
+    "updatedAt": "2026-10-31T05:48:15.622Z"
+  },
+  {
+    "storySlug": "undefined",
+    "contentType": "article",
+    "contentTitle": "Undefined",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": false,
+    "adminReply": {
+      "text": "",
+      "author": "Editorial Desk",
+      "repliedAt": null
+    },
+    "rejection_reason": "",
+    "author": "Ananya Deshmukh",
+    "role": "VP Product, SaaS Scale",
+    "text": "Particularly agree with the observations on operational efficiency. Real value creation is finally getting the spotlight over pure GMV chasing.",
+    "likes": 12,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae5811f5ae1a64958c4b334",
+    "createdAt": "2026-10-31T01:48:15.612Z",
+    "__v": 0,
+    "updatedAt": "2026-10-31T05:48:15.623Z"
   }
 ]

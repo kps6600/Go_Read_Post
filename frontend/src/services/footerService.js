@@ -35,6 +35,9 @@ export const FooterService = {
 
     // Broadcast footer update event to instantly refresh live components
     if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('footer_last_updated', Date.now().toString());
+      } catch (e) {}
       window.dispatchEvent(new CustomEvent('footer:change', { detail: json.data }));
     }
 

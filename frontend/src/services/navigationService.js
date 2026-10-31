@@ -68,6 +68,7 @@ export const NavigationService = {
   clearCache() {
     try {
       localStorage.removeItem(CACHE_KEY);
+      localStorage.setItem('navigation_last_updated', Date.now().toString());
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('navigation:change'));
       }

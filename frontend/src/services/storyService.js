@@ -7,6 +7,20 @@ import { SOCIAL_HERO_STORY, SOCIAL_GRID_STORIES, SOCIAL_LATEST_STORIES, SOCIAL_H
 const STORAGE_KEY = 'goreadpost_dynamic_stories';
 const API_BASE = '/api/stories';
 
+function notifyStoryChange() {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem('goreadpost_dynamic_stories');
+      localStorage.removeItem('goreadpost_stories_v2');
+      localStorage.removeItem('goreadpost_stories_v3');
+      localStorage.setItem('articles_last_updated', Date.now().toString());
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent('article:change'));
+    window.dispatchEvent(new CustomEvent('story:change'));
+    window.dispatchEvent(new CustomEvent('homepage:change'));
+  }
+}
+
 // Combine default hardcoded stories as seed base
 export function getDefaultSeedStories() {
   const combined = [
@@ -161,6 +175,7 @@ export const StoryService = {
     const list = getLocalStories();
     list.unshift(newStory);
     setLocalStories(list);
+    notifyStoryChange();
     return newStory;
   },
 
@@ -189,6 +204,7 @@ export const StoryService = {
       return s;
     });
     setLocalStories(list);
+    notifyStoryChange();
     return list.find(s => s._id === id || s.id === id);
   },
 
@@ -207,6 +223,7 @@ export const StoryService = {
 
     const list = getLocalStories().filter(s => s._id !== id && s.id !== id);
     setLocalStories(list);
+    notifyStoryChange();
     return true;
   },
 

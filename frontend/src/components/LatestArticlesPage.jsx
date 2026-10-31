@@ -449,8 +449,10 @@ export default function LatestArticlesPage({
       }
     }
 
-    // 4. Default seed stories
-    (ALL_STORIES || []).forEach(addStory);
+    // 4. Default seed stories only if database is completely empty
+    if (map.size === 0) {
+      (ALL_STORIES || []).forEach(addStory);
+    }
 
     const allList = Array.from(map.values());
 

@@ -223,20 +223,12 @@ export default function ModernHomepageView({
     } catch (e) {}
   }, []);
 
-  // Pool of stories: Live database stories merged with ALL_STORIES
+  // Pool of stories: Live database stories (fallback to ALL_STORIES only if database has not yet loaded)
   const pool = useMemo(() => {
-    const combined = Array.isArray(stories) ? [...stories] : [];
-    const seen = new Set(
-      combined.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase())
-    );
-    for (const item of ALL_STORIES) {
-      const key = String(item.slug || item.id || item._id || item.title || '').trim().toLowerCase();
-      if (key && !seen.has(key)) {
-        seen.add(key);
-        combined.push(item);
-      }
+    if (Array.isArray(stories) && stories.length > 0) {
+      return stories;
     }
-    return combined;
+    return ALL_STORIES;
   }, [stories]);
 
   // Active homepage sections from database or sensible defaults

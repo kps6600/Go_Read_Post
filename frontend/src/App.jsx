@@ -662,6 +662,18 @@ export default function App() {
         handleHomepageChange();
         handlePageChange();
       }
+      if (e.key === 'articles_last_updated') {
+        handleArticleChange();
+      }
+      if (e.key === 'settings_last_updated') {
+        handleSettingsChange({});
+      }
+      if (e.key === 'navigation_last_updated') {
+        handleNavChange();
+      }
+      if (e.key === 'taxonomy_last_updated') {
+        handleTaxonomyChange();
+      }
     };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('settings:change', handleSettingsChange);

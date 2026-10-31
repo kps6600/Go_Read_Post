@@ -283,6 +283,21 @@ export default function ArticlePage({
     loadArticle(slug, false);
   }, [slug, story]);
 
+  // Live article updates listener: automatically refreshes when article is edited in Admin
+  useEffect(() => {
+    const handleArticleUpdate = () => {
+      if (activeSlug) {
+        loadArticle(activeSlug, true);
+      }
+    };
+    window.addEventListener('article:change', handleArticleUpdate);
+    window.addEventListener('story:change', handleArticleUpdate);
+    return () => {
+      window.removeEventListener('article:change', handleArticleUpdate);
+      window.removeEventListener('story:change', handleArticleUpdate);
+    };
+  }, [activeSlug]);
+
   // 2. SEO Title, Metadata & JSON-LD Structured Data
   useEffect(() => {
     if (!article?.title) return;
@@ -543,22 +558,12 @@ export default function ArticlePage({
     return '';
   };
 
-  // Combined candidate pool of stories (live stories + curated fallback stories)
+  // Candidate pool of stories directly from live MongoDB database
   const allStoriesPool = useMemo(() => {
-    const list = Array.isArray(stories) && stories.length > 0 ? [...stories] : [];
-    const seen = new Set();
-    list.forEach(item => {
-      const key = String(item.id || item._id || item.slug || item.title || '').trim();
-      if (key) seen.add(key);
-    });
-    (ALL_STORIES || []).forEach(item => {
-      const key = String(item.id || item._id || item.slug || item.title || '').trim();
-      if (key && !seen.has(key)) {
-        list.push(item);
-        seen.add(key);
-      }
-    });
-    return list;
+    if (Array.isArray(stories) && stories.length > 0) {
+      return stories;
+    }
+    return ALL_STORIES;
   }, [stories]);
 
   // Helper to test if a candidate story is the currently open article

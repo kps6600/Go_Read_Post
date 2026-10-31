@@ -277,7 +277,9 @@ export default function TrendingPage({
       feedSec.data.articles.forEach(addStory);
     }
 
-    (ALL_STORIES || []).forEach(addStory);
+    if (map.size === 0) {
+      (ALL_STORIES || []).forEach(addStory);
+    }
 
     const allList = Array.from(map.values());
 

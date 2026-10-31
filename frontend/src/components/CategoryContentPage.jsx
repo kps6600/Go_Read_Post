@@ -240,7 +240,16 @@ export default function CategoryContentPage({
     };
 
     window.addEventListener('page:category:change', handleCategoryConfigChange);
-    return () => window.removeEventListener('page:category:change', handleCategoryConfigChange);
+    window.addEventListener('page:change', loadConfig);
+    const handleStorage = (e) => {
+      if (e.key === 'pages_last_updated') loadConfig();
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('page:category:change', handleCategoryConfigChange);
+      window.removeEventListener('page:change', loadConfig);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, [customConfig]);
 
   // Primary Layout: defaults to 'grid' (4 cards in one row)

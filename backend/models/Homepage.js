@@ -19,7 +19,7 @@ const homepageSectionSchema = new mongoose.Schema(
     customConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
     data: { type: mongoose.Schema.Types.Mixed, default: {} }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 homepageSectionSchema.index({ order: 1 });

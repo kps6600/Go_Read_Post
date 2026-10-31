@@ -157,6 +157,22 @@ adminHomepageRouter.put('/', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN'),
         );
       }
 
+      try {
+        const homePage = await Page.findOne({ $or: [{ id: 'home' }, { slug: '' }] });
+        if (homePage) {
+          homePage.sections = sections.map((s, idx) => ({
+            ...s,
+            order: idx + 1,
+            sectionKey: s.sectionKey || s.id || s.type,
+            data: s.data !== undefined ? s.data : (s.customConfig || {}),
+            customConfig: s.customConfig !== undefined ? s.customConfig : (s.data || {})
+          }));
+          await homePage.save();
+        }
+      } catch (err) {
+        console.error('Error syncing batch homepage sections to Page model:', err);
+      }
+
       const updated = await HomepageSection.find().sort({ order: 1 }).populate('articleIds', 'title slug');
       return res.json({ success: true, message: 'Homepage layout updated successfully', data: updated });
     }

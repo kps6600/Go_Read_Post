@@ -3,17 +3,20 @@ import mongoose from 'mongoose';
 const sectionSchema = new mongoose.Schema(
   {
     id: { type: String, default: () => 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) },
+    sectionKey: { type: String, trim: true },
     type: { 
       type: String, 
       required: true,
       trim: true
     },
+    title: { type: String, default: '' },
+    subtitle: { type: String, default: '' },
     order: { type: Number, default: 0 },
     enabled: { type: Boolean, default: true },
     data: { type: mongoose.Schema.Types.Mixed, default: {} },
     customConfig: { type: mongoose.Schema.Types.Mixed, default: {} }
   },
-  { _id: false }
+  { _id: false, strict: false }
 );
 
 const seoSchema = new mongoose.Schema(
@@ -47,7 +50,7 @@ const pageSchema = new mongoose.Schema(
     data: { type: mongoose.Schema.Types.Mixed, default: {} },
     publishedAt: { type: Date }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 // Indexes for fast lookup

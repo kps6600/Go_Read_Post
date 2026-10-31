@@ -1,5 +1,15 @@
 import { AuthService } from './authService';
 
+function notifyTaxonomyChange(type) {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('taxonomy_last_updated', Date.now().toString());
+    } catch (e) {}
+    if (type) window.dispatchEvent(new CustomEvent(`${type}:change`));
+    window.dispatchEvent(new CustomEvent('taxonomy:change'));
+  }
+}
+
 export const TaxonomyService = {
   // Categories
   async getCategories() {
@@ -58,7 +68,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create category');
-    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('category:change'));
+    notifyTaxonomyChange('category');
     return json.data;
   },
 
@@ -74,7 +84,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update category');
-    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('category:change'));
+    notifyTaxonomyChange('category');
     return json.data;
   },
 
@@ -93,7 +103,7 @@ export const TaxonomyService = {
       }
       throw err;
     }
-    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('category:change'));
+    notifyTaxonomyChange('category');
     return true;
   },
 
@@ -144,6 +154,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create author');
+    notifyTaxonomyChange('author');
     return json.data;
   },
 
@@ -159,6 +170,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update author');
+    notifyTaxonomyChange('author');
     return json.data;
   },
 
@@ -170,6 +182,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete author');
+    notifyTaxonomyChange('author');
     return true;
   },
 
@@ -245,6 +258,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create topic');
+    notifyTaxonomyChange('topic');
     return json.data;
   },
 
@@ -260,6 +274,7 @@ export const TaxonomyService = {
     });
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update topic');
+    notifyTaxonomyChange('topic');
     return json.data;
   },
 
@@ -278,6 +293,7 @@ export const TaxonomyService = {
       }
       throw err;
     }
+    notifyTaxonomyChange('topic');
     return true;
   },
 
