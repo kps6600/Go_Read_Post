@@ -665,11 +665,30 @@ router.put('/:id', protectAdmin, async (req, res) => {
       const isHome = id === 'home' || updates.slug === '' || updates.slug === 'home' || updates.id === 'home';
       const pageIdToUse = isHome ? 'home' : (updates.id || id);
       const query = buildPageQuery(id);
+
+      let updateSections = updates.sections;
+      if (isHome && Array.isArray(updates.sections)) {
+        const existingPage = await Page.findOne(query);
+        if (existingPage && Array.isArray(existingPage.sections) && existingPage.sections.length > 0) {
+          const merged = [...existingPage.sections];
+          for (const s of updates.sections) {
+            const key = s.sectionKey || s.id || s.type;
+            const idx = merged.findIndex(m => (m.sectionKey || m.id || m.type) === key);
+            if (idx !== -1) {
+              merged[idx] = { ...merged[idx], ...s, data: s.data || s.customConfig || merged[idx].data || {}, customConfig: s.customConfig || s.data || merged[idx].customConfig || {} };
+            } else {
+              merged.push(s);
+            }
+          }
+          updateSections = merged;
+        }
+      }
       
       const updateDoc = {
         ...updates,
         id: pageIdToUse,
-        slug: isHome ? '' : (updates.slug || '')
+        slug: isHome ? '' : (updates.slug || ''),
+        ...(updateSections ? { sections: updateSections } : {})
       };
 
       const updated = await Page.findOneAndUpdate(

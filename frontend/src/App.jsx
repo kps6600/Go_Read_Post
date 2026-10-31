@@ -547,12 +547,29 @@ export default function App() {
 
   const activeHomeSections = useMemo(() => {
     const homePage = sitePages.find(p => p.id === 'home' || p.slug === '' || p.slug === 'home');
-    if (homePage && Array.isArray(homePage.sections) && homePage.sections.length > 0) {
-      return homePage.sections;
+    const pageSecs = homePage && Array.isArray(homePage.sections) && homePage.sections.length > 0 ? homePage.sections : [];
+    const cmsSecs = Array.isArray(homepageSections) && homepageSections.length > 0 ? homepageSections : [];
+
+    if (cmsSecs.length > 0) {
+      return cmsSecs.map(cms => {
+        const match = pageSecs.find(p => (p.sectionKey || p.id || p.type) === (cms.sectionKey || cms.id || cms.type));
+        if (match && (match.data?.hasCustomPopular || match.data?.hasCustomSlides || (match.data?.slides && match.data.slides.length > 0) || (match.data?.popularArticles && match.data.popularArticles.length > 0))) {
+          return {
+            ...cms,
+            ...match,
+            data: { ...(cms.data || {}), ...(cms.customConfig || {}), ...(match.data || {}), ...(match.customConfig || {}) },
+            customConfig: { ...(cms.customConfig || {}), ...(cms.data || {}), ...(match.customConfig || {}), ...(match.data || {}) }
+          };
+        }
+        return {
+          ...cms,
+          data: cms.data || cms.customConfig || {},
+          customConfig: cms.customConfig || cms.data || {}
+        };
+      });
     }
-    if (Array.isArray(homepageSections) && homepageSections.length > 0) {
-      return homepageSections;
-    }
+
+    if (pageSecs.length > 0) return pageSecs;
     return [];
   }, [sitePages, homepageSections]);
 

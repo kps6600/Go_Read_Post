@@ -302,11 +302,28 @@ export default function LiveBannerEditor({
 
     setSaveStatus('saving');
     try {
+      // 1. Instant parent auto-save
       if (onAutoSave) {
-        await onAutoSave(finalData);
-        setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 2500);
+        onAutoSave(finalData).catch(() => {});
       }
+
+      // 2. Direct instant API update to homepage section
+      HomepageService.updateSection('hero_popular', {
+        data: finalData,
+        customConfig: finalData
+      }).catch(() => {});
+
+      // 3. Direct instant broadcast to live frontend views & storage
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homepage:change', { detail: [{ sectionKey: 'hero_popular', data: finalData, customConfig: finalData }] }));
+        window.dispatchEvent(new CustomEvent('page:change'));
+        try {
+          localStorage.setItem('homepage_last_updated', Date.now().toString());
+        } catch (e) {}
+      }
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2500);
     } catch (err) {
       console.error('Failed to auto-save banner change:', err);
       setSaveStatus('error');
@@ -609,11 +626,26 @@ export default function LiveBannerEditor({
     };
     setSaveStatus('saving');
     try {
+      // Direct instant API update
+      await HomepageService.updateSection('hero_popular', {
+        data: finalData,
+        customConfig: finalData
+      }).catch(() => {});
+
       if (onSave) {
         await onSave(finalData);
       } else if (onAutoSave) {
         await onAutoSave(finalData);
       }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homepage:change', { detail: [{ sectionKey: 'hero_popular', data: finalData, customConfig: finalData }] }));
+        window.dispatchEvent(new CustomEvent('page:change'));
+        try {
+          localStorage.setItem('homepage_last_updated', Date.now().toString());
+        } catch (e) {}
+      }
+
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (err) {

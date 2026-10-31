@@ -1,5 +1,6 @@
 import express from 'express';
 import HomepageSection, { DEFAULT_HOMEPAGE_SECTIONS } from '../models/Homepage.js';
+import Page from '../models/Page.js';
 import Article from '../models/Article.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin, requireRoles } from '../middleware/auth.js';
@@ -184,6 +185,32 @@ adminHomepageRouter.put('/:sectionKey', protectAdmin, requireRoles('SUPER_ADMIN'
         mergedUpdate,
         { upsert: true, new: true }
       ).populate('articleIds', 'title slug');
+
+      // Sync to Page 'home' model
+      try {
+        const homePage = await Page.findOne({ $or: [{ id: 'home' }, { slug: '' }] });
+        if (homePage && Array.isArray(homePage.sections)) {
+          const sIdx = homePage.sections.findIndex(s => (s.sectionKey || s.id || s.type) === sectionKey);
+          if (sIdx !== -1) {
+            homePage.sections[sIdx] = {
+              ...homePage.sections[sIdx],
+              data: mergedUpdate.data,
+              customConfig: mergedUpdate.customConfig
+            };
+          } else {
+            homePage.sections.push({
+              id: sectionKey,
+              type: sectionKey,
+              sectionKey,
+              enabled: true,
+              data: mergedUpdate.data,
+              customConfig: mergedUpdate.customConfig
+            });
+          }
+          await homePage.save();
+        }
+      } catch (err) {}
+
       return res.json({ success: true, message: `Section ${sectionKey} updated`, data: updated });
     }
 
