@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Flame, Sparkles, Plus, Trash2, ArrowLeft, ArrowRight, 
   ChevronLeft, ChevronRight, Search, RefreshCw, Layers, 
@@ -104,7 +104,7 @@ const normalizeArticle = (a, index = 0) => {
   };
 };
 
-export default function AdminTrendingView({ onShowToast, onNavigate }) {
+export default function AdminTrendingView({ onShowToast, onNavigate, isStudioView = false }) {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -441,8 +441,9 @@ export default function AdminTrendingView({ onShowToast, onNavigate }) {
   const slideDate = activeSlide.date || activeSlide.publishedAt || 'Today';
 
   return (
-    <div className="atv-fullpage-root">
+    <div className="atv-fullpage-root" style={isStudioView ? { minHeight: 'auto', background: 'transparent' } : {}}>
       {/* ── Full-Page Studio Top Bar ── */}
+      {!isStudioView && (
       <header className="atv-studio-topbar">
         <div className="atv-topbar-left">
           <button
@@ -482,6 +483,7 @@ export default function AdminTrendingView({ onShowToast, onNavigate }) {
           </button>
         </div>
       </header>
+      )}
 
       <div className="atv-container">
         {/* ── 1. SECTION A: Top Interactive Hero Slider ── */}

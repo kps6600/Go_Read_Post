@@ -182,3 +182,4 @@ code = code.replace(oldHeaderRight, newHeaderRight);
 
 fs.writeFileSync(editorPath, code, 'utf8');
 console.log('AdminPageEditor.jsx successfully updated.');
+

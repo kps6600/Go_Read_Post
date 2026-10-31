@@ -14,7 +14,7 @@ import { PageService } from '../../services/pageService';
 import AboutSection from '../AboutSection';
 import './AdminAboutView.css';
 
-export default function AdminAboutView({ onShowToast, onNavigate }) {
+export default function AdminAboutView({ onShowToast, onNavigate, isStudioView = false }) {
   const [aboutData, setAboutData] = useState(() => getStoredAboutData());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -235,8 +235,9 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
   const { hero, whoWeAre, statsBar, teamSection, seo } = aboutData;
 
   return (
-    <div className="aav-fullpage-root">
+    <div className="aav-fullpage-root" style={isStudioView ? { minHeight: 'auto', background: 'transparent' } : {}}>
       {/* ── Studio Topbar ── */}
+      {!isStudioView && (
       <header className="aav-studio-topbar">
         <div className="aav-topbar-left">
           <button
@@ -285,6 +286,7 @@ export default function AdminAboutView({ onShowToast, onNavigate }) {
           </button>
         </div>
       </header>
+      )}
 
       <div className="aav-container">
         {/* ── Navigation Tabs ── */}

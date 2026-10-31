@@ -48,7 +48,7 @@ const normalizeStory = (s, idx = 0) => {
   };
 };
 
-export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
+export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStudioView = false }) {
   // Loading & saving states
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -344,8 +344,9 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
   }
 
   return (
-    <div className="acsv-live-root">
+    <div className="acsv-live-root" style={isStudioView ? { minHeight: 'auto', background: 'transparent' } : {}}>
       {/* ── 1. Top Sticky Studio Bar ── */}
+      {!isStudioView && (
       <header className="acsv-studio-topbar">
         <div className="acsv-topbar-left">
           <button
@@ -403,6 +404,7 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate }) {
           </button>
         </div>
       </header>
+      )}
 
       {/* ── 2. Live Page Container ── */}
       <div className="acsv-container">

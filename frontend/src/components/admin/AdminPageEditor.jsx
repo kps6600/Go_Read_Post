@@ -12,6 +12,19 @@ import LiveSectionEditor from './LiveSectionEditor';
 import LiveHomepageStudio from './LiveHomepageStudio';
 import LiveWholePageStudio from './LiveWholePageStudio';
 import LatestArticlesPage from '../LatestArticlesPage';
+import AdminTrendingView from './AdminTrendingView';
+import AdminCategoryStudioView from './AdminCategoryStudioView';
+import AdminAboutView from './AdminAboutView';
+import ContactPage from '../ContactPage';
+import AdvertisePage from '../AdvertisePage';
+import AIStoryPage from '../AIStoryPage';
+import HerStoryPage from '../HerStoryPage';
+import SocialStoryPage from '../SocialStoryPage';
+import SMBStoryPage from '../SMBStoryPage';
+import EnterpriseStoryPage from '../EnterpriseStoryPage';
+import TopicsPage from '../TopicsPage';
+import VideosPage from '../VideosPage';
+import NewsletterPage from '../NewsletterPage';
 import { ALL_STORIES } from '../../data/storiesData';
 import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 
@@ -901,6 +914,124 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const displayTitle = isHomepage ? rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim();
   const displaySlug = isHomepage ? '/' : (slug ? `/${slug.replace(/^\/+/, '')}` : (pageId && !pageId.match(/^[0-9a-fA-F]{24}$/) ? `/${pageId}` : '/'));
 
+  // Multi-Page Visual Studio Switcher: routes every page to its dedicated live visual in-page studio
+  const renderVisualStudioForPage = () => {
+    const normId = (pageId || '').toLowerCase().trim();
+    const normSlug = (slug || page?.slug || '').toLowerCase().replace(/^\/+/, '').trim();
+
+    // 1. Latest Articles Page
+    if (normId === 'latest' || normSlug === 'latest') {
+      return (
+        <LatestArticlesPage
+          isStudioView={true}
+          onShowToast={onShowToast}
+        />
+      );
+    }
+
+    // 2. Trending Stories Page
+    if (normId === 'trending' || normSlug === 'trending') {
+      return (
+        <AdminTrendingView
+          isStudioView={true}
+          onShowToast={onShowToast}
+          onNavigate={onNavigate}
+        />
+      );
+    }
+
+    // 3. Category Desks & Beats Page
+    if (normId === 'category' || normId === 'categories' || normSlug === 'category' || normSlug === 'categories') {
+      return (
+        <AdminCategoryStudioView
+          isStudioView={true}
+          onShowToast={onShowToast}
+          onNavigate={onNavigate}
+        />
+      );
+    }
+
+    // 4. About Us Page
+    if (normId === 'about' || normSlug === 'about' || normSlug === 'about-us') {
+      return (
+        <AdminAboutView
+          isStudioView={true}
+          onShowToast={onShowToast}
+          onNavigate={onNavigate}
+        />
+      );
+    }
+
+    // 5. Contact Us Page
+    if (normId === 'contact' || normSlug === 'contact' || normSlug === 'contact-us') {
+      return (
+        <ContactPage
+          isStudioView={true}
+          onShowToast={onShowToast}
+          onBackToHome={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+        />
+      );
+    }
+
+    // 6. Advertise With Us Page
+    if (normId === 'page_advertise' || normId === 'advertise' || normSlug === 'advertise' || normSlug === 'advertise-with-us') {
+      return (
+        <AdvertisePage
+          isStudioView={true}
+          page={page}
+          onShowToast={onShowToast}
+          onBackToHome={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+        />
+      );
+    }
+
+    // 7. Specialty Hubs
+    if (normId === 'ai-story' || normSlug === 'ai-story') {
+      return <AIStoryPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'her-story' || normSlug === 'her-story') {
+      return <HerStoryPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'social-story' || normSlug === 'social-story') {
+      return <SocialStoryPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'smbstory' || normSlug === 'smbstory') {
+      return <SMBStoryPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'enterprise' || normSlug === 'enterprise') {
+      return <EnterpriseStoryPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'topics' || normSlug === 'topics') {
+      return <TopicsPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'videos' || normSlug === 'videos') {
+      return <VideosPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+    if (normId === 'newsletter' || normSlug === 'newsletter') {
+      return <NewsletterPage isStudioView={true} onShowToast={onShowToast} />;
+    }
+
+    // 8. Homepage or any other Dynamic / Custom Landing Page (WYSIWYG sections studio)
+    return (
+      <LiveWholePageStudio
+        isOpen={true}
+        inPageMode={true}
+        pageId={pageId}
+        pageTitle={displayTitle}
+        pageSlug={displaySlug}
+        initialSections={sections}
+        stories={allStories.length ? allStories : ALL_STORIES}
+        onClose={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+        onSaveSuccess={(updated) => {
+          if (updated) setSections(updated);
+          fetchPage();
+          onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
+        }}
+        onOpenSettings={() => setActiveTab('seo')}
+      />
+    );
+  };
+
   
 
 
@@ -1044,55 +1175,20 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           TAB 1: LIVE UI VISUAL STUDIO (RENDERED IN THE SAME PAGE)
          ======================================================== */}
       {activeTab === 'sections' && (
-        pageId === 'latest' ? (
-          <div 
-            className="admin-same-page-visual-editor"
-            style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              overflow: 'visible',
-              padding: '1.25rem',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
-              marginBottom: '2rem'
-            }}
-          >
-            <LatestArticlesPage
-              isStudioView={true}
-              onShowToast={onShowToast}
-            />
-          </div>
-        ) : (
-          <div 
-            className="admin-same-page-visual-editor"
-            style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              overflow: 'visible',
-              padding: '1.25rem',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
-              marginBottom: '2rem'
-            }}
-          >
-            <LiveWholePageStudio
-              isOpen={true}
-              inPageMode={true}
-              pageId={pageId}
-              pageTitle={displayTitle}
-              pageSlug={displaySlug}
-              initialSections={sections}
-              stories={allStories.length ? allStories : ALL_STORIES}
-              onClose={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
-              onSaveSuccess={(updated) => {
-                if (updated) setSections(updated);
-                fetchPage();
-                onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
-              }}
-              onOpenSettings={() => setActiveTab('seo')}
-            />
-          </div>
-        )
+        <div 
+          className="admin-same-page-visual-editor"
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '16px',
+            overflow: 'visible',
+            padding: '1.25rem',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+            marginBottom: '2rem'
+          }}
+        >
+          {renderVisualStudioForPage()}
+        </div>
       )}
 
       {/* ========================================================

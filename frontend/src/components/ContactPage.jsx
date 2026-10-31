@@ -20,12 +20,32 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SubmissionService } from '../services/submissionService';
-import { getStoredContactData, DEFAULT_CONTACT_DATA } from '../data/contactData';
+import { getStoredContactData, DEFAULT_CONTACT_DATA, saveStoredContactData } from '../data/contactData';
+import { PageService } from '../services/pageService';
 import './ContactPage.css';
 
-export default function ContactPage({ onBackToHome, onShowToast }) {
+export default function ContactPage({ onBackToHome, onShowToast, isStudioView = false }) {
   const [contactData, setContactData] = useState(() => getStoredContactData());
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
+  const persistContactData = (updated) => {
+    setContactData(updated);
+    saveStoredContactData(updated);
+    try {
+      PageService.updatePage('contact', {
+        title: 'Contact Us',
+        slug: 'contact',
+        sections: [
+          { id: 'hero', type: 'contact_hero', data: updated.hero },
+          { id: 'channels', type: 'contact_channels', data: updated.channels },
+          { id: 'departments', type: 'contact_departments', data: { departments: updated.departments } },
+          { id: 'bureaus', type: 'contact_bureaus', data: { bureaus: updated.bureaus } },
+          { id: 'faqs', type: 'contact_faqs', data: { faqs: updated.faqs } }
+        ]
+      }).catch(() => {});
+    } catch (e) {}
+    if (onShowToast) onShowToast('Contact Us updated and saved live!');
+  };
 
   const formRef = useRef(null);
 
@@ -197,16 +217,68 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
           </div>
 
           <h1 className="contact-hero-title">
-            {hero.titlePrefix} <span className="contact-highlight-red">{hero.titleHighlight}</span>
+            <span
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "lse-direct-editable" : ""}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== hero.titlePrefix) {
+                  persistContactData({ ...contactData, hero: { ...hero, titlePrefix: val } });
+                }
+              }}
+              title={isStudioView ? "Click directly to edit" : undefined}
+            >
+              {hero.titlePrefix}
+            </span>
+            {' '}
+            <span
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "contact-highlight-red lse-direct-editable" : "contact-highlight-red"}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== hero.titleHighlight) {
+                  persistContactData({ ...contactData, hero: { ...hero, titleHighlight: val } });
+                }
+              }}
+              title={isStudioView ? "Click directly to edit" : undefined}
+            >
+              {hero.titleHighlight}
+            </span>
           </h1>
 
-          <p className="contact-hero-subtitle">
+          <p
+            contentEditable={isStudioView}
+            suppressContentEditableWarning={true}
+            className={isStudioView ? "contact-hero-subtitle lse-direct-editable" : "contact-hero-subtitle"}
+            onBlur={(e) => {
+              const val = e.currentTarget.textContent.trim();
+              if (val && val !== hero.subtitle) {
+                persistContactData({ ...contactData, hero: { ...hero, subtitle: val } });
+              }
+            }}
+            title={isStudioView ? "Click directly to edit" : undefined}
+          >
             {hero.subtitle}
           </p>
 
           <div className="contact-response-notice">
             <Clock size={16} color="var(--brand-primary, #dc2626)" />
-            <span>{hero.responseNotice}</span>
+            <span
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "lse-direct-editable" : ""}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== hero.responseNotice) {
+                  persistContactData({ ...contactData, hero: { ...hero, responseNotice: val } });
+                }
+              }}
+              title={isStudioView ? "Click directly to edit" : undefined}
+            >
+              {hero.responseNotice}
+            </span>
           </div>
         </header>
 
@@ -222,12 +294,54 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                   <span className="contact-dept-badge">{dept.badge}</span>
                 </div>
 
-                <h3 className="contact-dept-title">{dept.title}</h3>
-                <p className="contact-dept-desc">{dept.desc}</p>
+                <h3 
+                  contentEditable={isStudioView} 
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "contact-dept-title lse-direct-editable" : "contact-dept-title"}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== dept.title) {
+                      const updated = contactData.departments.map(d => d.id === dept.id ? { ...d, title: val } : d);
+                      persistContactData({ ...contactData, departments: updated });
+                    }
+                  }}
+                  title={isStudioView ? "Click directly to edit" : undefined}
+                >
+                  {dept.title}
+                </h3>
+                <p 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "contact-dept-desc lse-direct-editable" : "contact-dept-desc"}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== dept.desc) {
+                      const updated = contactData.departments.map(d => d.id === dept.id ? { ...d, desc: val } : d);
+                      persistContactData({ ...contactData, departments: updated });
+                    }
+                  }}
+                  title={isStudioView ? "Click directly to edit" : undefined}
+                >
+                  {dept.desc}
+                </p>
 
-                <a href={`mailto:${dept.email}`} className="contact-dept-email">
+                <a href={`mailto:${dept.email}`} className="contact-dept-email" onClick={e => isStudioView && e.preventDefault()}>
                   <Mail size={15} />
-                  <span>{dept.email}</span>
+                  <span
+                    contentEditable={isStudioView}
+                    suppressContentEditableWarning={true}
+                    className={isStudioView ? "lse-direct-editable" : ""}
+                    onBlur={(e) => {
+                      const val = e.currentTarget.textContent.trim();
+                      if (val && val !== dept.email) {
+                        const updated = contactData.departments.map(d => d.id === dept.id ? { ...d, email: val } : d);
+                        persistContactData({ ...contactData, departments: updated });
+                      }
+                    }}
+                    title={isStudioView ? "Click directly to edit email" : undefined}
+                  >
+                    {dept.email}
+                  </span>
                 </a>
 
                 <button 
@@ -264,10 +378,34 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                   </div>
                   <div className="contact-channel-info">
                     <span className="contact-channel-label">Direct Bureau Line</span>
-                    <a href={`tel:${channels.phone}`} className="contact-channel-val">
+                    <span
+                      contentEditable={isStudioView}
+                      suppressContentEditableWarning={true}
+                      className={isStudioView ? "contact-channel-val lse-direct-editable" : "contact-channel-val"}
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== channels.displayPhone) {
+                          persistContactData({ ...contactData, channels: { ...channels, displayPhone: val, phone: val } });
+                        }
+                      }}
+                      title={isStudioView ? "Click directly to edit" : undefined}
+                    >
                       {channels.displayPhone}
-                    </a>
-                    <span className="contact-channel-sub">{channels.workingHours}</span>
+                    </span>
+                    <span 
+                      contentEditable={isStudioView}
+                      suppressContentEditableWarning={true}
+                      className={isStudioView ? "contact-channel-sub lse-direct-editable" : "contact-channel-sub"}
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== channels.workingHours) {
+                          persistContactData({ ...contactData, channels: { ...channels, workingHours: val } });
+                        }
+                      }}
+                      title={isStudioView ? "Click directly to edit" : undefined}
+                    >
+                      {channels.workingHours}
+                    </span>
                   </div>
                 </div>
 
@@ -278,9 +416,20 @@ export default function ContactPage({ onBackToHome, onShowToast }) {
                   </div>
                   <div className="contact-channel-info">
                     <span className="contact-channel-label">Central Email</span>
-                    <a href={`mailto:${channels.primaryEmail}`} className="contact-channel-val">
+                    <span
+                      contentEditable={isStudioView}
+                      suppressContentEditableWarning={true}
+                      className={isStudioView ? "contact-channel-val lse-direct-editable" : "contact-channel-val"}
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== channels.primaryEmail) {
+                          persistContactData({ ...contactData, channels: { ...channels, primaryEmail: val } });
+                        }
+                      }}
+                      title={isStudioView ? "Click directly to edit" : undefined}
+                    >
                       {channels.primaryEmail}
-                    </a>
+                    </span>
                     <span className="contact-channel-sub">{channels.weekendCoverage}</span>
                   </div>
                 </div>

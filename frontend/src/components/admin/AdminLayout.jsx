@@ -229,9 +229,10 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     // 6. Homepage CMS & Live Studio: /admin/homepage
     if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) {
       return (
-        <AdminHomepageView 
-          onShowToast={onShowToast} 
+        <AdminPageEditor 
+          pageId="home" 
           onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
         />
       );
     }
@@ -239,9 +240,10 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     // 6b. Trending CMS & Live Studio: /admin/trending
     if (currentPath === '/admin/trending' || currentPath.startsWith('/admin/trending')) {
       return (
-        <AdminTrendingView 
-          onShowToast={onShowToast} 
+        <AdminPageEditor 
+          pageId="trending" 
           onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
         />
       );
     }
@@ -249,9 +251,10 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     // 6c. Category Page Live Studio: /admin/category or /admin/category-studio
     if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) {
       return (
-        <AdminCategoryStudioView 
-          onShowToast={onShowToast} 
+        <AdminPageEditor 
+          pageId="category" 
           onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
         />
       );
     }
@@ -259,9 +262,10 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     // 6d. About Us Studio: /admin/about
     if (currentPath === '/admin/about' || currentPath.startsWith('/admin/about')) {
       return (
-        <AdminAboutView 
-          onShowToast={onShowToast} 
+        <AdminPageEditor 
+          pageId="about" 
           onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
         />
       );
     }

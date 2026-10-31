@@ -4,9 +4,31 @@ import {
   Megaphone, Target, Handshake, PhoneCall, Send, Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { PageService } from '../services/pageService';
 import './AdvertisePage.css';
 
-export default function AdvertisePage({ page, onBackToHome, onShowToast }) {
+export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudioView = false }) {
+  const [heroHeading, setHeroHeading] = useState(() => page?.data?.heading || page?.title || 'Advertise With Us');
+  const [heroSubtext, setHeroSubtext] = useState(() => page?.data?.subtext || page?.description || 'Reach the right audience for your brand. Promote your business, products or services through our blogging platform and get connected with engaged readers.');
+
+  const handleUpdateAdv = async (patch) => {
+    if (patch.heading) setHeroHeading(patch.heading);
+    if (patch.subtext) setHeroSubtext(patch.subtext);
+    try {
+      await PageService.updatePage('page_advertise', {
+        title: patch.heading || heroHeading,
+        description: patch.subtext || heroSubtext,
+        data: {
+          heading: patch.heading || heroHeading,
+          subtext: patch.subtext || heroSubtext,
+          ...patch
+        }
+      });
+      if (onShowToast) onShowToast('Advertise page content saved live!');
+    } catch (e) {
+      console.warn('Failed to update advertise page:', e);
+    }
+  };
   // Page Title & Meta tags for SEO
   useEffect(() => {
     document.title = 'Advertise With Us | GoReadPost Brand Partnerships';
@@ -138,12 +160,30 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast }) {
           
           {/* Left Hero Content */}
           <div className="adv-hero-content">
-            <h1 className="adv-hero-heading">
-              Advertise With Us
+            <h1 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "adv-hero-heading lse-direct-editable" : "adv-hero-heading"}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== heroHeading) handleUpdateAdv({ heading: val });
+              }}
+              title={isStudioView ? "Click directly to edit headline" : undefined}
+            >
+              {heroHeading}
             </h1>
 
-            <p className="adv-hero-subtext">
-              Reach the right audience for your brand. Promote your business, products or services through our blogging platform and get connected with engaged readers.
+            <p 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "adv-hero-subtext lse-direct-editable" : "adv-hero-subtext"}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== heroSubtext) handleUpdateAdv({ subtext: val });
+              }}
+              title={isStudioView ? "Click directly to edit subtext" : undefined}
+            >
+              {heroSubtext}
             </p>
 
             {/* 3 Checkmark Feature Badges */}
