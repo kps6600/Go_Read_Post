@@ -1127,6 +1127,29 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             </button>
           )}
 
+          {(pageId === 'latest' || slug === 'latest') && (
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open:add-latest-card'))}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1.05rem',
+                borderRadius: '8px',
+                border: '1px solid #ea580c',
+                background: '#fff7ed',
+                color: '#ea580c',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Plus size={15} />
+              <span>+ Add Card</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => window.open(displaySlug, '_blank')}

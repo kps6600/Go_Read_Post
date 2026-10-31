@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ChevronRight, ChevronLeft, Search, Mail, CheckCircle2, 
+  X, ChevronRight, ChevronLeft, Search, Mail, CheckCircle2, 
   ArrowRight, ArrowLeft, ArrowLeftRight, Trash2, Plus, LayoutGrid, Tag, Layers, Cpu, Briefcase, 
   GraduationCap, Heart, Plane, Utensils, Atom, Sparkles, TrendingUp,
   Edit3, Bookmark, Image as ImageIcon, Settings
@@ -308,6 +308,73 @@ export default function LatestArticlesPage({
   const [isAdminUser, setIsAdminUser] = useState(() => isStudioView ? true : false);
   const [isEditMode, setIsEditMode] = useState(true);
   const [liveArticles, setLiveArticles] = useState([]);
+  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState('create');
+  const [pickerSearch, setPickerSearch] = useState('');
+  const [newCardForm, setNewCardForm] = useState({
+    title: '',
+    category: 'Startups',
+    summary: '',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
+    author: 'Editorial Desk',
+    readTime: '4 min read'
+  });
+
+  useEffect(() => {
+    const handleOpenAddCard = () => setIsAddCardModalOpen(true);
+    window.addEventListener('open:add-latest-card', handleOpenAddCard);
+    return () => window.removeEventListener('open:add-latest-card', handleOpenAddCard);
+  }, []);
+
+  const handleCreateNewCard = async (e) => {
+    e?.preventDefault();
+    if (!newCardForm.title.trim()) {
+      alert('Please enter an article title');
+      return;
+    }
+    const newArt = {
+      id: 'art_' + Date.now(),
+      title: newCardForm.title.trim(),
+      subtitle: newCardForm.summary.trim() || 'Exclusive reporting from GoReadPost newsroom.',
+      summary: newCardForm.summary.trim() || 'Exclusive reporting from GoReadPost newsroom.',
+      category: newCardForm.category || 'Startups',
+      categoryName: newCardForm.category || 'Startups',
+      categoryLabel: newCardForm.category || 'Startups',
+      authorName: newCardForm.author || 'Editorial Desk',
+      author: { name: newCardForm.author || 'Editorial Desk' },
+      image: newCardForm.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+      publishedAt: new Date().toISOString(),
+      readTime: newCardForm.readTime || '4 min read',
+      isNewlyAdded: true
+    };
+    setLiveArticles(prev => [newArt, ...prev]);
+    try {
+      await ArticleService.createArticle(newArt);
+    } catch (err) {}
+    setIsAddCardModalOpen(false);
+    setNewCardForm({
+      title: '',
+      category: 'Startups',
+      summary: '',
+      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
+      author: 'Editorial Desk',
+      readTime: '4 min read'
+    });
+    if (onShowToast) onShowToast(`Card "${newArt.title}" added to Latest Articles!`);
+  };
+
+  const handleAddExistingStoryToFeed = (story) => {
+    const newArt = {
+      ...story,
+      id: 'art_' + Date.now(),
+      isNewlyAdded: true,
+      publishedAt: new Date().toISOString()
+    };
+    setLiveArticles(prev => [newArt, ...prev]);
+    ArticleService.createArticle(newArt).catch(() => {});
+    setIsAddCardModalOpen(false);
+    if (onShowToast) onShowToast(`Card "${story.title}" added to Latest Articles feed!`);
+  };
 
   // Live direct UI edit handlers
   const handleUpdatePageSettings = async (updates) => {
@@ -551,6 +618,17 @@ export default function LatestArticlesPage({
     // Sort strictly newest first (highest timestamp to lowest)
     return allList.sort((a, b) => getStoryTime(b) - getStoryTime(a));
   }, [liveArticles, stories, feedSec]);
+
+  const availableExistingArticles = useMemo(() => {
+    const list = Array.isArray(pool) ? pool : [];
+    if (!pickerSearch.trim()) return list.slice(0, 35);
+    const q = pickerSearch.toLowerCase();
+    return list.filter(a => {
+      const title = (a.title || '').toLowerCase();
+      const cat = (a.categoryLabel || a.categoryName || a.category || '').toLowerCase();
+      return title.includes(q) || cat.includes(q);
+    }).slice(0, 35);
+  }, [pool, pickerSearch]);
 
   // Dynamically extract categories with real story counts
   const categoryStats = useMemo(() => {
@@ -798,26 +876,34 @@ export default function LatestArticlesPage({
       )}
 
       {/* ── Page Header (Direct In-Place Editable) ── */}
-      <div className="lap-header" style={{ marginBottom: '1.75rem' }}>
-        <h1
-          contentEditable={isAdminUser && isEditMode}
-          suppressContentEditableWarning={true}
-          className={isAdminUser && isEditMode ? "lap-title lse-direct-editable" : "lap-title"}
-          onBlur={(e) => {
-            const val = e.currentTarget.textContent.trim();
-            if (val) handleUpdatePageSettings({ title: val });
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              e.currentTarget.blur();
-            }
-          }}
-          title={isAdminUser && isEditMode ? "Click directly to edit page headline" : undefined}
-          style={isAdminUser && isEditMode ? { cursor: 'text' } : {}}
-        >
-          {pageConfig?.title || "Latest Articles & Dispatches"}
+      <div className="lap-header" style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <h1 className="lap-title" style={{ margin: 0 }}>
+          {pageConfig?.title || "Latest Articles"}
         </h1>
+        {isAdminUser && (
+          <button
+            type="button"
+            className="lap-add-card-btn"
+            onClick={() => setIsAddCardModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              background: '#ea580c',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '0.85rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+            }}
+          >
+            <Plus size={16} />
+            <span>+ Add New Card</span>
+          </button>
+        )}
       </div>
 
       {/* ── Category Filter Pills Bar ── */}
@@ -1014,27 +1100,7 @@ export default function LatestArticlesPage({
                           <span className="lap-badge-new-dot" /> NEW
                         </span>
                       )}
-                      <span 
-                        contentEditable={isAdminUser && isEditMode}
-                        suppressContentEditableWarning={true}
-                        className={isAdminUser && isEditMode ? "lap-category-on-image lse-direct-editable" : "lap-category-on-image"}
-                        onBlur={(e) => {
-                          const val = e.currentTarget.textContent.trim();
-                          if (val && val !== storyCat) {
-                            handleInlineStoryUpdate(story, { category: val, categoryName: val, categoryLabel: val });
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        title={isAdminUser && isEditMode ? "Click directly to edit category badge" : undefined}
-                        style={isAdminUser && isEditMode ? { cursor: 'text' } : {}}
-                      >
-                        {storyCat}
-                      </span>
+                      <span className="lap-category-on-image">{storyCat}</span>
                       <button 
                         type="button" 
                         className={`lap-card-save-btn ${isCardSaved ? 'active' : ''}`}
@@ -1050,45 +1116,10 @@ export default function LatestArticlesPage({
                     </div>
 
                     <div className="lap-card-body">
-                      <h3 
-                        contentEditable={isAdminUser && isEditMode}
-                        suppressContentEditableWarning={true}
-                        className={isAdminUser && isEditMode ? "lap-card-title lse-direct-editable" : "lap-card-title"}
-                        onBlur={(e) => {
-                          const val = e.currentTarget.textContent.trim();
-                          if (val && val !== storyTitle) {
-                            handleInlineStoryUpdate(story, { title: val });
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        title={isAdminUser && isEditMode ? "Click directly on text to edit article title" : undefined}
-                        style={isAdminUser && isEditMode ? { cursor: 'text' } : {}}
-                      >
-                        {storyTitle}
-                      </h3>
+                      <h3 className="lap-card-title">{storyTitle}</h3>
 
                       {storyExcerpt && (
                         <p
-                          contentEditable={isAdminUser && isEditMode}
-                          suppressContentEditableWarning={true}
-                          className={isAdminUser && isEditMode ? "lse-direct-editable" : ""}
-                          onBlur={(e) => {
-                            const val = e.currentTarget.textContent.trim();
-                            if (val !== storyExcerpt) {
-                              handleInlineStoryUpdate(story, { summary: val, excerpt: val, subtitle: val });
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              e.currentTarget.blur();
-                            }
-                          }}
                           style={{
                             fontSize: '0.82rem',
                             color: '#64748b',
@@ -1097,10 +1128,8 @@ export default function LatestArticlesPage({
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            cursor: isAdminUser && isEditMode ? 'text' : 'default'
+                            overflow: 'hidden'
                           }}
-                          title={isAdminUser && isEditMode ? "Click directly to edit summary teaser" : undefined}
                         >
                           {storyExcerpt}
                         </p>
@@ -1117,27 +1146,7 @@ export default function LatestArticlesPage({
                               e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
                             }}
                           />
-                          <span 
-                            contentEditable={isAdminUser && isEditMode}
-                            suppressContentEditableWarning={true}
-                            className={isAdminUser && isEditMode ? "lap-author-name lse-direct-editable" : "lap-author-name"}
-                            onBlur={(e) => {
-                              const val = e.currentTarget.textContent.trim();
-                              if (val && val !== storyAuthor) {
-                                handleInlineStoryUpdate(story, { authorName: val, author: val });
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                e.currentTarget.blur();
-                              }
-                            }}
-                            title={isAdminUser && isEditMode ? "Click directly to edit author" : undefined}
-                            style={isAdminUser && isEditMode ? { cursor: 'text' } : {}}
-                          >
-                            {storyAuthor}
-                          </span>
+                          <span className="lap-author-name">{storyAuthor}</span>
                           <span className="lap-meta-sep">•</span>
                           <span>{storyDate}</span>
                           <span className="lap-meta-sep">•</span>
@@ -1205,6 +1214,312 @@ export default function LatestArticlesPage({
         onUpdate={handleUpdateNewsletterBanner}
         onShowToast={onShowToast}
       />
+
+      {/* ── Add Card Modal ── */}
+      {isAddCardModalOpen && (
+        <div 
+          className="admin-modal-overlay" 
+          onClick={() => setIsAddCardModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999999,
+            padding: '1rem'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '600px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              border: '1px solid #e2e8f0'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>Add Article Card</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#64748b' }}>Insert a new card or pick from existing stories</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsAddCardModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '0 1.5rem', gap: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => setModalTab('create')}
+                style={{
+                  padding: '12px 4px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: modalTab === 'create' ? '2.5px solid #ea580c' : '2.5px solid transparent',
+                  color: modalTab === 'create' ? '#ea580c' : '#64748b',
+                  fontWeight: 750,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                + Create New Card
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab('pick')}
+                style={{
+                  padding: '12px 4px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: modalTab === 'pick' ? '2.5px solid #ea580c' : '2.5px solid transparent',
+                  color: modalTab === 'pick' ? '#ea580c' : '#64748b',
+                  fontWeight: 750,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Choose from Existing ({availableExistingArticles.length})
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '1.5rem' }}>
+              {modalTab === 'create' ? (
+                <form onSubmit={handleCreateNewCard} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Article Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. AI Startup Secures Series A to Transform Telemetry"
+                      value={newCardForm.title}
+                      onChange={e => setNewCardForm(prev => ({ ...prev, title: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.9rem',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                        Category
+                      </label>
+                      <select
+                        value={newCardForm.category}
+                        onChange={e => setNewCardForm(prev => ({ ...prev, category: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.88rem',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        <option value="Startups">Startups</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Enterprise">Enterprise</option>
+                        <option value="SocialStory">SocialStory</option>
+                        <option value="SMBStory">SMBStory</option>
+                        <option value="Fintech">Fintech</option>
+                        <option value="AI & Robotics">AI & Robotics</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                        Author
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Editorial Desk"
+                        value={newCardForm.author}
+                        onChange={e => setNewCardForm(prev => ({ ...prev, author: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.88rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Summary / Excerpt
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Brief teaser summary about the story..."
+                      value={newCardForm.summary}
+                      onChange={e => setNewCardForm(prev => ({ ...prev, summary: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.88rem',
+                        boxSizing: 'border-box',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Thumbnail Image URL
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/..."
+                      value={newCardForm.image}
+                      onChange={e => setNewCardForm(prev => ({ ...prev, image: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.88rem',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddCardModalOpen(false)}
+                      style={{
+                        padding: '9px 18px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      style={{
+                        padding: '9px 22px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: '#ea580c',
+                        color: '#ffffff',
+                        fontWeight: 750,
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+                      }}
+                    >
+                      + Add Card to Feed
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="Search existing articles by title or category..."
+                      value={pickerSearch}
+                      onChange={e => setPickerSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.9rem',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {availableExistingArticles.length === 0 ? (
+                      <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>No articles match your search.</p>
+                    ) : (
+                      availableExistingArticles.map(art => {
+                        const id = art._id || art.id || art.slug;
+                        const title = art.title || 'Untitled';
+                        const cat = art.categoryLabel || art.categoryName || art.category || 'Article';
+                        const img = art.image || art.coverImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
+                        return (
+                          <div 
+                            key={id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: '#f8fafc',
+                              gap: '12px'
+                            }}
+                          >
+                            <img src={img} alt="" style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover' }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {title}
+                              </h4>
+                              <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 700 }}>{cat}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAddExistingStoryToFeed(art)}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: '#ea580c',
+                                color: '#ffffff',
+                                fontSize: '0.78rem',
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

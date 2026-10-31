@@ -1684,24 +1684,7 @@ export default function LiveWholePageStudio({
                                   <div style={{ padding: '1.15rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff' }}>
                                     <div>
                                       <h3 
-                                        contentEditable={true}
-                                        suppressContentEditableWarning={true}
-                                        className="lse-direct-editable"
-                                        onBlur={(e) => {
-                                          const val = e.currentTarget.textContent.trim();
-                                          if (val && val !== artTitle) {
-                                            handleInlineArticleUpdate(sec.id, art, { title: val });
-                                          }
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            e.currentTarget.blur();
-                                          }
-                                        }}
-                                        title="Click directly to edit title"
                                         style={{ 
-                                          cursor: 'text',
                                           fontSize: '0.98rem',
                                           fontWeight: 750,
                                           lineHeight: 1.38,
@@ -1717,22 +1700,6 @@ export default function LiveWholePageStudio({
                                       </h3>
 
                                       <p 
-                                        contentEditable={true}
-                                        suppressContentEditableWarning={true}
-                                        className="lse-direct-editable"
-                                        onBlur={(e) => {
-                                          const val = e.currentTarget.textContent.trim();
-                                          if (val !== (art.excerpt || '')) {
-                                            handleInlineArticleUpdate(sec.id, art, { excerpt: val, summary: val, subtitle: val });
-                                          }
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            e.currentTarget.blur();
-                                          }
-                                        }}
-                                        title="Click directly to edit excerpt teaser"
                                         style={{
                                           fontSize: '0.82rem',
                                           color: '#64748b',
@@ -1741,33 +1708,14 @@ export default function LiveWholePageStudio({
                                           display: '-webkit-box',
                                           WebkitLineClamp: 2,
                                           WebkitBoxOrient: 'vertical',
-                                          overflow: 'hidden',
-                                          cursor: 'text'
+                                          overflow: 'hidden'
                                         }}
                                       >
-                                        {art.excerpt || art.summary || 'Click directly to add lead excerpt teaser'}
+                                        {art.excerpt || art.summary || ''}
                                       </p>
 
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#94a3b8', fontWeight: 600 }}>
-                                        <span 
-                                          contentEditable={true}
-                                          suppressContentEditableWarning={true}
-                                          className="lse-direct-editable"
-                                          onBlur={(e) => {
-                                            const val = e.currentTarget.textContent.trim();
-                                            if (val && val !== artAuthor) {
-                                              handleInlineArticleUpdate(sec.id, art, { author: val, authorName: val });
-                                            }
-                                          }}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                              e.preventDefault();
-                                              e.currentTarget.blur();
-                                            }
-                                          }}
-                                          title="Click directly to edit author"
-                                          style={{ color: '#475569', fontWeight: 650, cursor: 'text' }}
-                                        >
+                                        <span style={{ color: '#475569', fontWeight: 650 }}>
                                           {artAuthor}
                                         </span>
                                         <span>•</span>
