@@ -300,6 +300,23 @@
               "slug": "social-side-3",
               "link": "/stories/social-side-3",
               "isCustom": true
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fb9",
+              "articleId": "6ae1f556d132e2796bff4fb9",
+              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
+              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80",
+              "author": "Geeta Nair",
+              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
+              "date": "2026-10-07T12:30:18.846Z",
+              "readTime": "6 min read min read",
+              "slug": "sim-7",
+              "link": "/stories/sim-7",
+              "isCustom": true
             }
           ],
           "limit": 4,
@@ -470,6 +487,23 @@
               "readTime": "4 min read min read",
               "slug": "social-side-3",
               "link": "/stories/social-side-3",
+              "isCustom": true
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fb9",
+              "articleId": "6ae1f556d132e2796bff4fb9",
+              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
+              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80",
+              "author": "Geeta Nair",
+              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
+              "date": "2026-10-07T12:30:18.846Z",
+              "readTime": "6 min read min read",
+              "slug": "sim-7",
+              "link": "/stories/sim-7",
               "isCustom": true
             }
           ],

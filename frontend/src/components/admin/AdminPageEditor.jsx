@@ -646,12 +646,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     setIsAddSectionOpen(false);
 
     persistSections(nextSections, `Section "${def?.label || sectionType}" added.`).catch(() => {});
-
-    if (sectionType === 'hero') {
-      setLiveBannerEditingSection(newSec);
-    } else {
-      setEditingSection(newSec);
-    }
   };
 
   // Save changes to backend
