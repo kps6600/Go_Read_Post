@@ -224,7 +224,21 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
     </div>
   );
 
-    if (activeMode === 'preview' && selectedPage) {
+      const handleEditPage = (page) => {
+    if (!page) return;
+    const isHome = page.slug === '' || page.slug === '/' || page.id === 'home' || page.id === 'homepage' || (page.title && page.title.toLowerCase().startsWith('home'));
+    const targetId = isHome ? 'home' : (page.slug ? page.slug.replace(/^\/+/, '') : (page.id || page._id));
+    const targetUrl = `/admin/pages/${targetId}/edit`;
+    if (onNavigate) {
+      onNavigate(targetUrl);
+    } else {
+      window.history.pushState(null, '', targetUrl);
+      setSelectedPage(page);
+      setActiveMode('edit');
+    }
+  };
+
+  if (activeMode === 'preview' && selectedPage) {
     const previewUrl = selectedPage.route || (selectedPage.slug ? `/${selectedPage.slug.replace(/^\/+/, '')}` : '/');
     return (
       <div className="admin-page-container">
@@ -287,7 +301,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
-              onClick={() => setActiveMode('edit')}
+              onClick={() => handleEditPage(selectedPage)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -347,6 +361,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
             if (target === '/admin/pages' || target === 'pages' || target === '/admin/pages/') {
               setActiveMode('list');
               setSelectedPage(null);
+              window.history.pushState(null, '', '/admin/pages');
             } else {
               onNavigate?.(target);
             }
@@ -798,10 +813,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
 
                           <button
                             type="button"
-                            onClick={() => {
-                              setSelectedPage(page);
-                              setActiveMode('edit');
-                            }}
+                            onClick={() => handleEditPage(page)}
                             title="Edit page & sections right here"
                             style={{
                               display: 'inline-flex',

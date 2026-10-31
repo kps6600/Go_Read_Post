@@ -222,9 +222,24 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     if (pageId) fetchPage();
   }, [pageId]);
+
+  // Synchronize browser URL to /admin/pages/:pageId/edit if accessed via /admin/pages
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isHome = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
+      const targetSlug = isHome ? 'home' : (slug ? slug.replace(/^\/+/, '') : (page?.slug ? page.slug.replace(/^\/+/, '') : (pageId || 'home')));
+      const expectedPath = `/admin/pages/${targetSlug}/edit`;
+
+      if (window.location.pathname === '/admin/pages' || window.location.pathname === '/admin/pages/') {
+        const search = window.location.search || '';
+        window.history.replaceState(null, '', expectedPath + search);
+        onNavigate?.(expectedPath + search);
+      }
+    }
+  }, [pageId, slug, page?.slug]);
 
   useEffect(() => {
     if (sections.length > 0 && !liveEditingSection && !liveBannerEditingSection && !isWholeHomeStudioOpen) {

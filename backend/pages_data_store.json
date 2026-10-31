@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T08:01:35.637Z",
+        "updatedAt": "2026-10-31T08:47:06.071Z",
         "data": {
           "slides": [
             {
@@ -330,7 +330,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T08:01:35.641Z",
+        "updatedAt": "2026-10-31T08:47:06.081Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -536,7 +536,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T08:01:35.651Z",
+        "updatedAt": "2026-10-31T08:47:06.091Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending"
@@ -806,7 +806,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T08:01:35.654Z",
+        "updatedAt": "2026-10-31T08:47:06.112Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1292,7 +1292,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T08:01:35.674Z",
+        "updatedAt": "2026-10-31T08:47:06.117Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -1534,7 +1534,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T08:01:35.704Z",
+        "updatedAt": "2026-10-31T08:47:06.126Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -1542,6 +1542,508 @@
         },
         "id": "newsletter",
         "type": "newsletter"
+      },
+      {
+        "_id": "6ae5a9f7a0893d46439cd20e",
+        "sectionKey": "sec_1793436151598",
+        "__v": 0,
+        "articleIds": [],
+        "createdAt": "2026-10-31T08:42:31.620Z",
+        "customConfig": {
+          "title": "HerStory: Women Leaders",
+          "heading": "HerStory: Women Leaders",
+          "subtitle": "Celebrating women entrepreneurs, corporate executives, and changemakers.",
+          "category": "HerStory",
+          "limit": 3,
+          "viewAllText": "Explore HerStory",
+          "viewAllUrl": "/category/herstory",
+          "articles": [
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&auto=format&fit=crop&q=80",
+                "alt": "How this 19-year-old researcher took algorithmic bias to Parliament",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fb4",
+              "title": "How this 19-year-old researcher took algorithmic bias to Parliament",
+              "slug": "sim-2",
+              "subtitle": "Aditi Bhatt uncovered gender disparity in school admissions software and presented recommendations to lawmakers.",
+              "excerpt": "Aditi Bhatt uncovered gender disparity in school admissions software and presented recommendations to lawmakers.",
+              "content": "",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Priya Kale",
+              "authorTitle": "Tech Policy Correspondent, HerStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [],
+              "topics": [
+                "WOMEN IN TECH"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:30:18.810Z",
+              "scheduledAt": null,
+              "views": 3202,
+              "claps": 210,
+              "createdAt": "2026-10-28T13:15:02.111Z",
+              "updatedAt": "2026-10-28T13:15:02.111Z",
+              "__v": 0
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.yourstory.com/cs/4/8e7cc4102d6c11e9aa979329348d4c3e/Screenshot2026-10-02at1-1790926676701.png?ar=16%3A9&mode=crop&crop=faces&format=auto&w=1200&q=80",
+                "alt": "I wanted to quit boxing but I continued, had to change colour of Asiad medal: Lovlina",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f555d132e2796bff4f46",
+              "title": "I wanted to quit boxing but I continued, had to change colour of Asiad medal: Lovlina",
+              "slug": "pick-1",
+              "subtitle": "",
+              "excerpt": "Olympic bronze medallist Lovlina Borgohain opens up about self-doubt, rigorous tactical transformations, and her relentless drive to upgrade her Asian Games medal into gold.",
+              "content": "In an emotional and candid interview following her podium triumph, Olympic medallist Lovlina Borgohain revealed that she had seriously contemplated stepping away from competitive boxing during the peak of training exhaustion.\n\n“There were days when the physical toll and the tactical adjustments felt overwhelming. But I made a quiet vow to myself: I had to change the colour of the medal. I couldn't stop at bronze when India was counting on me,” she said.\n\nLovlina reworked her footwork and infighting defence over ten grueling months in Patiala, focusing on counter-punching against taller southpaws. Her perseverance bore fruit with a dominating performance that secured her berth at the upcoming Olympic qualifiers.",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Press Trust of India",
+              "authorTitle": "Sports Correspondent",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "goreadpost",
+                "her-story"
+              ],
+              "topics": [
+                "HerStory"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": true,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:23:20.780Z",
+              "scheduledAt": null,
+              "views": 1824,
+              "claps": 466,
+              "createdAt": "2026-10-28T13:15:01.751Z",
+              "updatedAt": "2026-10-28T13:15:01.751Z",
+              "__v": 0
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+                "alt": "How this innovative learning programme is helping girls across rural communities stay in school",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fa4",
+              "title": "How this innovative learning programme is helping girls across rural communities stay in school",
+              "slug": "social-grid-2",
+              "subtitle": "",
+              "excerpt": "Combining solar-powered digital tablets and localized peer mentoring to eliminate dropouts after standard eight in tribal districts.",
+              "content": "Combining solar-powered digital tablets and localized peer mentoring to eliminate dropouts after standard eight in tribal districts.",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Rekha Balakrishnan",
+              "authorTitle": "Lead Features, SocialStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "socialstory",
+                "social-story"
+              ],
+              "topics": [
+                "Gender"
+              ],
+              "contentType": "article",
+              "readingTime": "4 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:23:20.779Z",
+              "scheduledAt": null,
+              "views": 6856,
+              "claps": 467,
+              "createdAt": "2026-10-28T13:15:02.069Z",
+              "updatedAt": "2026-10-28T13:15:02.069Z",
+              "__v": 0
+            }
+          ],
+          "hasCustomArticles": true
+        },
+        "data": {
+          "title": "HerStory: Women Leaders",
+          "heading": "HerStory: Women Leaders",
+          "subtitle": "Celebrating women entrepreneurs, corporate executives, and changemakers.",
+          "category": "HerStory",
+          "limit": 3,
+          "viewAllText": "Explore HerStory",
+          "viewAllUrl": "/category/herstory",
+          "articles": [
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&auto=format&fit=crop&q=80",
+                "alt": "How this 19-year-old researcher took algorithmic bias to Parliament",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fb4",
+              "title": "How this 19-year-old researcher took algorithmic bias to Parliament",
+              "slug": "sim-2",
+              "subtitle": "Aditi Bhatt uncovered gender disparity in school admissions software and presented recommendations to lawmakers.",
+              "excerpt": "Aditi Bhatt uncovered gender disparity in school admissions software and presented recommendations to lawmakers.",
+              "content": "",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Priya Kale",
+              "authorTitle": "Tech Policy Correspondent, HerStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [],
+              "topics": [
+                "WOMEN IN TECH"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:30:18.810Z",
+              "scheduledAt": null,
+              "views": 3202,
+              "claps": 210,
+              "createdAt": "2026-10-28T13:15:02.111Z",
+              "updatedAt": "2026-10-28T13:15:02.111Z",
+              "__v": 0
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.yourstory.com/cs/4/8e7cc4102d6c11e9aa979329348d4c3e/Screenshot2026-10-02at1-1790926676701.png?ar=16%3A9&mode=crop&crop=faces&format=auto&w=1200&q=80",
+                "alt": "I wanted to quit boxing but I continued, had to change colour of Asiad medal: Lovlina",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f555d132e2796bff4f46",
+              "title": "I wanted to quit boxing but I continued, had to change colour of Asiad medal: Lovlina",
+              "slug": "pick-1",
+              "subtitle": "",
+              "excerpt": "Olympic bronze medallist Lovlina Borgohain opens up about self-doubt, rigorous tactical transformations, and her relentless drive to upgrade her Asian Games medal into gold.",
+              "content": "In an emotional and candid interview following her podium triumph, Olympic medallist Lovlina Borgohain revealed that she had seriously contemplated stepping away from competitive boxing during the peak of training exhaustion.\n\n“There were days when the physical toll and the tactical adjustments felt overwhelming. But I made a quiet vow to myself: I had to change the colour of the medal. I couldn't stop at bronze when India was counting on me,” she said.\n\nLovlina reworked her footwork and infighting defence over ten grueling months in Patiala, focusing on counter-punching against taller southpaws. Her perseverance bore fruit with a dominating performance that secured her berth at the upcoming Olympic qualifiers.",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Press Trust of India",
+              "authorTitle": "Sports Correspondent",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "goreadpost",
+                "her-story"
+              ],
+              "topics": [
+                "HerStory"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": true,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:23:20.780Z",
+              "scheduledAt": null,
+              "views": 1824,
+              "claps": 466,
+              "createdAt": "2026-10-28T13:15:01.751Z",
+              "updatedAt": "2026-10-28T13:15:01.751Z",
+              "__v": 0
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+                "alt": "How this innovative learning programme is helping girls across rural communities stay in school",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fa4",
+              "title": "How this innovative learning programme is helping girls across rural communities stay in school",
+              "slug": "social-grid-2",
+              "subtitle": "",
+              "excerpt": "Combining solar-powered digital tablets and localized peer mentoring to eliminate dropouts after standard eight in tribal districts.",
+              "content": "Combining solar-powered digital tablets and localized peer mentoring to eliminate dropouts after standard eight in tribal districts.",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Rekha Balakrishnan",
+              "authorTitle": "Lead Features, SocialStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "HerStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "socialstory",
+                "social-story"
+              ],
+              "topics": [
+                "Gender"
+              ],
+              "contentType": "article",
+              "readingTime": "4 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:23:20.779Z",
+              "scheduledAt": null,
+              "views": 6856,
+              "claps": 467,
+              "createdAt": "2026-10-28T13:15:02.069Z",
+              "updatedAt": "2026-10-28T13:15:02.069Z",
+              "__v": 0
+            }
+          ],
+          "hasCustomArticles": true
+        },
+        "enabled": true,
+        "filterCategory": "",
+        "filterTag": "",
+        "limit": 6,
+        "order": 7,
+        "subtitle": "",
+        "title": "HerStory: Women Leaders",
+        "updatedAt": "2026-10-31T08:43:52.875Z",
+        "id": "sec_1793436151598",
+        "type": "sec_1793436151598"
+      },
+      {
+        "_id": "6ae5aaf6a0893d46439cd71f",
+        "sectionKey": "sec_1793436406804",
+        "__v": 0,
+        "articleIds": [],
+        "createdAt": "2026-10-31T08:46:46.889Z",
+        "customConfig": {
+          "title": "Startups & Capital Desk",
+          "heading": "Startups & Capital Desk",
+          "subtitle": "Early-stage fundraising, venture deals, term sheets, and founder dispatches.",
+          "category": "Startups",
+          "limit": 8,
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/startups"
+        },
+        "data": {
+          "title": "Startups & Capital Desk",
+          "heading": "Startups & Capital Desk",
+          "subtitle": "Early-stage fundraising, venture deals, term sheets, and founder dispatches.",
+          "category": "Startups",
+          "limit": 8,
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/startups"
+        },
+        "enabled": true,
+        "filterCategory": "",
+        "filterTag": "",
+        "limit": 6,
+        "order": 8,
+        "subtitle": "",
+        "title": "Startups & Capital Desk",
+        "updatedAt": "2026-10-31T08:46:47.096Z",
+        "id": "sec_1793436406804",
+        "type": "sec_1793436406804"
+      },
+      {
+        "_id": "6ae5aa48a0893d46439cd5f0",
+        "sectionKey": "sec_1793436232557",
+        "__v": 0,
+        "articleIds": [],
+        "createdAt": "2026-10-31T08:43:52.577Z",
+        "customConfig": {
+          "title": "SocialStory: Impact & Climate",
+          "heading": "SocialStory: Impact & Climate",
+          "subtitle": "Grassroots movements, sustainability, climate tech, and social enterprises.",
+          "category": "SocialStory",
+          "limit": 8,
+          "viewAllText": "Explore SocialStory",
+          "viewAllUrl": "/category/socialstory"
+        },
+        "data": {
+          "title": "SocialStory: Impact & Climate",
+          "heading": "SocialStory: Impact & Climate",
+          "subtitle": "Grassroots movements, sustainability, climate tech, and social enterprises.",
+          "category": "SocialStory",
+          "limit": 8,
+          "viewAllText": "Explore SocialStory",
+          "viewAllUrl": "/category/socialstory"
+        },
+        "enabled": true,
+        "filterCategory": "",
+        "filterTag": "",
+        "limit": 6,
+        "order": 9,
+        "subtitle": "",
+        "title": "SocialStory: Impact & Climate",
+        "updatedAt": "2026-10-31T08:43:52.883Z",
+        "id": "sec_1793436232557",
+        "type": "sec_1793436232557"
+      },
+      {
+        "id": "sec_1793436512950",
+        "type": "about",
+        "order": 10,
+        "enabled": true,
+        "data": {
+          "title": "About Us & Mission Manifesto",
+          "heading": "About Us & Mission Manifesto",
+          "subtitle": "The Definitive Journal of Innovation, Capital & Builders",
+          "content": "<p>GoReadPost chronicles breakthrough founders, deep technology, AI revolutions, venture capital, and economic innovation across India.</p>"
+        },
+        "sectionKey": "sec_1793436512950",
+        "customConfig": {
+          "title": "About Us & Mission Manifesto",
+          "heading": "About Us & Mission Manifesto",
+          "subtitle": "The Definitive Journal of Innovation, Capital & Builders",
+          "content": "<p>GoReadPost chronicles breakthrough founders, deep technology, AI revolutions, venture capital, and economic innovation across India.</p>"
+        }
       }
     ]
   },

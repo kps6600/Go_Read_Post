@@ -19,7 +19,10 @@ export default function AdminTopNavbar({
     if (currentPath === '/admin/posts' || currentPath === '/admin/blogs') return 'Editorial Articles & Posts';
     if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) return 'Homepage Live Studio & CMS';
     if (currentPath === '/admin/pages/create') return 'Pages / Create Page';
-    if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) return 'Pages / Edit Page & Sections';
+    if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
+      if (currentPath.includes('/home/')) return 'Pages / Edit Homepage';
+      return 'Pages / Edit Page & Sections';
+    }
     if (currentPath === '/admin/pages') return 'Pages Manager';
     if (currentPath === '/admin/services') return 'Services Content';
     if (currentPath === '/admin/portfolio') return 'Portfolio Showcase';

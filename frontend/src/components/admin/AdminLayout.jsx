@@ -342,7 +342,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       const cleanPath = currentPath.split('?')[0];
       const parts = cleanPath.split('/');
       const editIndex = parts.indexOf('edit');
-      const pageId = editIndex > 0 ? parts[editIndex - 1] : 'home';
+      const rawId = editIndex > 0 ? parts[editIndex - 1] : 'home';
+      const pageId = (!rawId || rawId === 'pages') ? 'home' : rawId;
       return (
         <AdminPageEditor 
           pageId={pageId} 
