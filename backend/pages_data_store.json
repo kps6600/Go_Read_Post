@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T06:29:58.068Z",
+        "updatedAt": "2026-10-31T05:23:45.720Z",
         "data": {
           "slides": [
             {
@@ -355,74 +355,6 @@
               "createdAt": "2026-10-28T13:15:02.130Z",
               "updatedAt": "2026-10-28T13:15:02.130Z",
               "__v": 0
-            },
-            {
-              "featuredImage": {
-                "url": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-                "alt": "How AI is transforming India's startup ecosystem (Updated Edition)",
-                "caption": "",
-                "credit": "GoReadPost"
-              },
-              "seo": {
-                "title": "",
-                "description": "",
-                "keywords": "",
-                "canonicalUrl": "",
-                "ogTitle": "",
-                "ogDescription": "",
-                "ogImage": ""
-              },
-              "isHero": false,
-              "isLatest": true,
-              "isCategoryFeatured": false,
-              "placements": [
-                "latest"
-              ],
-              "_id": "6ae1f556d132e2796bff4fbb",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "subtitle": "Founders are using AI to build faster and smarter businesses.",
-              "excerpt": "Founders are using AI to build faster and smarter businesses.",
-              "content": "<p>Updated live content from Admin CMS workbench.</p>",
-              "contentBlocks": [],
-              "authorId": null,
-              "authorName": "Kamlesh Sharma",
-              "authorTitle": "Senior Technology Correspondent",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "categoryId": null,
-              "categoryName": "Technology",
-              "subCategoryId": null,
-              "topicIds": [],
-              "tagIds": [],
-              "tags": [
-                "AI",
-                "Startup",
-                "India",
-                "Technology",
-                "GenAI"
-              ],
-              "topics": [
-                "AI",
-                "Startups",
-                "FinTech"
-              ],
-              "contentType": "article",
-              "readingTime": "5 min read",
-              "language": "English",
-              "location": "Bengaluru / India",
-              "isFeatured": true,
-              "isBreaking": false,
-              "isTrending": true,
-              "isEditorsPick": false,
-              "disabledFromFrontend": false,
-              "status": "published",
-              "publishedAt": "2026-10-08T08:55:07.642Z",
-              "scheduledAt": null,
-              "views": 57,
-              "claps": 50,
-              "createdAt": "2026-10-28T13:15:02.128Z",
-              "updatedAt": "2026-10-28T13:15:02.128Z",
-              "__v": 0
             }
           ],
           "limit": 4,
@@ -430,7 +362,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T06:29:58.073Z",
+        "updatedAt": "2026-10-31T05:17:54.208Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -643,74 +575,6 @@
               "createdAt": "2026-10-28T13:15:02.130Z",
               "updatedAt": "2026-10-28T13:15:02.130Z",
               "__v": 0
-            },
-            {
-              "featuredImage": {
-                "url": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-                "alt": "How AI is transforming India's startup ecosystem (Updated Edition)",
-                "caption": "",
-                "credit": "GoReadPost"
-              },
-              "seo": {
-                "title": "",
-                "description": "",
-                "keywords": "",
-                "canonicalUrl": "",
-                "ogTitle": "",
-                "ogDescription": "",
-                "ogImage": ""
-              },
-              "isHero": false,
-              "isLatest": true,
-              "isCategoryFeatured": false,
-              "placements": [
-                "latest"
-              ],
-              "_id": "6ae1f556d132e2796bff4fbb",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "subtitle": "Founders are using AI to build faster and smarter businesses.",
-              "excerpt": "Founders are using AI to build faster and smarter businesses.",
-              "content": "<p>Updated live content from Admin CMS workbench.</p>",
-              "contentBlocks": [],
-              "authorId": null,
-              "authorName": "Kamlesh Sharma",
-              "authorTitle": "Senior Technology Correspondent",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "categoryId": null,
-              "categoryName": "Technology",
-              "subCategoryId": null,
-              "topicIds": [],
-              "tagIds": [],
-              "tags": [
-                "AI",
-                "Startup",
-                "India",
-                "Technology",
-                "GenAI"
-              ],
-              "topics": [
-                "AI",
-                "Startups",
-                "FinTech"
-              ],
-              "contentType": "article",
-              "readingTime": "5 min read",
-              "language": "English",
-              "location": "Bengaluru / India",
-              "isFeatured": true,
-              "isBreaking": false,
-              "isTrending": true,
-              "isEditorsPick": false,
-              "disabledFromFrontend": false,
-              "status": "published",
-              "publishedAt": "2026-10-08T08:55:07.642Z",
-              "scheduledAt": null,
-              "views": 57,
-              "claps": 50,
-              "createdAt": "2026-10-28T13:15:02.128Z",
-              "updatedAt": "2026-10-28T13:15:02.128Z",
-              "__v": 0
             }
           ],
           "limit": 4,
@@ -736,7 +600,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T06:29:58.079Z",
+        "updatedAt": "2026-10-31T05:17:54.210Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending"
@@ -762,7 +626,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T06:29:58.085Z",
+        "updatedAt": "2026-10-31T05:17:54.213Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -974,31 +838,14 @@
               "createdAt": "2026-10-28T13:15:02.126Z",
               "updatedAt": "2026-10-28T13:15:02.126Z",
               "__v": 0
-            },
-            {
-              "id": "6ae1f555d132e2796bff4f70",
-              "articleId": "6ae1f555d132e2796bff4f70",
-              "title": "His software is inside your router. Now he wants it inside much smaller things",
-              "excerpt": "Bootstrapped software pioneer scales from enterprise Wi-Fi routers into embedded edge AI chips.",
-              "category": "Enterprise",
-              "categoryLabel": "Enterprise",
-              "categoryName": "Enterprise",
-              "image": "https://images.yourstory.com/cs/2/11718bd02d6d11e9aa979329348d4c3e/EmbedURSystemsV21600x900-1789975019215.jpg?mode=fill&ar=16%3A9&format=auto&w=1200&q=80",
-              "author": "Editorial Desk",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:23:20.783Z",
-              "readTime": "8 min read min read",
-              "slug": "lead-5",
-              "link": "/stories/lead-5",
-              "isCustom": true
             }
           ],
-          "limit": 4,
+          "limit": 3,
           "hasCustomArticles": true
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T06:29:58.091Z",
+        "updatedAt": "2026-10-31T05:17:54.222Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -1191,26 +1038,9 @@
               "createdAt": "2026-10-28T13:15:02.126Z",
               "updatedAt": "2026-10-28T13:15:02.126Z",
               "__v": 0
-            },
-            {
-              "id": "6ae1f555d132e2796bff4f70",
-              "articleId": "6ae1f555d132e2796bff4f70",
-              "title": "His software is inside your router. Now he wants it inside much smaller things",
-              "excerpt": "Bootstrapped software pioneer scales from enterprise Wi-Fi routers into embedded edge AI chips.",
-              "category": "Enterprise",
-              "categoryLabel": "Enterprise",
-              "categoryName": "Enterprise",
-              "image": "https://images.yourstory.com/cs/2/11718bd02d6d11e9aa979329348d4c3e/EmbedURSystemsV21600x900-1789975019215.jpg?mode=fill&ar=16%3A9&format=auto&w=1200&q=80",
-              "author": "Editorial Desk",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:23:20.783Z",
-              "readTime": "8 min read min read",
-              "slug": "lead-5",
-              "link": "/stories/lead-5",
-              "isCustom": true
             }
           ],
-          "limit": 4,
+          "limit": 3,
           "hasCustomArticles": true
         },
         "id": "spotlight",
@@ -1234,7 +1064,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T06:29:58.108Z",
+        "updatedAt": "2026-10-31T05:17:54.224Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",

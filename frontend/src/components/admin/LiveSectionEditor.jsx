@@ -1347,34 +1347,7 @@ function LiveGenericSectionStudio({
                               <Plus size={15} /> Select Article
                             </span>
 
-                            {pool.length > activeArticles.length && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAutoFillToMax();
-                                }}
-                                title="Auto-fill the remaining slots to complete the frontend grid"
-                                style={{
-                                  background: 'transparent',
-                                  border: '1.5px solid #fdba74',
-                                  borderRadius: '9999px',
-                                  padding: '6px 12px',
-                                  color: '#ea580c',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 750,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: '5px',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <Sparkles size={12} />
-                                <span>Auto-fill to Max ({maxArticlesFit})</span>
-                              </button>
-                            )}
+                            
                           </div>
                         </div>
                       ) : null}
@@ -1886,34 +1859,7 @@ function LiveGenericSectionStudio({
                             <Plus size={15} /> Select Article
                           </span>
 
-                          {pool.length > activeArticles.length && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAutoFillToMax();
-                              }}
-                              title="Auto-fill the remaining slots to complete the frontend grid"
-                              style={{
-                                background: 'transparent',
-                                border: '1.5px solid #fdba74',
-                                borderRadius: '9999px',
-                                padding: '6px 12px',
-                                color: '#ea580c',
-                                fontSize: '0.74rem',
-                                fontWeight: 750,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '5px',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <Sparkles size={12} />
-                              <span>Auto-fill to Max ({maxArticlesFit})</span>
-                            </button>
-                          )}
+                          
                         </div>
                       </div>
                     ) : null}
