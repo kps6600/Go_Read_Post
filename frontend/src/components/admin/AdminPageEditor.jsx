@@ -1345,7 +1345,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             <div className="modal-header">
               <div>
                 <h3>Add Page Section</h3>
-                <p>Select a section component to insert into this dynamic page. Sections already added to this page are excluded.</p>
               </div>
               <button
                 type="button"
