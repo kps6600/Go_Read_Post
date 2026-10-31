@@ -342,12 +342,8 @@ export default function LiveHomepageStudio({
   // FEED SECTIONS ARTICLE REORDERING & CURATION
   // ─────────────────────────────────────────────────────────
   const getSectionMaxFit = (sec) => {
-    const isSpot = sec?.id === 'spotlight' || sec?.type === 'spotlight';
-    const isTrend = sec?.id === 'trending' || sec?.type === 'trending';
-    const rawLimit = Number(sec?.data?.limit || sec?.limit);
-    if (isSpot) return (rawLimit > 0 && rawLimit !== 5) ? rawLimit : 8;
-    if (isTrend) return rawLimit > 0 ? rawLimit : 8;
-    return rawLimit > 0 ? rawLimit : 4;
+    // Exactly 4 cards for each section on the homepage
+    return 4;
   };
 
   const resolveSectionArticles = (sec) => {

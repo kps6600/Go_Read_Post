@@ -326,16 +326,12 @@ function LiveGenericSectionStudio({
   const isSpotlight = secType === 'spotlight' || section?.id === 'spotlight';
   const isTrending = secType === 'trending' || section?.id === 'trending';
   const isLatestSection = secType === 'latest_blogs' || secType === 'latest' || section?.id === 'latest_blogs';
-  const maxArticlesFit = isLatestPage 
-    ? 16 
-    : (isSpotlight || isTrending
-        ? 8
-        : (isLatestSection ? 4 : 8)
-      );
+  // Maximum articles that fit cleanly: exactly 4 cards for homepage sections, 16 for latest articles page
+  const maxArticlesFit = isLatestPage ? 16 : 4;
 
   // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
   const frontendArticles = useMemo(() => {
-    const limit = Number(data.limit) || maxArticlesFit;
+    const limit = maxArticlesFit;
 
     // 1. If custom curated articles are pinned in data.articles, use them up to max capacity
     if (Array.isArray(data.articles) && data.articles.length > 0) {

@@ -431,18 +431,14 @@ export default function ModernHomepageView({
     return combined.slice(0, 10);
   }, [pool, heroSlides]);
 
-  // Helper to filter articles by category or pinned list
+  // Helper to filter articles by category or pinned list (strictly 4 cards per section on homepage)
   const getSectionArticles = (sec, defaultArticles) => {
-    const isSpotlight = sec?.id === 'spotlight' || sec?.type === 'spotlight';
-    const isTrending = sec?.id === 'trending' || sec?.type === 'trending';
-    const defaultLimit = (isSpotlight || isTrending) ? 8 : 4;
-    const rawLimit = Number(sec?.data?.limit || sec?.limit);
-    const limit = (isSpotlight || isTrending) ? 8 : (rawLimit > 0 ? rawLimit : defaultLimit);
+    const limit = 4;
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      return sec.data.articles.slice(0, limit);
+      return sec.data.articles.filter(Boolean).slice(0, limit);
     }
     if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
-      return sec.articles.slice(0, limit);
+      return sec.articles.filter(Boolean).slice(0, limit);
     }
     if (sec?.data?.articleIds && Array.isArray(sec.data.articleIds) && sec.data.articleIds.length > 0) {
       const ids = new Set(sec.data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
@@ -1000,6 +996,12 @@ export default function ModernHomepageView({
     const viewAllUrl = sec?.data?.viewAllUrl || sec?.customConfig?.viewAllUrl || "/latest";
     const articles = getSectionArticles(sec, latestBlogs);
 
+    const handleNavigateViewAll = () => {
+      window.history.pushState(null, '', viewAllUrl);
+      window.dispatchEvent(new Event('popstate'));
+      if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+    };
+
     return (
       <section key={sec.id || "sec-latest-blogs"} className="mhp-latest-section">
         <div className="mhp-section-header">
@@ -1007,21 +1009,33 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
+            {subtitle && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0' }}>{subtitle}</p>}
           </div>
-          <span 
-            className="mhp-view-all-link"
-            onClick={() => {
-              window.history.pushState(null, '', viewAllUrl);
-              window.dispatchEvent(new Event('popstate'));
-              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
-            }}
+          <button 
+            type="button"
+            className="mhp-view-all-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
           >
-            {viewAllText} <ArrowRight size={14} />
-          </span>
+            <span>{viewAllText}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+        </div>
+
+        <div className="mhp-section-bottom-action">
+          <button 
+            type="button"
+            className="mhp-view-all-bottom-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
+          >
+            <span>{viewAllText}</span>
+            <ArrowRight size={15} />
+          </button>
         </div>
       </section>
     );
@@ -1034,6 +1048,12 @@ export default function ModernHomepageView({
     const viewAllUrl = sec?.data?.viewAllUrl || sec?.customConfig?.viewAllUrl || "/trending";
     const articles = getSectionArticles(sec, trendingStories);
 
+    const handleNavigateViewAll = () => {
+      window.history.pushState(null, '', viewAllUrl);
+      window.dispatchEvent(new Event('popstate'));
+      if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+    };
+
     return (
       <section key={sec.id || "sec-trending"} className="mhp-content-section">
         <div className="mhp-section-header">
@@ -1042,20 +1062,31 @@ export default function ModernHomepageView({
               <span>{title}</span>
             </div>
           </div>
-          <span 
-            className="mhp-view-all-link"
-            onClick={() => {
-              window.history.pushState(null, '', viewAllUrl);
-              window.dispatchEvent(new Event('popstate'));
-              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
-            }}
+          <button 
+            type="button"
+            className="mhp-view-all-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
           >
-            {viewAllText} <ArrowRight size={14} />
-          </span>
+            <span>{viewAllText}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+        </div>
+
+        <div className="mhp-section-bottom-action">
+          <button 
+            type="button"
+            className="mhp-view-all-bottom-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
+          >
+            <span>{viewAllText}</span>
+            <ArrowRight size={15} />
+          </button>
         </div>
       </section>
     );
@@ -1069,6 +1100,12 @@ export default function ModernHomepageView({
     const badgeText = sec?.data?.badgeText || sec?.customConfig?.badgeText || "Editor's Choice";
     const articles = getSectionArticles(sec, popularStories);
 
+    const handleNavigateViewAll = () => {
+      window.history.pushState(null, '', viewAllUrl);
+      window.dispatchEvent(new Event('popstate'));
+      if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+    };
+
     return (
       <section key={sec.id || "sec-popular-editors"} className="mhp-content-section">
         <div className="mhp-section-header">
@@ -1077,16 +1114,15 @@ export default function ModernHomepageView({
               <span>{title}</span>
             </div>
           </div>
-          <span 
-            className="mhp-view-all-link"
-            onClick={() => {
-              window.history.pushState(null, '', viewAllUrl);
-              window.dispatchEvent(new Event('popstate'));
-              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
-            }}
+          <button 
+            type="button"
+            className="mhp-view-all-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
           >
-            {viewAllText} <ArrowRight size={14} />
-          </span>
+            <span>{viewAllText}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
         <div className="mhp-blog-cards-grid">
@@ -1101,6 +1137,18 @@ export default function ModernHomepageView({
             )
           )}
         </div>
+
+        <div className="mhp-section-bottom-action">
+          <button 
+            type="button"
+            className="mhp-view-all-bottom-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
+          >
+            <span>{viewAllText}</span>
+            <ArrowRight size={15} />
+          </button>
+        </div>
       </section>
     );
   };
@@ -1113,6 +1161,12 @@ export default function ModernHomepageView({
     const badgeText = sec?.data?.badgeText || sec?.customConfig?.badgeText || "Spotlight";
     const articles = getSectionArticles(sec, spotlightStories);
 
+    const handleNavigateViewAll = () => {
+      window.history.pushState(null, '', viewAllUrl);
+      window.dispatchEvent(new Event('popstate'));
+      if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+    };
+
     return (
       <section key={sec.id || "sec-spotlight"} className="mhp-content-section">
         <div className="mhp-section-header">
@@ -1121,22 +1175,33 @@ export default function ModernHomepageView({
               <span>{title}</span>
             </div>
           </div>
-          <span 
-            className="mhp-view-all-link"
-            onClick={() => {
-              window.history.pushState(null, '', viewAllUrl);
-              window.dispatchEvent(new Event('popstate'));
-              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
-            }}
+          <button 
+            type="button"
+            className="mhp-view-all-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
           >
-            {viewAllText} <ArrowRight size={14} />
-          </span>
+            <span>{viewAllText}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => 
             renderStoryCard(blog, idx)
           )}
+        </div>
+
+        <div className="mhp-section-bottom-action">
+          <button 
+            type="button"
+            className="mhp-view-all-bottom-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
+          >
+            <span>{viewAllText}</span>
+            <ArrowRight size={15} />
+          </button>
         </div>
       </section>
     );
@@ -1218,6 +1283,12 @@ export default function ModernHomepageView({
     });
     const articles = getSectionArticles(sec, categoryArticles.length > 0 ? categoryArticles : pool);
 
+    const handleNavigateViewAll = () => {
+      window.history.pushState(null, '', viewAllUrl);
+      window.dispatchEvent(new Event('popstate'));
+      if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
+    };
+
     return (
       <section key={sec.id || `sec-cat-${rawCat}`} className="mhp-content-section">
         <div className="mhp-section-header">
@@ -1227,20 +1298,31 @@ export default function ModernHomepageView({
             </div>
             {subtitle && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0' }}>{subtitle}</p>}
           </div>
-          <span 
-            className="mhp-view-all-link"
-            onClick={() => {
-              window.history.pushState(null, '', viewAllUrl);
-              window.dispatchEvent(new Event('popstate'));
-              if (onCategoryClick) onCategoryClick(viewAllUrl.replace(/^\//, ''));
-            }}
+          <button 
+            type="button"
+            className="mhp-view-all-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
           >
-            {viewAllText} <ArrowRight size={14} />
-          </span>
+            <span>{viewAllText}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+        </div>
+
+        <div className="mhp-section-bottom-action">
+          <button 
+            type="button"
+            className="mhp-view-all-bottom-btn"
+            onClick={handleNavigateViewAll}
+            aria-label={viewAllText}
+          >
+            <span>{viewAllText}</span>
+            <ArrowRight size={15} />
+          </button>
         </div>
       </section>
     );
