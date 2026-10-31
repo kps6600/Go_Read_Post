@@ -703,6 +703,12 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const handleAutoSaveLiveSection = async (updatedData) => {
     if (!liveEditingSection) return;
     const targetId = liveEditingSection.id || liveEditingSection._id || liveEditingSection.sectionKey;
+    setLiveEditingSection(prev => prev ? {
+      ...prev,
+      data: updatedData,
+      customConfig: updatedData,
+      title: updatedData.heading || updatedData.title || prev.title
+    } : null);
     const updatedSections = sections.map(s => {
       const sId = s.id || s._id || s.sectionKey;
       if (sId === targetId) {

@@ -448,8 +448,8 @@ function LiveGenericSectionStudio({
   const frontendArticles = useMemo(() => {
     const limit = maxArticlesFit;
 
-    // 1. If custom curated articles are pinned in data.articles, use them and auto-fill up to max capacity
-    if (Array.isArray(data.articles) && data.articles.length > 0) {
+    // 1. If custom curated articles are set in data.articles, use exactly those curated articles (reflecting deletions immediately)
+    if (Array.isArray(data.articles)) {
       const unique = [];
       const seen = new Set();
       for (const a of data.articles.filter(Boolean)) {
@@ -458,16 +458,6 @@ function LiveGenericSectionStudio({
           seen.add(k);
           unique.push(a);
           if (unique.length >= maxArticlesFit) break;
-        }
-      }
-      if (unique.length < maxArticlesFit) {
-        for (const b of (sectionRelatedPool || pool)) {
-          const k = String(b.id || b._id || b.articleId || b.slug || b.title || '').trim().toLowerCase();
-          if (k && !seen.has(k)) {
-            seen.add(k);
-            unique.push(b);
-            if (unique.length >= maxArticlesFit) break;
-          }
         }
       }
       return unique.slice(0, maxArticlesFit);
@@ -745,7 +735,13 @@ function LiveGenericSectionStudio({
   const handleRemoveArticle = (idx, e) => {
     e?.stopPropagation();
     const nextArticles = activeArticles.filter((_, i) => i !== idx);
-    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
+    const nextData = { 
+      ...data, 
+      articles: nextArticles, 
+      limit: maxArticlesFit, 
+      hasCustomArticles: true 
+    };
+    setData(nextData);
     persistToDatabase(nextData);
   };
 
