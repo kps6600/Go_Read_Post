@@ -142,6 +142,16 @@ export default function LiveSectionEditor({
   );
 }
 
+const getSafeArticleImage = (art) => {
+  if (!art) return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
+  if (typeof art.featuredImage === 'string' && art.featuredImage) return art.featuredImage;
+  if (art.featuredImage && typeof art.featuredImage === 'object' && art.featuredImage.url) return art.featuredImage.url;
+  if (typeof art.image === 'string' && art.image) return art.image;
+  if (art.image && typeof art.image === 'object' && art.image.url) return art.image.url;
+  if (typeof art.coverImage === 'string' && art.coverImage) return art.coverImage;
+  return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
+};
+
 function LiveGenericSectionStudio({
   section,
   onClose,
@@ -266,12 +276,135 @@ function LiveGenericSectionStudio({
     return combined;
   }, [availableArticles, stories]);
 
-  // Filtered articles in Picker
+  // Section Type Identification
+  const secType = (section.type || section.sectionKey || '').toLowerCase();
+  const isArticleFeed = ['stories_feed', 'story_feed', 'article_feed', 'article_story_feed', 'latest_blogs', 'latest', 'trending', 'popular_editors', 'business', 'spotlight', 'technology', 'ai'].includes(secType) || secType.includes('feed') || secType.includes('story') || secType.includes('article') || secType.includes('blog');
+  const isNewsletter = secType === 'newsletter';
+  const isImageText = secType === 'image_text';
+  const isText = secType === 'text';
+  const isCTA = secType === 'cta';
+  const isGridList = ['services', 'portfolio', 'testimonials', 'features', 'stats', 'brands', 'faq', 'contact'].includes(secType);
+
+  const isLatestPage = pageId === 'latest' || section?.id === 'latest_feed';
+  const isSpotlight = secType === 'spotlight' || section?.id === 'spotlight' || (section?.title && section.title.toLowerCase().includes('spotlight'));
+  const isTrending = secType === 'trending' || section?.id === 'trending' || (section?.title && section.title.toLowerCase().includes('trending'));
+  const isLatestSection = secType === 'latest_blogs' || secType === 'latest' || section?.id === 'latest_blogs' || (section?.title && section.title.toLowerCase().includes('latest'));
+  // Maximum articles that fit cleanly: exactly 4 cards for homepage sections, 16 for latest articles page
+  const maxArticlesFit = isLatestPage ? 16 : 4;
+
+  // ── STRICT SECTION-RELATED ARTICLES ONLY FOR PICKER & CURATION ──
+  // Shows ONLY articles related to the active section, filtering out unrelated content
+  const sectionRelatedPool = useMemo(() => {
+    const titleLower = getSafeString(section?.title || data?.title || '', '').toLowerCase();
+    const isSpot = isSpotlight || secType === 'technology' || secType === 'ai' || titleLower.includes('spotlight') || titleLower.includes('tech');
+    const isTrend = isTrending || titleLower.includes('trending');
+    const isPop = secType === 'popular_editors' || secType === 'business' || section?.id === 'popular_editors' || titleLower.includes('popular') || titleLower.includes('editor');
+    
+    // A. Explicit Category Configured or Category Desk Section
+    const explicitCat = getSafeString(data.category || section?.category || data.filterCategory || '', '').toLowerCase().trim();
+    if (explicitCat) {
+      const matched = pool.filter(s => {
+        if (!s) return false;
+        const c = getSafeString(s.categoryName || s.categoryLabel || s.categoryTag || s.category || '', '').toLowerCase();
+        return c.includes(explicitCat);
+      });
+      if (matched.length > 0) return matched;
+    }
+
+    if (secType.startsWith('category_')) {
+      const rawCat = secType.replace(/^category_/, '').replace(/[-_]/g, ' ').toLowerCase();
+      const matched = pool.filter(s => {
+        if (!s) return false;
+        const c = getSafeString(s.categoryName || s.categoryLabel || s.categoryTag || s.category || '', '').toLowerCase();
+        return c.includes(rawCat);
+      });
+      if (matched.length > 0) return matched;
+    }
+
+    // B. Tech & Startup Spotlight -> ONLY Tech, Startups, AI, DeepTech, FinTech, Enterprise, TechSparks!
+    if (isSpot) {
+      const techList = pool.filter(s => {
+        if (!s) return false;
+        const c = getSafeString(s.categoryName || s.categoryLabel || s.categoryTag || s.category || '', '').toLowerCase();
+        const tag = getSafeString(s.tag || '', '').toUpperCase();
+        const tags = Array.isArray(s.tags) ? s.tags.map(t => String(t).toLowerCase()) : [];
+        const isTechCat = (
+          c.includes('tech') || 
+          c.includes('ai') || 
+          c.includes('startup') || 
+          c.includes('enterprise') || 
+          c.includes('fintech') || 
+          c.includes('deeptech') || 
+          c.includes('deep-tech')
+        );
+        const isTechTag = (
+          tag === 'TECHNOLOGY' || 
+          tag === 'STARTUP' || 
+          tag === 'AI' || 
+          tag === 'DEEPTECH' || 
+          tag === 'FINTECH' || 
+          tag === 'ENTERPRISE' || 
+          tag === 'TECHSPARKS 2024' ||
+          tags.some(t => t.includes('tech') || t.includes('ai') || t.includes('startup') || t.includes('software'))
+        );
+        return isTechCat || isTechTag;
+      });
+      if (techList.length > 0) return techList;
+    }
+
+    // C. Trending Now -> ONLY Trending, Viral, and Popular flagged stories!
+    if (isTrend) {
+      const trendList = pool.filter(s => {
+        if (!s) return false;
+        const tag = getSafeString(s.tag || '', '').toUpperCase();
+        const placements = Array.isArray(s.placements) ? s.placements : [];
+        return (
+          s.isTrending ||
+          s.trending ||
+          placements.includes('trending') ||
+          tag === 'TRENDING' ||
+          tag === 'POPULAR' ||
+          tag === 'VIRAL' ||
+          tag === 'TOP PICK'
+        );
+      });
+      if (trendList.length > 0) return trendList;
+    }
+
+    // D. Most Popular & Editor's Picks -> ONLY Editor's Choice, Featured, and Top Pick stories!
+    if (isPop) {
+      const popList = pool.filter(s => {
+        if (!s) return false;
+        const tag = getSafeString(s.tag || '', '').toUpperCase();
+        const placements = Array.isArray(s.placements) ? s.placements : [];
+        return (
+          s.isEditorsPick ||
+          s.isFeatured ||
+          placements.includes('editors_pick') ||
+          tag === 'TOP PICK' ||
+          tag === 'FEATURED' ||
+          tag === 'EDITOR' ||
+          tag === "EDITOR'S CHOICE" ||
+          s.isLead
+        );
+      });
+      if (popList.length > 0) return popList;
+    }
+
+    // E. Latest from the Blog / Stories Feed -> Latest editorial blog reporting
+    return [...pool].sort((a, b) => {
+      const dateA = new Date(a?.publishedAt || a?.date || a?.createdAt || 0);
+      const dateB = new Date(b?.publishedAt || b?.date || b?.createdAt || 0);
+      return dateB - dateA;
+    });
+  }, [pool, secType, isSpotlight, isTrending, section?.title, section?.category, section?.id, data?.title, data.category, data.filterCategory]);
+
+  // Filtered articles in Picker (strictly scoped to sectionRelatedPool)
   const filteredPickerArticles = useMemo(() => {
-    return pool.filter(a => {
+    return sectionRelatedPool.filter(a => {
       if (!a) return false;
       const title = getSafeString(a.title, '').toLowerCase();
-      const cat = getSafeString(a.categoryLabel || a.category, '').toLowerCase();
+      const cat = getSafeString(a.categoryName || a.categoryLabel || a.category, '').toLowerCase();
       const author = getSafeString(typeof a.author === 'object' && a.author ? a.author.name : a.author, '').toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
 
@@ -279,17 +412,18 @@ function LiveGenericSectionStudio({
       const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
       return matchesSearch && matchesCat;
     });
-  }, [pool, pickerSearch, pickerCategory]);
+  }, [sectionRelatedPool, pickerSearch, pickerCategory]);
 
+  // Available categories in Picker (strictly from sectionRelatedPool)
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    pool.forEach(a => {
+    sectionRelatedPool.forEach(a => {
       if (!a) return;
-      const c = getSafeString(a.categoryLabel || a.category, '');
+      const c = getSafeString(a.categoryName || a.categoryLabel || a.category, '');
       if (c && typeof c === 'string') cats.add(c.trim());
     });
     return Array.from(cats).slice(0, 10);
-  }, [pool]);
+  }, [sectionRelatedPool]);
 
   // ─────────────────────────────────────────────────────────
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
@@ -309,25 +443,6 @@ function LiveGenericSectionStudio({
       setSaveStatus('error');
     }
   };
-
-  // Section Type Identification
-  const secType = (section.type || section.sectionKey || '').toLowerCase();
-  const isArticleFeed = ['stories_feed', 'story_feed', 'article_feed', 'article_story_feed', 'latest_blogs', 'latest', 'trending', 'popular_editors', 'business', 'spotlight', 'technology', 'ai'].includes(secType) || secType.includes('feed') || secType.includes('story') || secType.includes('article') || secType.includes('blog');
-  const isNewsletter = secType === 'newsletter';
-  const isImageText = secType === 'image_text';
-  const isText = secType === 'text';
-  const isCTA = secType === 'cta';
-  const isGridList = ['services', 'portfolio', 'testimonials', 'features', 'stats', 'brands', 'faq', 'contact'].includes(secType);
-
-  // Maximum articles that fit cleanly in the frontend grid without awkward trailing spaces:
-  // - Homepage grid (4 columns wide): 8 articles (exactly 2 complete rows of 4).
-  // - Latest articles page (4 columns wide): 16 articles (exactly 4 complete rows of 4).
-  const isLatestPage = pageId === 'latest' || section?.id === 'latest_feed';
-  const isSpotlight = secType === 'spotlight' || section?.id === 'spotlight';
-  const isTrending = secType === 'trending' || section?.id === 'trending';
-  const isLatestSection = secType === 'latest_blogs' || secType === 'latest' || section?.id === 'latest_blogs';
-  // Maximum articles that fit cleanly: exactly 4 cards for homepage sections, 16 for latest articles page
-  const maxArticlesFit = isLatestPage ? 16 : 4;
 
   // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
   const frontendArticles = useMemo(() => {
@@ -519,7 +634,7 @@ function LiveGenericSectionStudio({
     const needed = maxArticlesFit - activeArticles.length;
     if (needed <= 0) return;
     const existingKeys = new Set(activeArticles.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase()));
-    const candidates = pool.filter(p => {
+    const candidates = sectionRelatedPool.filter(p => {
       if (!p) return false;
       const key = String(p.slug || p.id || p._id || p.title || '').trim().toLowerCase();
       return key && !existingKeys.has(key);
@@ -541,7 +656,7 @@ function LiveGenericSectionStudio({
       isCustom: true
     }));
     const nextArticles = [...activeArticles, ...toAdd];
-    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
+    const nextData = { ...data, articles: nextArticles, limit: maxArticlesFit, hasCustomArticles: true };
     persistToDatabase(nextData);
   };
 
@@ -557,18 +672,23 @@ function LiveGenericSectionStudio({
   };
 
   const handleSelectArticle = (article) => {
+    const artCatName = article.categoryName || article.categoryLabel || article.categoryTag || article.category || 'News';
+    const artImg = getSafeArticleImage(article);
+    const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Editorial Bureau'));
+
     const formatted = {
       id: article._id || article.id || `art-${Date.now()}`,
       articleId: article._id || article.id,
       title: article.title || 'Untitled Article',
       excerpt: article.excerpt || article.summary || article.description || '',
-      category: article.categoryLabel || article.category || 'News',
-      categoryLabel: article.categoryLabel || article.category || 'News',
-      image: article.image || article.coverImage || article.fallbackImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80',
-      author: typeof article.author === 'object' ? article.author?.name : (article.author || 'Editorial Bureau'),
+      category: artCatName,
+      categoryLabel: artCatName,
+      categoryName: artCatName,
+      image: artImg,
+      author: artAuthor,
       authorAvatar: article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
       date: article.publishedAt || article.date || 'Today',
-      readTime: article.readTime || '4 min read',
+      readTime: article.readTime || (article.readingTime ? `${article.readingTime} min read` : '4 min read'),
       slug: article.slug || article._id || article.id,
       link: article.slug ? `/stories/${article.slug}` : `/stories/${article._id || article.id}`,
       isCustom: true
@@ -585,7 +705,7 @@ function LiveGenericSectionStudio({
       nextArticles.push(formatted);
     }
 
-    const nextData = { ...data, articles: nextArticles, limit: (isSpotlight || isTrending) ? 8 : (isLatestSection ? 4 : nextArticles.length), hasCustomArticles: true };
+    const nextData = { ...data, articles: nextArticles, limit: maxArticlesFit, hasCustomArticles: true };
     persistToDatabase(nextData);
     setIsPickerOpen(false);
   };
@@ -2241,7 +2361,7 @@ function LiveGenericSectionStudio({
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
-                  {pickerTarget?.type === 'replace' ? 'Pick a published article to swap into this slot.' : `This section fits up to ${maxArticlesFit} articles on the frontend grid. Choose an article to fill this slot.`}
+                  {pickerTarget?.type === 'replace' ? `Pick a published article to swap into this slot. Showing only articles related to ${section.title || 'this section'}.` : `Showing only articles related to ${section.title || 'this section'} (${sectionRelatedPool.length} available). Choose an article to fill this slot.`}
                 </p>
               </div>
               <button 
@@ -2299,9 +2419,9 @@ function LiveGenericSectionStudio({
                   {filteredPickerArticles.map(article => {
                     const artId = article._id || article.id;
                     const artTitle = article.title || 'Untitled Article';
-                    const artImg = article.image || article.coverImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
-                    const artCat = article.categoryLabel || article.category || 'Article';
-                    const artAuthor = typeof article.author === 'object' ? article.author?.name : (article.author || 'Author');
+                    const artImg = getSafeArticleImage(article);
+                    const artCat = (article.categoryName || article.categoryLabel || article.categoryTag || article.category || 'Article').toUpperCase();
+                    const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Author'));
 
                     return (
                       <div 

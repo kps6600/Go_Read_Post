@@ -173,11 +173,75 @@ export default function LiveHomepageStudio({
     return combined;
   }, [availableArticles, stories]);
 
-  // Filtered articles in Picker
+  // Target section-related pool in Studio (strictly scoped to the section being edited)
+  const targetSectionRelatedPool = useMemo(() => {
+    if (!pickerTarget?.sectionId) return pool;
+    const sec = sections.find(s => s.id === pickerTarget.sectionId || s.sectionKey === pickerTarget.sectionId);
+    if (!sec) return pool;
+
+    const secType = (sec.type || sec.sectionKey || sec.id || '').toLowerCase();
+    const titleLower = (sec.title || sec.data?.title || '').toLowerCase();
+    const isSpot = secType === 'spotlight' || secType === 'technology' || secType === 'ai' || titleLower.includes('spotlight') || titleLower.includes('tech');
+    const isTrend = secType === 'trending' || titleLower.includes('trending');
+    const isPop = secType === 'popular_editors' || secType === 'business' || sec.id === 'popular_editors' || titleLower.includes('popular') || titleLower.includes('editor');
+    const explicitCat = (sec.data?.category || sec.category || '').toLowerCase().trim();
+
+    if (explicitCat) {
+      const matched = pool.filter(s => {
+        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
+        return c.includes(explicitCat);
+      });
+      if (matched.length > 0) return matched;
+    }
+
+    if (secType.startsWith('category_')) {
+      const rawCat = secType.replace(/^category_/, '').replace(/[-_]/g, ' ').toLowerCase();
+      const matched = pool.filter(s => {
+        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
+        return c.includes(rawCat);
+      });
+      if (matched.length > 0) return matched;
+    }
+
+    if (isSpot) {
+      const techList = pool.filter(s => {
+        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
+        const tag = (s.tag || '').toUpperCase();
+        return (
+          c.includes('tech') || c.includes('ai') || c.includes('startup') || c.includes('enterprise') ||
+          c.includes('fintech') || c.includes('deeptech') || c.includes('deep-tech') ||
+          tag === 'TECHNOLOGY' || tag === 'STARTUP' || tag === 'AI' || tag === 'DEEPTECH' || tag === 'FINTECH' || tag === 'ENTERPRISE' || tag === 'TECHSPARKS 2024'
+        );
+      });
+      if (techList.length > 0) return techList;
+    }
+
+    if (isTrend) {
+      const trendList = pool.filter(s => {
+        const tag = (s.tag || '').toUpperCase();
+        const placements = Array.isArray(s.placements) ? s.placements : [];
+        return s.isTrending || s.trending || placements.includes('trending') || tag === 'TRENDING' || tag === 'POPULAR' || tag === 'VIRAL' || tag === 'TOP PICK';
+      });
+      if (trendList.length > 0) return trendList;
+    }
+
+    if (isPop) {
+      const popList = pool.filter(s => {
+        const tag = (s.tag || '').toUpperCase();
+        const placements = Array.isArray(s.placements) ? s.placements : [];
+        return s.isEditorsPick || s.isFeatured || placements.includes('editors_pick') || tag === 'TOP PICK' || tag === 'FEATURED' || tag === 'EDITOR' || s.isLead;
+      });
+      if (popList.length > 0) return popList;
+    }
+
+    return [...pool].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+  }, [pool, pickerTarget, sections]);
+
+  // Filtered articles in Picker (strictly scoped to targetSectionRelatedPool)
   const filteredPickerArticles = useMemo(() => {
-    return pool.filter(a => {
+    return targetSectionRelatedPool.filter(a => {
       const title = (a.title || '').toLowerCase();
-      const cat = (a.categoryLabel || a.category || '').toLowerCase();
+      const cat = (a.categoryName || a.categoryLabel || a.category || '').toLowerCase();
       const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || '')).toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
 
@@ -185,16 +249,16 @@ export default function LiveHomepageStudio({
       const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
       return matchesSearch && matchesCat;
     });
-  }, [pool, pickerSearch, pickerCategory]);
+  }, [targetSectionRelatedPool, pickerSearch, pickerCategory]);
 
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    pool.forEach(a => {
-      const c = a.categoryLabel || a.category;
+    targetSectionRelatedPool.forEach(a => {
+      const c = a.categoryName || a.categoryLabel || a.category;
       if (c && typeof c === 'string') cats.add(c.trim());
     });
     return Array.from(cats).slice(0, 10);
-  }, [pool]);
+  }, [targetSectionRelatedPool]);
 
   // ─────────────────────────────────────────────────────────
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
