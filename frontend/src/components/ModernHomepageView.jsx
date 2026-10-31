@@ -431,19 +431,35 @@ export default function ModernHomepageView({
     return combined.slice(0, 10);
   }, [pool, heroSlides]);
 
-  // Helper to filter articles by category or pinned list (strictly 4 cards per section on homepage)
+  // Helper to filter articles by category or pinned list (strictly 4 unique cards per section on homepage)
   const getSectionArticles = (sec, defaultArticles) => {
     const limit = 4;
+    const dedupe = (list) => {
+      const seen = new Set();
+      const unique = [];
+      for (const item of (list || [])) {
+        if (!item) continue;
+        const key = String(item.id || item._id || item.articleId || item.slug || item.title || '').trim().toLowerCase();
+        if (key && seen.has(key)) continue;
+        if (key) seen.add(key);
+        unique.push(item);
+        if (unique.length >= limit) break;
+      }
+      return unique;
+    };
+
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      return sec.data.articles.filter(Boolean).slice(0, limit);
+      const list = dedupe(sec.data.articles.filter(Boolean));
+      if (list.length > 0) return list;
     }
     if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
-      return sec.articles.filter(Boolean).slice(0, limit);
+      const list = dedupe(sec.articles.filter(Boolean));
+      if (list.length > 0) return list;
     }
     if (sec?.data?.articleIds && Array.isArray(sec.data.articleIds) && sec.data.articleIds.length > 0) {
       const ids = new Set(sec.data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
       const matched = pool.filter(s => ids.has(String(s._id || s.id || s.slug)));
-      if (matched.length > 0) return matched.slice(0, limit);
+      if (matched.length > 0) return dedupe(matched);
     }
     const filterCat = sec?.data?.category || sec?.data?.filterCategory || sec?.filterCategory;
     if (filterCat && filterCat.trim()) {
@@ -452,9 +468,9 @@ export default function ModernHomepageView({
         const c = (s.category || s.categoryLabel || '').toLowerCase();
         return c.includes(cat);
       });
-      if (filtered.length > 0) return filtered.slice(0, limit);
+      if (filtered.length > 0) return dedupe(filtered);
     }
-    return defaultArticles.slice(0, limit);
+    return dedupe(defaultArticles);
   };
 
   // Auto rotate hero slide based on heroConfig
@@ -1023,7 +1039,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );
@@ -1062,7 +1078,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );
@@ -1102,7 +1118,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.map((blog, idx) => 
+          {articles.slice(0, 4).map((blog, idx) => 
             renderStoryCard(
               blog, 
               idx, 
@@ -1151,7 +1167,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.map((blog, idx) => 
+          {articles.slice(0, 4).map((blog, idx) => 
             renderStoryCard(blog, idx)
           )}
         </div>
@@ -1262,7 +1278,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );

@@ -657,6 +657,11 @@
   gap: 1.25rem;
 }
 
+/* Strictly enforce maximum 4 cards in homepage grid sections */
+.mhp-blog-cards-grid > *:nth-child(n+5) {
+  display: none !important;
+}
+
 @media (min-width: 1536px) {
   .mhp-latest-section .mhp-blog-cards-grid {
     grid-template-columns: repeat(4, 1fr);
