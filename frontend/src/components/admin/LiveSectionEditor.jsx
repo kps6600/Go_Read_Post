@@ -1024,48 +1024,7 @@ function LiveGenericSectionStudio({
                               >
                                 <ArrowRight size={13} />
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenArticleEditor(story)}
-                                title="Edit this article's content"
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '26px',
-                                  height: '26px',
-                                  borderRadius: '5px',
-                                  border: '1px solid #cbd5e1',
-                                  background: '#ffffff',
-                                  color: '#334155',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <Edit2 size={13} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenPicker({ type: 'replace', index: idx })}
-                                title="Replace this article"
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '26px',
-                                  height: '26px',
-                                  borderRadius: '5px',
-                                  border: '1px solid #cbd5e1',
-                                  background: '#ffffff',
-                                  color: '#334155',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <ArrowLeftRight size={13} />
-                              </button>
+
                               <button
                                 type="button"
                                 onClick={(e) => handleRemoveArticle(idx, e)}
@@ -1514,49 +1473,7 @@ function LiveGenericSectionStudio({
                                 <ArrowRight size={13} />
                               </button>
 
-                              <button
-                                type="button"
-                                onClick={() => handleOpenArticleEditor(blog)}
-                                title="Edit Article Details"
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '26px',
-                                  height: '26px',
-                                  borderRadius: '5px',
-                                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                                  background: 'rgba(255, 255, 255, 0.1)',
-                                  color: '#ffffff',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <Edit2 size={13} />
-                              </button>
 
-                              <button
-                                type="button"
-                                onClick={() => handleOpenPicker({ type: 'replace', index: idx })}
-                                title="Swap with another article"
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '26px',
-                                  height: '26px',
-                                  borderRadius: '5px',
-                                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                                  background: 'rgba(255, 255, 255, 0.1)',
-                                  color: '#ffffff',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <RefreshCw size={13} />
-                              </button>
 
                               <button
                                 type="button"

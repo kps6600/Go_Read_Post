@@ -1370,26 +1370,6 @@ export default function LiveHomepageStudio({
                                       </button>
                                       <button
                                         type="button"
-                                        onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-replace', index: aIdx })}
-                                        title="Replace this article"
-                                        style={{
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          width: '26px',
-                                          height: '26px',
-                                          borderRadius: '5px',
-                                          border: '1px solid rgba(255, 255, 255, 0.12)',
-                                          background: 'rgba(255, 255, 255, 0.08)',
-                                          color: '#ffffff',
-                                          cursor: 'pointer',
-                                          padding: 0
-                                        }}
-                                      >
-                                        <RefreshCw size={13} />
-                                      </button>
-                                      <button
-                                        type="button"
                                         onClick={() => handleRemoveFeedArticle(sec.id, aIdx)}
                                         title="Delete article permanently"
                                         style={{
