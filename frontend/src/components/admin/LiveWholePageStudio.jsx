@@ -1928,52 +1928,7 @@ export default function LiveWholePageStudio({
                   );
                 })
               )}
-                <div
-                  onClick={() => {
-                    setInsertAtIndex(null);
-                    setIsAddSectionModalOpen(true);
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  title="Insert another section component to this page"
-                  style={{
-                    marginTop: '2rem',
-                    padding: '2.5rem 1.5rem',
-                    borderRadius: '16px',
-                    border: '2px dashed rgba(234, 88, 12, 0.6)',
-                    background: 'linear-gradient(180deg, rgba(255, 247, 237, 0.6) 0%, rgba(255, 255, 255, 0.8) 100%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 14px rgba(234, 88, 12, 0.08)'
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '50%',
-                      background: '#ea580c',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.3)',
-                      marginBottom: '0.75rem'
-                    }}
-                  >
-                    <Plus size={26} strokeWidth={2.5} />
-                  </div>
-                  <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                    + Add Another Section Component
-                  </h3>
-                  <span style={{ fontSize: '0.84rem', color: '#64748b' }}>
-                    Insert a new story feed, category desk, multimedia showcase, or banner to this page.
-                  </span>
-                </div>
+
 
               </div>
             </div>
