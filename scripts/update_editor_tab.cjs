@@ -55,3 +55,4 @@ const replacementStr = `  // ── 2. DEDICATED WHOLE PAGE LIVE VISUAL STUDIO (
 code = code.replace(targetStr, replacementStr);
 fs.writeFileSync(editorPath, code, 'utf8');
 console.log('Updated AdminPageEditor.jsx to return LiveWholePageStudio when activeTab === sections.');
+

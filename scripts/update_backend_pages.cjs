@@ -96,3 +96,4 @@ if (!content.includes('id: "latest"')) {
 } else {
   console.log('backend/routes/pages.js already has latest page');
 }
+

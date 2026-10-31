@@ -15,6 +15,7 @@ import './LiveHomepageStudio.css';
 import './LiveSectionEditor.css';
 import '../ModernHomepage.css';
 import '../LatestArticlesPage.css';
+import LatestArticlesPage from '../LatestArticlesPage';
 
 // Helper to format an article as a Hero Carousel slide
 const formatForHeroSlide = (article) => {
@@ -109,6 +110,7 @@ export default function LiveWholePageStudio({
   const [insertAtIndex, setInsertAtIndex] = useState(null);
 
   const sectionRefs = useRef({});
+  const isLatestPage = pageId === 'latest' || pageSlug === 'latest';
 
   // Load sections from MongoDB on mount
   useEffect(() => {
@@ -858,6 +860,43 @@ export default function LiveWholePageStudio({
             </span>
           )}
 
+          {(pageId === 'latest' || pageSlug === 'latest') && (
+            <button
+              type="button"
+              className="lhs-btn-preview"
+              onClick={() => {
+                const titlePrompt = window.prompt("Add article title to latest feed:");
+                if (titlePrompt && titlePrompt.trim()) {
+                  const newArt = {
+                    id: 'art_' + Date.now(),
+                    title: titlePrompt.trim(),
+                    subtitle: 'Exclusive reporting from GoReadPost newsroom.',
+                    summary: 'Exclusive reporting from GoReadPost newsroom.',
+                    category: 'Startups',
+                    categoryName: 'Startups',
+                    categoryLabel: 'Startups',
+                    authorName: 'Editorial Desk',
+                    author: { name: 'Editorial Desk' },
+                    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+                    publishedAt: new Date().toISOString(),
+                    readTime: '4 min read',
+                    isNewlyAdded: true
+                  };
+                  ArticleService.createArticle(newArt).then(() => {
+                    window.dispatchEvent(new CustomEvent('article:change'));
+                    setSaveStatus('saved');
+                    setTimeout(() => setSaveStatus('idle'), 2500);
+                  }).catch(() => {});
+                }
+              }}
+              title="Add a new article card directly to Latest feed"
+              style={{ background: '#ea580c', color: '#ffffff', border: 'none' }}
+            >
+              <Plus size={14} />
+              <span>+ Add Article</span>
+            </button>
+          )}
+
           {onOpenSettings && (
             <button
               type="button"
@@ -904,21 +943,23 @@ export default function LiveWholePageStudio({
             <div className="lhs-tip-text">
               <Sparkles size={16} color="#fbbf24" />
               <span>
-                <strong>Whole Page Live Studio:</strong> Click any text, headline, or category to edit in-place. Hover images to change photos. Reorder sections with <strong>↑ Up / ↓ Down</strong>.
+                <strong>{isLatestPage ? 'Latest Articles Live UI Studio:' : 'Whole Page Live Studio:'}</strong> Click any headline, category tag, excerpt, or author to edit in-place. Hover article thumbnails to change photos. Reorder cards with <strong>← Left / Right →</strong>.
               </span>
             </div>
 
-            <button
-              type="button"
-              className="lse-toolbar-btn primary"
-              onClick={() => {
-                setInsertAtIndex(null);
-                setIsAddSectionModalOpen(true);
-              }}
-            >
-              <Plus size={14} />
-              <span>+ Add Section to Page</span>
-            </button>
+            {!isLatestPage && (
+              <button
+                type="button"
+                className="lse-toolbar-btn primary"
+                onClick={() => {
+                  setInsertAtIndex(null);
+                  setIsAddSectionModalOpen(true);
+                }}
+              >
+                <Plus size={14} />
+                <span>+ Add Section to Page</span>
+              </button>
+            )}
           </div>
 
           {/* ── Real Page Content Canvas ── */}
@@ -927,7 +968,18 @@ export default function LiveWholePageStudio({
             <div className="lhs-real-frontend-sheet">
               {/* ── All Sections In Natural Stacked Flow ── */}
               <div className="mhp-container" style={{ padding: '1.5rem clamp(1rem, 2.5vw, 2.5rem) 3rem' }}>
-                {sections.map((sec, idx) => {
+                {(pageId === 'latest' || pageSlug === 'latest') ? (
+                  /* ── REAL FRONTEND LATEST ARTICLES PAGE IN LIVE STUDIO ── */
+                  <LatestArticlesPage
+                    isStudioView={true}
+                    onShowToast={(msg) => {
+                      setSaveStatus('saved');
+                      setTimeout(() => setSaveStatus('idle'), 2500);
+                    }}
+                  />
+                ) : (
+                  /* ── HOMEPAGE & DYNAMIC SECTIONS CANVAS ── */
+                  sections.map((sec, idx) => {
                   const type = (sec.type || sec.id || '').toLowerCase();
                   const isHero = type.includes('hero');
                   const isNewsletter = type.includes('newsletter');
@@ -1970,9 +2022,8 @@ export default function LiveWholePageStudio({
                       )}
                     </div>
                   );
-                })}
-
-                {/* ── Prominent Bottom "+ Add Another Section to Page" Card ── */}
+                })
+              )}
                 <div
                   onClick={() => {
                     setInsertAtIndex(null);

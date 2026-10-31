@@ -150,3 +150,4 @@ lseCode = lseCode.replace(
 
 fs.writeFileSync('frontend/src/components/admin/LiveSectionEditor.jsx', lseCode, 'utf8');
 console.log('LiveSectionEditor.jsx successfully updated.');
+

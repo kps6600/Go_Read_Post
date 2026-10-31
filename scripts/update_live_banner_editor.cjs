@@ -304,3 +304,4 @@ code = code.replace(oldItemThumb, newItemThumb);
 
 fs.writeFileSync('frontend/src/components/admin/LiveBannerEditor.jsx', code, 'utf8');
 console.log('LiveBannerEditor.jsx successfully updated with in-place UI editable capabilities.');
+

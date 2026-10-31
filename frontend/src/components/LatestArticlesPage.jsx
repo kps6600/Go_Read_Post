@@ -296,8 +296,7 @@ export default function LatestArticlesPage({
   onCategoryClick,
   onShowToast,
   isSaved,
-  onToggleSave
-}) {
+  onToggleSave, isStudioView = false }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeTag, setActiveTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -306,7 +305,7 @@ export default function LatestArticlesPage({
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [pageConfig, setPageConfig] = useState(null);
-  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(() => isStudioView ? true : false);
   const [isEditMode, setIsEditMode] = useState(true);
   const [liveArticles, setLiveArticles] = useState([]);
 
@@ -458,7 +457,7 @@ export default function LatestArticlesPage({
     try {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
       const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
-      if (token && (u.role === 'admin' || u.role === 'superadmin' || u.role === 'SUPER_ADMIN' || localStorage.getItem('adminToken'))) {
+      if (isStudioView || (token && (u.role === 'admin' || u.role === 'superadmin' || u.role === 'SUPER_ADMIN' || localStorage.getItem('adminToken')))) {
         setIsAdminUser(true);
       }
     } catch (e) {}
@@ -686,7 +685,7 @@ export default function LatestArticlesPage({
 
 
       {/* ── Admin Visual Editor Toolbar ── */}
-      {isAdminUser && (
+      {isAdminUser && !isStudioView && (
         <div className="lap-admin-toolbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ 

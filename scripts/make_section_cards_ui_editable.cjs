@@ -453,3 +453,4 @@ if (normContent.includes(normOldCard1)) {
 }
 
 fs.writeFileSync(filePath, content, 'utf8');
+

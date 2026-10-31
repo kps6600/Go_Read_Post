@@ -56,3 +56,4 @@ code = code.replace(
 
 fs.writeFileSync('frontend/src/components/admin/LiveBannerEditor.jsx', code, 'utf8');
 console.log('Hero title and excerpt updated.');
+

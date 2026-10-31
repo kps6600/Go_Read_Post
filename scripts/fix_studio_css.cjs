@@ -61,3 +61,4 @@ css = css.replace(
 
 fs.writeFileSync(cssPath, css, 'utf8');
 console.log('Successfully updated LiveHomepageStudio.css for smooth full-page scrolling.');
+

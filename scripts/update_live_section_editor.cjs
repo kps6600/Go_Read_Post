@@ -67,3 +67,4 @@ if (!content.includes('const handleInlineArticleUpdate =')) {
 
 fs.writeFileSync(filePath, content, 'utf8');
 console.log('Added handleInlineArticleUpdate to LiveSectionEditor.jsx');
+

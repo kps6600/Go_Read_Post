@@ -477,3 +477,4 @@ content = content.replace(oldBlogExcerpt, newBlogExcerpt);
 
 fs.writeFileSync(filePath, content, 'utf8');
 console.log('Successfully updated article cards in LiveSectionEditor.jsx');
+

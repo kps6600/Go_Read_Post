@@ -2178,3 +2178,4 @@ export default function LiveWholePageStudio({
 
 fs.writeFileSync('frontend/src/components/admin/LiveWholePageStudio.jsx', studioCode, 'utf8');
 console.log('Created frontend/src/components/admin/LiveWholePageStudio.jsx successfully.');
+

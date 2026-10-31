@@ -125,3 +125,4 @@ mongoose.connect('mongodb://127.0.0.1:27017/goreadpost').then(async () => {
   console.error('MongoDB seed error:', err);
   process.exit(0);
 });
+

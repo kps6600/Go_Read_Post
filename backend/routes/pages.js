@@ -91,32 +91,14 @@ export const DEFAULT_PAGES = [
     },
     sections: [
       {
-        id: "latest_hero",
-        type: "hero",
+        id: "latest_feed",
+        type: "stories_feed",
         order: 1,
         enabled: true,
         data: {
-          badge: "REAL-TIME DISPATCHES",
-          heading: "Latest Articles & Dispatches",
-          title: "Latest Articles & Dispatches",
-          headline: "Latest Articles & Dispatches",
-          subheadline: "Real-time reporting, founder interviews, and high-velocity stories across India and the global startup ecosystem.",
-          subtitle: "Real-time reporting, founder interviews, and high-velocity stories across India and the global startup ecosystem.",
-          popularTitle: "Top Trending Dispatches",
-          primaryBtnText: "Explore Latest Feed",
-          primaryBtnUrl: "#feed",
-          heroSource: "auto"
-        }
-      },
-      {
-        id: "latest_feed",
-        type: "stories_feed",
-        order: 2,
-        enabled: true,
-        data: {
-          title: "Latest from the Newsroom",
-          heading: "Latest from the Newsroom",
-          subtitle: "Chronological feed of all published dispatches, scoops, and startup breakdowns.",
+          title: "Latest Articles",
+          heading: "Latest Articles",
+          subtitle: "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
           category: "",
           limit: 16,
           viewAllText: "Load More Stories",
@@ -124,25 +106,11 @@ export const DEFAULT_PAGES = [
         }
       },
       {
-        id: "category_startups",
-        type: "category_startups",
-        order: 3,
-        enabled: true,
-        data: {
-          title: "Category Desk: Startups & Capital",
-          heading: "Category Desk: Startups & Capital",
-          subtitle: "Early-stage fundraising, venture deals, term sheets, and founder dispatches.",
-          category: "Startups",
-          limit: 8,
-          viewAllText: "Explore Startups",
-          viewAllUrl: "/category/startups"
-        }
-      },
-      {
         id: "newsletter",
         type: "newsletter",
-        order: 4,
+        order: 2,
         enabled: true,
+        title: "Newsletter Subscription Banner",
         data: {
           title: "Newsletter Subscription Banner",
           heading: "Newsletter Subscription Banner",

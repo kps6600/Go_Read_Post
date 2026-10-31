@@ -21,3 +21,4 @@ code = code.replace(
 
 fs.writeFileSync(editorPath, code, 'utf8');
 console.log('Moved displayTitle and displaySlug declarations before activeTab check.');
+
