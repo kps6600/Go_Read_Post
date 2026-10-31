@@ -4212,10 +4212,16 @@ table input[type="checkbox"]:checked::after {
 .section-type-card {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
-  border-radius: 10px;
-  padding: 1.1rem;
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem;
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 125px;
 }
 .section-type-card:hover {
   border-color: var(--brand-primary);
@@ -4224,27 +4230,23 @@ table input[type="checkbox"]:checked::after {
   box-shadow: var(--shadow-sm);
 }
 .type-badge-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   background: rgba(220, 38, 38, 0.1);
   color: var(--brand-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.75rem;
+  margin: 0 auto 0.85rem auto;
 }
 .section-type-card h4 {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 0.35rem 0;
-}
-.section-type-card p {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  line-height: 1.45;
   margin: 0;
+  text-align: center;
+  line-height: 1.35;
 }
 
 /* ══════════════════════════════════════════════════════════════════

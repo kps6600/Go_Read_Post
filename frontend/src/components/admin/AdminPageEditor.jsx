@@ -1374,10 +1374,9 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
                     onClick={() => handleCreateSection(item.type)}
                   >
                     <div className="type-badge-icon">
-                      <Plus size={16} />
+                      <Plus size={20} />
                     </div>
                     <h4>{item.label}</h4>
-                    <p>{item.desc}</p>
                   </div>
                 ))
               )}
