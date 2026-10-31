@@ -640,6 +640,13 @@ export default function App() {
       handleArticleChange();
     };
 
+    const handleStorageChange = (e) => {
+      if (e.key === 'homepage_last_updated' || e.key === 'pages_last_updated') {
+        handleHomepageChange();
+        handlePageChange();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('settings:change', handleSettingsChange);
     window.addEventListener('article:change', handleArticleChange);
     window.addEventListener('story:change', handleArticleChange);
@@ -652,6 +659,7 @@ export default function App() {
     window.addEventListener('author:change', handleTaxonomyChange);
 
     return () => {
+      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('settings:change', handleSettingsChange);
       window.removeEventListener('article:change', handleArticleChange);
       window.removeEventListener('story:change', handleArticleChange);

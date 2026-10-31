@@ -16,7 +16,8 @@ const homepageSectionSchema = new mongoose.Schema(
     articleIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
     filterCategory: { type: String, default: '' },
     filterTag: { type: String, default: '' },
-    customConfig: { type: mongoose.Schema.Types.Mixed, default: {} }
+    customConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
+    data: { type: mongoose.Schema.Types.Mixed, default: {} }
   },
   { timestamps: true }
 );

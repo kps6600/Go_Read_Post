@@ -91,6 +91,8 @@ router.get('/', async (req, res) => {
           } else {
             doc.articles = (doc.articleIds || []).map(formatHomepageArticle);
           }
+          doc.data = doc.data || doc.customConfig || {};
+          doc.customConfig = doc.customConfig || doc.data || {};
           return doc;
         })
       );
@@ -131,19 +133,24 @@ adminHomepageRouter.put('/', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN'),
 
     if (isDbConnected()) {
       for (const s of sections) {
-        if (!s.sectionKey) continue;
+        const key = s.sectionKey || s.id || s.type;
+        if (!key) continue;
+        const configData = s.customConfig !== undefined ? s.customConfig : (s.data || {});
+        const sectionData = s.data !== undefined ? s.data : (s.customConfig || {});
         await HomepageSection.findOneAndUpdate(
-          { sectionKey: s.sectionKey },
+          { sectionKey: key },
           {
-            title: s.title,
-            subtitle: s.subtitle,
-            enabled: Boolean(s.enabled),
+            sectionKey: key,
+            title: s.title || (s.data && (s.data.heading || s.data.title)) || key,
+            subtitle: s.subtitle || '',
+            enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
             order: Number(s.order || 0),
             limit: Number(s.limit || 6),
             articleIds: s.articleIds || [],
             filterCategory: s.filterCategory || '',
             filterTag: s.filterTag || '',
-            customConfig: s.customConfig !== undefined ? s.customConfig : {}
+            customConfig: configData,
+            data: sectionData
           },
           { upsert: true, new: true }
         );
@@ -167,9 +174,14 @@ adminHomepageRouter.put('/:sectionKey', protectAdmin, requireRoles('SUPER_ADMIN'
     const updateData = req.body;
 
     if (isDbConnected()) {
+      const mergedUpdate = {
+        ...updateData,
+        customConfig: updateData.customConfig !== undefined ? updateData.customConfig : (updateData.data || {}),
+        data: updateData.data !== undefined ? updateData.data : (updateData.customConfig || {})
+      };
       const updated = await HomepageSection.findOneAndUpdate(
         { sectionKey },
-        { ...updateData },
+        mergedUpdate,
         { upsert: true, new: true }
       ).populate('articleIds', 'title slug');
       return res.json({ success: true, message: `Section ${sectionKey} updated`, data: updated });

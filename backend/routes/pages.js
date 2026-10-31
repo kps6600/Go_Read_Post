@@ -25,6 +25,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'goreadpost_cms_super_secret_jwt_ke
 
 function buildPageQuery(param) {
   const clean = (param || '').trim();
+  if (clean === 'home' || clean === '') {
+    return { $or: [{ id: 'home' }, { slug: '' }, { slug: 'home' }, { slug: '/' }] };
+  }
   const or = [
     { id: clean },
     { slug: clean.toLowerCase() },
@@ -373,9 +376,14 @@ export async function ensureDefaultPages() {
   if (!isDbConnected()) return;
   try {
     for (const p of DEFAULT_PAGES) {
-      const exists = await Page.findOne({ $or: [{ slug: p.slug.toLowerCase() }, { id: p.id }] });
+      const query = p.id === 'home' || p.slug === ''
+        ? { $or: [{ id: 'home' }, { slug: '' }, { slug: 'home' }] }
+        : { $or: [{ slug: p.slug.toLowerCase() }, { id: p.id }] };
+      const exists = await Page.findOne(query);
       if (!exists) {
-        await Page.create(p).catch(() => {});
+        await Page.create(p).catch((err) => {
+          console.error(`Error seeding default page ${p.id}:`, err?.message);
+        });
       }
     }
   } catch (e) {
@@ -654,8 +662,21 @@ router.put('/:id', protectAdmin, async (req, res) => {
         }
       }
 
-      const updated = await Page.findOneAndUpdate(buildPageQuery(id), updates, { new: true });
-      if (!updated) return res.status(404).json({ success: false, message: 'Page not found' });
+      const isHome = id === 'home' || updates.slug === '' || updates.slug === 'home' || updates.id === 'home';
+      const pageIdToUse = isHome ? 'home' : (updates.id || id);
+      const query = buildPageQuery(id);
+      
+      const updateDoc = {
+        ...updates,
+        id: pageIdToUse,
+        slug: isHome ? '' : (updates.slug || '')
+      };
+
+      const updated = await Page.findOneAndUpdate(
+        query,
+        { $set: updateDoc },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
       try {
         const list = readFallbackPages();
         const found = findFallbackPage(list, id);

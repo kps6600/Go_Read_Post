@@ -408,10 +408,10 @@ function LiveGenericSectionStudio({
     };
     setSaveStatus('saving');
     try {
-      if (onAutoSave) {
-        await onAutoSave(finalData);
-      } else if (onSave) {
+      if (onSave) {
         await onSave(finalData);
+      } else if (onAutoSave) {
+        await onAutoSave(finalData);
       }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);

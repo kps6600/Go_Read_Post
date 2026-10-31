@@ -238,7 +238,13 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
           keywords: Array.isArray(seo?.keywords) ? seo.keywords : typeof seo?.keywords === 'string' ? seo.keywords.split(',').map(s => s.trim()) : (page?.seo?.keywords || []),
           ogImage: (seo?.ogImage || page?.seo?.ogImage || '').trim()
         },
-        sections: updatedSections.map((s, idx) => ({ ...s, order: idx + 1 }))
+        sections: updatedSections.map((s, idx) => ({
+          ...s,
+          order: idx + 1,
+          sectionKey: s.sectionKey || s.id || s.type,
+          data: s.data || s.customConfig || {},
+          customConfig: s.customConfig || s.data || {}
+        }))
       };
 
       const updated = await PageService.updatePage(pageId, payload);
@@ -257,6 +263,9 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         } catch (e) {}
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('homepage:change', { detail: payload.sections }));
+          try {
+            localStorage.setItem('homepage_last_updated', Date.now().toString());
+          } catch (e) {}
         }
       }
 
@@ -692,6 +701,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         return {
           ...s,
           data: updatedData,
+          customConfig: updatedData,
           title: updatedData.heading || updatedData.title || s.title
         };
       }
@@ -715,6 +725,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         return {
           ...s,
           data: updatedData,
+          customConfig: updatedData,
           title: updatedData.heading || updatedData.title || s.title
         };
       }

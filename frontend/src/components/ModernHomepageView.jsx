@@ -262,7 +262,7 @@ export default function ModernHomepageView({
 
   // 1. Dynamic Hero Slides
   const heroSlides = useMemo(() => {
-    const data = heroConfig?.data || {};
+    const data = { ...(heroConfig?.customConfig || {}), ...(heroConfig?.data || {}) };
 
     // Mode A: Custom Admin Curated Slides
     if (Array.isArray(data.slides) && data.slides.length > 0) {
@@ -335,7 +335,7 @@ export default function ModernHomepageView({
 
   // 2. Curated & Dynamic Popular Posts (Top 5 stories)
   const popularPosts = useMemo(() => {
-    const data = heroConfig?.data || {};
+    const data = { ...(heroConfig?.customConfig || {}), ...(heroConfig?.data || {}) };
 
     // Mode A: Curated Popular Articles selected by Admin
     if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {

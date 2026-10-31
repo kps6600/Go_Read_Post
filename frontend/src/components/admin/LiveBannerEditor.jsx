@@ -597,19 +597,22 @@ export default function LiveBannerEditor({
       ...data,
       slides: slides,
       popularArticles: popularArticles,
+      hasCustomSlides: true,
+      hasCustomPopular: true,
       heroSource: 'custom',
       showPopular: showPopular,
-      headline: slides[0]?.title || data.headline,
-      subheadline: slides[0]?.excerpt || data.subheadline,
-      badge: slides[0]?.category || data.badge,
-      bgImage: slides[0]?.image || data.bgImage
+      headline: slides.length > 0 ? (slides[0]?.title || '') : (data.headline || ''),
+      subheadline: slides.length > 0 ? (slides[0]?.excerpt || '') : (data.subheadline || ''),
+      badge: slides.length > 0 ? (slides[0]?.category || '') : (data.badge || ''),
+      bgImage: slides.length > 0 ? (slides[0]?.image || '') : (data.bgImage || ''),
+      image: slides.length > 0 ? (slides[0]?.image || '') : (data.image || '')
     };
     setSaveStatus('saving');
     try {
-      if (onAutoSave) {
-        await onAutoSave(finalData);
-      } else if (onSave) {
+      if (onSave) {
         await onSave(finalData);
+      } else if (onAutoSave) {
+        await onAutoSave(finalData);
       }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 3000);

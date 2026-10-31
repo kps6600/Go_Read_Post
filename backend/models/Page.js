@@ -10,7 +10,8 @@ const sectionSchema = new mongoose.Schema(
     },
     order: { type: Number, default: 0 },
     enabled: { type: Boolean, default: true },
-    data: { type: mongoose.Schema.Types.Mixed, default: {} }
+    data: { type: mongoose.Schema.Types.Mixed, default: {} },
+    customConfig: { type: mongoose.Schema.Types.Mixed, default: {} }
   },
   { _id: false }
 );
@@ -32,7 +33,7 @@ const pageSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true, trim: true },
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    slug: { type: String, unique: true, trim: true, lowercase: true, default: '' },
     brand: { type: String, default: 'GoReadPost' },
     description: { type: String, default: '' },
     heroHeadline: { type: String, default: '' },
