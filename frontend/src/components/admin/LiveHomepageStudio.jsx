@@ -1479,22 +1479,7 @@ export default function LiveHomepageStudio({
                                   cursor: 'pointer'
                                 }}
                               >
-                                <div
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    background: '#ffedd5',
-                                    color: '#c2410c',
-                                    padding: '4px 12px',
-                                    borderRadius: '20px',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 800,
-                                    marginBottom: '1rem'
-                                  }}
-                                >
-                                  <span>Slot #{secArticles.length + 1} of {maxFit} Max</span>
-                                </div>
+                                
 
                                 <div
                                   className="lse-add-plus-badge"

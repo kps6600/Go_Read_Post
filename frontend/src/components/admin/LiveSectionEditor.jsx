@@ -1268,22 +1268,7 @@ function LiveGenericSectionStudio({
                             cursor: 'pointer'
                           }}
                         >
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              background: '#ffedd5',
-                              color: '#c2410c',
-                              padding: '4px 12px',
-                              borderRadius: '20px',
-                              fontSize: '0.75rem',
-                              fontWeight: 800,
-                              marginBottom: '1rem'
-                            }}
-                          >
-                            <span>Slot #{activeArticles.length + 1} of {maxArticlesFit} Max</span>
-                          </div>
+                          
 
                           <div
                             className="lse-add-plus-badge"
@@ -1780,22 +1765,7 @@ function LiveGenericSectionStudio({
                           cursor: 'pointer'
                         }}
                       >
-                        <div
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: '#ffedd5',
-                            color: '#c2410c',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '0.75rem',
-                            fontWeight: 800,
-                            marginBottom: '1rem'
-                          }}
-                        >
-                          <span>Slot #{activeArticles.length + 1} of ${maxArticlesFit} Max</span>
-                        </div>
+                        
 
                         <div
                           className="lse-add-plus-badge"
@@ -2303,7 +2273,7 @@ function LiveGenericSectionStudio({
                 <h4 className="lbe-picker-title">
                   <Layers size={18} color="#38bdf8" />
                   <span>
-                    {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : `Select Article to Add (Slot #${activeArticles.length + 1} of ${maxArticlesFit} Max)`}
+                    {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : 'Select Article to Add'}
                   </span>
                 </h4>
                 <p className="lbe-picker-subtitle">
