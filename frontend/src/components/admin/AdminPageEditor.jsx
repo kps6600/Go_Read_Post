@@ -1104,6 +1104,29 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             <span>{activeTab === 'seo' ? 'Live UI Studio' : 'Page Info & SEO'}</span>
           </button>
 
+          {(pageId === 'home' || !pageId) && (
+            <button
+              type="button"
+              onClick={() => setIsAddSectionOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1.05rem',
+                borderRadius: '8px',
+                border: '1px solid #ea580c',
+                background: '#fff7ed',
+                color: '#ea580c',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Plus size={15} />
+              <span>+ Add Section</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => window.open(displaySlug, '_blank')}

@@ -10,10 +10,22 @@
   position: relative !important;
   inset: auto !important;
   z-index: 10 !important;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: visible !important;
-  min-height: 800px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-height: auto;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.lhs-overlay.in-page-mode .lhs-workspace {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.lhs-overlay.in-page-mode .lhs-browser-frame {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px;
 }
 .lhs-overlay {
   position: fixed;

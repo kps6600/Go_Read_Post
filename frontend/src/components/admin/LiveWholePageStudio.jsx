@@ -941,68 +941,33 @@ export default function LiveWholePageStudio({
       <main className="lhs-workspace">
         <div className={`lhs-canvas-wrapper ${deviceView === 'mobile' ? 'mobile-view' : ''}`}>
           
-          {/* Tip Bar */}
-          <div className="lhs-tip-bar">
-            <div className="lhs-tip-text">
-              <Sparkles size={16} color="#fbbf24" />
-              <span>
-                <strong>{isLatestPage ? 'Latest Articles Live UI Studio:' : 'Whole Page Live Studio:'}</strong> Click any headline, category tag, excerpt, or author to edit in-place. Hover article thumbnails to change photos. Reorder cards with <strong>← Left / Right →</strong>.
-              </span>
-            </div>
+          {/* Tip Bar (Hidden in in-page mode per user request) */}
+          {!inPageMode && (
+            <div className="lhs-tip-bar">
+              <div className="lhs-tip-text">
+                <Sparkles size={16} color="#fbbf24" />
+                <span>
+                  <strong>{isLatestPage ? 'Latest Articles Live UI Studio:' : 'Whole Page Live Studio:'}</strong> Click any headline, category tag, excerpt, or author to edit in-place. Hover article thumbnails to change photos. Reorder cards with <strong>← Left / Right →</strong>.
+                </span>
+              </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {inPageMode && (
-                <>
-                  {saveStatus === 'saving' && (
-                    <span className="lhs-save-indicator saving" style={{ fontSize: '0.75rem', padding: '3px 8px' }}>
-                      <RefreshCw size={12} className="lhs-spin" />
-                      <span>Saving...</span>
-                    </span>
-                  )}
-                  {saveStatus === 'saved' && (
-                    <span className="lhs-save-indicator saved" style={{ fontSize: '0.75rem', padding: '3px 8px' }}>
-                      <Check size={12} />
-                      <span>Saved</span>
-                    </span>
-                  )}
-                  <div className="lhs-viewport-switcher" style={{ margin: 0, padding: '2px 4px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '6px' }}>
-                    <button
-                      type="button"
-                      className={`lhs-viewport-btn ${deviceView === 'desktop' ? 'active' : ''}`}
-                      onClick={() => setDeviceView('desktop')}
-                      style={{ padding: '3px 8px', fontSize: '0.75rem' }}
-                    >
-                      <Monitor size={12} />
-                      <span>Desktop</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`lhs-viewport-btn ${deviceView === 'mobile' ? 'active' : ''}`}
-                      onClick={() => setDeviceView('mobile')}
-                      style={{ padding: '3px 8px', fontSize: '0.75rem' }}
-                    >
-                      <Smartphone size={12} />
-                      <span>Mobile</span>
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {!isLatestPage && (
-                <button
-                  type="button"
-                  className="lse-toolbar-btn primary"
-                  onClick={() => {
-                    setInsertAtIndex(null);
-                    setIsAddSectionModalOpen(true);
-                  }}
-                >
-                  <Plus size={14} />
-                  <span>+ Add Section to Page</span>
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {!isLatestPage && (
+                  <button
+                    type="button"
+                    className="lse-toolbar-btn primary"
+                    onClick={() => {
+                      setInsertAtIndex(null);
+                      setIsAddSectionModalOpen(true);
+                    }}
+                  >
+                    <Plus size={14} />
+                    <span>+ Add Section to Page</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ── Real Page Content Canvas ── */}
           <div className="lhs-browser-frame">
