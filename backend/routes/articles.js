@@ -291,7 +291,12 @@ adminArticlesRouter.get('/', async (req, res) => {
 
     if (isDbConnected()) {
       const [articles, total] = await Promise.all([
-        Article.find(query).sort({ updatedAt: -1 }).skip(skip).limit(parseInt(limit, 10)),
+        Article.find(query)
+          .select('-content -contentBlocks')
+          .sort({ updatedAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit, 10))
+          .lean(),
         Article.countDocuments(query)
       ]);
       return res.json({
@@ -475,7 +480,7 @@ adminArticlesRouter.post('/', async (req, res) => {
       });
 
       if (newArticle.status === 'published') {
-        await syncToStories(newArticle);
+        syncToStories(newArticle).catch(err => console.error('Background syncToStories error:', err));
       }
 
       return res.status(201).json({ success: true, message: 'Article created successfully', data: newArticle });
@@ -519,9 +524,9 @@ adminArticlesRouter.put('/:id', async (req, res) => {
       const updated = await Article.findByIdAndUpdate(id, updates, { new: true, runValidators: false });
       if (!updated) return res.status(404).json({ success: false, message: 'Article not found' });
       if (updated.status === 'published') {
-        await syncToStories(updated);
+        syncToStories(updated).catch(err => console.error('Background syncToStories error:', err));
       } else {
-        await Story.findOneAndDelete({ $or: [{ slug: updated.slug }, { title: updated.title }] }).catch(() => null);
+        Story.findOneAndDelete({ $or: [{ slug: updated.slug }, { title: updated.title }] }).catch(() => null);
       }
       return res.json({ success: true, message: 'Article updated successfully', data: updated });
     }
@@ -638,55 +643,58 @@ adminArticlesRouter.delete('/:id', async (req, res) => {
 
     if (isDbConnected()) {
       if (mongoose.Types.ObjectId.isValid(id)) {
-        deleted = await Article.findByIdAndDelete(id);
+        deleted = await Article.findByIdAndDelete(id).lean();
       }
       if (!deleted) {
-        deleted = await Article.findOneAndDelete({ $or: [{ slug: id }, { title: id }] });
+        deleted = await Article.findOneAndDelete({ $or: [{ slug: id }, { title: id }] }).lean();
       }
-      // Also delete corresponding story
-      const storyDeleted = await Story.findOneAndDelete({
+      // Delete corresponding story in background
+      Story.deleteMany({
         $or: [
           { slug: id },
           { title: id },
+          ...(deleted?.slug ? [{ slug: deleted.slug }] : []),
+          ...(deleted?.title ? [{ title: deleted.title }] : []),
           ...(mongoose.Types.ObjectId.isValid(id) ? [{ _id: id }] : [])
         ]
       }).catch(() => null);
-
-      if (deleted && deleted.slug) {
-        await Story.deleteMany({ $or: [{ slug: deleted.slug }, { title: deleted.title }] }).catch(() => null);
-      }
-      if (!deleted && storyDeleted) {
-        deleted = storyDeleted;
-      }
     }
 
-    // Always remove from fallback files so restarting never brings it back
     let fallback = readFallbackArticles();
     const target = fallback.find(a => String(a._id) === String(id) || a.slug === id);
-    fallback = fallback.filter(a => String(a._id) !== String(id) && a.slug !== id && (deleted ? (a.slug !== deleted.slug && a.title !== deleted.title) : true));
-    writeFallbackArticles(fallback);
 
-    if (fs.existsSync(fallbackStoriesPath)) {
+    // Fast background cleanup of fallback JSON files and page references without blocking HTTP response
+    setImmediate(async () => {
       try {
-        let stories = JSON.parse(fs.readFileSync(fallbackStoriesPath, 'utf-8'));
-        stories = stories.filter(s => String(s._id) !== String(id) && s.slug !== id && (deleted ? (s.slug !== deleted.slug && s.title !== deleted.title) : true));
-        fs.writeFileSync(fallbackStoriesPath, JSON.stringify(stories, null, 2), 'utf-8');
-      } catch (e) {}
-    }
+        if (target || deleted) {
+          fallback = fallback.filter(a => String(a._id) !== String(id) && a.slug !== id && (deleted ? (a.slug !== deleted.slug && a.title !== deleted.title) : true));
+          writeFallbackArticles(fallback);
+        }
 
-    const delSlugs = [id];
-    const delTitles = [];
-    if (deleted) {
-      if (deleted.slug) delSlugs.push(deleted.slug);
-      if (deleted.title) delTitles.push(deleted.title);
-    }
-    if (target) {
-      if (target.slug) delSlugs.push(target.slug);
-      if (target.title) delTitles.push(target.title);
-    }
+        if (fs.existsSync(fallbackStoriesPath)) {
+          try {
+            let stories = JSON.parse(fs.readFileSync(fallbackStoriesPath, 'utf-8'));
+            stories = stories.filter(s => String(s._id) !== String(id) && s.slug !== id && (deleted ? (s.slug !== deleted.slug && s.title !== deleted.title) : true));
+            fs.writeFileSync(fallbackStoriesPath, JSON.stringify(stories, null, 2), 'utf-8');
+          } catch (e) {}
+        }
 
-    // Purge from all pages (slides and popularArticles)
-    await cleanArticleFromPages([id], delSlugs, delTitles);
+        const delSlugs = [id];
+        const delTitles = [];
+        if (deleted) {
+          if (deleted.slug) delSlugs.push(deleted.slug);
+          if (deleted.title) delTitles.push(deleted.title);
+        }
+        if (target) {
+          if (target.slug) delSlugs.push(target.slug);
+          if (target.title) delTitles.push(target.title);
+        }
+
+        await cleanArticleFromPages([id], delSlugs, delTitles);
+      } catch (bgErr) {
+        console.error('Background delete cleanup error:', bgErr);
+      }
+    });
 
     if (!deleted && !target && isDbConnected()) {
       return res.status(404).json({ success: false, message: 'Article not found' });
@@ -750,7 +758,11 @@ adminArticlesRouter.post('/bulk-delete', async (req, res) => {
       } catch (e) {}
     }
 
-    await cleanArticleFromPages(ids, targetSlugs, targetTitles);
+    setImmediate(async () => {
+      try {
+        await cleanArticleFromPages(ids, targetSlugs, targetTitles);
+      } catch (e) {}
+    });
 
     res.json({
       success: true,

@@ -2138,17 +2138,21 @@ export default function LiveArticleStudio({
   // Permanent Delete Handler
   const handleConfirmPermanentDelete = async () => {
     if (!formData._id) return;
-    setDeleting(true);
+    const targetId = formData._id;
+    const targetTitle = formData.title;
+
+    // Instant optimistic UI feedback
+    setShowDeleteModal(false);
+    setDeleting(false);
+    if (onSaveSuccess) onSaveSuccess(null);
+    if (onClose) onClose();
+    if (onShowToast) onShowToast(`Permanently deleted "${targetTitle}"`);
+
     try {
-      await ArticleService.deleteArticle(formData._id);
-      if (onShowToast) onShowToast(`Permanently deleted "${formData.title}"`);
-      setShowDeleteModal(false);
-      if (onSaveSuccess) onSaveSuccess(null);
-      if (onClose) onClose();
+      await ArticleService.deleteArticle(targetId);
     } catch (err) {
-      alert('Error deleting article: ' + err.message);
-    } finally {
-      setDeleting(false);
+      console.error('Error deleting article:', err);
+      if (onShowToast) onShowToast(`Error deleting article: ${err.message}`);
     }
   };
 

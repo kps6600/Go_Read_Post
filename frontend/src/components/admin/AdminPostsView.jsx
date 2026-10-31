@@ -992,20 +992,28 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
         }
       };
 
+      let result = null;
       if (editingArticle) {
         const id = editingArticle._id || editingArticle.id;
-        await ArticleService.updateArticle(id, payload);
+        result = await ArticleService.updateArticle(id, payload);
         if (onShowToast) onShowToast(`Updated story "${payload.title}" successfully!`);
+        if (result) {
+          setArticles(prev => prev.map(a => ((a._id || a.id) === id ? { ...a, ...result } : a)));
+        }
       } else {
-        await ArticleService.createArticle(payload);
+        result = await ArticleService.createArticle(payload);
         if (onShowToast) onShowToast(`Published new article "${payload.title}" to GoReadPost!`);
+        if (result) {
+          setArticles(prev => [result, ...prev]);
+          setTotalCount(prev => prev + 1);
+        }
       }
 
       handleCloseEditor();
-      await loadArticles();
+      setSaving(false);
+      loadArticles();
     } catch (err) {
       alert('Error saving article: ' + err.message);
-    } finally {
       setSaving(false);
     }
   };
@@ -1071,16 +1079,21 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
   const handleConfirmDelete = async () => {
     if (!articleToDelete) return;
     const id = articleToDelete._id || articleToDelete.id;
-    setDeleting(true);
+    const deletedTitle = articleToDelete.title;
+
+    // Instant optimistic UI update
+    setArticles(prev => prev.filter(a => String(a._id || a.id) !== String(id)));
+    setTotalCount(prev => Math.max(0, prev - 1));
+    setArticleToDelete(null);
+    setDeleting(false);
+    if (onShowToast) onShowToast(`Deleted article "${deletedTitle}"`);
+
     try {
       await ArticleService.deleteArticle(id);
-      if (onShowToast) onShowToast(`Deleted article "${articleToDelete.title}"`);
-      setArticleToDelete(null);
-      await loadArticles();
     } catch (err) {
-      alert('Error deleting article: ' + err.message);
-    } finally {
-      setDeleting(false);
+      console.error('Error deleting article:', err);
+      if (onShowToast) onShowToast(`Error deleting article: ${err.message}`);
+      loadArticles();
     }
   };
 
@@ -1090,17 +1103,22 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
     if (!window.confirm(`Are you sure you want to delete ${count} selected articles? This action will permanently remove them from the database.`)) {
       return;
     }
-    setDeleting(true);
+    const idsArray = Array.from(selectedIds);
+    const idsSet = new Set(idsArray.map(String));
+
+    // Instant optimistic UI update
+    setArticles(prev => prev.filter(a => !idsSet.has(String(a._id || a.id))));
+    setTotalCount(prev => Math.max(0, prev - count));
+    setSelectedIds(new Set());
+    setDeleting(false);
+    if (onShowToast) onShowToast(`Successfully deleted ${count} articles.`);
+
     try {
-      const idsArray = Array.from(selectedIds);
       await ArticleService.bulkDeleteArticles(idsArray);
-      if (onShowToast) onShowToast(`Successfully deleted ${count} articles.`);
-      setSelectedIds(new Set());
-      await loadArticles();
     } catch (err) {
-      alert('Error deleting articles: ' + err.message);
-    } finally {
-      setDeleting(false);
+      console.error('Error deleting articles:', err);
+      if (onShowToast) onShowToast(`Error deleting articles: ${err.message}`);
+      loadArticles();
     }
   };
 
@@ -3226,8 +3244,24 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       <LiveArticleStudio 
         article={editingArticle}
         onClose={handleCloseEditor}
-        onSaveSuccess={async () => {
-          await loadArticles();
+        onSaveSuccess={(savedArt) => {
+          if (savedArt) {
+            setArticles(prev => {
+              const id = savedArt._id || savedArt.id;
+              const exists = prev.some(a => (a._id || a.id) === id);
+              if (exists) {
+                return prev.map(a => ((a._id || a.id) === id ? { ...a, ...savedArt } : a));
+              }
+              return [savedArt, ...prev];
+            });
+            setTotalCount(prev => prev + 1);
+          } else if (savedArt === null && editingArticle) {
+            const delId = editingArticle._id || editingArticle.id;
+            setArticles(prev => prev.filter(a => (a._id || a.id) !== delId));
+            setTotalCount(prev => Math.max(0, prev - 1));
+          }
+          handleCloseEditor();
+          loadArticles();
         }}
         onShowToast={onShowToast}
         categories={categories}

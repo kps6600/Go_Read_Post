@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T11:54:25.496Z",
+        "updatedAt": "2026-10-31T11:58:44.104Z",
         "data": {
           "slides": [
             {
@@ -129,6 +129,19 @@
               "link": "/stories/ai-2",
               "author": "Editorial",
               "date": "2026-10-07T12:23:20.775Z"
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fb2",
+              "_id": "6ae1f556d132e2796bff4fb2",
+              "title": "She couldn't do one pull-up. Today, Prableen Kaur Gill is Asia's No. 1 street lifter",
+              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
+              "readTime": "4 min read min read",
+              "category": "Trending",
+              "slug": "prableen-pullup",
+              "link": "/stories/prableen-pullup",
+              "author": "Editorial",
+              "date": "2026-10-07T12:30:18.791Z"
             }
           ],
           "hasCustomSlides": true,
@@ -343,7 +356,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:54:25.510Z",
+        "updatedAt": "2026-10-31T11:58:44.123Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -503,21 +516,64 @@
               "isCustom": true
             },
             {
-              "id": "6ae1f556d132e2796bff4fb9",
-              "articleId": "6ae1f556d132e2796bff4fb9",
-              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
-              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
-              "category": "SocialStory",
-              "categoryLabel": "SocialStory",
-              "categoryName": "SocialStory",
-              "image": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80",
-              "author": "Geeta Nair",
-              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:30:18.846Z",
-              "readTime": "6 min read min read",
-              "slug": "sim-7",
-              "link": "/stories/sim-7",
-              "isCustom": true
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=900&auto=format&fit=crop&q=80",
+                "alt": "How a mobile bicycle library is educating 5,000 rural girls in Bihar",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fb8",
+              "title": "How a mobile bicycle library is educating 5,000 rural girls in Bihar",
+              "slug": "sim-6",
+              "subtitle": "Pedaling through unpaved roads with STEM kits and illustrated books to foster grassroots literacy.",
+              "excerpt": "Pedaling through unpaved roads with STEM kits and illustrated books to foster grassroots literacy.",
+              "content": "",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Vandana Shukla",
+              "authorTitle": "Education Initiatives Reporter, HerStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "Startups",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [],
+              "topics": [
+                "EDUCATION"
+              ],
+              "contentType": "article",
+              "readingTime": "4 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:30:18.839Z",
+              "scheduledAt": null,
+              "views": 3223,
+              "claps": 210,
+              "createdAt": "2026-10-28T13:15:02.121Z",
+              "updatedAt": "2026-10-28T13:15:02.121Z",
+              "__v": 0
             }
           ],
           "limit": 4,
@@ -526,7 +582,7 @@
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fbc",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fb9"
+            "6ae1f556d132e2796bff4fb8"
           ]
         },
         "id": "latest_blogs",
@@ -549,10 +605,296 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:54:25.534Z",
+        "updatedAt": "2026-10-31T11:58:44.132Z",
         "data": {
           "viewAllText": "View All Trending",
-          "viewAllUrl": "/trending"
+          "viewAllUrl": "/trending",
+          "articles": [
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80",
+                "alt": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "title": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+                "description": "Public-private convergence between district school administrations, CSR foundations, and edtech builders is the only vehicle capable of transforming foundational numeracy.",
+                "keywords": "",
+                "ogImage": "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80"
+              },
+              "_id": "6ae1f556d132e2796bff4fb1",
+              "title": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+              "slug": "social-expert-3",
+              "subtitle": "Public-private convergence between district school administrations, CSR foundations, and edtech builders is the only vehicle capable of transforming foundational numeracy.",
+              "excerpt": "Public-private convergence between district school administrations, CSR foundations, and edtech builders is the only vehicle capable of transforming foundational numeracy.",
+              "content": "<p>Public-private convergence between district school administrations, CSR foundations, and edtech builders is the only vehicle capable of transforming foundational numeracy.</p>\n",
+              "contentBlocks": [
+                {
+                  "id": "blk_sec_1",
+                  "type": "section",
+                  "heading": "",
+                  "content": "Public-private convergence between district school administrations, CSR foundations, and edtech builders is the only vehicle capable of transforming foundational numeracy.",
+                  "images": []
+                }
+              ],
+              "authorId": null,
+              "authorName": "Chetan Kapoor",
+              "authorTitle": "CEO, Tech Mahindra Foundation",
+              "authorAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80",
+              "categoryId": "6ae31c200567316e867c923e",
+              "categoryName": "YS हिंदी",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "socialstory",
+                "social-story"
+              ],
+              "topics": [
+                "Action",
+                "DEEPTECH"
+              ],
+              "contentType": "article",
+              "readingTime": "4 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": true,
+              "isBreaking": true,
+              "isTrending": true,
+              "isEditorsPick": true,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-30T08:00:59.519Z",
+              "scheduledAt": null,
+              "views": 2891,
+              "claps": 192,
+              "createdAt": "2026-10-28T13:15:02.103Z",
+              "updatedAt": "2026-10-30T08:00:59.525Z",
+              "__v": 0,
+              "isCategoryFeatured": true,
+              "isHero": true,
+              "isLatest": true,
+              "placements": [
+                "latest",
+                "homepage_hero",
+                "trending",
+                "breaking",
+                "category_top",
+                "editors_pick"
+              ]
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+                "alt": "This banker-turned-cactus conservationist is protecting endangered arid biodiversity",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "title": "This banker-turned-cactus conservationist is protecting endangered arid biodiversity",
+                "description": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+                "keywords": "",
+                "ogImage": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80"
+              },
+              "_id": "6ae1f556d132e2796bff4fae",
+              "title": "This banker-turned-cactus conservationist is protecting endangered arid biodiversity",
+              "slug": "social-side-3",
+              "subtitle": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+              "excerpt": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+              "content": "<p>Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.</p>\n",
+              "contentBlocks": [
+                {
+                  "id": "blk_sec_1",
+                  "type": "section",
+                  "heading": "",
+                  "content": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+                  "images": []
+                }
+              ],
+              "authorId": null,
+              "authorName": "Tanvi Dubey",
+              "authorTitle": "Senior Editor, SocialStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "SocialStory",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "socialstory",
+                "social-story"
+              ],
+              "topics": [
+                "Environment"
+              ],
+              "contentType": "article",
+              "readingTime": "4 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": true,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-30T07:21:15.663Z",
+              "scheduledAt": null,
+              "views": 8772,
+              "claps": 132,
+              "createdAt": "2026-10-28T13:15:02.096Z",
+              "updatedAt": "2026-10-30T07:21:15.695Z",
+              "__v": 0,
+              "isCategoryFeatured": false,
+              "isHero": true,
+              "isLatest": true,
+              "placements": [
+                "latest",
+                "homepage_hero"
+              ]
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80",
+                "alt": "टेकस्पार्क्स 2024: 'द न्यू टेक ऑर्डर' की थीम पर बेंगलुरु में सजेगा भारत के सबसे बड़े टेक-स्टार्टअप महाकुंभ का मंच",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fbc",
+              "title": "टेकस्पार्क्स 2024: 'द न्यू टेक ऑर्डर' की थीम पर बेंगलुरु में सजेगा भारत के सबसे बड़े टेक-स्टार्टअप महाकुंभ का मंच",
+              "slug": "techsparks-2024-bengaluru",
+              "subtitle": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है।",
+              "excerpt": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है। देश-विदेश के टॉप 150+ टेक लीडर्स, 100+ वीसी फंड्स और 5000+ डेलिगेट्स जुटेंगे।",
+              "content": "टेकस्पार्क्स का 15वां संस्करण इस साल 26 से 28 सितंबर के बीच बेंगलुरु के ताज वेस्ट एंड में आयोजित होने जा रहा है। इस साल की थीम है 'द न्यू टेक ऑर्डर' (The New Tech Order)। पिछले डेढ़ दशक से टेकस्पार्क्स भारत के टेक और स्टार्टअप इकोसिस्टम का सबसे बड़ा और विश्वसनीय मंच बना हुआ है, जिसने अनगिनत यूनिकॉर्न्स, इनोवेटर्स और नीति-निर्माताओं को एक साथ लाकर देश की डिजिटल विकास यात्रा को गति दी है।\n\nइस साल का टेकस्पार्क्स भारत के टेक और इनोवेशन लैंडस्केप में आ रहे बड़े बदलावों को रेखांकित करेगा। आर्टिफिशियल इंटेलिजेंस (AI), डीपटेक, फिनटेक, स्पेसटेक, सेमीकंडक्टर और क्वांटम कंप्यूटिंग जैसे उभरते क्षेत्रों में भारत की वैश्विक स्थिति पर गहन चर्चा होगी।\n\nतीन दिवसीय इस महाकुंभ में 150 से अधिक अनुभवी वक्ता अपने विचार साझा करेंगे। इनमें केंद्रीय वाणिज्य एवं उद्योग मंत्री पीयूष गोयल, जेरोधा के नितिन कामथ, जोहो के श्रीधर वेम्बु, जोमैटो के दीपिंदर गोयल, और एडलवाइस म्यूचुअल फंड की राधिका गुप्ता शामिल हैं।",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "टीम योरस्टोरी (Team YourStory)",
+              "authorTitle": "सीनियर एडिटोरियल डेस्क, YS हिंदी",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "TechSparks 2024",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [],
+              "topics": [
+                "TechSparks 2024"
+              ],
+              "contentType": "article",
+              "readingTime": "5 MIN READ",
+              "language": "Hindi",
+              "location": "India",
+              "isFeatured": false,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-19T07:12:52.680Z",
+              "scheduledAt": null,
+              "views": 48252,
+              "claps": 142,
+              "createdAt": "2026-10-28T13:15:02.130Z",
+              "updatedAt": "2026-10-28T13:15:02.130Z",
+              "__v": 0
+            },
+            {
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+                "alt": "How AI is transforming India's startup ecosystem (Updated Edition)",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f556d132e2796bff4fbb",
+              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
+              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "subtitle": "Founders are using AI to build faster and smarter businesses.",
+              "excerpt": "Founders are using AI to build faster and smarter businesses.",
+              "content": "<p>Updated live content from Admin CMS workbench.</p>",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Kamlesh Sharma",
+              "authorTitle": "Senior Technology Correspondent",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "Technology",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "AI",
+                "Startup",
+                "India",
+                "Technology",
+                "GenAI"
+              ],
+              "topics": [
+                "AI",
+                "Startups",
+                "FinTech"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "Bengaluru / India",
+              "isFeatured": true,
+              "isBreaking": false,
+              "isTrending": true,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-08T08:55:07.642Z",
+              "scheduledAt": null,
+              "views": 57,
+              "claps": 50,
+              "createdAt": "2026-10-28T13:15:02.128Z",
+              "updatedAt": "2026-10-28T13:15:02.128Z",
+              "__v": 0
+            }
+          ],
+          "articleIds": [
+            "6ae1f556d132e2796bff4fb1",
+            "6ae1f556d132e2796bff4fae",
+            "6ae1f556d132e2796bff4fbc",
+            "6ae1f556d132e2796bff4fbb"
+          ],
+          "hasCustomArticles": true
         },
         "id": "trending",
         "type": "trending"
@@ -819,7 +1161,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:54:25.545Z",
+        "updatedAt": "2026-10-31T11:58:44.145Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1305,7 +1647,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:54:25.548Z",
+        "updatedAt": "2026-10-31T11:58:44.148Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -1877,7 +2219,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:54:25.564Z",
+        "updatedAt": "2026-10-31T11:58:44.157Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2579,7 +2921,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T11:54:25.567Z",
+        "updatedAt": "2026-10-31T11:58:44.161Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2614,7 +2956,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T11:54:25.570Z",
+        "updatedAt": "2026-10-31T11:58:44.162Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -2649,7 +2991,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T11:54:25.573Z",
+        "updatedAt": "2026-10-31T11:58:44.164Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -2895,7 +3237,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T11:54:25.576Z",
+        "updatedAt": "2026-10-31T11:58:44.166Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }

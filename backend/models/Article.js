@@ -71,6 +71,8 @@ const articleSchema = new mongoose.Schema(
 );
 
 articleSchema.index({ status: 1, publishedAt: -1 });
+articleSchema.index({ updatedAt: -1 });
+articleSchema.index({ createdAt: -1 });
 articleSchema.index({ isHero: 1 });
 articleSchema.index({ isFeatured: 1 });
 articleSchema.index({ isTrending: 1 });

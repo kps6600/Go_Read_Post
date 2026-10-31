@@ -11,9 +11,11 @@ function notifyArticleChange() {
       localStorage.removeItem('goreadpost_stories_v3');
       localStorage.setItem('articles_last_updated', Date.now().toString());
     } catch (e) {}
-    window.dispatchEvent(new CustomEvent('article:change'));
-    window.dispatchEvent(new CustomEvent('story:change'));
-    window.dispatchEvent(new CustomEvent('homepage:change'));
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('article:change'));
+      window.dispatchEvent(new CustomEvent('story:change'));
+      window.dispatchEvent(new CustomEvent('homepage:change'));
+    }, 20);
   }
 }
 
