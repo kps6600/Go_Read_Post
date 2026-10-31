@@ -385,9 +385,10 @@
 .mhp-popular-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  justify-content: space-between;
+  gap: 0.5rem;
   flex: 1;
-  justify-content: flex-start;
+  height: 100%;
 }
 
 .mhp-popular-item {
@@ -397,7 +398,10 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border-radius: 12px;
 }
 
 .mhp-popular-item:hover {

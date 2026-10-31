@@ -497,6 +497,7 @@
   transition: all 0.18s ease;
   position: relative;
   margin-bottom: 0;
+  flex: 1;
 }
 
 .lbe-popular-manage-item:hover {
