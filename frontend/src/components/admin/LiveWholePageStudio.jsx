@@ -187,13 +187,13 @@ export default function LiveWholePageStudio({
 
   const getSectionMaxFit = (sec) => {
     const isLatestFeed = pageId === 'latest' && (sec?.id === 'latest_feed' || sec?.type === 'latest_feed' || sec?.type === 'latest_blogs');
-    if (isLatestFeed) return sec?.data?.limit || 16;
-    return sec?.data?.limit || 4;
+    if (isLatestFeed) return 32;
+    const currentCount = Array.isArray(sec?.data?.articles) ? sec.data.articles.length : (sec?.data?.limit || 4);
+    return Math.min(32, currentCount + 4);
   };
 
   const resolveSectionArticles = (sec) => {
     const data = sec?.data || {};
-    const maxFit = getSectionMaxFit(sec);
     const cat = data.category || data.filterCategory;
     let source = pool;
     if (cat && cat.trim()) {
@@ -202,10 +202,11 @@ export default function LiveWholePageStudio({
     }
     const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
 
-    if (Array.isArray(data.articles)) {
-      return data.articles.filter(Boolean).slice(0, maxFit);
+    if (Array.isArray(data.articles) && data.articles.length > 0) {
+      return data.articles.filter(Boolean);
     }
-    return sorted.slice(0, maxFit);
+    const initialCount = data.limit || 4;
+    return sorted.slice(0, initialCount);
   };
 
   // ─────────────────────────────────────────────────────────
@@ -564,8 +565,9 @@ export default function LiveWholePageStudio({
           data: {
             ...s.data,
             articles: nextArticles,
-            articleIds: nextArticles.map(a => a._id || a.id),
-            hasCustomArticles: true
+                articleIds: nextArticles.map(a => a._id || a.id),
+                limit: Math.max(s.data?.limit || 4, nextArticles.length),
+                hasCustomArticles: true
           }
         };
       }
@@ -1765,7 +1767,7 @@ export default function LiveWholePageStudio({
                                 </h4>
 
                                 <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem', lineHeight: 1.45, maxWidth: '220px' }}>
-                                  {maxFit - secArticles.length} more card{maxFit - secArticles.length === 1 ? '' : 's'} fit in this feed
+                                  Insert article into slot #{secArticles.length + 1}
                                 </p>
 
                                 <span

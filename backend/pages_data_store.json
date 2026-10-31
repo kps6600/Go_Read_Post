@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T12:32:11.096Z",
+        "updatedAt": "2026-10-31T12:33:53.486Z",
         "data": {
           "slides": [
             {
@@ -380,7 +380,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:32:11.098Z",
+        "updatedAt": "2026-10-31T12:33:53.490Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -612,7 +612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:32:11.100Z",
+        "updatedAt": "2026-10-31T12:33:53.498Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending",
@@ -1126,7 +1126,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:32:11.103Z",
+        "updatedAt": "2026-10-31T12:33:53.501Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1612,7 +1612,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:32:11.106Z",
+        "updatedAt": "2026-10-31T12:33:53.504Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -2184,7 +2184,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:32:11.107Z",
+        "updatedAt": "2026-10-31T12:33:53.506Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2875,9 +2875,55 @@
               "createdAt": "2026-10-28T13:15:02.069Z",
               "updatedAt": "2026-10-28T13:15:02.069Z",
               "__v": 0
+            },
+            {
+              "_id": "6ae5dde41ff5406ec264830c",
+              "id": "techsparks-2024-bengaluru-mvwdhrkd",
+              "title": "टेकस्पार्क्स 2024: 'द न्यू टेक ऑर्डर' की थीम पर बेंगलुरु में सजेगा भारत के सबसे बड़े टेक-स्टार्टअप महाकुंभ का मंच",
+              "subtitle": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है।",
+              "summary": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है। देश-विदेश के टॉप 150+ टेक लीडर्स, 100+ वीसी फंड्स और 5000+ डेलिगेट्स जुटेंगे।",
+              "excerpt": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है। देश-विदेश के टॉप 150+ टेक लीडर्स, 100+ वीसी फंड्स और 5000+ डेलिगेट्स जुटेंगे।",
+              "slug": "techsparks-2024-bengaluru-mvwdhrkd",
+              "brand": "GoReadPost",
+              "category": "techsparks-2024",
+              "categoryTag": "TechSparks 2024",
+              "categoryLabel": "TechSparks 2024",
+              "tag": "LATEST",
+              "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+              "fallbackImage": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+              "author": {
+                "name": "टीम योरस्टोरी (Team YourStory)",
+                "title": "सीनियर एडिटोरियल डेस्क, YS हिंदी",
+                "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+              },
+              "authorName": "टीम योरस्टोरी (Team YourStory)",
+              "authorTitle": "सीनियर एडिटोरियल डेस्क, YS हिंदी",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+              "readTime": "5 MIN READ",
+              "readingTime": "5 MIN READ",
+              "publishedAt": "Oct 31, 2026",
+              "content": [
+                "टेकस्पार्क्स का 15वां संस्करण इस साल 26 से 28 सितंबर के बीच बेंगलुरु के ताज वेस्ट एंड में आयोजित होने जा रहा है। इस साल की थीम है 'द न्यू टेक ऑर्डर' (The New Tech Order)। पिछले डेढ़ दशक से टेकस्पार्क्स भारत के टेक और स्टार्टअप इकोसिस्टम का सबसे बड़ा और विश्वसनीय मंच बना हुआ है, जिसने अनगिनत यूनिकॉर्न्स, इनोवेटर्स और नीति-निर्माताओं को एक साथ लाकर देश की डिजिटल विकास यात्रा को गति दी है।\n\nइस साल का टेकस्पार्क्स भारत के टेक और इनोवेशन लैंडस्केप में आ रहे बड़े बदलावों को रेखांकित करेगा। आर्टिफिशियल इंटेलिजेंस (AI), डीपटेक, फिनटेक, स्पेसटेक, सेमीकंडक्टर और क्वांटम कंप्यूटिंग जैसे उभरते क्षेत्रों में भारत की वैश्विक स्थिति पर गहन चर्चा होगी।\n\nतीन दिवसीय इस महाकुंभ में 150 से अधिक अनुभवी वक्ता अपने विचार साझा करेंगे। इनमें केंद्रीय वाणिज्य एवं उद्योग मंत्री पीयूष गोयल, जेरोधा के नितिन कामथ, जोहो के श्रीधर वेम्बु, जोमैटो के दीपिंदर गोयल, और एडलवाइस म्यूचुअल फंड की राधिका गुप्ता शामिल हैं।"
+              ],
+              "tags": [],
+              "status": "published",
+              "views": 48252,
+              "claps": 142,
+              "isFeatured": false,
+              "isTrending": false,
+              "isBreaking": false,
+              "isEditorsPick": false,
+              "createdAt": "2026-10-31T12:24:04.047Z",
+              "updatedAt": "2026-10-31T12:24:04.047Z"
             }
           ],
-          "hasCustomArticles": true
+          "hasCustomArticles": true,
+          "articleIds": [
+            "6ae1f556d132e2796bff4fb4",
+            "6ae1f555d132e2796bff4f46",
+            "6ae1f556d132e2796bff4fa4",
+            "6ae5dde41ff5406ec264830c"
+          ]
         },
         "enabled": true,
         "filterCategory": "",
@@ -2886,7 +2932,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T12:32:11.109Z",
+        "updatedAt": "2026-10-31T12:33:53.515Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2921,7 +2967,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T12:32:11.111Z",
+        "updatedAt": "2026-10-31T12:33:53.518Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -2956,7 +3002,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T12:32:11.112Z",
+        "updatedAt": "2026-10-31T12:33:53.521Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -3202,7 +3248,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T12:32:11.114Z",
+        "updatedAt": "2026-10-31T12:33:53.523Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }

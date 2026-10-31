@@ -452,7 +452,7 @@ export default function ModernHomepageView({
 
     // 1. Curated section articles from admin
     if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      return sec.data.articles.filter(Boolean).slice(0, limit);
+      return sec.data.articles.filter(Boolean);
     }
     if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
       addArticles(sec.articles);
@@ -1055,7 +1055,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );
@@ -1094,7 +1094,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );
@@ -1134,7 +1134,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.slice(0, 4).map((blog, idx) => 
+          {articles.map((blog, idx) => 
             renderStoryCard(
               blog, 
               idx, 
@@ -1183,7 +1183,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.slice(0, 4).map((blog, idx) => 
+          {articles.map((blog, idx) => 
             renderStoryCard(blog, idx)
           )}
         </div>
@@ -1294,7 +1294,7 @@ export default function ModernHomepageView({
         </div>
 
         <div className="mhp-blog-cards-grid">
-          {articles.slice(0, 4).map((blog, idx) => renderStoryCard(blog, idx))}
+          {articles.map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
       </section>
     );
