@@ -14,6 +14,20 @@ import './LiveBannerEditor.css';
 import './LiveSectionEditor.css';
 import '../ModernHomepage.css';
 
+// Category extraction helper supporting MongoDB models, API responses, and static pools
+const extractCategory = (item) => {
+  if (!item) return '';
+  if (typeof item.categoryName === 'string' && item.categoryName.trim()) return item.categoryName.trim();
+  if (typeof item.categoryLabel === 'string' && item.categoryLabel.trim()) return item.categoryLabel.trim();
+  if (typeof item.category === 'string' && item.category.trim()) return item.category.trim();
+  if (typeof item.category === 'object' && item.category) {
+    const val = item.category.name || item.category.label || item.category.title || '';
+    if (val && typeof val === 'string') return val.trim();
+  }
+  if (typeof item.series === 'string' && item.series.trim()) return item.series.trim();
+  return '';
+};
+
 // Formatter to standardize an article or video object for Hero Slider
 const formatForHeroSlide = (item) => {
   const id = item._id || item.id || `slide-${Date.now()}`;
@@ -22,7 +36,7 @@ const formatForHeroSlide = (item) => {
   const excerpt = item.summary || item.excerpt || item.description || 
     (typeof item.content === 'string' ? item.content.slice(0, 160) : '') || 
     'Comprehensive reporting on innovation and founder journeys.';
-  const category = item.categoryLabel || item.category || (isVideo ? 'Video' : 'Startups');
+  const category = extractCategory(item) || (isVideo ? 'Video' : 'Startups');
   const image = item.image || item.coverImage || item.bannerImage || item.fallbackImage || item.thumbnail ||
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80';
   const authorName = typeof item.author === 'object' 
@@ -65,7 +79,7 @@ const formatForPopularPost = (item) => {
   const readTime = isVideo
     ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video')
     : (item.readTime || (item.readingTime ? `${item.readingTime} min read` : '3 min read'));
-  const category = item.categoryLabel || item.category || (isVideo ? 'Video' : 'Trending');
+  const category = extractCategory(item) || (isVideo ? 'Video' : 'Trending');
   const slug = item.slug || id;
   const link = isVideo ? `/videos/${slug}` : `/stories/${slug}`;
   const author = typeof item.author === 'object' ? (item.author?.name || 'Author') : (item.author || item.host || item.guest || 'Editorial');
@@ -187,92 +201,79 @@ export default function LiveBannerEditor({
   const filteredPickerArticles = useMemo(() => {
     return combinedPool.filter(a => {
       const title = (a.title || '').toLowerCase();
-      const cat = (a.categoryLabel || a.category || '').toLowerCase();
+      const rawCat = extractCategory(a);
+      const cat = rawCat.toLowerCase();
       const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || a.host || a.guest || '')).toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
 
       const matchesSearch = !q || title.includes(q) || cat.includes(q) || author.includes(q);
-      const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
+      const matchesCat = pickerCategory === 'All' || cat === pickerCategory.toLowerCase() || cat.includes(pickerCategory.toLowerCase());
       return matchesSearch && matchesCat;
     });
   }, [combinedPool, pickerSearch, pickerCategory]);
 
+  // Dynamic counts for each category in current content pool
+  const categoryCounts = useMemo(() => {
+    const counts = { All: combinedPool.length };
+    combinedPool.forEach(a => {
+      const c = extractCategory(a);
+      if (c) {
+        counts[c] = (counts[c] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [combinedPool]);
+
   // Unique categories for picker filtering, strictly matched to active content type
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    if (pickerContentType === 'articles') {
-      pool.forEach(a => {
-        const c = a.categoryLabel || a.category;
-        if (c && typeof c === 'string') cats.add(c.trim());
-      });
-    } else if (pickerContentType === 'videos') {
-      videoPool.forEach(v => {
-        const c = v.categoryLabel || v.category || v.series;
-        if (c && typeof c === 'string') cats.add(c.trim());
-      });
-    } else {
-      combinedPool.forEach(a => {
-        const c = a.categoryLabel || a.category;
-        if (c && typeof c === 'string') cats.add(c.trim());
-      });
+    const targetPool = pickerContentType === 'articles' ? pool : (pickerContentType === 'videos' ? videoPool : combinedPool);
+    
+    targetPool.forEach(a => {
+      const c = extractCategory(a);
+      if (c && typeof c === 'string') cats.add(c.trim());
+    });
+
+    // Provide standard categories if few were discovered
+    if (cats.size <= 2 && pickerContentType !== 'videos') {
+      ['Startups', 'Technology', 'AI & DeepTech', 'HerStory', 'SMBStory', 'SocialStory'].forEach(c => cats.add(c));
     }
-    return Array.from(cats).slice(0, 12);
+    return Array.from(cats).slice(0, 14);
   }, [pool, videoPool, combinedPool, pickerContentType]);
 
   if (!isOpen || !section) return null;
 
-  // Initialize or retrieve slides (Hero Carousel)
-  const rawSlides = Array.isArray(data.slides) && data.slides.length > 0 
-    ? data.slides.filter(s => {
-        if (!s) return false;
-        // If slide is custom, created by admin, or has custom content, ALWAYS preserve it!
-        if (s.isCustom || !s.articleId) return true;
-        // Only if it's purely a DB article reference, check if the article still exists
-        const id = String(s.articleId || s.id || s._id || s.slug);
-        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === s.title);
-      })
-    : [];
-
-  // If rawSlides is still empty, initialize from section's own data (headline, badge, bgImage) if present!
-  if (rawSlides.length === 0 && (data.headline || data.title || data.heading || data.bgImage || data.image)) {
-    rawSlides.push({
-      id: `hero-slide-${Date.now()}`,
-      title: data.headline || data.title || data.heading || 'Featured Story',
-      excerpt: data.subheadline || data.subtitle || data.description || 'Comprehensive reporting on innovation and founder journeys.',
-      category: data.badge || data.category || 'HEADLINE',
-      image: data.bgImage || data.image || (pool[0]?.image) || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80',
-      author: 'Editorial Bureau',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-      date: 'Today',
-      readTime: '4 min read',
-      primaryBtnText: data.primaryBtnText || data.buttonText || 'Read More',
-      link: data.primaryBtnUrl || data.buttonUrl || '/latest',
-      isCustom: true
-    });
-  }
-
-  const slides = rawSlides.length > 0 
-    ? rawSlides 
-    : [
-        formatForHeroSlide(pool[0] || {}),
-        formatForHeroSlide(pool[1] || {}),
-        formatForHeroSlide(pool[2] || {})
-      ];
-
   // Initialize or retrieve popular articles (Sidebar 1-5)
-  // If data.hasCustomPopular is true or data.popularArticles is explicitly an array (even empty []), respect it!
   const rawPopular = Array.isArray(data.popularArticles) || data.hasCustomPopular
     ? (Array.isArray(data.popularArticles) ? data.popularArticles : []).filter(item => {
         if (!item) return false;
-        if (item.isCustom || !item.articleId) return true;
+        if (item.title || item.image || item.isCustom || !item.articleId) return true;
         const id = String(item.articleId || item._id || item.id || item.slug);
-        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
+        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title) ||
+               videoPool.some(v => String(v._id || v.id || v.slug) === id || v.title === item.title);
       })
     : null;
 
   const popularArticles = (rawPopular !== null
     ? rawPopular
     : pool.slice(0, Number(data.popularLimit) || 5).map(formatForPopularPost)).slice(0, 5);
+
+  // Unified Content Flow:
+  // If there is NO content in the popular list (popularArticles.length === 0), make the banner section empty ([]).
+  // If any content is present in the popular list (popularArticles.length > 0), show it in the banner section!
+  const rawSlides = Array.isArray(data.slides) && data.slides.length > 0
+    ? data.slides.filter(s => {
+        if (!s) return false;
+        if (s.title || s.image || s.isCustom || !s.articleId) return true;
+        const id = String(s.articleId || s.id || s._id || s.slug);
+        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === s.title) ||
+               videoPool.some(v => String(v._id || v.id || v.slug) === id || v.title === s.title);
+      })
+    : null;
+
+  const slides = popularArticles.length > 0
+    ? (rawSlides && rawSlides.length > 0 ? rawSlides : popularArticles.map(formatForHeroSlide))
+    : [];
 
   const currentSlide = slides[activeSlideIdx] || slides[0] || {};
   const showPopular = data.showPopular !== false && pageId !== 'trending' && section?.id !== 'trending_hero';
@@ -288,13 +289,15 @@ export default function LiveBannerEditor({
       ...data,
       slides: sl,
       popularArticles: pop,
+      hasCustomSlides: true,
       hasCustomPopular: true,
       heroSource: 'custom',
       showPopular: showPopular,
-      headline: sl[0]?.title || data.headline,
-      subheadline: sl[0]?.excerpt || data.subheadline,
-      badge: sl[0]?.category || data.badge,
-      bgImage: sl[0]?.image || data.bgImage
+      headline: sl.length > 0 ? (sl[0]?.title || '') : '',
+      subheadline: sl.length > 0 ? (sl[0]?.excerpt || '') : '',
+      badge: sl.length > 0 ? (sl[0]?.category || '') : '',
+      bgImage: sl.length > 0 ? (sl[0]?.image || '') : '',
+      image: sl.length > 0 ? (sl[0]?.image || '') : ''
     };
 
     setSaveStatus('saving');
@@ -386,18 +389,22 @@ export default function LiveBannerEditor({
     if (onAutoSave) onAutoSave(finalData);
   };
 
-  const updateSlidesState = (newSlides, newActiveIdx = null) => {
+    const updateSlidesState = (newSlides, newActiveIdx = null) => {
     setData(prev => ({
       ...prev,
       slides: newSlides,
+      hasCustomSlides: true,
       heroSource: 'custom',
-      headline: newSlides[0]?.title || prev.headline,
-      subheadline: newSlides[0]?.excerpt || prev.subheadline,
-      badge: newSlides[0]?.category || prev.badge,
-      bgImage: newSlides[0]?.image || prev.bgImage
+      headline: newSlides.length > 0 ? (newSlides[0]?.title || '') : '',
+      subheadline: newSlides.length > 0 ? (newSlides[0]?.excerpt || '') : '',
+      badge: newSlides.length > 0 ? (newSlides[0]?.category || '') : '',
+      bgImage: newSlides.length > 0 ? (newSlides[0]?.image || '') : '',
+      image: newSlides.length > 0 ? (newSlides[0]?.image || '') : ''
     }));
     if (newActiveIdx !== null && newActiveIdx >= 0) {
       setActiveSlideIdx(newActiveIdx);
+    } else {
+      setActiveSlideIdx(0);
     }
   };
 
@@ -423,10 +430,9 @@ export default function LiveBannerEditor({
     persistToDatabase(next, popularArticles);
   };
 
-  // Delete slide from carousel
+  // Delete slide from carousel (allows clearing to 0 slides)
   const handleDeleteSlide = (idx, e) => {
     e?.stopPropagation();
-    if (slides.length <= 1) return;
     const next = slides.filter((_, i) => i !== idx);
     const newIdx = Math.max(0, Math.min(activeSlideIdx, next.length - 1));
     updateSlidesState(next, newIdx);
@@ -469,8 +475,20 @@ export default function LiveBannerEditor({
   // Remove article from popular posts
   const handleDeletePopular = (idx) => {
     const next = popularArticles.filter((_, i) => i !== idx);
-    updatePopularState(next);
-    persistToDatabase(slides, next);
+    const nextSlides = next.length > 0 ? next.map(formatForHeroSlide) : [];
+    setData(prev => ({
+      ...prev,
+      popularArticles: next,
+      slides: nextSlides,
+      hasCustomPopular: true,
+      hasCustomSlides: true,
+      headline: nextSlides.length > 0 ? (nextSlides[0]?.title || '') : '',
+      subheadline: nextSlides.length > 0 ? (nextSlides[0]?.excerpt || '') : '',
+      badge: nextSlides.length > 0 ? (nextSlides[0]?.category || '') : '',
+      bgImage: nextSlides.length > 0 ? (nextSlides[0]?.image || '') : '',
+      image: nextSlides.length > 0 ? (nextSlides[0]?.image || '') : ''
+    }));
+    persistToDatabase(nextSlides, next);
   };
 
   // ─────────────────────────────────────────────────────────
@@ -505,8 +523,20 @@ export default function LiveBannerEditor({
     }
     const toAdd = selectedPickerCards.slice(0, remaining).map(formatForPopularPost);
     const nextPop = [...popularArticles, ...toAdd].slice(0, 5);
-    updatePopularState(nextPop);
-    persistToDatabase(slides, nextPop);
+    const nextSlides = nextPop.map(formatForHeroSlide);
+    setData(prev => ({
+      ...prev,
+      popularArticles: nextPop,
+      slides: nextSlides,
+      hasCustomPopular: true,
+      hasCustomSlides: true,
+      headline: nextSlides[0]?.title || '',
+      subheadline: nextSlides[0]?.excerpt || '',
+      badge: nextSlides[0]?.category || '',
+      bgImage: nextSlides[0]?.image || '',
+      image: nextSlides[0]?.image || ''
+    }));
+    persistToDatabase(nextSlides, nextPop);
     setIsPickerOpen(false);
     setSelectedPickerCards([]);
   };
@@ -534,8 +564,20 @@ export default function LiveBannerEditor({
       }
       const newPop = formatForPopularPost(article);
       const nextPop = [...popularArticles, newPop].slice(0, 5);
-      updatePopularState(nextPop);
-      persistToDatabase(slides, nextPop);
+      const nextSlides = nextPop.map(formatForHeroSlide);
+      setData(prev => ({
+        ...prev,
+        popularArticles: nextPop,
+        slides: nextSlides,
+        hasCustomPopular: true,
+        hasCustomSlides: true,
+        headline: nextSlides[0]?.title || '',
+        subheadline: nextSlides[0]?.excerpt || '',
+        badge: nextSlides[0]?.category || '',
+        bgImage: nextSlides[0]?.image || '',
+        image: nextSlides[0]?.image || ''
+      }));
+      persistToDatabase(nextSlides, nextPop);
     } else if (pickerTarget.type === 'popular-replace') {
       const targetIdx = pickerTarget.index;
       const nextPop = [...popularArticles];
@@ -676,109 +718,134 @@ export default function LiveBannerEditor({
             
             {/* ── Left Hero Slide Card ── */}
             <div 
-              className="mhp-hero-card"
+              className={`mhp-hero-card ${slides.length === 0 ? 'empty-hero' : ''}`}
               style={{ 
-                backgroundImage: `url(${currentSlide.image})`,
+                backgroundImage: slides.length > 0 && currentSlide.image ? `url(${currentSlide.image})` : 'none',
                 position: 'relative'
               }}
             >
-              <div className="mhp-hero-overlay" />
+              {slides.length > 0 ? (
+                <>
+                  <div className="mhp-hero-overlay" />
 
 
 
-              {/* Real Article Content on Hero Slide */}
-              <div className="mhp-hero-content">
-                <div style={{ marginBottom: '0.65rem' }}>
-                  <span 
-                    style={{
-                      background: 'rgba(234, 88, 12, 0.3)',
-                      border: '1px solid rgba(234, 88, 12, 0.6)',
-                      color: '#fb923c',
-                      fontWeight: 800,
-                      fontSize: '0.78rem',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      display: 'inline-flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <span>{currentSlide.category}</span>
-                  </span>
-                </div>
+                  {/* Real Article Content on Hero Slide */}
+                  <div className="mhp-hero-content">
+                    {currentSlide.category && (
+                      <div style={{ marginBottom: '0.65rem' }}>
+                        <span 
+                          style={{
+                            background: 'rgba(234, 88, 12, 0.3)',
+                            border: '1px solid rgba(234, 88, 12, 0.6)',
+                            color: '#fb923c',
+                            fontWeight: 800,
+                            fontSize: '0.78rem',
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            display: 'inline-flex',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <span>{currentSlide.category}</span>
+                        </span>
+                      </div>
+                    )}
 
-                <h1 
-                  className="mhp-hero-title" 
-                  style={{ margin: '0 0 1rem', lineHeight: 1.2 }}
-                >
-                  {currentSlide.title}
-                </h1>
+                    <h1 
+                      className="mhp-hero-title" 
+                      style={{ margin: '0 0 1rem', lineHeight: 1.2 }}
+                    >
+                      {currentSlide.title}
+                    </h1>
 
-                {currentSlide.excerpt && (
-                  <p 
-                    className="mhp-hero-desc" 
-                    style={{ margin: '0 0 1.25rem' }}
-                  >
-                    {currentSlide.excerpt}
-                  </p>
-                )}
+                    {currentSlide.excerpt && (
+                      <p 
+                        className="mhp-hero-desc" 
+                        style={{ margin: '0 0 1.25rem' }}
+                      >
+                        {currentSlide.excerpt}
+                      </p>
+                    )}
 
-                <div className="mhp-author-meta" style={{ flexWrap: 'wrap', gap: '8px' }}>
-                  <img 
-                    src={currentSlide.authorAvatar} 
-                    alt={currentSlide.author} 
-                    className="mhp-author-avatar"
-                  />
-                  <span style={{ fontWeight: 700, color: '#ffffff' }}>{currentSlide.author}</span>
-                  <span className="mhp-meta-sep">•</span>
-                  <span style={{ color: '#cbd5e1' }}>{currentSlide.date}</span>
-                  <span className="mhp-meta-sep">•</span>
-                  <span style={{ color: '#cbd5e1' }}>{currentSlide.readTime}</span>
-                </div>
+                    <div className="mhp-author-meta" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                      {currentSlide.authorAvatar && (
+                        <img 
+                          src={currentSlide.authorAvatar} 
+                          alt={currentSlide.author || ''} 
+                          className="mhp-author-avatar"
+                        />
+                      )}
+                      {currentSlide.author && (
+                        <span style={{ fontWeight: 700, color: '#ffffff' }}>{currentSlide.author}</span>
+                      )}
+                      {currentSlide.date && (
+                        <>
+                          <span className="mhp-meta-sep">•</span>
+                          <span style={{ color: '#cbd5e1' }}>{currentSlide.date}</span>
+                        </>
+                      )}
+                      {currentSlide.readTime && (
+                        <>
+                          <span className="mhp-meta-sep">•</span>
+                          <span style={{ color: '#cbd5e1' }}>{currentSlide.readTime}</span>
+                        </>
+                      )}
+                    </div>
 
-                <div className="mhp-hero-bottom-actions">
-                  <div className="mhp-hero-read-btn">
-                    <span>{currentSlide.primaryBtnText || 'Read More'}</span>
-                    <ArrowRight size={15} color="#0f172a" />
+                    <div className="mhp-hero-bottom-actions">
+                      <div className="mhp-hero-read-btn">
+                        <span>{currentSlide.primaryBtnText || 'Read More'}</span>
+                        <ArrowRight size={15} color="#0f172a" />
+                      </div>
+                      {currentSlide.category && (
+                        <span className="mhp-category-tag">
+                          {currentSlide.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="mhp-category-tag">
-                    {currentSlide.category}
-                  </span>
-                </div>
-              </div>
 
-              {/* Slider Dots Navigation */}
-              {slides.length > 1 && (
-                <div className="mhp-slider-nav">
-                  <div className="mhp-slider-dots">
-                    {slides.map((_, idx) => (
-                      <span 
-                        key={idx}
-                        className={`mhp-slider-dot ${idx === activeSlideIdx ? 'active' : ''}`}
-                        onClick={() => setActiveSlideIdx(idx)}
-                      />
-                    ))}
-                  </div>
-                  <button 
-                    type="button"
-                    className="mhp-slider-btn" 
-                    onClick={() => setActiveSlideIdx((activeSlideIdx - 1 + slides.length) % slides.length)}
-                    aria-label="Previous slide"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button 
-                    type="button"
-                    className="mhp-slider-btn" 
-                    onClick={() => setActiveSlideIdx((activeSlideIdx + 1) % slides.length)}
-                    aria-label="Next slide"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
+                  {/* Slider Dots Navigation */}
+                  {slides.length > 1 && (
+                    <div className="mhp-slider-nav">
+                      <div className="mhp-slider-dots">
+                        {slides.map((_, idx) => (
+                          <span 
+                            key={idx}
+                            className={`mhp-slider-dot ${idx === activeSlideIdx ? 'active' : ''}`}
+                            onClick={() => setActiveSlideIdx(idx)}
+                          />
+                        ))}
+                      </div>
+                      <button 
+                        type="button"
+                        className="mhp-slider-btn" 
+                        onClick={() => setActiveSlideIdx((activeSlideIdx - 1 + slides.length) % slides.length)}
+                        aria-label="Previous slide"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button 
+                        type="button"
+                        className="mhp-slider-btn" 
+                        onClick={() => setActiveSlideIdx((activeSlideIdx + 1) % slides.length)}
+                        aria-label="Next slide"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="lbe-hero-empty-state">
+                  <h3 className="lbe-hero-empty-title">Hero Banner</h3>
                 </div>
               )}
             </div>
+
 
             {/* ── Right Popular Posts Sidebar (With Position Up/Down Reorder) ── */}
             {showPopular && (
@@ -834,61 +901,69 @@ export default function LiveBannerEditor({
                 </div>
 
                 <div className="mhp-popular-list">
-                  {popularArticles.map((item, idx) => (
-                    <div key={item.id || idx} className="lbe-popular-manage-item">
-                      {/* Rank Number */}
-                      <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
-                        {idx + 1}
-                      </div>
-
-                      {/* Thumbnail */}
-                      <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="mhp-popular-thumb"
-                        loading="lazy"
-                      />
-
-                      {/* Info */}
-                      <div className="mhp-popular-info">
-                        <h4 className="mhp-popular-title">{item.title}</h4>
-                        <span className="mhp-popular-meta">
-                          {item.category && <span style={{ color: '#fb923c', marginRight: '4px' }}>{item.category} •</span>}
-                          {item.readTime || '3 min read'}
-                        </span>
-                      </div>
-
-                      {/* Direct Position Reorder & Change Controls */}
-                      <div className="lbe-item-reorder-group">
-                        <button
-                          type="button"
-                          className="lbe-reorder-btn arrow-btn"
-                          disabled={idx === 0}
-                          onClick={() => handleMovePopularUp(idx)}
-                          title={`Move Up to Position #${idx}`}
-                        >
-                          <ArrowUp size={13} />
-                        </button>
-                        <button
-                          type="button"
-                          className="lbe-reorder-btn arrow-btn"
-                          disabled={idx === popularArticles.length - 1}
-                          onClick={() => handleMovePopularDown(idx)}
-                          title={`Move Down to Position #${idx + 2}`}
-                        >
-                          <ArrowDown size={13} />
-                        </button>
-                        <button
-                          type="button"
-                          className="lbe-reorder-btn danger"
-                          onClick={() => handleDeletePopular(idx)}
-                          title="Remove from popular posts"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
+                  {popularArticles.length === 0 ? (
+                    <div className="lbe-popular-empty-state">
+                      <h3 className="lbe-popular-empty-title">Popular Posts</h3>
                     </div>
-                  ))}
+                  ) : (
+                    popularArticles.map((item, idx) => (
+                      <div key={item.id || idx} className="lbe-popular-manage-item">
+                        {/* Rank Number */}
+                        <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
+                          {idx + 1}
+                        </div>
+
+                        {/* Thumbnail */}
+                        <img 
+                          src={item.image} 
+                          alt={item.title} 
+                          className="mhp-popular-thumb"
+                          loading="lazy"
+                        />
+
+                        {/* Info */}
+                        <div className="mhp-popular-info">
+                          <h4 className="mhp-popular-title">{item.title}</h4>
+                          <span className="mhp-popular-meta">
+                            {item.category && <span style={{ color: '#fb923c', marginRight: '4px' }}>{item.category} •</span>}
+                            {item.readTime || '3 min read'}
+                          </span>
+                        </div>
+
+                        {/* Direct Position Reorder & Change Controls */}
+                        <div className="lbe-item-reorder-group">
+                          <button
+                            type="button"
+                            className="lbe-reorder-btn arrow-btn"
+                            disabled={idx === 0}
+                            onClick={() => handleMovePopularUp(idx)}
+                            title={`Move Up to Position #${idx}`}
+                          >
+                            <ArrowUp size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className="lbe-reorder-btn arrow-btn"
+                            disabled={idx === popularArticles.length - 1}
+                            onClick={() => handleMovePopularDown(idx)}
+                            title={`Move Down to Position #${idx + 2}`}
+                          >
+                            <ArrowDown size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className="lbe-reorder-btn danger"
+                            onClick={() => handleDeletePopular(idx)}
+                            title="Remove from popular posts"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+
                 </div>
               </div>
             )}
@@ -968,7 +1043,9 @@ export default function LiveBannerEditor({
               )}
 
               <div className="lbe-picker-search-wrap">
-                <Search size={16} color="#94a3b8" />
+                <div className="lbe-picker-search-icon-box">
+                  <Search size={16} />
+                </div>
                 <input
                   type="text"
                   placeholder={pickerTarget?.mode === 'videos' || pickerContentType === 'videos' ? 'Search videos by title, series, guest...' : 'Search articles by title, author, desk...'}
@@ -977,29 +1054,42 @@ export default function LiveBannerEditor({
                   className="lbe-picker-search-input"
                   autoFocus
                 />
-                {pickerSearch && (
-                  <button 
-                    type="button" 
-                    onClick={() => setPickerSearch('')}
-                    style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-                  >
-                    <X size={14} />
-                  </button>
-                )}
+                <div className="lbe-picker-search-actions">
+                  {pickerSearch && (
+                    <button 
+                      type="button" 
+                      onClick={() => setPickerSearch('')}
+                      className="lbe-picker-search-clear-btn"
+                      title="Clear search"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                  <span className="lbe-picker-search-count-badge">
+                    {filteredPickerArticles.length} {filteredPickerArticles.length === 1 ? 'item' : 'items'}
+                  </span>
+                </div>
               </div>
 
-              {/* Category Pills */}
+              {/* Category Filter Pills */}
               <div className="lbe-picker-categories">
-                {availableCategories.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    className={`lbe-picker-cat-pill ${pickerCategory === cat ? 'active' : ''}`}
-                    onClick={() => setPickerCategory(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                {availableCategories.map(cat => {
+                  const isActive = pickerCategory === cat;
+                  const count = categoryCounts[cat];
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`lbe-picker-cat-pill ${isActive ? 'active' : ''}`}
+                      onClick={() => setPickerCategory(cat)}
+                    >
+                      <span className="lbe-picker-cat-name">{cat}</span>
+                      {count !== undefined && (
+                        <span className="lbe-picker-cat-badge">{count}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1016,7 +1106,7 @@ export default function LiveBannerEditor({
                     const artTitle = article.title || 'Untitled';
                     const artImg = article.image || article.coverImage || article.fallbackImage || article.thumbnail || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80';
                     const isVid = article.itemType === 'video' || !!article.duration || !!article.youtubeEmbedUrl;
-                    const artCat = article.categoryLabel || article.category || (isVid ? 'Video' : 'Article');
+                    const artCat = extractCategory(article) || (isVid ? 'Video' : 'Article');
                     const artAuthor = typeof article.author === 'object' ? (article.author?.name || 'Author') : (article.author || article.host || article.guest || 'Author');
                     const artDate = isVid ? (article.duration ? ('\u{1F3AC} ' + article.duration) : '\u{1F3AC} Video') : (article.publishedAt || article.date || 'Recent');
 

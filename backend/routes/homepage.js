@@ -142,7 +142,8 @@ adminHomepageRouter.put('/', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN'),
             limit: Number(s.limit || 6),
             articleIds: s.articleIds || [],
             filterCategory: s.filterCategory || '',
-            filterTag: s.filterTag || ''
+            filterTag: s.filterTag || '',
+            customConfig: s.customConfig !== undefined ? s.customConfig : {}
           },
           { upsert: true, new: true }
         );

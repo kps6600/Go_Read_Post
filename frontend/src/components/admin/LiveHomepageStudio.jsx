@@ -1035,47 +1035,85 @@ export default function LiveHomepageStudio({
                             </div>
 
                             <div className="mhp-popular-list">
-                              {popularArticles.map((pop, pIdx) => (
-                                <div key={pop.id || pIdx} className="mhp-popular-item lbe-item-row" style={{ position: 'relative' }}>
-                                  <span className="mhp-popular-rank" style={{ color: pIdx === 0 ? '#ef4444' : '#64748b' }}>
-                                    #{pIdx + 1}
-                                  </span>
-                                  <img src={pop.image} alt={pop.title} className="mhp-popular-thumb" />
-                                  <div className="mhp-popular-info">
-                                    <h4 className="mhp-popular-title">{pop.title}</h4>
-                                    <span className="mhp-popular-meta">{pop.category} • {pop.readTime}</span>
+                              {popularArticles.length === 0 ? (
+                                <div className="lbe-popular-empty-state">
+
+                                  <div className="lbe-popular-empty-actions">
+                                    <button
+                                      type="button"
+                                      className="lbe-btn-add-popular-split article"
+                                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'articles' })}
+                                      title="Open Articles Library to select an article"
+                                    >
+                                      <Plus size={14} strokeWidth={2.5} />
+                                      <span>Add Article</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="lbe-btn-add-popular-split video"
+                                      onClick={() => handleOpenPicker({ type: 'popular-add', mode: 'videos' })}
+                                      title="Open Videos Catalog to select a video"
+                                    >
+                                      <Play size={11} fill="currentColor" />
+                                      <span>Add Video</span>
+                                    </button>
                                   </div>
 
-                                  <div className="lbe-item-reorder-group">
-                                    <button
-                                      type="button"
-                                      className="lbe-reorder-btn"
-                                      disabled={pIdx === 0}
-                                      onClick={() => handleMovePopular(pIdx, 'up')}
-                                      title="Move Up"
-                                    >
-                                      <ArrowUp size={12} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="lbe-reorder-btn"
-                                      disabled={pIdx === popularArticles.length - 1}
-                                      onClick={() => handleMovePopular(pIdx, 'down')}
-                                      title="Move Down"
-                                    >
-                                      <ArrowDown size={12} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="lbe-reorder-btn danger"
-                                      onClick={() => handleDeletePopular(pIdx)}
-                                      title="Remove from Popular"
-                                    >
-                                      <Trash2 size={12} />
-                                    </button>
-                                  </div>
+                                  <button
+                                    type="button"
+                                    className="lbe-popular-autofill-btn"
+                                    onClick={() => {
+                                      const fallbackPop = pool.slice(0, 5).map(formatForPopularPost);
+                                      handleUpdateHeroData({ popularArticles: fallbackPop, hasCustomPopular: true });
+                                    }}
+                                  >
+                                    <Sparkles size={13} color="#ea580c" />
+                                    <span>Auto-fill with Top Stories</span>
+                                  </button>
                                 </div>
-                              ))}
+                              ) : (
+                                popularArticles.map((pop, pIdx) => (
+                                  <div key={pop.id || pIdx} className="mhp-popular-item lbe-item-row" style={{ position: 'relative' }}>
+                                    <span className="mhp-popular-rank" style={{ color: pIdx === 0 ? '#ef4444' : '#64748b' }}>
+                                      #{pIdx + 1}
+                                    </span>
+                                    <img src={pop.image} alt={pop.title} className="mhp-popular-thumb" />
+                                    <div className="mhp-popular-info">
+                                      <h4 className="mhp-popular-title">{pop.title}</h4>
+                                      <span className="mhp-popular-meta">{pop.category} • {pop.readTime}</span>
+                                    </div>
+
+                                    <div className="lbe-item-reorder-group">
+                                      <button
+                                        type="button"
+                                        className="lbe-reorder-btn"
+                                        disabled={pIdx === 0}
+                                        onClick={() => handleMovePopular(pIdx, 'up')}
+                                        title="Move Up"
+                                      >
+                                        <ArrowUp size={12} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="lbe-reorder-btn"
+                                        disabled={pIdx === popularArticles.length - 1}
+                                        onClick={() => handleMovePopular(pIdx, 'down')}
+                                        title="Move Down"
+                                      >
+                                        <ArrowDown size={12} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="lbe-reorder-btn danger"
+                                        onClick={() => handleDeletePopular(pIdx)}
+                                        title="Remove from Popular"
+                                      >
+                                        <Trash2 size={12} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
                             </div>
                           </div>
                         </section>

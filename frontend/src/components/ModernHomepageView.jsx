@@ -646,7 +646,7 @@ export default function ModernHomepageView({
   };  // Section 1: Hero & Popular Posts (Self-contained for independent multi-hero editing & rotation)
   const HeroPopularSectionItem = ({ sec }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
-    const data = sec?.data || {};
+    const data = { ...(sec?.customConfig || {}), ...(sec?.data || {}) };
     const showPopular = data.showPopular !== false;
     const popularTitle = data.popularTitle || sec?.customConfig?.popularTitle || (sec?.subtitle && !sec?.subtitle.toLowerCase().includes('slider') && !sec?.subtitle.toLowerCase().includes('sidebar') ? sec?.subtitle : 'Top 5 Ranked Articles') || 'Popular Posts';
     const viewAllText = data.viewAllText || sec?.customConfig?.viewAllText || "View All";

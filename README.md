@@ -128,3 +128,4 @@ goreadpost/
   - MongoDB & Mongoose 9
   - JWT (`jsonwebtoken`) & `bcryptjs`
   - CORS, Dotenv, Cloudinary
+
