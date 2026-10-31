@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, ChevronRight, ChevronLeft, Search, Mail, CheckCircle2, 
   ArrowRight, ArrowLeft, ArrowLeftRight, Trash2, Plus, LayoutGrid, Tag, Layers, Cpu, Briefcase, 
@@ -1216,7 +1217,7 @@ export default function LatestArticlesPage({
       />
 
       {/* ── Add Card Modal ── */}
-      {isAddCardModalOpen && (
+      {isAddCardModalOpen && typeof document !== 'undefined' && createPortal(
         <div 
           className="admin-modal-overlay" 
           onClick={() => setIsAddCardModalOpen(false)}
@@ -1236,13 +1237,15 @@ export default function LatestArticlesPage({
             onClick={e => e.stopPropagation()}
             style={{
               background: '#ffffff',
-              borderRadius: '16px',
-              width: '100%',
-              maxWidth: '600px',
+              borderRadius: '20px',
+              width: '95vw',
+              maxWidth: modalTab === 'pick' ? '1280px' : '720px',
+              height: modalTab === 'pick' ? '88vh' : 'auto',
               maxHeight: '90vh',
               overflowY: 'auto',
               boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
-              border: '1px solid #e2e8f0'
+              border: '1px solid #e2e8f0',
+              transition: 'max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
             {/* Modal Header */}
@@ -1461,7 +1464,7 @@ export default function LatestArticlesPage({
                     />
                   </div>
 
-                  <div style={{ maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ maxHeight: '62vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {availableExistingArticles.length === 0 ? (
                       <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>No articles match your search.</p>
                     ) : (

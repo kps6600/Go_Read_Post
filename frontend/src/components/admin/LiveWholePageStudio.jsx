@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, Check, Sparkles, Plus, Trash2, 
   ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight,
@@ -13,6 +14,7 @@ import { ALL_STORIES, TOP_PICKS, SPOTLIGHT_STORIES, LEAD_STORY } from '../../dat
 import { SECTION_DEFINITIONS } from './SectionEditorModal';
 import './LiveHomepageStudio.css';
 import './LiveSectionEditor.css';
+import './LiveBannerEditor.css';
 import '../ModernHomepage.css';
 import '../LatestArticlesPage.css';
 import LatestArticlesPage from '../LatestArticlesPage';
@@ -1976,7 +1978,7 @@ export default function LiveWholePageStudio({
       {/* ─────────────────────────────────────────────────────────
           MODAL: ARTICLE PICKER FOR SLOTS & CARDS
          ───────────────────────────────────────────────────────── */}
-      {isPickerOpen && (
+      {isPickerOpen && typeof document !== 'undefined' && createPortal(
         <div className="lbe-picker-overlay" onClick={() => setIsPickerOpen(false)}>
           <div className="lbe-picker-modal" onClick={e => e.stopPropagation()}>
             <div className="lbe-picker-header">
@@ -2064,13 +2066,14 @@ export default function LiveWholePageStudio({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ─────────────────────────────────────────────────────────
           MODAL: ADD SECTION MODAL
          ───────────────────────────────────────────────────────── */}
-      {isAddSectionModalOpen && (
+      {isAddSectionModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="admin-modal-overlay" onClick={() => setIsAddSectionModalOpen(false)}>
           <div className="section-picker-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -2113,7 +2116,8 @@ export default function LiveWholePageStudio({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

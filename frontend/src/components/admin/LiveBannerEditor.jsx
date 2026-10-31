@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, Check, Sparkles, Plus, Trash2, 
   ArrowRight, ChevronLeft, ChevronRight,
@@ -1199,7 +1200,7 @@ export default function LiveBannerEditor({
       {/* ─────────────────────────────────────────────────────────
           ARTICLE PICKER MODAL
          ───────────────────────────────────────────────────────── */}
-      {isPickerOpen && (
+      {isPickerOpen && typeof document !== 'undefined' && createPortal(
         <div className="lbe-picker-overlay" onClick={() => setIsPickerOpen(false)}>
           <div className="lbe-picker-modal" onClick={e => e.stopPropagation()}>
             
@@ -1551,7 +1552,8 @@ export default function LiveBannerEditor({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* —— Slide Content & Photo Editor Modal —— */}

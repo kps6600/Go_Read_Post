@@ -4148,9 +4148,9 @@ table input[type="checkbox"]:checked::after {
 .admin-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100002;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4160,10 +4160,11 @@ table input[type="checkbox"]:checked::after {
 .section-picker-modal {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 860px;
-  max-height: 85vh;
+  border-radius: 20px;
+  width: 95vw;
+  max-width: 1400px;
+  height: 90vh;
+  max-height: 920px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
