@@ -405,8 +405,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     currentPath === '/admin/about' ||
     currentPath.startsWith('/admin/about') ||
     currentPath === '/admin/homepage' ||
-    currentPath.startsWith('/admin/homepage') ||
-    (currentPath.startsWith('/admin/pages') && (currentPath.includes('/edit') || currentPath.includes('/create')))
+    currentPath.startsWith('/admin/homepage')
   );
 
   if (isPageEditorRoute) {
