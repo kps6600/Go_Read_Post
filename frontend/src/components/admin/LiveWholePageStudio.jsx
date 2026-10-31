@@ -1102,60 +1102,6 @@ export default function LiveWholePageStudio({
                               </button>
                             </div>
 
-                            {/* Floating Hero Position Dock */}
-                            <div className="lbe-hero-control-dock">
-                              <span className="lbe-position-badge">
-                                ★ HERO SLIDE #{heroSlideIdx + 1} OF {heroSlides.length}
-                              </span>
-
-                              <div className="lbe-dock-actions">
-                                <button
-                                  type="button"
-                                  className="lbe-dock-btn"
-                                  disabled={heroSlideIdx === 0}
-                                  onClick={() => handleMoveHeroSlide(heroSlideIdx, 'up')}
-                                  title="Move earlier"
-                                >
-                                  <ArrowLeft size={13} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="lbe-dock-btn"
-                                  disabled={heroSlideIdx === heroSlides.length - 1}
-                                  onClick={() => handleMoveHeroSlide(heroSlideIdx, 'down')}
-                                  title="Move later"
-                                >
-                                  <ArrowRight size={13} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="lbe-dock-btn"
-                                  onClick={() => handleOpenPicker({ type: 'hero-replace', index: heroSlideIdx })}
-                                  title="Replace with existing article"
-                                >
-                                  <RefreshCw size={13} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="lbe-dock-btn"
-                                  style={{ background: 'rgba(34, 197, 94, 0.25)', color: '#4ade80' }}
-                                  onClick={() => handleOpenPicker({ type: 'hero-add' })}
-                                  title="Add new slide from articles"
-                                >
-                                  <Plus size={13} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="lbe-dock-btn danger"
-                                  disabled={heroSlides.length <= 1}
-                                  onClick={(e) => handleDeleteHeroSlide(heroSlideIdx, e)}
-                                  title="Delete slide"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            </div>
-
                             <div className="mhp-hero-content">
                               <span 
                                 contentEditable={true}
