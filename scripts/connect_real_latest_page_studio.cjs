@@ -126,3 +126,4 @@ studioCode = studioCode.replace(targetHeaderActions, newAddArticleBtn);
 
 fs.writeFileSync(studioPath, studioCode, 'utf8');
 console.log('Successfully updated LiveWholePageStudio.jsx');
+

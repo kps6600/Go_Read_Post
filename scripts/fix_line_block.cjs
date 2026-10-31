@@ -17,3 +17,4 @@ const newBlock = `                      )}
 content = content.replace(targetBlock, newBlock);
 fs.writeFileSync(studioPath, content, 'utf8');
 console.log('Replaced target block!');
+

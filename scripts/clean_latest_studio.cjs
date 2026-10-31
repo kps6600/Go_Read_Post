@@ -82,3 +82,4 @@ if (code.includes(oldBottomCardStart)) {
 
 fs.writeFileSync(studioPath, code, 'utf8');
 console.log('Cleaned up tip bar and bottom card for latest page.');
+

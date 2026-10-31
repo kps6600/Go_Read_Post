@@ -14,3 +14,4 @@ code = code.replace(
 
 fs.writeFileSync(studioPath, code, 'utf8');
 console.log('Fixed closing parens in LiveWholePageStudio.jsx');
+

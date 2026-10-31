@@ -2,6 +2,19 @@
    GoReadPost - Whole Homepage Visual Live Studio (Full WYSIWYG)
    ========================================================================== */
 
+
+
+/* In-Page Same Window Mode (keeps Admin sidebar and navbar visible) */
+.admin-same-page-visual-editor .lhs-overlay,
+.lhs-overlay.in-page-mode {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 10 !important;
+  border-radius: 14px;
+  overflow: visible !important;
+  min-height: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
 .lhs-overlay {
   position: fixed;
   inset: 0;

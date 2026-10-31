@@ -89,7 +89,8 @@ export default function LiveWholePageStudio({
   pageId = 'latest',
   pageTitle = 'Latest Articles',
   pageSlug = 'latest',
-  onOpenSettings = null
+  onOpenSettings = null,
+  inPageMode = false
 }) {
   if (!isOpen) return null;
 
@@ -792,7 +793,7 @@ export default function LiveWholePageStudio({
   };
 
   return (
-    <div className="lhs-overlay">
+    <div className={`lhs-overlay ${inPageMode ? 'in-page-mode' : ''}`}>
       {/* ── Studio Top Header Bar ── */}
       <header className="lhs-header">
         <div className="lhs-header-left">

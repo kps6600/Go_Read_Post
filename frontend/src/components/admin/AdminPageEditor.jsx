@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  Globe, Eye, Plus, Trash2, ArrowLeft, Check,
+import {
+  ExternalLink, Settings, Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
   Layers, Settings as SettingsIcon, RefreshCw, X, Sparkles, Edit2
 } from 'lucide-react';
@@ -11,6 +11,7 @@ import LiveBannerEditor from './LiveBannerEditor';
 import LiveSectionEditor from './LiveSectionEditor';
 import LiveHomepageStudio from './LiveHomepageStudio';
 import LiveWholePageStudio from './LiveWholePageStudio';
+import LatestArticlesPage from '../LatestArticlesPage';
 import { ALL_STORIES } from '../../data/storiesData';
 import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 
@@ -900,34 +901,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const displayTitle = isHomepage ? rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim();
   const displaySlug = isHomepage ? '/' : (slug ? `/${slug.replace(/^\/+/, '')}` : (pageId && !pageId.match(/^[0-9a-fA-F]{24}$/) ? `/${pageId}` : '/'));
 
-  // ── 2. DEDICATED WHOLE PAGE LIVE VISUAL STUDIO (DEFAULT VIEW) ──
-  if (activeTab === 'sections') {
-    return (
-      <div className="admin-live-studio-dedicated-page" style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
-        <LiveWholePageStudio
-          isOpen={true}
-          pageId={pageId}
-          pageTitle={displayTitle}
-          pageSlug={displaySlug}
-          initialSections={sections}
-          stories={allStories.length ? allStories : ALL_STORIES}
-          onClose={() => {
-            if (onNavigate) {
-              onNavigate('/admin/pages');
-            } else {
-              window.location.href = '/admin/pages';
-            }
-          }}
-          onSaveSuccess={(updatedSections) => {
-            if (updatedSections) setSections(updatedSections);
-            fetchPage();
-            onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
-          }}
-          onOpenSettings={() => setActiveTab('seo')}
-        />
-      </div>
-    );
-  }
+  
 
 
   return (
@@ -980,6 +954,48 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             type="button"
+            onClick={() => setActiveTab(activeTab === 'seo' ? 'sections' : 'seo')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1.05rem',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: activeTab === 'seo' ? '#eff6ff' : '#ffffff',
+              color: activeTab === 'seo' ? '#2563eb' : '#334155',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {activeTab === 'seo' ? <Eye size={15} /> : <Settings size={15} />}
+            <span>{activeTab === 'seo' ? 'Live UI Studio' : 'Page Info & SEO'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.open(displaySlug, '_blank')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1.05rem',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#334155',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            <ExternalLink size={15} />
+            <span>View Live Page</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleSavePage('published')}
             disabled={saving}
             style={{
@@ -1007,52 +1023,76 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
 
       <div style={{ width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
         {/* Segmented Editor Tabs */}
-        <div className="admin-segmented-tabs-bar">
-        <button
-          type="button"
-          className={`admin-nav-tab-item ${activeTab === 'sections' ? 'active' : ''}`}
-          onClick={() => setActiveTab('sections')}
-        >
-          <span>Page Sections Builder</span>
-          <span className="tab-counter-badge">{sections.length}</span>
-        </button>
-
-        <button
-          type="button"
-          className={`admin-nav-tab-item ${activeTab === 'seo' ? 'active' : ''}`}
-          onClick={() => setActiveTab('seo')}
-        >
-          <span>Page Info & SEO Settings</span>
-        </button>
-      </div>
+        <div className="admin-segmented-tabs-bar" style={{ display: 'none' }}>
+          <button
+            type="button"
+            className={`admin-nav-tab-item ${activeTab === 'sections' ? 'active' : ''}`}
+            onClick={() => setActiveTab('sections')}
+          >
+            <span>Live UI Studio</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-tab-item ${activeTab === 'seo' ? 'active' : ''}`}
+            onClick={() => setActiveTab('seo')}
+          >
+            <span>Page Info & SEO Settings</span>
+          </button>
+        </div>
 
       {/* ========================================================
-          TAB 1: WHOLE PAGE LIVE VISUAL STUDIO (FULL WYSIWYG)
+          TAB 1: LIVE UI VISUAL STUDIO (RENDERED IN THE SAME PAGE)
          ======================================================== */}
       {activeTab === 'sections' && (
-        <div className="admin-live-whole-page-studio-container" style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
-          <LiveWholePageStudio
-            isOpen={true}
-            pageId={pageId}
-            pageTitle={displayTitle}
-            pageSlug={displaySlug}
-            initialSections={sections}
-            stories={allStories.length ? allStories : ALL_STORIES}
-            onClose={() => {
-              if (onNavigate) {
-                onNavigate('/admin/pages');
-              } else {
-                window.location.href = '/admin/pages';
-              }
+        pageId === 'latest' ? (
+          <div 
+            className="admin-same-page-visual-editor"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              overflow: 'visible',
+              padding: '1.25rem',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+              marginBottom: '2rem'
             }}
-            onSaveSuccess={(updated) => {
-              if (updated) setSections(updated);
-              fetchPage();
-              onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
+          >
+            <LatestArticlesPage
+              isStudioView={true}
+              onShowToast={onShowToast}
+            />
+          </div>
+        ) : (
+          <div 
+            className="admin-same-page-visual-editor"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              overflow: 'visible',
+              padding: '1.25rem',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+              marginBottom: '2rem'
             }}
-            onOpenSettings={() => setActiveTab('seo')}
-          />
-        </div>
+          >
+            <LiveWholePageStudio
+              isOpen={true}
+              inPageMode={true}
+              pageId={pageId}
+              pageTitle={displayTitle}
+              pageSlug={displaySlug}
+              initialSections={sections}
+              stories={allStories.length ? allStories : ALL_STORIES}
+              onClose={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
+              onSaveSuccess={(updated) => {
+                if (updated) setSections(updated);
+                fetchPage();
+                onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
+              }}
+              onOpenSettings={() => setActiveTab('seo')}
+            />
+          </div>
+        )
       )}
 
       {/* ========================================================
