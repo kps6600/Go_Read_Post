@@ -335,6 +335,8 @@ function LiveGenericSectionStudio({
 
   // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
   const frontendArticles = useMemo(() => {
+    const limit = Number(data.limit) || maxArticlesFit;
+
     // 1. If custom curated articles are pinned in data.articles, use them up to max capacity
     if (Array.isArray(data.articles) && data.articles.length > 0) {
       return data.articles.filter(Boolean).slice(0, maxArticlesFit);
@@ -396,7 +398,7 @@ function LiveGenericSectionStudio({
     }
 
     return sectionPool.slice(0, limit);
-  }, [data.articles, data.limit, data.category, secType, pool]);
+  }, [data.articles, data.limit, data.category, secType, pool, maxArticlesFit]);
 
   const activeArticles = frontendArticles;
 
