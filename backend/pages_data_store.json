@@ -4,7 +4,7 @@
     "title": "Homepage",
     "slug": "",
     "brand": "GoReadPost",
-    "description": "Main portal covering startup dispatches, fundraises, playbooks, and leadership features.",
+    "description": "GoReadPost Main Editorial Homepage & Lead Portals",
     "heroHeadline": "Stories That Matter in Indian & Global Startups",
     "heroSubhead": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
     "heroBanner": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
@@ -12,201 +12,256 @@
     "showInNav": true,
     "order": 1,
     "seo": {
-      "title": "GoReadPost | Stories of Founders, Technology & Capital",
-      "description": "Leading media platform delivering unfiltered reporting on startups, funding, and deep tech.",
+      "title": "GoReadPost | Stories of Founders, Technology & Startups",
+      "description": "Definitive journal of startup breakdowns, deeptech, venture capital, and builder journeys.",
       "keywords": [
         "startups",
-        "venture capital",
-        "deeptech",
-        "entrepreneurship"
+        "technology",
+        "founders",
+        "venture capital"
       ],
       "ogImage": ""
     },
     "sections": [
       {
-        "id": "hero_popular",
-        "type": "hero",
-        "order": 1,
+        "_id": "6ae1f55cd132e2796bff4ff7",
+        "sectionKey": "hero_popular",
+        "title": "Hero Section - Lead Stories & Popular Posts",
+        "subtitle": "Primary hero editorial slider & top 5 ranked sidebar",
         "enabled": true,
-        "data": {
-          "title": "Lead Stories & Popular Posts",
-          "heading": "Lead Stories & Editorial Hero Slider",
-          "headline": "How AI is transforming India's startup ecosystem (Updated Edition)",
-          "subheadline": "Indian tech founders share how AI models are driving unit economics.",
-          "badge": "Startups",
-          "primaryBtnText": "Read More",
-          "primaryBtnUrl": "/latest",
-          "popularTitle": "Popular Posts",
+        "order": 1,
+        "limit": 5,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "customConfig": {
           "slides": [
             {
-              "id": "6ac75a6b8833c33aee8af41a",
-              "articleId": "6ac75a6b8833c33aee8af41a",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "excerpt": "Indian tech founders share how AI models are driving unit economics.",
+              "id": "6ae1f556d132e2796bff4fb7",
+              "articleId": "6ae1f556d132e2796bff4fb7",
+              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+              "excerpt": "At 14,000 feet, Rashi Goel and her pack of trained mountain dogs guide trekkers through treacherous passes.",
               "category": "Startups",
-              "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
-              "author": "Editorial Bureau",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
-              "date": "2026-10-08T08:55:07.642Z",
-              "readTime": "5 min read min read",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "author": "Rashi Goel",
+              "authorAvatar": "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&auto=format&fit=crop&q=80",
+              "date": "Today",
+              "readTime": "5 min read",
               "primaryBtnText": "Read More",
-              "link": "/stories/how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39"
-            },
-            {
-              "id": "6ac74207caca5851772df7c0",
-              "articleId": "6ac74207caca5851772df7c0",
-              "title": "Bootstrapping ₹12 Cr organic skincare from a single kitchen stove",
-              "excerpt": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
-              "category": "Startups",
-              "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
-              "author": "Editorial Bureau",
-              "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:30:18.852Z",
-              "readTime": "5 min read min read",
-              "primaryBtnText": "Read More",
-              "link": "/stories/sim-8",
-              "slug": "sim-8"
-            },
-            {
-              "id": "6ac74207caca5851772df7bf",
-              "articleId": "6ac74207caca5851772df7bf",
-              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
-              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
-              "category": "Startups",
-              "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80",
-              "author": "Editorial Bureau",
-              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:30:18.846Z",
-              "readTime": "6 min read min read",
-              "primaryBtnText": "Read More",
-              "link": "/stories/sim-7",
-              "slug": "sim-7"
+              "link": "/stories/sim-5",
+              "slug": "sim-5"
             }
           ],
           "popularArticles": [
             {
-              "id": "6ac74207caca5851772df7c0",
-              "_id": "6ac74207caca5851772df7c0",
-              "title": "Bootstrapping ₹12 Cr organic skincare from a single kitchen stove",
-              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "readTime": "5 min read min read",
-              "category": "Trending",
-              "slug": "sim-8",
-              "link": "/stories/sim-8",
-              "date": "2026-10-07T12:30:18.852Z"
-            },
-            {
-              "id": "6ac74207caca5851772df7bf",
-              "_id": "6ac74207caca5851772df7bf",
-              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
-              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "readTime": "6 min read min read",
-              "category": "Trending",
-              "slug": "sim-7",
-              "link": "/stories/sim-7",
-              "date": "2026-10-07T12:30:18.846Z"
-            },
-            {
-              "id": "6ac74207caca5851772df7be",
-              "_id": "6ac74207caca5851772df7be",
-              "title": "How a mobile bicycle library is educating 5,000 rural girls in Bihar",
-              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "readTime": "4 min read min read",
-              "category": "Trending",
-              "slug": "sim-6",
-              "link": "/stories/sim-6",
-              "date": "2026-10-07T12:30:18.839Z"
-            },
-            {
-              "id": "6ac74207caca5851772df7bd",
-              "_id": "6ac74207caca5851772df7bd",
+              "id": "6ae1f556d132e2796bff4fb7",
+              "_id": "6ae1f556d132e2796bff4fb7",
+              "articleId": "6ae1f556d132e2796bff4fb7",
               "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
-              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "readTime": "5 min read min read",
-              "category": "Trending",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "readTime": "5 min read",
+              "category": "Startups",
               "slug": "sim-5",
               "link": "/stories/sim-5",
-              "date": "2026-10-07T12:30:18.833Z"
-            },
-            {
-              "id": "6ac74206caca5851772df74d",
-              "_id": "6ac74206caca5851772df74d",
-              "title": "India faces 53-60% talent gap in GenAI, cloud skills: TeamLease report",
-              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
-              "readTime": "4 min read min read",
-              "category": "Trending",
-              "slug": "ai-3",
-              "link": "/stories/ai-3",
-              "date": "2026-10-07T12:23:20.775Z"
+              "author": "Rashi Goel",
+              "date": "Today",
+              "itemType": "article"
             }
           ],
+          "hasCustomSlides": true,
+          "hasCustomPopular": true,
           "heroSource": "custom",
           "showPopular": true,
-          "bgImage": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80"
-        }
+          "popularTitle": "Popular Posts",
+          "headline": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+          "subheadline": "At 14,000 feet, Rashi Goel and her pack of trained mountain dogs guide trekkers through treacherous passes.",
+          "badge": "Startups",
+          "bgImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+          "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80"
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.939Z",
+        "updatedAt": "2026-10-31T05:23:45.720Z",
+        "data": {
+          "slides": [
+            {
+              "id": "6ae1f556d132e2796bff4fb7",
+              "articleId": "6ae1f556d132e2796bff4fb7",
+              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+              "excerpt": "At 14,000 feet, Rashi Goel and her pack of trained mountain dogs guide trekkers through treacherous passes.",
+              "category": "Startups",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "author": "Rashi Goel",
+              "authorAvatar": "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&auto=format&fit=crop&q=80",
+              "date": "Today",
+              "readTime": "5 min read",
+              "primaryBtnText": "Read More",
+              "link": "/stories/sim-5",
+              "slug": "sim-5"
+            }
+          ],
+          "popularArticles": [
+            {
+              "id": "6ae1f556d132e2796bff4fb7",
+              "_id": "6ae1f556d132e2796bff4fb7",
+              "articleId": "6ae1f556d132e2796bff4fb7",
+              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "readTime": "5 min read",
+              "category": "Startups",
+              "slug": "sim-5",
+              "link": "/stories/sim-5",
+              "author": "Rashi Goel",
+              "date": "Today",
+              "itemType": "article"
+            }
+          ],
+          "hasCustomSlides": true,
+          "hasCustomPopular": true,
+          "heroSource": "custom",
+          "showPopular": true,
+          "popularTitle": "Popular Posts",
+          "headline": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+          "subheadline": "At 14,000 feet, Rashi Goel and her pack of trained mountain dogs guide trekkers through treacherous passes.",
+          "badge": "Startups",
+          "bgImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+          "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80"
+        },
+        "id": "hero_popular",
+        "type": "hero"
       },
       {
-        "id": "trending",
-        "type": "trending",
+        "_id": "6ae1f55cd132e2796bff4ff8",
+        "sectionKey": "latest_blogs",
+        "title": "Latest from the Blog",
+        "subtitle": "",
+        "enabled": true,
         "order": 2,
-        "enabled": true,
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "customConfig": {
+          "viewAllText": "View All Articles",
+          "viewAllUrl": "/latest"
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.940Z",
+        "updatedAt": "2026-10-31T05:17:54.208Z",
         "data": {
-          "title": "Trending Now",
-          "heading": "Trending Now",
-          "subtitle": "High-velocity stories capturing builder attention and social virality",
-          "limit": 6,
-          "viewAllUrl": "/trending"
-        }
+          "viewAllText": "View All Articles",
+          "viewAllUrl": "/latest"
+        },
+        "id": "latest_blogs",
+        "type": "latest_blogs"
       },
       {
-        "id": "popular_editors",
-        "type": "stories_feed",
+        "_id": "6ae1f55cd132e2796bff4ff9",
+        "sectionKey": "trending",
+        "title": "Trending Now",
+        "subtitle": "High-velocity stories capturing builder attention",
+        "enabled": true,
         "order": 3,
-        "enabled": true,
-        "data": {
-          "title": "Most Popular & Editor's Picks",
-          "heading": "Most Popular & Editor's Picks",
-          "subtitle": "Essential reads handpicked by newsroom editors",
-          "category": "",
-          "limit": 6,
-          "viewAllText": "View All",
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "customConfig": {
+          "viewAllText": "View All Trending",
           "viewAllUrl": "/trending"
-        }
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.940Z",
+        "updatedAt": "2026-10-31T05:17:54.210Z",
+        "data": {
+          "viewAllText": "View All Trending",
+          "viewAllUrl": "/trending"
+        },
+        "id": "trending",
+        "type": "trending"
       },
       {
-        "id": "spotlight",
-        "type": "spotlight",
+        "_id": "6ae1f55cd132e2796bff4ffa",
+        "sectionKey": "popular_editors",
+        "title": "Most Popular & Editor's Picks",
+        "subtitle": "Essential reads handpicked by newsroom editors",
+        "enabled": true,
         "order": 4,
-        "enabled": true,
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "customConfig": {
+          "badgeText": "Editor's Choice",
+          "viewAllText": "Explore Popular",
+          "viewAllUrl": "/category/startups"
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.940Z",
+        "updatedAt": "2026-10-31T05:17:54.213Z",
         "data": {
-          "title": "Tech & Startup Spotlight",
-          "heading": "Tech & Startup Spotlight",
-          "subtitle": "Deep tech breakthroughs, generative AI, and emerging ventures",
-          "category": "Technology",
-          "badgeText": "DEEPTECH FOCUS",
-          "limit": 6,
-          "viewAllUrl": "/category/technology"
-        }
+          "badgeText": "Editor's Choice",
+          "viewAllText": "Explore Popular",
+          "viewAllUrl": "/category/startups"
+        },
+        "id": "popular_editors",
+        "type": "popular_editors"
       },
       {
-        "id": "newsletter",
-        "type": "newsletter",
-        "order": 5,
+        "_id": "6ae1f55cd132e2796bff4ffb",
+        "sectionKey": "spotlight",
+        "title": "Tech & Startup Spotlight",
+        "subtitle": "Deep tech, generative AI, and emerging ventures",
         "enabled": true,
+        "order": 5,
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "Technology",
+        "filterTag": "",
+        "customConfig": {
+          "badgeText": "Spotlight",
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/technology"
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.940Z",
+        "updatedAt": "2026-10-31T05:17:54.222Z",
         "data": {
-          "title": "Newsletter Subscription Banner",
-          "heading": "Newsletter Subscription Banner",
+          "badgeText": "Spotlight",
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/technology"
+        },
+        "id": "spotlight",
+        "type": "spotlight"
+      },
+      {
+        "_id": "6ae1f55cd132e2796bff4ffc",
+        "sectionKey": "newsletter",
+        "title": "Newsletter Subscription Banner",
+        "subtitle": "Get the Latest Blogs Delivered to Your Inbox",
+        "enabled": true,
+        "order": 6,
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "customConfig": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
-          "subtitle": "Join 100,000+ founders and engineers receiving our daily intelligence briefs.",
           "buttonText": "Subscribe",
-          "placeholder": "Enter your email address"
-        }
+          "badgeText": "DAILY BRIEF"
+        },
+        "__v": 0,
+        "createdAt": "2026-10-28T13:15:08.940Z",
+        "updatedAt": "2026-10-31T05:17:54.224Z",
+        "data": {
+          "headline": "Get the Latest Blogs Delivered to Your Inbox",
+          "buttonText": "Subscribe",
+          "badgeText": "DAILY BRIEF"
+        },
+        "id": "newsletter",
+        "type": "newsletter"
       }
     ]
   },
