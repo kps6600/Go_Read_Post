@@ -1025,18 +1025,6 @@ export default function ModernHomepageView({
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
         </div>
-
-        <div className="mhp-section-bottom-action">
-          <button 
-            type="button"
-            className="mhp-view-all-bottom-btn"
-            onClick={handleNavigateViewAll}
-            aria-label={viewAllText}
-          >
-            <span>{viewAllText}</span>
-            <ArrowRight size={15} />
-          </button>
-        </div>
       </section>
     );
   };
@@ -1075,18 +1063,6 @@ export default function ModernHomepageView({
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
-        </div>
-
-        <div className="mhp-section-bottom-action">
-          <button 
-            type="button"
-            className="mhp-view-all-bottom-btn"
-            onClick={handleNavigateViewAll}
-            aria-label={viewAllText}
-          >
-            <span>{viewAllText}</span>
-            <ArrowRight size={15} />
-          </button>
         </div>
       </section>
     );
@@ -1137,18 +1113,6 @@ export default function ModernHomepageView({
             )
           )}
         </div>
-
-        <div className="mhp-section-bottom-action">
-          <button 
-            type="button"
-            className="mhp-view-all-bottom-btn"
-            onClick={handleNavigateViewAll}
-            aria-label={viewAllText}
-          >
-            <span>{viewAllText}</span>
-            <ArrowRight size={15} />
-          </button>
-        </div>
       </section>
     );
   };
@@ -1190,18 +1154,6 @@ export default function ModernHomepageView({
           {articles.map((blog, idx) => 
             renderStoryCard(blog, idx)
           )}
-        </div>
-
-        <div className="mhp-section-bottom-action">
-          <button 
-            type="button"
-            className="mhp-view-all-bottom-btn"
-            onClick={handleNavigateViewAll}
-            aria-label={viewAllText}
-          >
-            <span>{viewAllText}</span>
-            <ArrowRight size={15} />
-          </button>
         </div>
       </section>
     );
@@ -1311,18 +1263,6 @@ export default function ModernHomepageView({
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => renderStoryCard(blog, idx))}
-        </div>
-
-        <div className="mhp-section-bottom-action">
-          <button 
-            type="button"
-            className="mhp-view-all-bottom-btn"
-            onClick={handleNavigateViewAll}
-            aria-label={viewAllText}
-          >
-            <span>{viewAllText}</span>
-            <ArrowRight size={15} />
-          </button>
         </div>
       </section>
     );
