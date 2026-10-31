@@ -237,10 +237,58 @@ export default function LiveHomepageStudio({
     return [...pool].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
   }, [pool, pickerTarget, sections]);
 
-  // Filtered articles in Picker (strictly scoped to targetSectionRelatedPool)
+  // Filtered articles in Picker (strictly scoped to targetSectionRelatedPool and excluding already-added articles to prevent repeated content)
   const filteredPickerArticles = useMemo(() => {
+    const existingKeys = new Set();
+    if (pickerTarget?.sectionId) {
+      const sec = sections.find(s => s.id === pickerTarget.sectionId || s.sectionKey === pickerTarget.sectionId);
+      if (sec) {
+        const currentArticles = resolveSectionArticles(sec);
+        currentArticles.forEach((art, idx) => {
+          if (!art) return;
+          if (pickerTarget.type === 'feed-replace' && pickerTarget.index === idx) return;
+          const idKey = String(art._id || art.id || art.articleId || '').trim();
+          const slugKey = String(art.slug || '').trim().toLowerCase();
+          const titleKey = String(art.title || '').trim().toLowerCase();
+          if (idKey) existingKeys.add(idKey);
+          if (slugKey) existingKeys.add(slugKey);
+          if (titleKey) existingKeys.add(titleKey);
+        });
+      }
+    } else if (pickerTarget?.type?.startsWith('hero')) {
+      heroSlides.forEach((slide, idx) => {
+        if (pickerTarget.type === 'hero-replace' && (pickerTarget.index ?? heroSlideIdx) === idx) return;
+        if (slide.slug) existingKeys.add(String(slide.slug).trim().toLowerCase());
+        if (slide.title) existingKeys.add(String(slide.title).trim().toLowerCase());
+      });
+    } else if (pickerTarget?.type?.startsWith('popular')) {
+      popularArticles.forEach((pop, idx) => {
+        if (pickerTarget.type === 'popular-replace' && pickerTarget.index === idx) return;
+        if (pop.slug) existingKeys.add(String(pop.slug).trim().toLowerCase());
+        if (pop.title) existingKeys.add(String(pop.title).trim().toLowerCase());
+      });
+    }
+
+    const seenInPicker = new Set();
+
     return targetSectionRelatedPool.filter(a => {
-      const title = (a.title || '').toLowerCase();
+      if (!a) return false;
+      const artId = String(a._id || a.id || a.articleId || '').trim();
+      const artSlug = String(a.slug || '').trim().toLowerCase();
+      const title = (a.title || '').trim().toLowerCase();
+
+      // DO NOT SHOW REPEATED CONTENT: Exclude articles already added in this section
+      if ((artId && existingKeys.has(artId)) || (artSlug && existingKeys.has(artSlug)) || (title && existingKeys.has(title))) {
+        return false;
+      }
+
+      // Deduplicate within picker
+      const dedupeKey = artId || artSlug || title;
+      if (dedupeKey) {
+        if (seenInPicker.has(dedupeKey)) return false;
+        seenInPicker.add(dedupeKey);
+      }
+
       const cat = (a.categoryName || a.categoryLabel || a.category || '').toLowerCase();
       const author = (typeof a.author === 'object' && a.author ? a.author.name || '' : (a.author || '')).toLowerCase();
       const q = pickerSearch.trim().toLowerCase();
@@ -249,7 +297,7 @@ export default function LiveHomepageStudio({
       const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
       return matchesSearch && matchesCat;
     });
-  }, [targetSectionRelatedPool, pickerSearch, pickerCategory]);
+  }, [targetSectionRelatedPool, pickerSearch, pickerCategory, pickerTarget, sections, heroSlides, popularArticles, heroSlideIdx]);
 
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);

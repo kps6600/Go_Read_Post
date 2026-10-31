@@ -399,66 +399,6 @@ function LiveGenericSectionStudio({
     });
   }, [pool, secType, isSpotlight, isTrending, section?.title, section?.category, section?.id, data?.title, data.category, data.filterCategory]);
 
-  // Filtered articles in Picker (strictly scoped to sectionRelatedPool)
-  const filteredPickerArticles = useMemo(() => {
-    return sectionRelatedPool.filter(a => {
-      if (!a) return false;
-      const title = getSafeString(a.title, '').toLowerCase();
-      const cat = getSafeString(a.categoryName || a.categoryLabel || a.category, '').toLowerCase();
-      const author = getSafeString(typeof a.author === 'object' && a.author ? a.author.name : a.author, '').toLowerCase();
-      const q = pickerSearch.trim().toLowerCase();
-
-      const matchesSearch = !q || title.includes(q) || cat.includes(q) || author.includes(q);
-      const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
-      return matchesSearch && matchesCat;
-    });
-  }, [sectionRelatedPool, pickerSearch, pickerCategory]);
-
-  // Available categories in Picker (strictly from sectionRelatedPool)
-  const availableCategories = useMemo(() => {
-    const cats = new Set(['All']);
-    sectionRelatedPool.forEach(a => {
-      if (!a) return;
-      const c = getSafeString(a.categoryName || a.categoryLabel || a.category, '');
-      if (c && typeof c === 'string') cats.add(c.trim());
-    });
-    return Array.from(cats).slice(0, 10);
-  }, [sectionRelatedPool]);
-
-  // ─────────────────────────────────────────────────────────
-  // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
-  // ─────────────────────────────────────────────────────────
-  const persistToDatabase = async (nextData) => {
-    const finalData = nextData || data;
-    setData(finalData);
-    setSaveStatus('saving');
-    try {
-      const targetSecKey = section.sectionKey || section.id || section.type;
-      if (targetSecKey && (pageId === 'home' || !pageId)) {
-        HomepageService.updateSection(targetSecKey, {
-          data: finalData,
-          customConfig: finalData
-        }).catch(() => {});
-      }
-      if (onAutoSave) {
-        await onAutoSave(finalData);
-      }
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('homepage:change'));
-        window.dispatchEvent(new CustomEvent('page:change'));
-        try {
-          localStorage.setItem('homepage_last_updated', Date.now().toString());
-          localStorage.setItem('pages_last_updated', Date.now().toString());
-        } catch (e) {}
-      }
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2500);
-    } catch (err) {
-      console.error('Failed to auto-save section:', err);
-      setSaveStatus('error');
-    }
-  };
-
   // EXACT FRONTEND ARTICLES RESOLVER (Matches ModernHomepageView.jsx 1:1)
   const frontendArticles = useMemo(() => {
     const limit = maxArticlesFit;
@@ -527,6 +467,98 @@ function LiveGenericSectionStudio({
   }, [data.articles, data.limit, data.category, secType, pool, maxArticlesFit]);
 
   const activeArticles = frontendArticles;
+
+  // Filtered articles in Picker (strictly scoped to sectionRelatedPool and excluding already-added articles to prevent repeated content)
+  const filteredPickerArticles = useMemo(() => {
+    // 1. Build set of keys already present in the active section
+    const existingKeys = new Set();
+    activeArticles.forEach((art, idx) => {
+      if (!art) return;
+      if (pickerTarget?.type === 'replace' && pickerTarget?.index === idx) return;
+
+      const idKey = String(art._id || art.id || art.articleId || '').trim();
+      const slugKey = String(art.slug || '').trim().toLowerCase();
+      const titleKey = String(art.title || '').trim().toLowerCase();
+      if (idKey) existingKeys.add(idKey);
+      if (slugKey) existingKeys.add(slugKey);
+      if (titleKey) existingKeys.add(titleKey);
+    });
+
+    const seenInPicker = new Set();
+
+    return sectionRelatedPool.filter(a => {
+      if (!a) return false;
+
+      // DO NOT ADD REPEATED CONTENT: Exclude articles already added in this section
+      const artId = String(a._id || a.id || a.articleId || '').trim();
+      const artSlug = String(a.slug || '').trim().toLowerCase();
+      const artTitle = getSafeString(a.title, '').trim().toLowerCase();
+
+      if ((artId && existingKeys.has(artId)) || (artSlug && existingKeys.has(artSlug)) || (artTitle && existingKeys.has(artTitle))) {
+        return false;
+      }
+
+      // Prevent internal duplicates in the picker list
+      const dedupeKey = artId || artSlug || artTitle;
+      if (dedupeKey) {
+        if (seenInPicker.has(dedupeKey)) return false;
+        seenInPicker.add(dedupeKey);
+      }
+
+      const cat = getSafeString(a.categoryName || a.categoryLabel || a.category, '').toLowerCase();
+      const author = getSafeString(typeof a.author === 'object' && a.author ? a.author.name : a.author, '').toLowerCase();
+      const q = pickerSearch.trim().toLowerCase();
+
+      const matchesSearch = !q || artTitle.includes(q) || cat.includes(q) || author.includes(q);
+      const matchesCat = pickerCategory === 'All' || cat.includes(pickerCategory.toLowerCase());
+      return matchesSearch && matchesCat;
+    });
+  }, [sectionRelatedPool, pickerSearch, pickerCategory, activeArticles, pickerTarget]);
+
+  // Available categories in Picker (strictly from sectionRelatedPool)
+  const availableCategories = useMemo(() => {
+    const cats = new Set(['All']);
+    sectionRelatedPool.forEach(a => {
+      if (!a) return;
+      const c = getSafeString(a.categoryName || a.categoryLabel || a.category, '');
+      if (c && typeof c === 'string') cats.add(c.trim());
+    });
+    return Array.from(cats).slice(0, 10);
+  }, [sectionRelatedPool]);
+
+  // ─────────────────────────────────────────────────────────
+  // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
+  // ─────────────────────────────────────────────────────────
+  const persistToDatabase = async (nextData) => {
+    const finalData = nextData || data;
+    setData(finalData);
+    setSaveStatus('saving');
+    try {
+      const targetSecKey = section.sectionKey || section.id || section.type;
+      if (targetSecKey && (pageId === 'home' || !pageId)) {
+        HomepageService.updateSection(targetSecKey, {
+          data: finalData,
+          customConfig: finalData
+        }).catch(() => {});
+      }
+      if (onAutoSave) {
+        await onAutoSave(finalData);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('homepage:change'));
+        window.dispatchEvent(new CustomEvent('page:change'));
+        try {
+          localStorage.setItem('homepage_last_updated', Date.now().toString());
+          localStorage.setItem('pages_last_updated', Date.now().toString());
+        } catch (e) {}
+      }
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2500);
+    } catch (err) {
+      console.error('Failed to auto-save section:', err);
+      setSaveStatus('error');
+    }
+  };
 
   const handleSaveAndApply = async () => {
     const finalData = {
@@ -687,6 +719,22 @@ function LiveGenericSectionStudio({
   };
 
   const handleSelectArticle = (article) => {
+    // Guard against repeated content
+    const isRepeated = activeArticles.some((a, idx) => {
+      if (pickerTarget?.type === 'replace' && pickerTarget?.index === idx) return false;
+      const matchId = (a._id && (a._id === article._id || a._id === article.id)) ||
+                      (a.id && (a.id === article._id || a.id === article.id)) ||
+                      (a.articleId && (a.articleId === article._id || a.articleId === article.id));
+      const matchSlug = a.slug && article.slug && a.slug.toLowerCase().trim() === article.slug.toLowerCase().trim();
+      const matchTitle = a.title && article.title && a.title.toLowerCase().trim() === article.title.toLowerCase().trim();
+      return matchId || matchSlug || matchTitle;
+    });
+
+    if (isRepeated && pickerTarget?.type !== 'replace') {
+      alert('This article is already added to this section. Please select a different article to prevent repeated content.');
+      return;
+    }
+
     const artCatName = article.categoryName || article.categoryLabel || article.categoryTag || article.category || 'News';
     const artImg = getSafeArticleImage(article);
     const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Editorial Bureau'));
@@ -2223,42 +2271,15 @@ function LiveGenericSectionStudio({
                     const artCat = (article.categoryName || article.categoryLabel || article.categoryTag || article.category || 'Article').toUpperCase();
                     const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Author'));
 
-                    const existingIndex = activeArticles.findIndex(a => 
-                      (a._id && (a._id === article._id || a._id === article.id)) ||
-                      (a.id && (a.id === article._id || a.id === article.id)) ||
-                      (a.articleId && (a.articleId === article._id || a.articleId === article.id)) ||
-                      (a.slug && article.slug && a.slug === article.slug)
-                    );
-                    const isAlreadyAdded = existingIndex !== -1;
-
                     return (
                       <div 
                         key={`${artId}-${pIdx}`} 
-                        className={`lbe-picker-card ${isAlreadyAdded ? 'lbe-picker-card-already-added' : ''}`}
+                        className="lbe-picker-card"
                         onClick={() => handleSelectArticle(article)}
                       >
                         <div className="lbe-picker-card-thumb-wrap">
                           <img src={artImg} alt={artTitle} className="lbe-picker-card-thumb" />
                           <span className="lbe-picker-card-category">{artCat}</span>
-                          {isAlreadyAdded && (
-                            <span 
-                              style={{
-                                position: 'absolute',
-                                top: '8px',
-                                right: '8px',
-                                background: 'rgba(16, 185, 129, 0.95)',
-                                color: '#ffffff',
-                                fontSize: '0.68rem',
-                                fontWeight: 800,
-                                padding: '3px 8px',
-                                borderRadius: '6px',
-                                boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                                zIndex: 12
-                              }}
-                            >
-                              ✓ Slot #{existingIndex + 1}
-                            </span>
-                          )}
                         </div>
                         <div className="lbe-picker-card-content">
                           <h5 className="lbe-picker-card-title">{artTitle}</h5>
@@ -2274,7 +2295,7 @@ function LiveGenericSectionStudio({
                             }}
                           >
                             <Check size={13} />
-                            <span>{isAlreadyAdded ? `Select Article (Currently Slot #${existingIndex + 1})` : 'Select This Article'}</span>
+                            <span>Select This Article</span>
                           </button>
                         </div>
                       </div>
