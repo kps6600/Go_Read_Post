@@ -1115,3 +1115,41 @@
 .lse-add-article-card:active {
   transform: translateY(-2px) scale(0.99);
 }
+
+/* ── In-Page Embedded Section Studio Styles (Same Window Editing) ── */
+.admin-live-studio-inpage-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-height: 860px;
+}
+
+.admin-live-studio-inpage-wrapper .lbe-overlay,
+.admin-live-studio-inpage-wrapper .lse-overlay,
+.admin-live-studio-inpage-wrapper .admin-live-studio-dedicated-page {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 860px !important;
+  z-index: 10 !important;
+  border-radius: 16px !important;
+}
+
+.admin-live-studio-inpage-wrapper .lbe-floating-save-btn,
+.admin-live-studio-inpage-wrapper .lse-floating-save-btn {
+  position: absolute !important;
+  top: 16px !important;
+  right: 60px !important;
+  z-index: 50 !important;
+}
+
+.admin-live-studio-inpage-wrapper .lbe-top-close-btn,
+.admin-live-studio-inpage-wrapper .lse-top-close-btn {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 50 !important;
+}

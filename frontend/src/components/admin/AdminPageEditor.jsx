@@ -742,20 +742,86 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
   };
 
-  // ── 1. DEDICATED FULL-SCREEN LIVE SECTION STUDIO PAGE VIEW ──
-  // Replaces the sections table completely with the full-screen visual live editor!
+  // ── 1. IN-PAGE LIVE SECTION STUDIO VIEW (OPENS IN THE SAME WINDOW) ──
   if (liveEditingSection) {
+    const secTitle = liveEditingSection.data?.heading || 
+                     liveEditingSection.data?.title || 
+                     liveEditingSection.title || 
+                     (CANONICAL_SECTION_META[liveEditingSection.type]?.title) ||
+                     liveEditingSection.type || 
+                     'Section';
+    const secType = liveEditingSection.type || liveEditingSection.sectionKey || 'Section';
+
     return (
-      <div className="admin-live-studio-dedicated-page">
-        <LiveSectionEditor
-          section={liveEditingSection}
-          isOpen={true}
-          pageId={pageId}
-          onClose={handleCloseLiveEditor}
-          onAutoSave={handleAutoSaveLiveSection}
-          onSave={handleSaveLiveSection}
-          stories={allStories.length ? allStories : ALL_STORIES}
-        />
+      <div className="admin-page-container admin-section-edit-container">
+        {/* Top Header in same window */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '14px',
+          padding: '0.85rem 1.25rem',
+          marginBottom: '1rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={handleCloseLiveEditor}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1.05rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Sections</span>
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                Editing: {secTitle}
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                background: '#eff6ff',
+                color: '#2563eb',
+                padding: '2px 8px',
+                borderRadius: '6px'
+              }}>
+                {secType}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Section Studio rendered right in the same space */}
+        <div className="admin-live-studio-inpage-wrapper">
+          <LiveSectionEditor
+            section={liveEditingSection}
+            isOpen={true}
+            pageId={pageId}
+            onClose={handleCloseLiveEditor}
+            onAutoSave={handleAutoSaveLiveSection}
+            onSave={handleSaveLiveSection}
+            stories={allStories.length ? allStories : ALL_STORIES}
+          />
+        </div>
       </div>
     );
   }
