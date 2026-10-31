@@ -235,7 +235,7 @@ export default function LiveWholePageStudio({
     return pool.slice(0, 5).map(formatForPopularPost);
   }, [heroSection, pool]);
 
-  // Target section-related pool in Studio (strictly scoped to the section being edited)
+  // Target section-related pool in Studio (prioritizes section-related articles at top, followed by full catalog)
   const targetSectionRelatedPool = useMemo(() => {
     if (!pickerTarget?.sectionId) return pool;
     const sec = sections.find(s => s.id === pickerTarget.sectionId || s.sectionKey === pickerTarget.sectionId);
@@ -248,55 +248,50 @@ export default function LiveWholePageStudio({
     const isPop = secType === 'popular_editors' || secType === 'business' || sec.id === 'popular_editors' || titleLower.includes('popular') || titleLower.includes('editor');
     const explicitCat = (sec.data?.category || sec.category || '').toLowerCase().trim();
 
-    if (explicitCat) {
-      const matched = pool.filter(s => {
-        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
-        return c.includes(explicitCat);
-      });
-      if (matched.length > 0) return matched;
-    }
+    const isMatch = (s) => {
+      if (!s) return false;
+      const c = (
+        (typeof s.categoryName === 'string' ? s.categoryName : '') ||
+        (typeof s.categoryLabel === 'string' ? s.categoryLabel : '') ||
+        (typeof s.categoryTag === 'string' ? s.categoryTag : '') ||
+        (typeof s.category === 'string' ? s.category : (s.category?.name || ''))
+      ).toLowerCase();
+      const tag = (s.tag || '').toUpperCase();
 
-    if (secType.startsWith('category_')) {
-      const rawCat = secType.replace(/^category_/, '').replace(/[-_]/g, ' ').toLowerCase();
-      const matched = pool.filter(s => {
-        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
-        return c.includes(rawCat);
-      });
-      if (matched.length > 0) return matched;
-    }
-
-    if (isSpot) {
-      const techList = pool.filter(s => {
-        const c = (s.categoryName || s.categoryLabel || s.categoryTag || s.category || '').toLowerCase();
-        const tag = (s.tag || '').toUpperCase();
-        return (
+      if (explicitCat && (c.includes(explicitCat) || explicitCat.includes(c))) return true;
+      if (secType.startsWith('category_')) {
+        const rawCat = secType.replace(/^category_/, '').replace(/[-_]/g, ' ').toLowerCase();
+        if (c.includes(rawCat) || rawCat.includes(c)) return true;
+      }
+      if (isSpot) {
+        if (
           c.includes('tech') || c.includes('ai') || c.includes('startup') || c.includes('enterprise') ||
           c.includes('fintech') || c.includes('deeptech') || c.includes('deep-tech') ||
           tag === 'TECHNOLOGY' || tag === 'STARTUP' || tag === 'AI' || tag === 'DEEPTECH' || tag === 'FINTECH' || tag === 'ENTERPRISE' || tag === 'TECHSPARKS 2024'
-        );
-      });
-      if (techList.length > 0) return techList;
-    }
-
-    if (isTrend) {
-      const trendList = pool.filter(s => {
-        const tag = (s.tag || '').toUpperCase();
+        ) return true;
+      }
+      if (isTrend) {
         const placements = Array.isArray(s.placements) ? s.placements : [];
-        return s.isTrending || s.trending || placements.includes('trending') || tag === 'TRENDING' || tag === 'POPULAR' || tag === 'VIRAL' || tag === 'TOP PICK';
-      });
-      if (trendList.length > 0) return trendList;
-    }
-
-    if (isPop) {
-      const popList = pool.filter(s => {
-        const tag = (s.tag || '').toUpperCase();
+        if (s.isTrending || s.trending || placements.includes('trending') || tag === 'TRENDING' || tag === 'POPULAR' || tag === 'VIRAL' || tag === 'TOP PICK') return true;
+      }
+      if (isPop) {
         const placements = Array.isArray(s.placements) ? s.placements : [];
-        return s.isEditorsPick || s.isFeatured || placements.includes('editors_pick') || tag === 'TOP PICK' || tag === 'FEATURED' || tag === 'EDITOR' || s.isLead;
-      });
-      if (popList.length > 0) return popList;
-    }
+        if (s.isEditorsPick || s.isFeatured || placements.includes('editors_pick') || tag === 'TOP PICK' || tag === 'FEATURED' || tag === 'EDITOR' || s.isLead) return true;
+      }
+      return false;
+    };
 
-    return [...pool].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+    const matches = [];
+    const others = [];
+    pool.forEach(s => {
+      if (isMatch(s)) {
+        matches.push(s);
+      } else {
+        others.push(s);
+      }
+    });
+
+    return [...matches, ...others];
   }, [pool, pickerTarget, sections]);
 
   // Filtered articles in Picker
@@ -353,13 +348,20 @@ export default function LiveWholePageStudio({
       const q = pickerSearch.trim().toLowerCase();
       const matchesSearch = !q ||
         title.includes(q) ||
-        (a.summary && a.summary.toLowerCase().includes(q)) ||
+        (a.summary && typeof a.summary === 'string' && a.summary.toLowerCase().includes(q)) ||
+        (a.subtitle && typeof a.subtitle === 'string' && a.subtitle.toLowerCase().includes(q)) ||
         (a.author && typeof a.author === 'string' && a.author.toLowerCase().includes(q)) ||
-        (a.author?.name && a.author.name.toLowerCase().includes(q));
+        (a.author?.name && typeof a.author.name === 'string' && a.author.name.toLowerCase().includes(q));
 
       // Category filter
-      const cat = a.categoryLabel || a.category || a.categoryName || '';
-      const matchesCat = pickerCategory === 'All' || cat.toLowerCase().includes(pickerCategory.toLowerCase());
+      const cat = (
+        (typeof a.categoryName === 'string' ? a.categoryName : '') ||
+        (typeof a.categoryLabel === 'string' ? a.categoryLabel : '') ||
+        (typeof a.categoryTag === 'string' ? a.categoryTag : '') ||
+        (typeof a.category === 'string' ? a.category : (a.category?.name || ''))
+      ).toLowerCase();
+      const pCat = pickerCategory.trim().toLowerCase();
+      const matchesCat = pCat === 'all' || cat.includes(pCat) || pCat.includes(cat);
 
       return matchesSearch && matchesCat;
     });
@@ -367,12 +369,17 @@ export default function LiveWholePageStudio({
 
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
-    targetSectionRelatedPool.forEach(a => {
-      const c = a.categoryName || a.categoryLabel || a.category;
-      if (c && typeof c === 'string') cats.add(c.trim());
+    pool.forEach(a => {
+      const c = (
+        (typeof a.categoryName === 'string' ? a.categoryName : '') ||
+        (typeof a.categoryLabel === 'string' ? a.categoryLabel : '') ||
+        (typeof a.categoryTag === 'string' ? a.categoryTag : '') ||
+        (typeof a.category === 'string' ? a.category : (a.category?.name || ''))
+      ).trim();
+      if (c) cats.add(c);
     });
-    return Array.from(cats).slice(0, 10);
-  }, [targetSectionRelatedPool]);
+    return Array.from(cats).slice(0, 15);
+  }, [pool]);
 
   // ─────────────────────────────────────────────────────────
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE

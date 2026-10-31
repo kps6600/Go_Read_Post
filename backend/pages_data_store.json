@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T12:09:27.734Z",
+        "updatedAt": "2026-10-31T12:27:30.720Z",
         "data": {
           "slides": [
             {
@@ -153,6 +153,19 @@
               "link": "/stories/social-expert-3",
               "author": "Chetan Kapoor",
               "date": "Oct 30, 2026"
+            },
+            {
+              "id": "pick-2",
+              "_id": "pick-2",
+              "title": "Four Indian brands putting a new spin on khadi",
+              "image": "https://images.yourstory.com/cs/4/8e7cc4102d6c11e9aa979329348d4c3e/ModernKhadi1600x900-1790843426768.jpg?ar=16%3A9&mode=crop&crop=faces&format=auto&w=1200&q=80",
+              "coverImage": "https://images.yourstory.com/cs/4/8e7cc4102d6c11e9aa979329348d4c3e/ModernKhadi1600x900-1790843426768.jpg?ar=16%3A9&mode=crop&crop=faces&format=auto&w=1200&q=80",
+              "readTime": "6 min read",
+              "category": "SMBStory",
+              "slug": "pick-2",
+              "link": "/stories/pick-2",
+              "author": "Palak Agarwal",
+              "date": "3 hours ago"
             }
           ],
           "hasCustomSlides": true,
@@ -367,7 +380,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:09:27.744Z",
+        "updatedAt": "2026-10-31T12:27:30.726Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -616,7 +629,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:09:27.762Z",
+        "updatedAt": "2026-10-31T12:27:30.730Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending",
@@ -771,103 +784,34 @@
               ]
             },
             {
-              "featuredImage": {
-                "url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80",
-                "alt": "टेकस्पार्क्स 2024: 'द न्यू टेक ऑर्डर' की थीम पर बेंगलुरु में सजेगा भारत के सबसे बड़े टेक-स्टार्टअप महाकुंभ का मंच",
-                "caption": "",
-                "credit": "GoReadPost"
-              },
-              "seo": {
-                "title": "",
-                "description": "",
-                "keywords": "",
-                "canonicalUrl": "",
-                "ogTitle": "",
-                "ogDescription": "",
-                "ogImage": ""
-              },
-              "isHero": false,
-              "isLatest": true,
-              "isCategoryFeatured": false,
-              "placements": [
-                "latest"
-              ],
-              "_id": "6ae1f556d132e2796bff4fbc",
-              "title": "टेकस्पार्क्स 2024: 'द न्यू टेक ऑर्डर' की थीम पर बेंगलुरु में सजेगा भारत के सबसे बड़े टेक-स्टार्टअप महाकुंभ का मंच",
-              "slug": "techsparks-2024-bengaluru",
-              "subtitle": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है।",
-              "excerpt": "TechSparks 2024 Bengaluru: भारत के सबसे बड़े स्टार्टअप और टेक इवेंट टेकस्पार्क्स के 15वें संस्करण का आयोजन 26 से 28 सितंबर को बेंगलुरु में होने जा रहा है। देश-विदेश के टॉप 150+ टेक लीडर्स, 100+ वीसी फंड्स और 5000+ डेलिगेट्स जुटेंगे।",
-              "content": "टेकस्पार्क्स का 15वां संस्करण इस साल 26 से 28 सितंबर के बीच बेंगलुरु के ताज वेस्ट एंड में आयोजित होने जा रहा है। इस साल की थीम है 'द न्यू टेक ऑर्डर' (The New Tech Order)। पिछले डेढ़ दशक से टेकस्पार्क्स भारत के टेक और स्टार्टअप इकोसिस्टम का सबसे बड़ा और विश्वसनीय मंच बना हुआ है, जिसने अनगिनत यूनिकॉर्न्स, इनोवेटर्स और नीति-निर्माताओं को एक साथ लाकर देश की डिजिटल विकास यात्रा को गति दी है।\n\nइस साल का टेकस्पार्क्स भारत के टेक और इनोवेशन लैंडस्केप में आ रहे बड़े बदलावों को रेखांकित करेगा। आर्टिफिशियल इंटेलिजेंस (AI), डीपटेक, फिनटेक, स्पेसटेक, सेमीकंडक्टर और क्वांटम कंप्यूटिंग जैसे उभरते क्षेत्रों में भारत की वैश्विक स्थिति पर गहन चर्चा होगी।\n\nतीन दिवसीय इस महाकुंभ में 150 से अधिक अनुभवी वक्ता अपने विचार साझा करेंगे। इनमें केंद्रीय वाणिज्य एवं उद्योग मंत्री पीयूष गोयल, जेरोधा के नितिन कामथ, जोहो के श्रीधर वेम्बु, जोमैटो के दीपिंदर गोयल, और एडलवाइस म्यूचुअल फंड की राधिका गुप्ता शामिल हैं।",
-              "contentBlocks": [],
-              "authorId": null,
-              "authorName": "टीम योरस्टोरी (Team YourStory)",
-              "authorTitle": "सीनियर एडिटोरियल डेस्क, YS हिंदी",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "categoryId": null,
-              "categoryName": "TechSparks 2024",
-              "subCategoryId": null,
-              "topicIds": [],
-              "tagIds": [],
-              "tags": [],
-              "topics": [
-                "TechSparks 2024"
-              ],
-              "contentType": "article",
-              "readingTime": "5 MIN READ",
-              "language": "Hindi",
-              "location": "India",
-              "isFeatured": false,
-              "isBreaking": false,
-              "isTrending": false,
-              "isEditorsPick": false,
-              "disabledFromFrontend": false,
-              "status": "published",
-              "publishedAt": "2026-10-19T07:12:52.680Z",
-              "scheduledAt": null,
-              "views": 48252,
-              "claps": 142,
-              "createdAt": "2026-10-28T13:15:02.130Z",
-              "updatedAt": "2026-10-28T13:15:02.130Z",
-              "__v": 0
-            },
-            {
-              "featuredImage": {
-                "url": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-                "alt": "How AI is transforming India's startup ecosystem (Updated Edition)",
-                "caption": "",
-                "credit": "GoReadPost"
-              },
-              "seo": {
-                "title": "",
-                "description": "",
-                "keywords": "",
-                "canonicalUrl": "",
-                "ogTitle": "",
-                "ogDescription": "",
-                "ogImage": ""
-              },
-              "isHero": false,
-              "isLatest": true,
-              "isCategoryFeatured": false,
-              "placements": [
-                "latest"
-              ],
               "_id": "6ae1f556d132e2796bff4fbb",
+              "id": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
               "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
               "subtitle": "Founders are using AI to build faster and smarter businesses.",
+              "summary": "Founders are using AI to build faster and smarter businesses.",
               "excerpt": "Founders are using AI to build faster and smarter businesses.",
-              "content": "<p>Updated live content from Admin CMS workbench.</p>",
-              "contentBlocks": [],
-              "authorId": null,
+              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "brand": "GoReadPost",
+              "category": "technology",
+              "categoryTag": "Technology",
+              "categoryLabel": "Technology",
+              "tag": "FEATURED",
+              "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+              "fallbackImage": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
+              "author": {
+                "name": "Kamlesh Sharma",
+                "title": "Senior Technology Correspondent",
+                "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+              },
               "authorName": "Kamlesh Sharma",
               "authorTitle": "Senior Technology Correspondent",
               "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "categoryId": null,
-              "categoryName": "Technology",
-              "subCategoryId": null,
-              "topicIds": [],
-              "tagIds": [],
+              "readTime": "5 min read",
+              "readingTime": "5 min read",
+              "publishedAt": "Oct 8, 2026",
+              "content": [
+                "<p>Updated live content from Admin CMS workbench.</p>"
+              ],
               "tags": [
                 "AI",
                 "Startup",
@@ -875,35 +819,62 @@
                 "Technology",
                 "GenAI"
               ],
-              "topics": [
-                "AI",
-                "Startups",
-                "FinTech"
-              ],
-              "contentType": "article",
-              "readingTime": "5 min read",
-              "language": "English",
-              "location": "Bengaluru / India",
-              "isFeatured": true,
-              "isBreaking": false,
-              "isTrending": true,
-              "isEditorsPick": false,
-              "disabledFromFrontend": false,
               "status": "published",
-              "publishedAt": "2026-10-08T08:55:07.642Z",
-              "scheduledAt": null,
               "views": 57,
               "claps": 50,
+              "isFeatured": true,
+              "isTrending": true,
+              "isBreaking": false,
+              "isEditorsPick": false,
               "createdAt": "2026-10-28T13:15:02.128Z",
-              "updatedAt": "2026-10-28T13:15:02.128Z",
-              "__v": 0
+              "updatedAt": "2026-10-28T13:15:02.128Z"
+            },
+            {
+              "_id": "6ae1f556d132e2796bff4fba",
+              "id": "sim-8",
+              "title": "Bootstrapping ₹12 Cr organic skincare from a single kitchen stove",
+              "subtitle": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
+              "summary": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
+              "excerpt": "How Rekha Sharma turned a ₹500 grocery investment into an 800-store distribution powerhouse.",
+              "slug": "sim-8",
+              "brand": "GoReadPost",
+              "category": "startups",
+              "categoryTag": "Startups",
+              "categoryLabel": "Startups",
+              "tag": "LATEST",
+              "image": "https://images.unsplash.com/photo-1556740758-90de374c12ad?w=900&auto=format&fit=crop&q=80",
+              "fallbackImage": "https://images.unsplash.com/photo-1556740758-90de374c12ad?w=900&auto=format&fit=crop&q=80",
+              "author": {
+                "name": "Rekha Balakrishnan",
+                "title": "Senior Features Writer, HerStory",
+                "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
+              },
+              "authorName": "Rekha Balakrishnan",
+              "authorTitle": "Senior Features Writer, HerStory",
+              "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80",
+              "readTime": "5 min read",
+              "readingTime": "5 min read",
+              "publishedAt": "Oct 7, 2026",
+              "content": [
+                ""
+              ],
+              "tags": [],
+              "status": "published",
+              "views": 3212,
+              "claps": 210,
+              "isFeatured": false,
+              "isTrending": false,
+              "isBreaking": false,
+              "isEditorsPick": false,
+              "createdAt": "2026-10-28T13:15:02.126Z",
+              "updatedAt": "2026-10-28T13:15:02.126Z"
             }
           ],
           "articleIds": [
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fbc",
-            "6ae1f556d132e2796bff4fbb"
+            "6ae1f556d132e2796bff4fbb",
+            "6ae1f556d132e2796bff4fba"
           ],
           "hasCustomArticles": true
         },
@@ -1172,7 +1143,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:09:27.766Z",
+        "updatedAt": "2026-10-31T12:27:30.745Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1658,7 +1629,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:09:27.771Z",
+        "updatedAt": "2026-10-31T12:27:30.755Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -2230,7 +2201,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T12:09:27.782Z",
+        "updatedAt": "2026-10-31T12:27:30.758Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2932,7 +2903,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T12:09:27.787Z",
+        "updatedAt": "2026-10-31T12:27:30.760Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2967,7 +2938,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T12:09:27.790Z",
+        "updatedAt": "2026-10-31T12:27:30.761Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -3002,7 +2973,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T12:09:27.837Z",
+        "updatedAt": "2026-10-31T12:27:30.763Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -3248,7 +3219,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T12:09:27.885Z",
+        "updatedAt": "2026-10-31T12:27:30.768Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }
