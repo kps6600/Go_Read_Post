@@ -96,7 +96,7 @@ export default function LiveWholePageStudio({
 }) {
   if (!isOpen) return null;
 
-  const [sections, setSections] = useState([]);
+  const [sections, setSections] = useState(() => (Array.isArray(initialSections) && initialSections.length > 0 ? initialSections : []));
   const [deviceView, setDeviceView] = useState('desktop'); // 'desktop' | 'mobile'
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
   const [availableArticles, setAvailableArticles] = useState(() => (stories.length > 0 ? stories : ALL_STORIES));
@@ -114,10 +114,13 @@ export default function LiveWholePageStudio({
 
   const sectionRefs = useRef({});
   const isLatestPage = pageId === 'latest' || pageSlug === 'latest';
+  const currentLoadedPageIdRef = useRef(null);
 
   // Load sections from MongoDB on mount
   useEffect(() => {
     let isMounted = true;
+    if (currentLoadedPageIdRef.current === pageId && sections.length > 0) return;
+    currentLoadedPageIdRef.current = pageId;
     const loadPageData = async () => {
       try {
         if (initialSections && Array.isArray(initialSections) && initialSections.length > 0) {
@@ -163,7 +166,7 @@ export default function LiveWholePageStudio({
     }).catch(() => {});
 
     return () => { isMounted = false; };
-  }, [pageId, initialSections]);
+  }, [pageId]);
 
   const pool = useMemo(() => {
     const combined = [...availableArticles];
@@ -682,12 +685,12 @@ export default function LiveWholePageStudio({
       }
       const newPop = formatForPopularPost(article);
       const nextPop = [...popularArticles, newPop].slice(0, 5);
-      handleUpdateHeroData({ popularArticles: nextPop });
+      handleUpdateHeroData({ popularArticles: nextPop, hasCustomPopular: true });
     } else if (pickerTarget.type === 'popular-replace') {
       const targetIdx = pickerTarget.index;
       const nextPop = [...popularArticles];
       nextPop[targetIdx] = formatForPopularPost(article);
-      handleUpdateHeroData({ popularArticles: nextPop });
+      handleUpdateHeroData({ popularArticles: nextPop, hasCustomPopular: true });
     } else if (pickerTarget.type === 'feed-add') {
       const sec = sections.find(s => s.id === pickerTarget.sectionId);
       if (sec) {

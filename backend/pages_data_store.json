@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T11:58:44.104Z",
+        "updatedAt": "2026-10-31T12:09:27.734Z",
         "data": {
           "slides": [
             {
@@ -102,21 +102,6 @@
             }
           ],
           "popularArticles": [
-            {
-              "id": "6ae1f556d132e2796bff4fb7",
-              "_id": "6ae1f556d132e2796bff4fb7",
-              "articleId": "6ae1f556d132e2796bff4fb7",
-              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
-              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
-              "readTime": "5 min read",
-              "category": "Startups",
-              "slug": "sim-5",
-              "link": "/stories/sim-5",
-              "author": "Rashi Goel",
-              "date": "Today",
-              "itemType": "article"
-            },
             {
               "id": "6ae1f555d132e2796bff4f67",
               "_id": "6ae1f555d132e2796bff4f67",
@@ -142,6 +127,32 @@
               "link": "/stories/prableen-pullup",
               "author": "Editorial",
               "date": "2026-10-07T12:30:18.791Z"
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fbb",
+              "_id": "6ae1f556d132e2796bff4fbb",
+              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
+              "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80",
+              "readTime": "5 min read min read",
+              "category": "Trending",
+              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "link": "/stories/how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "author": "Editorial",
+              "date": "2026-10-08T08:55:07.642Z"
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fb1",
+              "_id": "6ae1f556d132e2796bff4fb1",
+              "title": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+              "image": "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80",
+              "readTime": "4 min read",
+              "category": "YS हिंदी",
+              "slug": "social-expert-3",
+              "link": "/stories/social-expert-3",
+              "author": "Chetan Kapoor",
+              "date": "Oct 30, 2026"
             }
           ],
           "hasCustomSlides": true,
@@ -356,7 +367,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:58:44.123Z",
+        "updatedAt": "2026-10-31T12:09:27.744Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -605,7 +616,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:58:44.132Z",
+        "updatedAt": "2026-10-31T12:09:27.762Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending",
@@ -1161,7 +1172,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:58:44.145Z",
+        "updatedAt": "2026-10-31T12:09:27.766Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1647,7 +1658,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:58:44.148Z",
+        "updatedAt": "2026-10-31T12:09:27.771Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -2219,7 +2230,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T11:58:44.157Z",
+        "updatedAt": "2026-10-31T12:09:27.782Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2921,7 +2932,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T11:58:44.161Z",
+        "updatedAt": "2026-10-31T12:09:27.787Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2956,7 +2967,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T11:58:44.162Z",
+        "updatedAt": "2026-10-31T12:09:27.790Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -2991,7 +3002,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T11:58:44.164Z",
+        "updatedAt": "2026-10-31T12:09:27.837Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -3237,7 +3248,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T11:58:44.166Z",
+        "updatedAt": "2026-10-31T12:09:27.885Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }

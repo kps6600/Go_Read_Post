@@ -616,6 +616,7 @@ export default function App() {
     };
 
     const handleArticleChange = () => {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
       StoryService.getStories().then((res) => {
         if (res && res.data && res.data.length > 0) {
           setStories(res.data);
@@ -637,6 +638,7 @@ export default function App() {
     };
 
     const handlePageChange = () => {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
       PageService.getPages().then((pgs) => {
         if (Array.isArray(pgs)) {
           setSitePages(pgs);
@@ -645,6 +647,7 @@ export default function App() {
     };
 
     const handleHomepageChange = () => {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
       HomepageService.getPublicHomepage().then((sections) => {
         if (Array.isArray(sections)) {
           setHomepageSections(sections);

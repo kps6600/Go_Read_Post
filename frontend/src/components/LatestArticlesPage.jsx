@@ -513,7 +513,12 @@ export default function LatestArticlesPage({
 
       combinedLive = Array.from(map.values());
       if (combinedLive.length > 0) {
-        setLiveArticles(combinedLive);
+        setLiveArticles(prev => {
+          const newlyAdded = prev.filter(p => p.isNewlyAdded);
+          const combinedKeys = new Set(combinedLive.map(c => String(c._id || c.id || c.slug)));
+          const uniqueNew = newlyAdded.filter(n => !combinedKeys.has(String(n._id || n.id || n.slug)));
+          return [...uniqueNew, ...combinedLive];
+        });
       }
     } catch (err) {
       console.warn('Could not load live latest articles:', err);
@@ -544,8 +549,13 @@ export default function LatestArticlesPage({
     loadLatestConfig();
     fetchLiveArticles();
 
+    let changeTimer = null;
     const handleArticleOrStoryChange = () => {
-      fetchLiveArticles();
+      if (isStudioView) return;
+      if (changeTimer) clearTimeout(changeTimer);
+      changeTimer = setTimeout(() => {
+        fetchLiveArticles();
+      }, 300);
     };
 
     window.addEventListener('article:change', handleArticleOrStoryChange);
@@ -554,12 +564,13 @@ export default function LatestArticlesPage({
     window.addEventListener('page:change', loadLatestConfig);
 
     return () => {
+      if (changeTimer) clearTimeout(changeTimer);
       window.removeEventListener('article:change', handleArticleOrStoryChange);
       window.removeEventListener('story:change', handleArticleOrStoryChange);
       window.removeEventListener('homepage:change', handleArticleOrStoryChange);
       window.removeEventListener('page:change', loadLatestConfig);
     };
-  }, []);
+  }, [isStudioView]);
 
   // Section reference for custom title, subtitle, and curated articles
   const feedSec = useMemo(() => {
@@ -1520,7 +1531,8 @@ export default function LatestArticlesPage({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

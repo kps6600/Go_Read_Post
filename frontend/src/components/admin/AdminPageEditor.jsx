@@ -209,8 +209,10 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }).catch(() => {});
   }, []);
 
-  const fetchPage = async () => {
-    setLoading(true);
+  const fetchPage = async (showSpinner = false) => {
+    if (showSpinner || !page) {
+      setLoading(true);
+    }
     try {
       const data = await PageService.getPageById(pageId);
       if (data) {
@@ -1024,7 +1026,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
         onClose={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
         onSaveSuccess={(updated) => {
           if (updated) setSections(updated);
-          fetchPage();
           onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
         }}
         onOpenSettings={() => setActiveTab('seo')}
