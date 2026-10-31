@@ -1002,11 +1002,6 @@ export default function LiveWholePageStudio({
                     >
                       {/* Floating Section Control Bar */}
                       <div className="lhs-section-control-bar">
-                        <div className="lhs-section-badge">
-                          <span style={{ color: '#fb923c', fontWeight: 900 }}>#{idx + 1}</span>
-                          <span>{sec.title || sec.type}</span>
-                        </div>
-
                         <div className="lhs-section-tools">
                           <button
                             type="button"
