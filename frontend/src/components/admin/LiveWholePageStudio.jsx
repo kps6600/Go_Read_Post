@@ -203,6 +203,33 @@ export default function LiveWholePageStudio({
     return sorted.slice(0, maxFit);
   };
 
+  // ─────────────────────────────────────────────────────────
+  // HERO & POPULAR ARTICLES (MEMOIZED FOR SECTIONS & PICKER)
+  // ─────────────────────────────────────────────────────────
+  const heroSection = useMemo(() => {
+    return sections.find(s => s.type === 'hero' || s.type === 'hero_popular' || s.type === 'latest_hero' || s.id === 'latest_hero' || (s.type || '').toLowerCase().includes('hero')) || sections[0];
+  }, [sections]);
+
+  const heroSlides = useMemo(() => {
+    const data = heroSection?.data || {};
+    if (Array.isArray(data.slides) && data.slides.length > 0) {
+      return data.slides;
+    }
+    return pool.slice(0, 5).map(formatForHeroSlide);
+  }, [heroSection, pool]);
+
+  const activeSlide = heroSlides[heroSlideIdx] || heroSlides[0] || LEAD_STORY;
+
+  const popularArticles = useMemo(() => {
+    const data = heroSection?.data || {};
+    if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
+      return (data.popularArticles || []).slice(0, 5);
+    }
+    const trending = pool.filter(s => s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING');
+    if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
+    return pool.slice(0, 5).map(formatForPopularPost);
+  }, [heroSection, pool]);
+
   // Target section-related pool in Studio (strictly scoped to the section being edited)
   const targetSectionRelatedPool = useMemo(() => {
     if (!pickerTarget?.sectionId) return pool;
@@ -438,20 +465,6 @@ export default function LiveWholePageStudio({
   // ─────────────────────────────────────────────────────────
   // HERO SLIDER CURATION & CONTROLS
   // ─────────────────────────────────────────────────────────
-  const heroSection = useMemo(() => {
-    return sections.find(s => s.type === 'hero' || s.type === 'hero_popular' || s.type === 'latest_hero' || s.id === 'latest_hero' || (s.type || '').toLowerCase().includes('hero')) || sections[0];
-  }, [sections]);
-
-  const heroSlides = useMemo(() => {
-    const data = heroSection?.data || {};
-    if (Array.isArray(data.slides) && data.slides.length > 0) {
-      return data.slides;
-    }
-    return pool.slice(0, 5).map(formatForHeroSlide);
-  }, [heroSection, pool]);
-
-  const activeSlide = heroSlides[heroSlideIdx] || heroSlides[0] || LEAD_STORY;
-
   const handleUpdateHeroData = (patch) => {
     if (!heroSection) return;
     const next = sections.map(s => {
@@ -493,17 +506,6 @@ export default function LiveWholePageStudio({
     setHeroSlideIdx(newIdx);
     handleUpdateHeroData({ slides: nextSlides });
   };
-
-  // Popular posts curation
-  const popularArticles = useMemo(() => {
-    const data = heroSection?.data || {};
-    if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
-      return (data.popularArticles || []).slice(0, 5);
-    }
-    const trending = pool.filter(s => s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING');
-    if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
-    return pool.slice(0, 5).map(formatForPopularPost);
-  }, [heroSection, pool]);
 
   const handleMovePopular = (idx, direction) => {
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;

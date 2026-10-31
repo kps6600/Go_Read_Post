@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T09:10:13.026Z",
+        "updatedAt": "2026-10-31T11:33:32.307Z",
         "data": {
           "slides": [
             {
@@ -330,7 +330,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T09:10:13.037Z",
+        "updatedAt": "2026-10-31T11:33:32.326Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -536,7 +536,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T09:10:13.068Z",
+        "updatedAt": "2026-10-31T11:33:32.384Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending"
@@ -806,7 +806,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T09:10:13.075Z",
+        "updatedAt": "2026-10-31T11:33:32.393Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1292,7 +1292,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T09:10:13.081Z",
+        "updatedAt": "2026-10-31T11:33:32.397Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -1487,21 +1487,67 @@
               "__v": 0
             },
             {
-              "id": "6ae1f556d132e2796bff4fb7",
-              "articleId": "6ae1f556d132e2796bff4fb7",
-              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
-              "excerpt": "At 14,000 feet, Rashi Goel and her pack of trained mountain dogs guide trekkers through treacherous passes.",
-              "category": "Startups",
-              "categoryLabel": "Startups",
-              "categoryName": "Startups",
-              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
-              "author": "Rashi Goel",
-              "authorAvatar": "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&auto=format&fit=crop&q=80",
-              "date": "2026-10-07T12:30:18.833Z",
-              "readTime": "5 min read min read",
-              "slug": "sim-5",
-              "link": "/stories/sim-5",
-              "isCustom": true
+              "featuredImage": {
+                "url": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
+                "alt": "Peak XV Partners leads $25M Series A round in Fabless Semiconductor startup",
+                "caption": "",
+                "credit": "GoReadPost"
+              },
+              "seo": {
+                "title": "",
+                "description": "",
+                "keywords": "",
+                "canonicalUrl": "",
+                "ogTitle": "",
+                "ogDescription": "",
+                "ogImage": ""
+              },
+              "isHero": false,
+              "isLatest": true,
+              "isCategoryFeatured": false,
+              "placements": [
+                "latest"
+              ],
+              "_id": "6ae1f555d132e2796bff4f62",
+              "title": "Peak XV Partners leads $25M Series A round in Fabless Semiconductor startup",
+              "slug": "just-in-15",
+              "subtitle": "",
+              "excerpt": "Semiconductor innovators build ultra-low-power neural processing units designed to run large language models on edge devices.",
+              "content": "In one of the largest early-stage semiconductor rounds of the quarter, deeptech innovator NeuroEdge has closed an $18 million Series A syndicate.\n\nThe round was spearheaded by Peak XV Partners with participation from Lightspeed and prominent Silicon Valley angel syndicates.\n\nProceeds will finance tape-out cycles for custom sub-4nm processor architectures targeting industrial IoT and smart automotive cameras.",
+              "contentBlocks": [],
+              "authorId": null,
+              "authorName": "Sayan Sen",
+              "authorTitle": "Capital & Deals",
+              "authorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+              "categoryId": null,
+              "categoryName": "FinTech",
+              "subCategoryId": null,
+              "topicIds": [],
+              "tagIds": [],
+              "tags": [
+                "aistory",
+                "just-in"
+              ],
+              "topics": [
+                "FUNDING"
+              ],
+              "contentType": "article",
+              "readingTime": "5 min read",
+              "language": "English",
+              "location": "India",
+              "isFeatured": true,
+              "isBreaking": false,
+              "isTrending": false,
+              "isEditorsPick": false,
+              "disabledFromFrontend": false,
+              "status": "published",
+              "publishedAt": "2026-10-07T12:23:20.782Z",
+              "scheduledAt": null,
+              "views": 9630,
+              "claps": 251,
+              "createdAt": "2026-10-28T13:15:01.849Z",
+              "updatedAt": "2026-10-28T13:15:01.849Z",
+              "__v": 0
             }
           ],
           "limit": 4,
@@ -1510,7 +1556,7 @@
             "6ae1f556d132e2796bff4fbc",
             "6ae1f556d132e2796bff4fbb",
             "6ae1f556d132e2796bff4fba",
-            "6ae1f556d132e2796bff4fb7"
+            "6ae1f555d132e2796bff4f62"
           ]
         },
         "id": "spotlight",
@@ -1818,7 +1864,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T09:10:13.083Z",
+        "updatedAt": "2026-10-31T11:33:32.406Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
@@ -2520,7 +2566,7 @@
         "order": 7,
         "subtitle": "",
         "title": "HerStory: Women Leaders",
-        "updatedAt": "2026-10-31T09:10:13.084Z",
+        "updatedAt": "2026-10-31T11:33:32.411Z",
         "id": "sec_1793436151598",
         "type": "sec_1793436151598"
       },
@@ -2555,7 +2601,7 @@
         "order": 8,
         "subtitle": "",
         "title": "Startups & Capital Desk",
-        "updatedAt": "2026-10-31T09:10:13.086Z",
+        "updatedAt": "2026-10-31T11:33:32.413Z",
         "id": "sec_1793436406804",
         "type": "sec_1793436406804"
       },
@@ -2590,7 +2636,7 @@
         "order": 9,
         "subtitle": "",
         "title": "SocialStory: Impact & Climate",
-        "updatedAt": "2026-10-31T09:10:13.087Z",
+        "updatedAt": "2026-10-31T11:33:32.414Z",
         "id": "sec_1793436232557",
         "type": "sec_1793436232557"
       },
@@ -2836,7 +2882,7 @@
         "order": 10,
         "subtitle": "",
         "title": "About Us & Mission Manifesto",
-        "updatedAt": "2026-10-31T09:10:13.089Z",
+        "updatedAt": "2026-10-31T11:33:32.415Z",
         "id": "sec_1793436512950",
         "type": "sec_1793436512950"
       }
