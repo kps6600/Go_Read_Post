@@ -10,6 +10,7 @@ import SectionEditorModal, { SECTION_DEFINITIONS } from './SectionEditorModal';
 import LiveBannerEditor from './LiveBannerEditor';
 import LiveSectionEditor from './LiveSectionEditor';
 import LiveHomepageStudio from './LiveHomepageStudio';
+import LiveWholePageStudio from './LiveWholePageStudio';
 import { ALL_STORIES } from '../../data/storiesData';
 import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 
@@ -893,30 +894,41 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     );
   }
 
-  // ── 2. DEDICATED FULL-SCREEN WHOLE HOMEPAGE STUDIO PAGE VIEW ──
-  if (isWholeHomeStudioOpen) {
-    return (
-      <div className="admin-live-studio-dedicated-page">
-        <LiveHomepageStudio
-          isOpen={true}
-          initialSections={sections}
-          stories={allStories.length ? allStories : ALL_STORIES}
-          onClose={handleCloseWholeHomeStudio}
-          onSaveSuccess={(updatedSections) => {
-            if (updatedSections) setSections(updatedSections);
-            fetchPage();
-            onShowToast?.('Whole homepage layout and articles permanently saved live!');
-          }}
-        />
-      </div>
-    );
-  }
-
   const isHomepage = pageId === 'home' || page?.id === 'home' || page?.slug === '' || page?.slug === '/' || slug === '' || slug === '/' || (page?.title && page.title.toLowerCase().startsWith('home'));
   const isLive = status === 'published' || status === 'active';
   const rawTopTitle = title || page?.title || (isHomepage ? 'Homepage' : 'Edit Page');
   const displayTitle = isHomepage ? rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim() || 'Homepage' : rawTopTitle.replace(/\s*-\s*Live Portal/i, '').trim();
   const displaySlug = isHomepage ? '/' : (slug ? `/${slug.replace(/^\/+/, '')}` : (pageId && !pageId.match(/^[0-9a-fA-F]{24}$/) ? `/${pageId}` : '/'));
+
+  // ── 2. DEDICATED WHOLE PAGE LIVE VISUAL STUDIO (DEFAULT VIEW) ──
+  if (activeTab === 'sections') {
+    return (
+      <div className="admin-live-studio-dedicated-page" style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
+        <LiveWholePageStudio
+          isOpen={true}
+          pageId={pageId}
+          pageTitle={displayTitle}
+          pageSlug={displaySlug}
+          initialSections={sections}
+          stories={allStories.length ? allStories : ALL_STORIES}
+          onClose={() => {
+            if (onNavigate) {
+              onNavigate('/admin/pages');
+            } else {
+              window.location.href = '/admin/pages';
+            }
+          }}
+          onSaveSuccess={(updatedSections) => {
+            if (updatedSections) setSections(updatedSections);
+            fetchPage();
+            onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
+          }}
+          onOpenSettings={() => setActiveTab('seo')}
+        />
+      </div>
+    );
+  }
+
 
   return (
     <div className="admin-inpage-editor-root" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -1015,218 +1027,31 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
       </div>
 
       {/* ========================================================
-          TAB 1: SECTION-BASED PAGE BUILDER
+          TAB 1: WHOLE PAGE LIVE VISUAL STUDIO (FULL WYSIWYG)
          ======================================================== */}
       {activeTab === 'sections' && (
-        <div className="section-builder-wrapper">
-          {/* Section Stack */}
-          {sections.length === 0 ? (
-            <div className="admin-empty-indicator">
-              <Layers size={36} color="var(--brand-primary)" />
-              <h4>No sections configured yet</h4>
-              <p>Add your first section to construct this page layout.</p>
-              <button
-                type="button"
-                className="btn-admin-primary"
-                onClick={() => setIsAddSectionOpen(true)}
-              >
-                <Plus size={16} />
-                <span>Add First Section</span>
-              </button>
-            </div>
-          ) : (
-            <div className="section-builder-stack">
-              {sections.map((sec, idx) => {
-                const def = SECTION_DEFINITIONS.find(d => d.type === sec.type) || {
-                  label: (sec.type || sec.id || 'SECTION').toUpperCase()
-                };
-                const isEnabled = sec.enabled !== false;
-                const secKey = sec.id ? sec.id.replace(/^sec_/, '') : '';
-                const canon = CANONICAL_SECTION_META[sec.id] || CANONICAL_SECTION_META[secKey] || CANONICAL_SECTION_META[sec.type];
-
-                const badgeText = canon?.badge || def.label?.toUpperCase() || (sec.type || sec.id || 'SECTION').toUpperCase();
-                const badgeColor = canon?.color || 'var(--brand-primary)';
-                const badgeBg = canon?.bg || 'rgba(234, 88, 12, 0.08)';
-
-                const isHeroSec = 
-                  sec.sectionKey === 'hero_popular' || 
-                  sec.id === 'hero_popular' || 
-                  sec.type === 'hero' || 
-                  sec.type === 'hero_popular' || 
-                  (sec.id || '').toLowerCase().includes('hero') || 
-                  (sec.sectionKey || '').toLowerCase().includes('hero') || 
-                  (sec.title || '').toLowerCase().includes('hero');
-
-                let titleText = 
-                  sec.data?.heading || 
-                  sec.data?.title || 
-                  sec.data?.headline || 
-                  sec.title || 
-                  canon?.title || 
-                  def.label || 
-                  `Section ${idx + 1}`;
-
-                if (isHeroSec && !titleText.toLowerCase().includes('hero')) {
-                  titleText = `Hero Section - ${titleText}`;
-                }
-
-                const subText = 
-                  sec.data?.subheadline || 
-                  sec.data?.subtitle || 
-                  sec.data?.description || 
-                  sec.description || 
-                  canon?.desc || 
-                  def.desc || 
-                  '';
-
-                // Content summary pills
-                const categoryPill = sec.data?.category ? `📂 ${sec.data.category}` : null;
-                const limitPill = sec.data?.limit ? `📰 ${sec.data.limit} Stories Limit` : (sec.type === 'hero' || sec.id === 'hero_popular' ? `🔥 ${sec.data?.popularArticles?.length || 5} Ranked Popular Posts` : null);
-                const viewAllPill = sec.data?.viewAllUrl ? `🔗 ${sec.data.viewAllUrl}` : null;
-                const highlightBadge = sec.data?.badgeText || sec.data?.badge ? `✨ ${sec.data.badgeText || sec.data.badge}` : null;
-                const isHeroCustom = (sec.type === 'hero' || sec.id === 'hero_popular') && sec.data?.headline && sec.data.headline !== titleText;
-
-                return (
-                  <div
-                    key={sec.id || idx}
-                    ref={(el) => { if (el) cardRefs.current[sec.id || idx] = el; }}
-                    className={`section-stack-card ${!isEnabled ? 'disabled' : ''}`}
-                  >
-                    {/* Drag / Reorder Buttons */}
-                    <div className="section-reorder-controls">
-                      <span className="section-order-num">{idx + 1}</span>
-                      <button
-                        type="button"
-                        className="reorder-btn"
-                        disabled={idx === 0 || isReordering}
-                        onClick={() => handleMoveSection(idx, 'up')}
-                        title="Move Up"
-                      >
-                        <ArrowUp size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        className="reorder-btn"
-                        disabled={idx === sections.length - 1 || isReordering}
-                        onClick={() => handleMoveSection(idx, 'down')}
-                        title="Move Down"
-                      >
-                        <ArrowDown size={14} />
-                      </button>
-                    </div>
-
-                    {/* Section Information Preview */}
-                    <div className="section-info-meta">
-                      <div className="section-headline-preview" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                        <span>{titleText}</span>
-                        {!isEnabled && <span className="disabled-pill">Disabled</span>}
-                      </div>
-                    </div>
-
-                    {/* Section Actions: only admin can hide or show, except banner section which has Live Edit */}
-                    <div className="section-card-actions">
-                      <button
-                        type="button"
-                        className={`btn-section-action ${isEnabled ? 'enabled' : 'disabled'}`}
-                        onClick={() => handleToggleSectionEnabled(sec.id)}
-                        title={isEnabled ? 'Hide section from live page' : 'Show section on live page'}
-                        style={{
-                          background: isEnabled ? '#ecfdf5' : '#f8fafc',
-                          color: isEnabled ? '#059669' : '#64748b',
-                          border: isEnabled ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-                          fontWeight: 700,
-                          padding: '6px 12px',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {isEnabled ? <Eye size={15} color="#059669" /> : <EyeOff size={15} color="#94a3b8" />}
-                        <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
-                      </button>
-
-                      {/* Edit Button for all sections */}
-                      <button
-                        type="button"
-                        className="btn-section-action live-edit"
-                        onClick={() => handleOpenLiveEditor(sec)}
-                        style={{
-                          background: '#2563eb',
-                          color: '#ffffff',
-                          border: 'none',
-                          fontWeight: 750,
-                          padding: '6px 14px',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title={`Edit content for "${def.label || sec.type || titleText}"`}
-                      >
-                        <Edit2 size={14} />
-                        <span>Edit</span>
-                      </button>
-
-                      {/* Delete button */}
-                      <button
-                        type="button"
-                        className="btn-section-action delete"
-                        onClick={() => handleDeleteSection(sec.id)}
-                        disabled={saving}
-                        title="Delete this section"
-                        style={{
-                          background: 'rgba(239, 68, 68, 0.08)',
-                          color: '#dc2626',
-                          border: '1px solid rgba(239, 68, 68, 0.2)',
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Add Another Section Button */}
-          <div className="add-section-footer-bar" style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-            <button
-              type="button"
-              className="btn-admin-secondary"
-              onClick={() => setIsAddSectionOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 28px',
-                borderRadius: '10px',
-                fontSize: '0.92rem',
-                fontWeight: 750,
-                background: '#ffffff',
-                border: '2px dashed #cbd5e1',
-                color: '#0f172a',
-                cursor: 'pointer',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
-                transition: 'all 0.2s ease'
-              }}
-              title="Add another section to the home page"
-            >
-              <Plus size={18} color="var(--brand-primary)" />
-              <span>Add Another Section</span>
-            </button>
-          </div>
+        <div className="admin-live-whole-page-studio-container" style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
+          <LiveWholePageStudio
+            isOpen={true}
+            pageId={pageId}
+            pageTitle={displayTitle}
+            pageSlug={displaySlug}
+            initialSections={sections}
+            stories={allStories.length ? allStories : ALL_STORIES}
+            onClose={() => {
+              if (onNavigate) {
+                onNavigate('/admin/pages');
+              } else {
+                window.location.href = '/admin/pages';
+              }
+            }}
+            onSaveSuccess={(updated) => {
+              if (updated) setSections(updated);
+              fetchPage();
+              onShowToast?.(`"${displayTitle}" layout and articles permanently saved live!`);
+            }}
+            onOpenSettings={() => setActiveTab('seo')}
+          />
         </div>
       )}
 
