@@ -1034,18 +1034,6 @@ export default function LiveWholePageStudio({
                             {sec.enabled === false ? <EyeOff size={12} /> : <Eye size={12} />}
                             <span>{sec.enabled === false ? 'Hidden' : 'Visible'}</span>
                           </button>
-                          {isGridFeed && (
-                            <button
-                              type="button"
-                              className="lhs-sec-tool-btn"
-                              style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80' }}
-                              onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-add' })}
-                              title="Add article to this section"
-                            >
-                              <Plus size={12} />
-                              <span>Add Story</span>
-                            </button>
-                          )}
                           <button
                             type="button"
                             className="lhs-sec-tool-btn danger"
