@@ -1608,7 +1608,7 @@ export default function LiveHomepageStudio({
                         </section>
                       )}
 
-                      {/* 3. NEWSLETTER BANNER SECTION */}
+                      {/* 3. NEWSLETTER BANNER SECTION (DIRECT IN-PLACE UI EDITABLE) */}
                       {isNewsletter && (
                         <section className="mhp-newsletter-section" style={{ margin: 0 }}>
                           <div className="mhp-newsletter-card">
@@ -1616,19 +1616,44 @@ export default function LiveHomepageStudio({
                               <div className="mhp-newsletter-icon-wrap">
                                 <Mail size={32} />
                               </div>
-                              <div>
+                              <div style={{ flex: 1 }}>
                                 <h2 
-                                  className="mhp-newsletter-title lse-inline-edit-hint"
-                                  onClick={() => handleOpenEditSectionModal(sec)}
-                                  title="Click to edit headline"
+                                  contentEditable={true}
+                                  suppressContentEditableWarning={true}
+                                  className="mhp-newsletter-title lse-direct-editable"
+                                  onBlur={(e) => {
+                                    const val = e.currentTarget.textContent.trim();
+                                    if (val) {
+                                      updateSectionDataDirectly(sec.id, { headline: val, title: val, heading: val });
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
+                                  title="Click directly to edit headline"
+                                  style={{ outline: 'none', cursor: 'text' }}
                                 >
                                   {sec.data?.headline || sec.data?.title || 'Get the Latest Blogs Delivered to Your Inbox'}
                                 </h2>
                                 <p 
-                                  className="lse-inline-edit-hint"
-                                  onClick={() => handleOpenEditSectionModal(sec)}
-                                  title="Click to edit subtitle"
-                                  style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#64748b' }}
+                                  contentEditable={true}
+                                  suppressContentEditableWarning={true}
+                                  className="lse-direct-editable"
+                                  onBlur={(e) => {
+                                    const val = e.currentTarget.textContent.trim();
+                                    updateSectionDataDirectly(sec.id, { subtitle: val });
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
+                                  title="Click directly to edit subtitle"
+                                  style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#64748b', outline: 'none', cursor: 'text' }}
                                 >
                                   {sec.data?.subtitle || 'Join 50,000+ founders and operators getting daily dispatches.'}
                                 </p>
@@ -1638,16 +1663,33 @@ export default function LiveHomepageStudio({
                             <div className="mhp-newsletter-form">
                               <input 
                                 type="text"
-                                disabled
-                                placeholder={sec.data?.placeholder || 'Enter your email address'}
-                                className="mhp-newsletter-input"
-                                style={{ opacity: 0.9 }}
+                                defaultValue={sec.data?.placeholder || 'Enter your email address'}
+                                onBlur={(e) => {
+                                  updateSectionDataDirectly(sec.id, { placeholder: e.target.value });
+                                }}
+                                className="mhp-newsletter-input lse-direct-editable"
+                                title="Type directly to edit placeholder"
+                                style={{ cursor: 'text', border: '1.5px dashed rgba(234, 88, 12, 0.45)' }}
                               />
                               <button 
                                 type="button" 
-                                className="mhp-newsletter-btn"
-                                onClick={() => handleOpenEditSectionModal(sec)}
-                                title="Click to edit button text"
+                                contentEditable={true}
+                                suppressContentEditableWarning={true}
+                                className="mhp-newsletter-btn lse-direct-editable"
+                                onBlur={(e) => {
+                                  const val = e.currentTarget.textContent.trim();
+                                  if (val) {
+                                    updateSectionDataDirectly(sec.id, { buttonText: val });
+                                  }
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.currentTarget.blur();
+                                  }
+                                }}
+                                title="Click directly to edit button text"
+                                style={{ outline: 'none', cursor: 'text' }}
                               >
                                 {sec.data?.buttonText || 'Subscribe'}
                               </button>

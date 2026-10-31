@@ -529,6 +529,11 @@ function LiveGenericSectionStudio({
   // ─────────────────────────────────────────────────────────
   // INSTANT AUTO-SAVE PERSISTENCE TO DATABASE
   // ─────────────────────────────────────────────────────────
+    const updateDataDirectly = (newData) => {
+    const nextData = { ...data, ...newData };
+    setData(nextData);
+    persistToDatabase(nextData);
+  };
   const persistToDatabase = async (nextData) => {
     const finalData = nextData || data;
     setData(finalData);
@@ -1804,7 +1809,7 @@ function LiveGenericSectionStudio({
               </section>
             ))}
 
-            {/* 2. NEWSLETTER BANNER RENDERER */}
+            {/* 2. NEWSLETTER BANNER RENDERER (DIRECT IN-PLACE UI EDITABLE) */}
             {isNewsletter && (
               <section className="mhp-newsletter-section" style={{ margin: 0 }}>
                 <div className="mhp-newsletter-card" style={{ background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)', border: '1.5px solid rgba(234, 88, 12, 0.35)', borderRadius: '16px', padding: '2.5rem' }}>
@@ -1812,20 +1817,46 @@ function LiveGenericSectionStudio({
                     <div className="mhp-newsletter-icon-wrap" style={{ background: 'rgba(234, 88, 12, 0.2)', color: '#fb923c' }}>
                       <Mail size={32} />
                     </div>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <h2 
-                        className="mhp-newsletter-title lse-inline-edit-hint" 
-                        onClick={handleOpenEditModal}
-                        title="Click to edit headline"
-                        style={{ color: '#ffffff', margin: '0 0 6px' }}
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        className="mhp-newsletter-title lse-direct-editable" 
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== (data.headline || data.title)) {
+                            updateDataDirectly({ headline: val, title: val, heading: val });
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        title="Click directly to edit headline"
+                        style={{ color: '#ffffff', margin: '0 0 6px', outline: 'none', cursor: 'text' }}
                       >
                         {data.headline || data.title || "Get the Latest Blogs Delivered to Your Inbox"}
                       </h2>
                       <p 
-                        className="lse-inline-edit-hint" 
-                        onClick={handleOpenEditModal}
-                        title="Click to edit subtitle"
-                        style={{ margin: 0, fontSize: '0.95rem', color: '#94a3b8' }}
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        className="lse-direct-editable" 
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val !== data.subtitle) {
+                            updateDataDirectly({ subtitle: val, description: val });
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        title="Click directly to edit subtitle"
+                        style={{ margin: 0, fontSize: '0.95rem', color: '#94a3b8', outline: 'none', cursor: 'text' }}
                       >
                         {data.subtitle || "Unfiltered insights on venture capital, frontier tech, and high-growth leadership directly in your inbox."}
                       </p>
@@ -1834,20 +1865,38 @@ function LiveGenericSectionStudio({
 
                   <form className="mhp-newsletter-form" onSubmit={(e) => e.preventDefault()}>
                     <input 
-                      type="email" 
-                      placeholder={data.placeholder || "Enter your email address"}
-                      className="mhp-newsletter-input lse-inline-edit-hint"
-                      onClick={handleOpenEditModal}
-                      title="Click to edit placeholder"
-                      readOnly
-                      style={{ cursor: 'pointer' }}
+                      type="text" 
+                      value={data.placeholder !== undefined ? data.placeholder : "Enter your email address"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setData(prev => ({ ...prev, placeholder: val }));
+                      }}
+                      onBlur={(e) => {
+                        updateDataDirectly({ placeholder: e.target.value });
+                      }}
+                      className="mhp-newsletter-input lse-direct-editable"
+                      title="Type directly to edit placeholder"
+                      style={{ cursor: 'text', border: '1.5px dashed rgba(234, 88, 12, 0.45)', color: '#ffffff', background: 'rgba(255, 255, 255, 0.05)' }}
                     />
                     <button 
                       type="button" 
-                      className="mhp-newsletter-btn lse-inline-edit-hint"
-                      onClick={handleOpenEditModal}
-                      title="Click to edit button text"
-                      style={{ background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', color: '#ffffff', fontWeight: 800 }}
+                      contentEditable={true}
+                      suppressContentEditableWarning={true}
+                      className="mhp-newsletter-btn lse-direct-editable"
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== data.buttonText) {
+                          updateDataDirectly({ buttonText: val, primaryBtnText: val });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      title="Click directly to edit button text"
+                      style={{ background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', color: '#ffffff', fontWeight: 800, cursor: 'text', outline: 'none' }}
                     >
                       {data.buttonText || "Subscribe"}
                     </button>
