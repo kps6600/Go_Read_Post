@@ -1190,8 +1190,7 @@ function LiveGenericSectionStudio({
                                     gap: '6px',
                                     fontSize: '0.76rem',
                                     color: '#94a3b8',
-                                    fontWeight: 600,
-                                    marginBottom: '14px'
+                                    fontWeight: 600
                                   }}
                                 >
                                   <span style={{ color: '#475569', fontWeight: 650 }}>{artAuthor}</span>
@@ -1199,33 +1198,6 @@ function LiveGenericSectionStudio({
                                   <span>{artDate}</span>
                                 </div>
                               </div>
-
-                              {/* Direct Quick Action to Edit Article & Content */}
-                              <button
-                                type="button"
-                                onClick={() => handleOpenArticleEditor(story)}
-                                title="Edit this article's title, summary, body content, author or image"
-                                style={{
-                                  width: '100%',
-                                  padding: '9px 14px',
-                                  borderRadius: '9px',
-                                  background: '#f8fafc',
-                                  border: '1.5px solid #e2e8f0',
-                                  color: '#0f172a',
-                                  fontSize: '0.82rem',
-                                  fontWeight: 750,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: '7px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease',
-                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                                }}
-                              >
-                                <Edit3 size={14} color="#ea580c" />
-                                <span>Edit Article & Content</span>
-                              </button>
                             </div>
                           </article>
                         );
@@ -1645,8 +1617,7 @@ function LiveGenericSectionStudio({
                                   gap: '6px',
                                   fontSize: '0.76rem',
                                   color: '#94a3b8',
-                                  fontWeight: 600,
-                                  marginBottom: '14px'
+                                  fontWeight: 600
                                 }}
                               >
                                 <span style={{ color: '#475569', fontWeight: 650 }}>{artAuthor}</span>
@@ -1654,33 +1625,6 @@ function LiveGenericSectionStudio({
                                 <span>{artDate}</span>
                               </div>
                             </div>
-
-                            {/* Direct Quick Action to Edit Article & Content */}
-                            <button
-                              type="button"
-                              onClick={() => handleOpenArticleEditor(blog)}
-                              title="Open editor to change title, summary, body content, author or image"
-                              style={{
-                                width: '100%',
-                                padding: '9px 14px',
-                                borderRadius: '9px',
-                                background: '#f8fafc',
-                                border: '1.5px solid #e2e8f0',
-                                color: '#0f172a',
-                                fontSize: '0.82rem',
-                                fontWeight: 750,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '7px',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                              }}
-                            >
-                              <Edit3 size={14} color="#ea580c" />
-                              <span>Edit Article & Content</span>
-                            </button>
                           </div>
                         </article>
                       );
