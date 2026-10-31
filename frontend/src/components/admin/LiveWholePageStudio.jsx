@@ -180,6 +180,29 @@ export default function LiveWholePageStudio({
     return combined;
   }, [availableArticles, stories]);
 
+  const getSectionMaxFit = (sec) => {
+    const isLatestFeed = pageId === 'latest' && (sec?.id === 'latest_feed' || sec?.type === 'latest_feed' || sec?.type === 'latest_blogs');
+    if (isLatestFeed) return sec?.data?.limit || 16;
+    return sec?.data?.limit || 4;
+  };
+
+  const resolveSectionArticles = (sec) => {
+    const data = sec?.data || {};
+    const maxFit = getSectionMaxFit(sec);
+    const cat = data.category || data.filterCategory;
+    let source = pool;
+    if (cat && cat.trim()) {
+      const filtered = pool.filter(s => (s.category || s.categoryLabel || s.categoryName || '').toLowerCase().includes(cat.toLowerCase().trim()));
+      if (filtered.length > 0) source = filtered;
+    }
+    const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+
+    if (Array.isArray(data.articles)) {
+      return data.articles.filter(Boolean).slice(0, maxFit);
+    }
+    return sorted.slice(0, maxFit);
+  };
+
   // Target section-related pool in Studio (strictly scoped to the section being edited)
   const targetSectionRelatedPool = useMemo(() => {
     if (!pickerTarget?.sectionId) return pool;
@@ -507,32 +530,7 @@ export default function LiveWholePageStudio({
     };
     handleUpdateHeroData({ popularArticles: nextPop });
   };
-
-  // ─────────────────────────────────────────────────────────
   // FEED SECTIONS ARTICLE REORDERING & CURATION
-  // ─────────────────────────────────────────────────────────
-  const getSectionMaxFit = (sec) => {
-    const isLatestFeed = pageId === 'latest' && (sec.id === 'latest_feed' || sec.type === 'latest_feed' || sec.type === 'latest_blogs');
-    if (isLatestFeed) return sec.data?.limit || 16;
-    return sec.data?.limit || 4;
-  };
-
-  const resolveSectionArticles = (sec) => {
-    const data = sec?.data || {};
-    const maxFit = getSectionMaxFit(sec);
-    const cat = data.category || data.filterCategory;
-    let source = pool;
-    if (cat && cat.trim()) {
-      const filtered = pool.filter(s => (s.category || s.categoryLabel || s.categoryName || '').toLowerCase().includes(cat.toLowerCase().trim()));
-      if (filtered.length > 0) source = filtered;
-    }
-    const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
-
-    if (Array.isArray(data.articles)) {
-      return data.articles.filter(Boolean).slice(0, maxFit);
-    }
-    return sorted.slice(0, maxFit);
-  };
 
   const handleMoveFeedArticle = (secId, idx, direction) => {
     const sec = sections.find(s => s.id === secId);
