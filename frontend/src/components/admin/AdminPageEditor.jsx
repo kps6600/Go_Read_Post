@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Globe, Eye, Plus, Trash2, ArrowLeft, Check,
   ArrowUp, ArrowDown, EyeOff, CheckCircle2, AlertCircle, 
@@ -115,6 +115,45 @@ export const isCoreFeedSection = (sec) => {
   );
 };
 
+export const isSectionAlreadyOnPage = (itemType, existingSections) => {
+  if (!Array.isArray(existingSections) || existingSections.length === 0) return false;
+  return existingSections.some(s => {
+    if (!s) return false;
+    const sType = (s.type || '').toLowerCase().trim();
+    const sId = (s.id || '').toLowerCase().trim();
+    const sKey = (s.sectionKey || '').toLowerCase().trim();
+    const sTitle = (s.data?.heading || s.data?.title || s.title || '').toLowerCase().trim();
+    const targetType = (itemType || '').toLowerCase().trim();
+
+    // Direct type, ID, or sectionKey match
+    if (sType === targetType || sId === targetType || sKey === targetType) return true;
+
+    // Canonical equivalencies
+    if (targetType === 'hero' && (sType === 'hero_popular' || sId === 'hero_popular' || sKey === 'hero_popular' || sType === 'banner' || isBannerSection(s))) return true;
+    if (targetType === 'stories_feed' && (sType === 'latest_blogs' || sId === 'latest_blogs' || sKey === 'latest_blogs' || sType === 'stories_feed' || sTitle.includes('latest from the blog'))) return true;
+    if (targetType === 'trending' && (sType === 'trending' || sId === 'trending' || sKey === 'trending' || sTitle.includes('trending'))) return true;
+    if (targetType === 'popular_editors' && (sType === 'popular_editors' || sId === 'popular_editors' || sKey === 'popular_editors' || sType === 'editors_picks' || sTitle.includes("editor's pick") || sTitle.includes('most popular'))) return true;
+    if (targetType === 'spotlight' && (sType === 'spotlight' || sId === 'spotlight' || sKey === 'spotlight' || sTitle.includes('spotlight'))) return true;
+    if (targetType === 'newsletter' && (sType === 'newsletter' || sId === 'newsletter' || sKey === 'newsletter' || sTitle.includes('newsletter'))) return true;
+    if (targetType === 'video_section' && (sType === 'video_section' || sId === 'video_section' || sKey === 'video_section' || sTitle.includes('video stories'))) return true;
+    if (targetType === 'video_shows' && (sType === 'video_shows' || sId === 'video_shows' || sKey === 'video_shows' || sTitle.includes('originals & shows'))) return true;
+    if (targetType === 'about' && (sType === 'about' || sId === 'about' || sKey === 'about' || sTitle.includes('about us'))) return true;
+    if (targetType === 'contact' && (sType === 'contact' || sId === 'contact' || sKey === 'contact' || sTitle.includes('contact'))) return true;
+    if (targetType === 'advertise' && (sType === 'advertise' || sId === 'advertise' || sKey === 'advertise' || sTitle.includes('advertise'))) return true;
+
+    // Category desk matches
+    if (targetType.startsWith('category_')) {
+      const catSlug = targetType.replace('category_', '').toLowerCase();
+      if (sType === targetType || sId === targetType || sKey === targetType) return true;
+      const sCategory = (s.data?.category || '').toLowerCase();
+      if (sCategory && (sCategory === catSlug || sCategory.includes(catSlug) || catSlug.includes(sCategory))) return true;
+      if (sType.includes('category') && sTitle.includes(catSlug)) return true;
+    }
+
+    return false;
+  });
+};
+
 export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -140,6 +179,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     ogImage: ''
   });
   const [sections, setSections] = useState([]);
+
+  // Filter out sections that are already added to this page so they are not shown in the Add Page Section modal
+  const availableSectionDefinitions = useMemo(() => {
+    return SECTION_DEFINITIONS.filter(item => !isSectionAlreadyOnPage(item.type, sections));
+  }, [sections]);
   const [allStories, setAllStories] = useState(() => getDefaultSeedStories());
 
   useEffect(() => {
@@ -1301,7 +1345,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             <div className="modal-header">
               <div>
                 <h3>Add Page Section</h3>
-                <p>Select a section component to insert into this dynamic page.</p>
+                <p>Select a section component to insert into this dynamic page. Sections already added to this page are excluded.</p>
               </div>
               <button
                 type="button"
@@ -1313,19 +1357,31 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             </div>
 
             <div className="section-types-grid">
-              {SECTION_DEFINITIONS.map((item) => (
-                <div
-                  key={item.type}
-                  className="section-type-card"
-                  onClick={() => handleCreateSection(item.type)}
-                >
-                  <div className="type-badge-icon">
-                    <Plus size={16} />
-                  </div>
-                  <h4>{item.label}</h4>
-                  <p>{item.desc}</p>
+              {availableSectionDefinitions.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', padding: '3rem 1.5rem', textAlign: 'center', color: '#64748b' }}>
+                  <CheckCircle2 size={40} color="#10b981" style={{ marginBottom: '12px' }} />
+                  <h4 style={{ margin: '0 0 6px', fontSize: '1.05rem', color: '#0f172a', fontWeight: 800 }}>
+                    All Available Section Types Are Already Added
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem' }}>
+                    Every supported section component is currently active on this page.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                availableSectionDefinitions.map((item) => (
+                  <div
+                    key={item.type}
+                    className="section-type-card"
+                    onClick={() => handleCreateSection(item.type)}
+                  >
+                    <div className="type-badge-icon">
+                      <Plus size={16} />
+                    </div>
+                    <h4>{item.label}</h4>
+                    <p>{item.desc}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

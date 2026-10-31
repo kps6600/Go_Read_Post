@@ -82,7 +82,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.939Z",
-        "updatedAt": "2026-10-31T07:51:19.224Z",
+        "updatedAt": "2026-10-31T05:23:45.720Z",
         "data": {
           "slides": [
             {
@@ -302,20 +302,20 @@
               "isCustom": true
             },
             {
-              "id": "6ae1f556d132e2796bff4fbb",
-              "articleId": "6ae1f556d132e2796bff4fbb",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "excerpt": "Founders are using AI to build faster and smarter businesses.",
-              "category": "Technology",
-              "categoryLabel": "Technology",
-              "categoryName": "Technology",
-              "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-              "author": "Kamlesh Sharma",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "date": "2026-10-08T08:55:07.642Z",
-              "readTime": "5 min read min read",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "link": "/stories/how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "id": "6ae1f556d132e2796bff4fb9",
+              "articleId": "6ae1f556d132e2796bff4fb9",
+              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
+              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80",
+              "author": "Geeta Nair",
+              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
+              "date": "2026-10-07T12:30:18.846Z",
+              "readTime": "6 min read min read",
+              "slug": "sim-7",
+              "link": "/stories/sim-7",
               "isCustom": true
             }
           ],
@@ -325,12 +325,12 @@
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fbc",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fbb"
+            "6ae1f556d132e2796bff4fb9"
           ]
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T07:51:19.229Z",
+        "updatedAt": "2026-10-31T05:17:54.208Z",
         "data": {
           "viewAllText": "View All Articles",
           "viewAllUrl": "/latest",
@@ -490,20 +490,20 @@
               "isCustom": true
             },
             {
-              "id": "6ae1f556d132e2796bff4fbb",
-              "articleId": "6ae1f556d132e2796bff4fbb",
-              "title": "How AI is transforming India's startup ecosystem (Updated Edition)",
-              "excerpt": "Founders are using AI to build faster and smarter businesses.",
-              "category": "Technology",
-              "categoryLabel": "Technology",
-              "categoryName": "Technology",
-              "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1200&auto=format&fit=crop&q=80",
-              "author": "Kamlesh Sharma",
-              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
-              "date": "2026-10-08T08:55:07.642Z",
-              "readTime": "5 min read min read",
-              "slug": "how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
-              "link": "/stories/how-ai-is-transforming-indias-startup-ecosystem-muzawh39",
+              "id": "6ae1f556d132e2796bff4fb9",
+              "articleId": "6ae1f556d132e2796bff4fb9",
+              "title": "Solar Sisters: Electrifying 40 off-grid tribal hamlets in Rajasthan",
+              "excerpt": "Barefoot solar engineers assembling clean microgrids and empowering rural women technicians.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80",
+              "author": "Geeta Nair",
+              "authorAvatar": "https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=100&auto=format&fit=crop&q=80",
+              "date": "2026-10-07T12:30:18.846Z",
+              "readTime": "6 min read min read",
+              "slug": "sim-7",
+              "link": "/stories/sim-7",
               "isCustom": true
             }
           ],
@@ -513,7 +513,7 @@
             "6ae1f556d132e2796bff4fb1",
             "6ae1f556d132e2796bff4fbc",
             "6ae1f556d132e2796bff4fae",
-            "6ae1f556d132e2796bff4fbb"
+            "6ae1f556d132e2796bff4fb9"
           ]
         },
         "id": "latest_blogs",
@@ -536,7 +536,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T07:51:19.234Z",
+        "updatedAt": "2026-10-31T05:17:54.210Z",
         "data": {
           "viewAllText": "View All Trending",
           "viewAllUrl": "/trending"
@@ -806,7 +806,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T07:51:19.238Z",
+        "updatedAt": "2026-10-31T05:17:54.213Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
@@ -1292,7 +1292,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T07:51:19.243Z",
+        "updatedAt": "2026-10-31T05:17:54.222Z",
         "data": {
           "badgeText": "Spotlight",
           "viewAllText": "Explore Startups",
@@ -1534,7 +1534,7 @@
         },
         "__v": 0,
         "createdAt": "2026-10-28T13:15:08.940Z",
-        "updatedAt": "2026-10-31T07:51:19.272Z",
+        "updatedAt": "2026-10-31T05:17:54.224Z",
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
           "buttonText": "Subscribe",
