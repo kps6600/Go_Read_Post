@@ -355,6 +355,23 @@
               "createdAt": "2026-10-28T13:15:02.130Z",
               "updatedAt": "2026-10-28T13:15:02.130Z",
               "__v": 0
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fae",
+              "articleId": "6ae1f556d132e2796bff4fae",
+              "title": "This banker-turned-cactus conservationist is protecting endangered arid biodiversity",
+              "excerpt": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+              "author": "Tanvi Dubey",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+              "date": "2026-10-30T07:21:15.663Z",
+              "readTime": "4 min read min read",
+              "slug": "social-side-3",
+              "link": "/stories/social-side-3",
+              "isCustom": true
             }
           ],
           "limit": 4,
@@ -575,6 +592,23 @@
               "createdAt": "2026-10-28T13:15:02.130Z",
               "updatedAt": "2026-10-28T13:15:02.130Z",
               "__v": 0
+            },
+            {
+              "id": "6ae1f556d132e2796bff4fae",
+              "articleId": "6ae1f556d132e2796bff4fae",
+              "title": "This banker-turned-cactus conservationist is protecting endangered arid biodiversity",
+              "excerpt": "Trading high finance for desert botony, this botanist is safeguarding over 800 indigenous xerophyte and succulent varieties in Rajasthan.",
+              "category": "SocialStory",
+              "categoryLabel": "SocialStory",
+              "categoryName": "SocialStory",
+              "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+              "author": "Tanvi Dubey",
+              "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+              "date": "2026-10-30T07:21:15.663Z",
+              "readTime": "4 min read min read",
+              "slug": "social-side-3",
+              "link": "/stories/social-side-3",
+              "isCustom": true
             }
           ],
           "limit": 4,

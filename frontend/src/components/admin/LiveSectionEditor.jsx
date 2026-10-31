@@ -2269,17 +2269,12 @@ function LiveGenericSectionStudio({
         <div className="lbe-picker-overlay" onClick={() => setIsPickerOpen(false)}>
           <div className="lbe-picker-modal" onClick={e => e.stopPropagation()}>
             <div className="lbe-picker-header">
-              <div>
-                <h4 className="lbe-picker-title">
-                  <Layers size={18} color="#38bdf8" />
-                  <span>
-                    {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : 'Select Article to Add'}
-                  </span>
-                </h4>
-                <p className="lbe-picker-subtitle">
-                  {pickerTarget?.type === 'replace' ? `Pick a published article to swap into this slot. Showing only articles related to ${section.title || 'this section'}.` : `Showing only articles related to ${section.title || 'this section'} (${sectionRelatedPool.length} available). Choose an article to fill this slot.`}
-                </p>
-              </div>
+              <h4 className="lbe-picker-title">
+                <Layers size={18} color="#38bdf8" />
+                <span>
+                  {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : 'Select Article to Add'}
+                </span>
+              </h4>
               <button 
                 type="button" 
                 className="lbe-picker-close-btn"
