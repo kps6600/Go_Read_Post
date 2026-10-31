@@ -431,46 +431,62 @@ export default function ModernHomepageView({
     return combined.slice(0, 10);
   }, [pool, heroSlides]);
 
-  // Helper to filter articles by category or pinned list (strictly 4 unique cards per section on homepage)
+  // Helper to strictly produce EXACTLY 4 unique articles for every homepage section
   const getSectionArticles = (sec, defaultArticles) => {
     const limit = 4;
-    const dedupe = (list) => {
-      const seen = new Set();
-      const unique = [];
-      for (const item of (list || [])) {
+    const seen = new Set();
+    const result = [];
+
+    const addArticles = (list) => {
+      if (!Array.isArray(list)) return;
+      for (const item of list) {
         if (!item) continue;
         const key = String(item.id || item._id || item.articleId || item.slug || item.title || '').trim().toLowerCase();
-        if (key && seen.has(key)) continue;
-        if (key) seen.add(key);
-        unique.push(item);
-        if (unique.length >= limit) break;
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+          if (result.length >= limit) return;
+        }
       }
-      return unique;
     };
 
-    if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      const list = dedupe(sec.data.articles.filter(Boolean));
-      if (list.length > 0) return list;
+    // 1. Curated section articles from admin
+    if (sec?.data?.articles && Array.isArray(sec.data.articles)) {
+      addArticles(sec.data.articles);
     }
-    if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
-      const list = dedupe(sec.articles.filter(Boolean));
-      if (list.length > 0) return list;
+    if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
+      addArticles(sec.articles);
     }
-    if (sec?.data?.articleIds && Array.isArray(sec.data.articleIds) && sec.data.articleIds.length > 0) {
+
+    // 2. Curated article IDs
+    if (result.length < limit && sec?.data?.articleIds && Array.isArray(sec.data.articleIds)) {
       const ids = new Set(sec.data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
       const matched = pool.filter(s => ids.has(String(s._id || s.id || s.slug)));
-      if (matched.length > 0) return dedupe(matched);
+      addArticles(matched);
     }
+
+    // 3. Section category filter
     const filterCat = sec?.data?.category || sec?.data?.filterCategory || sec?.filterCategory;
-    if (filterCat && filterCat.trim()) {
+    if (result.length < limit && filterCat && filterCat.trim()) {
       const cat = filterCat.toLowerCase().trim();
       const filtered = pool.filter(s => {
         const c = (s.category || s.categoryLabel || '').toLowerCase();
         return c.includes(cat);
       });
-      if (filtered.length > 0) return dedupe(filtered);
+      addArticles(filtered);
     }
-    return dedupe(defaultArticles);
+
+    // 4. Default section articles (e.g. latestBlogs, trendingStories, popularStories, spotlightStories)
+    if (result.length < limit && Array.isArray(defaultArticles)) {
+      addArticles(defaultArticles);
+    }
+
+    // 5. Backfill from pool to guarantee EVERY section ALWAYS has EXACTLY 4 cards
+    if (result.length < limit) {
+      addArticles(pool);
+    }
+
+    return result.slice(0, limit);
   };
 
   // Auto rotate hero slide based on heroConfig
