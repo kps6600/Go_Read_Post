@@ -76,7 +76,7 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
     }
 
     const validRoles = ['SUPER_ADMIN', 'AUTHOR', 'USER', 'READER'];
-    const chosenRole = validRoles.includes((role || '').toUpperCase()) ? (role || '').toUpperCase() : 'AUTHOR';
+    const chosenRole = validRoles.includes((role || '').toUpperCase()) ? (role || '').toUpperCase() : 'USER';
 
     if (isDbConnected()) {
       const existing = await User.findOne({

@@ -8,7 +8,6 @@ export default function AdminUsersView({ onShowToast }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -44,24 +43,20 @@ export default function AdminUsersView({ onShowToast }) {
     }
   };
 
-  const superAdminCount = useMemo(() => users.filter(u => (u.role || '').toUpperCase() === 'SUPER_ADMIN').length, [users]);
-  const authorCount = useMemo(() => users.filter(u => (u.role || '').toUpperCase() === 'AUTHOR').length, [users]);
-  const userCount = useMemo(() => users.filter(u => {
+  // Exclude team members (Super Admin, Authors, Admin, Editor)
+  // This page exclusively manages registered community readers / regular users
+  const isTeamMember = (u) => {
     const r = (u.role || '').toUpperCase();
-    return r === 'USER' || r === 'READER' || (!r.includes('ADMIN') && r !== 'AUTHOR');
-  }).length, [users]);
+    return r === 'SUPER_ADMIN' || r === 'AUTHOR' || r === 'ADMIN' || r === 'EDITOR';
+  };
+
+  const communityUsers = useMemo(() => {
+    return users.filter(u => !isTeamMember(u));
+  }, [users]);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return users.filter(u => {
-      // Role match
-      if (roleFilter !== 'all') {
-        const uRole = (u.role || '').toUpperCase();
-        if (roleFilter === 'SUPER_ADMIN' && uRole !== 'SUPER_ADMIN') return false;
-        if (roleFilter === 'AUTHOR' && uRole !== 'AUTHOR') return false;
-        if (roleFilter === 'USER' && (uRole === 'SUPER_ADMIN' || uRole === 'AUTHOR')) return false;
-      }
-
+    return communityUsers.filter(u => {
       // Status match
       if (statusFilter === 'active' && u.isActive === false) return false;
       if (statusFilter === 'suspended' && u.isActive !== false) return false;
@@ -71,11 +66,10 @@ export default function AdminUsersView({ onShowToast }) {
       return (
         u.name?.toLowerCase().includes(q) ||
         u.username?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        u.role?.toLowerCase().includes(q)
+        u.email?.toLowerCase().includes(q)
       );
     });
-  }, [users, search, roleFilter, statusFilter]);
+  }, [communityUsers, search, statusFilter]);
 
   const openCreateModal = () => {
     setEditingUser(null);
@@ -191,7 +185,7 @@ export default function AdminUsersView({ onShowToast }) {
             }}
           >
             <Users size={16} />
-            <span>User List ({users.length})</span>
+            <span>User List ({communityUsers.length})</span>
           </div>
         </div>
 
@@ -349,35 +343,6 @@ export default function AdminUsersView({ onShowToast }) {
             )}
           </div>
 
-          {/* Role Filter Dropdown */}
-          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-            <Shield size={14} color={roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
-            <select
-              value={roleFilter}
-              onChange={e => { setRoleFilter(e.target.value); setSelectedIds(new Set()); }}
-              style={{
-                appearance: 'none',
-                height: '40px',
-                padding: '0 32px 0 34px',
-                border: roleFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: roleFilter !== 'all' ? '700' : '500',
-                background: roleFilter !== 'all' ? '#fff1f2' : '#f8fafc',
-                color: roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
-                cursor: 'pointer',
-                outline: 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <option value="all">All Roles ({users.length})</option>
-              <option value="SUPER_ADMIN">Super Admin ({superAdminCount})</option>
-              <option value="AUTHOR">Authors ({authorCount})</option>
-              <option value="USER">Users ({userCount})</option>
-            </select>
-            <ChevronDown size={14} color={roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
-          </div>
-
           {/* Status Filter Dropdown */}
           <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
             <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
@@ -407,10 +372,10 @@ export default function AdminUsersView({ onShowToast }) {
           </div>
 
           {/* Reset Filters button */}
-          {(search || roleFilter !== 'all' || statusFilter !== 'all') && (
+          {(search || statusFilter !== 'all') && (
             <button
               type="button"
-              onClick={() => { setSearch(''); setRoleFilter('all'); setStatusFilter('all'); setSelectedIds(new Set()); }}
+              onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
               title="Reset all filters"
               style={{
                 display: 'inline-flex',
@@ -437,7 +402,7 @@ export default function AdminUsersView({ onShowToast }) {
         {/* Right: Counter & Refresh Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
-            Showing <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> of {users.length}
+            Showing <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> of {communityUsers.length}
           </span>
           <button
             onClick={loadData}
@@ -479,13 +444,13 @@ export default function AdminUsersView({ onShowToast }) {
             No Users Found
           </div>
           <p style={{ fontSize: '0.85rem', color: '#64748b', maxWidth: '380px', margin: '0 auto 16px' }}>
-            {search || roleFilter !== 'all' || statusFilter !== 'all'
+            {search || statusFilter !== 'all'
               ? 'No users match your current filter criteria. Try resetting the search or filter.'
-              : 'No registered accounts found in the database.'}
+              : 'No registered user accounts found in the database.'}
           </p>
-          {(search || roleFilter !== 'all' || statusFilter !== 'all') ? (
+          {(search || statusFilter !== 'all') ? (
             <button
-              onClick={() => { setSearch(''); setRoleFilter('all'); setStatusFilter('all'); }}
+              onClick={() => { setSearch(''); setStatusFilter('all'); }}
               style={{ padding: '8px 16px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '0.84rem' }}
             >
               Reset Filters
@@ -669,53 +634,37 @@ export default function AdminUsersView({ onShowToast }) {
                 />
               </div>
 
-              {(() => {
-                const isRootUser = editingUser && (editingUser.username === 'admin' || editingUser.email === 'admin@goreadpost.com');
-                return (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
-                        Account Role *
-                      </label>
-                      <select
-                        value={isRootUser ? 'SUPER_ADMIN' : formData.role}
-                        onChange={e => setFormData({ ...formData, role: e.target.value })}
-                        disabled={isRootUser}
-                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: isRootUser ? '#f8fafc' : '#fff' }}
-                      >
-                        <option value="USER">User (Reader)</option>
-                        <option value="AUTHOR">Author</option>
-                        <option value="SUPER_ADMIN">Super Admin</option>
-                      </select>
-                      {isRootUser && (
-                        <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                          Primary root admin role is locked.
-                        </span>
-                      )}
-                    </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
+                    Account Role
+                  </label>
+                  <select
+                    value="USER"
+                    disabled
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#f8fafc', color: '#475569', cursor: 'not-allowed' }}
+                  >
+                    <option value="USER">User (Reader)</option>
+                  </select>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                    Registered community reader. Authors are managed under Authors desk.
+                  </span>
+                </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
-                        Account Status
-                      </label>
-                      <select
-                        value={isRootUser ? 'active' : (formData.isActive ? 'active' : 'suspended')}
-                        onChange={e => setFormData({ ...formData, isActive: e.target.value === 'active' })}
-                        disabled={isRootUser}
-                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: isRootUser ? '#f8fafc' : '#fff' }}
-                      >
-                        <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
-                      </select>
-                      {isRootUser && (
-                        <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                          Root admin cannot be deactivated.
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
+                <div>
+                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
+                    Account Status
+                  </label>
+                  <select
+                    value={formData.isActive ? 'active' : 'suspended'}
+                    onChange={e => setFormData({ ...formData, isActive: e.target.value === 'active' })}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                  >
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button

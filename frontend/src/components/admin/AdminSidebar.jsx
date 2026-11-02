@@ -51,7 +51,7 @@ export const ADMIN_NAV_GROUPS = [
   {
     group: 'ACCESS & SETTINGS',
     items: [
-      { id: 'users', path: '/admin/users', label: 'Users & Roles', icon: Shield },
+      { id: 'users', path: '/admin/users', label: 'User List', icon: Users },
       { id: 'seo', path: '/admin/seo', label: 'SEO & Meta Tags', icon: Search },
       { id: 'settings', path: '/admin/settings', label: 'Site Settings', icon: Settings },
     ]
