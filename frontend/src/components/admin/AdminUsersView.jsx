@@ -204,78 +204,6 @@ export default function AdminUsersView({ onShowToast }) {
         </button>
       </div>
 
-      {/* Bulk Action Toolbar */}
-      {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#fff1f2',
-          border: '1px solid #fecdd3',
-          padding: '12px 18px',
-          borderRadius: '10px',
-          marginBottom: '20px',
-          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.08)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              fontWeight: '700',
-              fontSize: '0.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <CheckSquare size={13} />
-              <span>{selectedIds.size} Selected</span>
-            </div>
-            <span style={{ fontSize: '0.85rem', color: '#881337', fontWeight: 600 }}>
-              {selectedIds.size === filteredUsers.length ? 'All filtered accounts selected' : `${selectedIds.size} of ${filteredUsers.length} accounts selected`}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set(filteredUsers.map(u => u._id)))}
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'underline' }}
-            >
-              Select All ({filteredUsers.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline' }}
-            >
-              Clear Selection
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleBulkDelete}
-            disabled={bulkDeleting}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '7px 14px',
-              backgroundColor: '#dc2626',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              color: '#ffffff',
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
-            }}
-          >
-            <Trash2 size={15} />
-            {bulkDeleting ? 'Deleting...' : `Delete Selected (${selectedIds.size})`}
-          </button>
-        </div>
-      )}
-
       {/* Modern Search & Filter Toolbar Card */}
       <div style={{
         background: '#ffffff',
@@ -440,7 +368,51 @@ export default function AdminUsersView({ onShowToast }) {
           )}
         </div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <>
+          {/* Sub-Header Bar: Select All & Bulk Actions */}
+          <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.2rem 0.25rem 0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <label className="abv-select-all-label" title="Select all users">
+                <input 
+                  type="checkbox" 
+                  checked={selectedIds.size > 0 && selectedIds.size === filteredUsers.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(new Set(filteredUsers.map(u => u._id)));
+                    } else {
+                      setSelectedIds(new Set());
+                    }
+                  }}
+                  style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+                />
+                <span>Select All</span>
+              </label>
+              {selectedIds.size > 0 && (
+                <span className="abv-selected-pill">
+                  {selectedIds.size} of {filteredUsers.length} selected
+                </span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {selectedIds.size > 0 && (
+                <div className="abv-bulk-actions-group">
+                  <button
+                    type="button"
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleting}
+                    className="abv-bulk-btn abv-bulk-btn-delete"
+                    title="Delete selected accounts"
+                  >
+                    <Trash2 size={14} />
+                    <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
@@ -537,6 +509,7 @@ export default function AdminUsersView({ onShowToast }) {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {/* Create / Edit User Modal */}
