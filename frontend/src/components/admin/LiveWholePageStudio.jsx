@@ -1499,12 +1499,18 @@ export default function LiveWholePageStudio({
                                         {art.excerpt || art.summary || ''}
                                       </p>
 
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#94a3b8', fontWeight: 600 }}>
-                                        <span style={{ color: '#475569', fontWeight: 650 }}>
-                                          {artAuthor}
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', fontSize: '0.76rem', color: '#94a3b8', fontWeight: 600 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          <span style={{ color: '#475569', fontWeight: 650 }}>
+                                            {artAuthor}
+                                          </span>
+                                          <span>•</span>
+                                          <span>{artDate}</span>
+                                        </div>
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#64748b', fontWeight: 700, padding: '2px 8px', border: '1px solid #e2e8f0', borderRadius: '16px', background: '#f8fafc' }}>
+                                          <Eye size={11} />
+                                          <span>{art.views ? String(art.views).replace(/\s*reads|\s*views/gi, '') : '1.4K'}</span>
                                         </span>
-                                        <span>•</span>
-                                        <span>{artDate}</span>
                                       </div>
                                     </div>
                                   </div>

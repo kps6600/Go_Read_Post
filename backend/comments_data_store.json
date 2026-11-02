@@ -2041,5 +2041,59 @@
     "createdAt": "2026-11-01T10:38:19.556Z",
     "__v": 0,
     "updatedAt": "2026-11-02T10:38:19.562Z"
+  },
+  {
+    "storySlug": "social-expert-3",
+    "contentType": "article",
+    "contentTitle": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": true,
+    "adminReply": {
+      "text": "Spot on analysis, Vikramaditya. Our follow-up piece on Q4 capital allocation will dive deeper into Series B valuations.",
+      "author": "Editorial Desk",
+      "repliedAt": "2026-11-02T11:13:31.426Z"
+    },
+    "rejection_reason": "",
+    "author": "Vikramaditya Shah",
+    "role": "Principal, Peak Capital",
+    "text": "Crucial analysis on this ecosystem shift. The capital discipline we are seeing across the current cohort will set a much stronger foundation for the next decade.",
+    "likes": 18,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae87e6b6d7257fb0c0aede7",
+    "createdAt": "2026-11-02T10:13:31.426Z",
+    "__v": 0,
+    "updatedAt": "2026-11-02T12:13:31.432Z"
+  },
+  {
+    "storySlug": "social-expert-3",
+    "contentType": "article",
+    "contentTitle": "Why collaboration isn't optional anymore in Indian education reform and pedagogy",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": false,
+    "adminReply": {
+      "text": "",
+      "author": "Editorial Desk",
+      "repliedAt": null
+    },
+    "rejection_reason": "",
+    "author": "Ananya Deshmukh",
+    "role": "VP Product, SaaS Scale",
+    "text": "Particularly agree with the observations on operational efficiency. Real value creation is finally getting the spotlight over pure GMV chasing.",
+    "likes": 12,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6ae87e6b6d7257fb0c0aede8",
+    "createdAt": "2026-11-02T08:13:31.426Z",
+    "__v": 0,
+    "updatedAt": "2026-11-02T12:13:31.433Z"
   }
 ]
