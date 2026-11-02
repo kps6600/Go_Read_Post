@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown, RotateCcw
+  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -299,33 +299,6 @@ export default function AdminUsersView({ onShowToast }) {
             </select>
             <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
           </div>
-
-          {/* Reset Filters button */}
-          {(search || statusFilter !== 'all') && (
-            <button
-              type="button"
-              onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
-              title="Reset all filters"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                height: '40px',
-                padding: '0 12px',
-                borderRadius: '8px',
-                border: '1px dashed #cbd5e1',
-                background: '#ffffff',
-                color: '#dc2626',
-                fontSize: '12.5px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <RotateCcw size={13} />
-              <span>Reset</span>
-            </button>
-          )}
 
           {/* Add User CTA Button */}
           <button
