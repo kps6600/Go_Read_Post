@@ -154,7 +154,7 @@ export const protectAuth = async (req, res, next) => {
 export const protectAdmin = async (req, res, next) => {
   await protectAuth(req, res, () => {
     const role = (req.user?.role || req.admin?.role || '').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
-    const adminRoles = ['SUPER_ADMIN', 'ADMIN'];
+    const adminRoles = ['SUPER_ADMIN', 'AUTHOR', 'ADMIN', 'EDITOR'];
     
     if (!adminRoles.includes(role)) {
       return res.status(403).json({

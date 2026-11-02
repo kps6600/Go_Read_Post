@@ -163,7 +163,7 @@ export const AuthService = {
     const u = user || this.getAdminUser() || this.getUser();
     if (!u || !u.role) return false;
     const role = (u.role || '').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
-    return ['SUPER_ADMIN', 'ADMIN'].includes(role);
+    return ['SUPER_ADMIN', 'AUTHOR', 'ADMIN', 'EDITOR'].includes(role);
   },
 
   isSuperAdmin(user = null) {

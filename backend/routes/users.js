@@ -19,20 +19,20 @@ let fallbackUsers = [
     createdAt: new Date().toISOString()
   },
   {
-    _id: 'editor_user_id',
-    name: 'Senior Editor',
-    username: 'editor',
-    email: 'editor@goreadpost.com',
-    role: 'EDITOR',
-    isActive: true,
-    createdAt: new Date().toISOString()
-  },
-  {
     _id: 'author_user_id',
     name: 'Staff Author',
     username: 'author',
     email: 'author@goreadpost.com',
     role: 'AUTHOR',
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    _id: 'sample_user_id',
+    name: 'Sample Reader',
+    username: 'reader1',
+    email: 'reader@example.com',
+    role: 'USER',
     isActive: true,
     createdAt: new Date().toISOString()
   }
@@ -75,7 +75,7 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields (name, username, email, password) are required.' });
     }
 
-    const validRoles = ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'];
+    const validRoles = ['SUPER_ADMIN', 'AUTHOR', 'USER', 'READER'];
     const chosenRole = validRoles.includes((role || '').toUpperCase()) ? (role || '').toUpperCase() : 'AUTHOR';
 
     if (isDbConnected()) {

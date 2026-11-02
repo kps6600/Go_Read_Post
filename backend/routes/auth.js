@@ -377,11 +377,11 @@ router.get('/me', protectAuth, async (req, res) => {
         user = req.user;
       }
       const role = (user.role || 'READER').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
-      const isAssignedAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(role);
+      const isAssignedAdmin = ['SUPER_ADMIN', 'AUTHOR', 'ADMIN', 'EDITOR'].includes(role);
       return res.json({ success: true, user, admin: isAssignedAdmin ? user : null });
     }
     const role = (req.user?.role || 'READER').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
-    const isAssignedAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(role);
+    const isAssignedAdmin = ['SUPER_ADMIN', 'AUTHOR', 'ADMIN', 'EDITOR'].includes(role);
     res.json({ success: true, user: req.user, admin: isAssignedAdmin ? req.user : null });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
