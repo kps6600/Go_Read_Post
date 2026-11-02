@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown,
-  UserPlus, Eye, EyeOff, Lock, Phone, Sparkles, Check, User
+  Eye, EyeOff, Lock, Phone, Sparkles, Check, User
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -705,20 +705,10 @@ export default function AdminUsersView({ onShowToast }) {
           <div style={{ background: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
             
             {/* Modal Header */}
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626' }}>
-                  <UserPlus size={20} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '750', color: '#0f172a' }}>
-                    {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
-                  </h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#64748b' }}>
-                    {editingUser ? 'Update community reader details and credentials.' : 'Enter reader profile details and login credentials.'}
-                  </p>
-                </div>
-              </div>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
+                {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
