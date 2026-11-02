@@ -844,26 +844,10 @@ export default function LiveBannerEditor({
                           }}
                         >
                           <span 
-                          contentEditable={true}
-                          suppressContentEditableWarning={true}
-                          className="lse-direct-editable"
-                          onBlur={(e) => {
-                            const val = e.currentTarget.textContent.trim();
-                            if (val && val !== currentSlide.category) {
-                              handleInlineSlideUpdate({ category: val, badge: val });
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          title="Click directly to edit category badge"
-                          style={{ cursor: 'text' }}
-                        >
-                          {currentSlide.category}
-                        </span>
+                            style={{ pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
+                          >
+                            {currentSlide.category}
+                          </span>
                         </span>
                       </div>
                     )}
@@ -1131,23 +1115,7 @@ export default function LiveBannerEditor({
                           <span className="mhp-popular-meta">
                             {item.category && (
                             <span 
-                              contentEditable={true}
-                              suppressContentEditableWarning={true}
-                              className="lse-direct-editable"
-                              onBlur={(e) => {
-                                const val = e.currentTarget.textContent.trim();
-                                if (val && val !== item.category) {
-                                  handleInlinePopularUpdate(idx, { category: val });
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  e.currentTarget.blur();
-                                }
-                              }}
-                              title="Click directly to edit category"
-                              style={{ color: '#fb923c', marginRight: '4px', cursor: 'text' }}
+                              style={{ color: '#fb923c', marginRight: '4px', pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
                             >
                               {item.category} •
                             </span>

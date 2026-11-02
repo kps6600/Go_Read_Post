@@ -1130,23 +1130,8 @@ export default function LiveWholePageStudio({
 
                             <div className="mhp-hero-content">
                               <span 
-                                contentEditable={true}
-                                suppressContentEditableWarning={true}
-                                className="mhp-badge lse-direct-editable"
-                                onBlur={(e) => {
-                                  const val = e.currentTarget.textContent.trim();
-                                  if (val && val !== activeSlide.category) {
-                                    handleInlineSlideUpdate({ category: val, categoryLabel: val });
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.currentTarget.blur();
-                                  }
-                                }}
-                                title="Click directly to edit category badge"
-                                style={{ cursor: 'text' }}
+                                className="mhp-badge"
+                                style={{ pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
                               >
                                 {activeSlide.category || 'FEATURED'}
                               </span>
@@ -1348,23 +1333,7 @@ export default function LiveWholePageStudio({
                                       </h4>
                                       <span className="mhp-popular-meta">
                                         <span 
-                                          contentEditable={true}
-                                          suppressContentEditableWarning={true}
-                                          className="lse-direct-editable"
-                                          onBlur={(e) => {
-                                            const val = e.currentTarget.textContent.trim();
-                                            if (val && val !== item.category) {
-                                              handleInlinePopularUpdate(idx, { category: val });
-                                            }
-                                          }}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                              e.preventDefault();
-                                              e.currentTarget.blur();
-                                            }
-                                          }}
-                                          title="Click directly to edit category"
-                                          style={{ color: '#fb923c', marginRight: '4px', cursor: 'text' }}
+                                          style={{ color: '#fb923c', marginRight: '4px', pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
                                         >
                                           {item.category || 'Startups'} •
                                         </span>
@@ -1489,8 +1458,8 @@ export default function LiveWholePageStudio({
                                     background: '#ffffff',
                                     borderRadius: '16px',
                                     overflow: 'hidden',
-                                    border: '2px solid #ea580c',
-                                    boxShadow: '0 6px 20px rgba(234, 88, 12, 0.12)',
+                                    border: '1px solid #e2e8f0',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     transition: 'all 0.25s ease'
@@ -1669,22 +1638,6 @@ export default function LiveWholePageStudio({
 
                                     {/* Category Pill in Bottom-Left of Image */}
                                     <span 
-                                      contentEditable={true}
-                                      suppressContentEditableWarning={true}
-                                      className="lse-direct-editable"
-                                      onBlur={(e) => {
-                                        const val = e.currentTarget.textContent.trim();
-                                        if (val && val !== artCat) {
-                                          handleInlineArticleUpdate(sec.id, art, { category: val, categoryName: val, categoryLabel: val });
-                                        }
-                                      }}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          e.preventDefault();
-                                          e.currentTarget.blur();
-                                        }
-                                      }}
-                                      title="Click directly to edit category badge"
                                       style={{
                                         position: 'absolute',
                                         bottom: '10px',
@@ -1699,7 +1652,9 @@ export default function LiveWholePageStudio({
                                         borderRadius: '5px',
                                         textTransform: 'uppercase',
                                         boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
-                                        cursor: 'text'
+                                        cursor: 'default',
+                                        userSelect: 'none',
+                                        pointerEvents: 'none'
                                       }}
                                     >
                                       {artCat}
