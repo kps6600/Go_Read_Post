@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { 
-  Users, Shield, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Check, Lock, Mail, UserCheck, CheckSquare
+  Users, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Check, Lock, Mail, UserCheck, CheckSquare
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -12,7 +12,6 @@ export default function AdminUsersView({ onShowToast }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'roles'
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -156,54 +155,36 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Tabs & Actions Bar */}
+      {/* Header & Actions Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => setActiveTab('users')}
+          <div
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
-              border: 'none', background: 'transparent', cursor: 'pointer',
-              fontWeight: activeTab === 'users' ? '700' : '500',
-              color: activeTab === 'users' ? 'var(--brand-primary, #0ea5e9)' : '#64748b',
-              borderBottom: activeTab === 'users' ? '2px solid var(--brand-primary, #0ea5e9)' : '2px solid transparent'
+              fontWeight: '700',
+              color: 'var(--brand-primary, #0ea5e9)',
+              borderBottom: '2px solid var(--brand-primary, #0ea5e9)'
             }}
           >
             <span>Editorial Users ({users.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('roles')}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
-              border: 'none', background: 'transparent', cursor: 'pointer',
-              fontWeight: activeTab === 'roles' ? '700' : '500',
-              color: activeTab === 'roles' ? 'var(--brand-primary, #0ea5e9)' : '#64748b',
-              borderBottom: activeTab === 'roles' ? '2px solid var(--brand-primary, #0ea5e9)' : '2px solid transparent'
-            }}
-          >
-            <span>Role Permissions Matrix</span>
-          </button>
+          </div>
         </div>
 
-        {activeTab === 'users' && (
-          <button
-            onClick={openCreateModal}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
-              background: 'var(--brand-primary, #0ea5e9)', color: '#fff', border: 'none', borderRadius: '8px',
-              fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer', marginBottom: '4px',
-              boxShadow: '0 2px 6px rgba(14, 165, 233, 0.25)'
-            }}
-          >
-            <Plus size={15} />
-            <span>Add New User</span>
-          </button>
-        )}
+        <button
+          onClick={openCreateModal}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
+            background: 'var(--brand-primary, #0ea5e9)', color: '#fff', border: 'none', borderRadius: '8px',
+            fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer', marginBottom: '4px',
+            boxShadow: '0 2px 6px rgba(14, 165, 233, 0.25)'
+          }}
+        >
+          <Plus size={15} />
+          <span>Add New User</span>
+        </button>
       </div>
 
-      {activeTab === 'users' ? (
-        <>
+      <>
           {/* Bulk Action Toolbar */}
           {selectedIds.size > 0 && (
             <div style={{
@@ -386,53 +367,7 @@ export default function AdminUsersView({ onShowToast }) {
               </table>
             </div>
           )}
-        </>
-      ) : (
-        /* Roles Tab */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
-          {[
-            {
-              role: 'SUPER_ADMIN',
-              name: 'Super Administrator',
-              desc: 'Full platform authority. Manages database, security keys, all roles, and global configurations.',
-              perms: ['All Permissions', 'Manage Users & Roles', 'Delete All Records', 'Settings & System CMS']
-            },
-            {
-              role: 'ADMIN',
-              name: 'Administrator',
-              desc: 'Manages navigation, homepage, authors, categories, media, and all editorial publishing desks.',
-              perms: ['Publish & Unpublish Articles', 'Manage Navigation & Footer', 'Manage Taxonomy & Media', 'Homepage Curation']
-            },
-            {
-              role: 'EDITOR',
-              name: 'Senior Editor',
-              desc: 'Reviews drafts submitted by authors, schedules stories, edits taxonomy, and curates featured flags.',
-              perms: ['Review & Edit Articles', 'Publish Approved Stories', 'Create Categories & Tags', 'Upload Media Assets']
-            },
-            {
-              role: 'AUTHOR',
-              name: 'Staff Reporter / Author',
-              desc: 'Drafts articles, uploads story images, tags topics, and submits pieces for editorial review.',
-              perms: ['Create & Edit Own Drafts', 'Upload Story Media', 'Tag Topics & Entities', 'Read All Published Content']
-            }
-          ].map(r => (
-            <div key={r.role} style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <Shield size={18} color="var(--brand-primary, #0ea5e9)" />
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800' }}>{r.name}</h3>
-              </div>
-              <p style={{ color: '#64748b', fontSize: '13px', margin: '0 0 16px' }}>{r.desc}</p>
-
-              <div style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '8px' }}>GRANULAR PERMISSIONS:</div>
-              <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#334155' }}>
-                {r.perms.map(p => (
-                  <li key={p} style={{ marginBottom: '4px' }}>{p}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
+      </>
 
       {/* Create / Edit User Modal */}
       {isModalOpen && (
