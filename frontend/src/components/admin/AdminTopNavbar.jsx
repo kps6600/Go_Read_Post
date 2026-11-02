@@ -18,6 +18,8 @@ export default function AdminTopNavbar({
     if ((currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs')) && currentPath.includes('/edit')) return 'Articles / Edit Story';
     if (currentPath === '/admin/posts' || currentPath === '/admin/blogs') return 'Editorial Articles & Posts';
     if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) return 'Homepage Live Studio & CMS';
+    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic')) return 'Pages / Topic Page Studio';
+    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) return 'Pages / Category Page Studio';
     if (currentPath === '/admin/pages/create') return 'Pages / Create Page';
     if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
       if (currentPath.includes('/home/')) return 'Pages / Edit Homepage';

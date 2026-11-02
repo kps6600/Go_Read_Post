@@ -28,6 +28,7 @@ import AdminCommentsView from './AdminCommentsView';
 import AdminSubmissionsView from './AdminSubmissionsView';
 import AdminTrendingView from './AdminTrendingView';
 import AdminCategoryStudioView from './AdminCategoryStudioView';
+import AdminTopicStudioView from './AdminTopicStudioView';
 import AdminFounderView from './AdminFounderView';
 
 export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: propSettings }) {
@@ -248,6 +249,19 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       );
     }
 
+    // 6c-1. Topic Page Live Studio: /admin/topic or /admin/topic/:slug
+    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic')) {
+      const topicSlug = currentPath.replace('/admin/topic', '').replace(/^\/+/, '').split('/')[0].split('?')[0];
+      return (
+        <AdminTopicStudioView
+          initialTopic={topicSlug || 'herstory'}
+          currentPath={currentPath}
+          onShowToast={onShowToast}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+
     // 6c. Category Page Live Studio: /admin/category or /admin/category-studio
     if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) {
       const catSlug = currentPath.replace('/admin/category', '').replace(/^\/+/, '').split('/')[0].split('?')[0];
@@ -409,6 +423,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     currentPath.startsWith('/admin/trending') ||
     currentPath === '/admin/category' ||
     currentPath.startsWith('/admin/category') ||
+    currentPath === '/admin/topic' ||
+    currentPath.startsWith('/admin/topic') ||
     currentPath === '/admin/about' ||
     currentPath.startsWith('/admin/about') ||
     currentPath === '/admin/homepage' ||

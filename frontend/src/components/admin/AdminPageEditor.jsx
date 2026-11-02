@@ -14,6 +14,7 @@ import LiveWholePageStudio from './LiveWholePageStudio';
 import LatestArticlesPage from '../LatestArticlesPage';
 import AdminTrendingView from './AdminTrendingView';
 import AdminCategoryStudioView from './AdminCategoryStudioView';
+import AdminTopicStudioView from './AdminTopicStudioView';
 import AdminAboutView from './AdminAboutView';
 import ContactPage from '../ContactPage';
 import AdvertisePage from '../AdvertisePage';
@@ -976,6 +977,28 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
           onNavigate={onNavigate}
         />
       );
+    }
+
+
+    // 3b. Topic Pages & Hubs (/topic/:slug)
+    if (
+      normId.startsWith('topic') || normSlug.startsWith('topic') ||
+      normId === 'topics' || normSlug === 'topics'
+    ) {
+      const topicSlug = normSlug.startsWith('topic/')
+        ? normSlug.replace('topic/', '')
+        : (normId.startsWith('topic_') ? normId.replace('topic_', '') : (normId === 'topics' || normSlug === 'topics' ? null : normId));
+      if (topicSlug && topicSlug !== 'topics') {
+        return (
+          <AdminTopicStudioView
+            isStudioView={true}
+            initialTopic={topicSlug || 'herstory'}
+            currentPath={currentPath}
+            onShowToast={onShowToast}
+            onNavigate={onNavigate}
+          />
+        );
+      }
     }
 
     // 4. About Us Page
