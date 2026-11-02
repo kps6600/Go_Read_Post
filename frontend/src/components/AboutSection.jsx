@@ -7,19 +7,31 @@ import {
   PenTool, 
   Search, 
   Send, 
-  Loader2 
+  Loader2,
+  Trash2,
+  Plus,
+  X
 } from 'lucide-react';
 import { SubmissionService } from '../services/submissionService';
-import { getStoredAboutData, DEFAULT_ABOUT_DATA } from '../data/aboutData';
+import { getStoredAboutData, DEFAULT_ABOUT_DATA, saveStoredAboutData } from '../data/aboutData';
+import { PageService } from '../services/pageService';
 import './AboutSection.css';
 
-export default function AboutSection({ page }) {
+export default function AboutSection({ 
+  page, 
+  isStudioView = false, 
+  onShowToast, 
+  onBackToHome 
+}) {
   const [aboutData, setAboutData] = useState(() => {
     if (page?.data && typeof page.data === 'object' && (page.data.hero || page.data.whatWeShare)) {
       return { ...DEFAULT_ABOUT_DATA, ...page.data };
     }
     return getStoredAboutData();
   });
+
+  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
+  const [newCard, setNewCard] = useState({ title: '', description: '' });
 
   useEffect(() => {
     if (page?.data && typeof page.data === 'object' && (page.data.hero || page.data.whatWeShare)) {
@@ -35,6 +47,38 @@ export default function AboutSection({ page }) {
     window.addEventListener('storage', handleStorageUpdate);
     return () => window.removeEventListener('storage', handleStorageUpdate);
   }, [page]);
+
+  // Listen to Studio Top Bar "+ Add Card" event
+  useEffect(() => {
+    const handleAddCardEvent = () => {
+      setIsAddCardModalOpen(true);
+    };
+    window.addEventListener('open:add-about-card', handleAddCardEvent);
+    window.addEventListener('open:add-card', handleAddCardEvent);
+    return () => {
+      window.removeEventListener('open:add-about-card', handleAddCardEvent);
+      window.removeEventListener('open:add-card', handleAddCardEvent);
+    };
+  }, []);
+
+  // Listen to Studio Top Bar "Publish Live" event
+  useEffect(() => {
+    const handlePublishEvent = () => {
+      saveStoredAboutData(aboutData);
+      try {
+        PageService.updatePage('about', {
+          title: 'About Us',
+          slug: 'about',
+          status: 'published',
+          data: aboutData
+        }).catch(() => {});
+      } catch (e) {}
+    };
+    window.addEventListener('admin:publish-live-studio', handlePublishEvent);
+    return () => {
+      window.removeEventListener('admin:publish-live-studio', handlePublishEvent);
+    };
+  }, [aboutData]);
 
   useEffect(() => {
     if (aboutData?.seo?.title) {
@@ -83,7 +127,6 @@ export default function AboutSection({ page }) {
       setQueryForm({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
       console.warn('Submission note:', err);
-      // Ensure positive feedback if submission accepted or locally completed
       setQuerySubmitted(true);
       setQueryForm({ name: '', email: '', subject: '', message: '' });
     } finally {
@@ -105,11 +148,110 @@ export default function AboutSection({ page }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Card Management: Delete a card
+  const handleDeleteCard = (cardIdOrIdx) => {
+    const currentItems = [...(aboutData.whatWeShare?.items || [])];
+    const filtered = currentItems.filter((item, idx) => {
+      if (item.id) return item.id !== cardIdOrIdx;
+      return idx !== cardIdOrIdx;
+    });
+
+    const updated = {
+      ...aboutData,
+      whatWeShare: {
+        ...aboutData.whatWeShare,
+        items: filtered
+      }
+    };
+
+    setAboutData(updated);
+    saveStoredAboutData(updated);
+    try {
+      PageService.updatePage('about', { data: updated }).catch(() => {});
+    } catch (e) {}
+
+    if (onShowToast) {
+      onShowToast('Card deleted from "What We Share"');
+    }
+  };
+
+  // Card Management: Add a new card
+  const handleAddCard = (e) => {
+    e?.preventDefault();
+    if (!newCard.title.trim()) {
+      if (onShowToast) onShowToast('Please enter a card title');
+      return;
+    }
+
+    const cardToAdd = {
+      id: 'share-' + Date.now(),
+      title: newCard.title.trim(),
+      description: newCard.description.trim() || 'Insightful perspectives and curated articles.'
+    };
+
+    const currentItems = [...(aboutData.whatWeShare?.items || [])];
+    const updatedItems = [...currentItems, cardToAdd];
+
+    const updated = {
+      ...aboutData,
+      whatWeShare: {
+        ...aboutData.whatWeShare,
+        items: updatedItems
+      }
+    };
+
+    setAboutData(updated);
+    saveStoredAboutData(updated);
+    try {
+      PageService.updatePage('about', { data: updated }).catch(() => {});
+    } catch (e) {}
+
+    setNewCard({ title: '', description: '' });
+    setIsAddCardModalOpen(false);
+
+    if (onShowToast) {
+      onShowToast(`Card "${cardToAdd.title}" added to "What We Share"!`);
+    }
+  };
+
   const { hero, whoWeAre, whatWeShare, mission, vision, whyChooseUs, community } = aboutData;
 
   return (
-    <div className="nexus-about-root">
+    <div className={`nexus-about-root ${isStudioView ? 'nexus-about-studio-mode' : ''}`}>
       <div className="nexus-about-container">
+
+        {/* ── Studio View Breadcrumb ── */}
+        {isStudioView && (
+          <nav 
+            className="contact-breadcrumb-nav" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              fontSize: '0.88rem', 
+              color: '#64748b',
+              marginBottom: '-1.5rem',
+              padding: '0 0.25rem'
+            }}
+          >
+            <button 
+              type="button" 
+              onClick={onBackToHome}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: '#dc2626', 
+                fontWeight: 700, 
+                cursor: 'pointer', 
+                padding: 0 
+              }}
+            >
+              Home
+            </button>
+            <span>/</span>
+            <span style={{ color: '#0f172a', fontWeight: 700 }}>About Us</span>
+          </nav>
+        )}
 
         {/* ── 1. HERO SECTION ── */}
         <section className="nexus-hero-section">
@@ -188,11 +330,98 @@ export default function AboutSection({ page }) {
 
           <div className="nexus-share-grid">
             {(whatWeShare?.items || []).map((item, idx) => (
-              <div key={item.id || idx} className="nexus-share-card">
+              <div 
+                key={item.id || idx} 
+                className="nexus-share-card"
+                style={{ position: 'relative' }}
+              >
+                {isStudioView && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCard(item.id || idx);
+                    }}
+                    title="Delete card"
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '8px',
+                      border: '1px solid #fecaca',
+                      background: '#fff1f2',
+                      color: '#dc2626',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      zIndex: 5
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#dc2626';
+                      e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.borderColor = '#dc2626';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#fff1f2';
+                      e.currentTarget.style.color = '#dc2626';
+                      e.currentTarget.style.borderColor = '#fecaca';
+                    }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
                 <h3 className="nexus-share-card-title">{item.title}</h3>
                 <p className="nexus-share-card-desc">{item.description}</p>
               </div>
             ))}
+
+            {isStudioView && (
+              <button
+                type="button"
+                onClick={() => setIsAddCardModalOpen(true)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  minHeight: '170px',
+                  background: '#f8fafc',
+                  border: '2px dashed #cbd5e1',
+                  borderRadius: '16px',
+                  color: '#ea580c',
+                  cursor: 'pointer',
+                  padding: '1.5rem',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#fff7ed';
+                  e.currentTarget.style.borderColor = '#ea580c';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+              >
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  background: '#ffedd5',
+                  color: '#ea580c',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Plus size={20} />
+                </div>
+                <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>+ Add Card</span>
+              </button>
+            )}
           </div>
         </section>
 
@@ -371,6 +600,138 @@ export default function AboutSection({ page }) {
         </section>
 
       </div>
+
+      {/* ── MODAL: ADD CARD TO WHAT WE SHARE ── */}
+      {isAddCardModalOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '1rem'
+          }}
+          onClick={() => setIsAddCardModalOpen(false)}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '480px',
+              width: '100%',
+              padding: '1.75rem',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              border: '1px solid #e2e8f0'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
+                  <Plus size={18} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Add Card to What We Share
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddCardModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCard}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Card Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Industry Reports & Research"
+                  value={newCard.title}
+                  onChange={(e) => setNewCard(prev => ({ ...prev, title: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.9rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    fontSize: '0.92rem',
+                    boxSizing: 'border-box',
+                    outline: 'none'
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Card Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="e.g. Deep-dive analyses into emerging markets, tech disruption, and high-growth sectors."
+                  value={newCard.description}
+                  onChange={(e) => setNewCard(prev => ({ ...prev, description: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.9rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    fontSize: '0.92rem',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddCardModalOpen(false)}
+                  style={{
+                    padding: '0.6rem 1.1rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '0.6rem 1.3rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#ea580c',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+                  }}
+                >
+                  Add Card
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

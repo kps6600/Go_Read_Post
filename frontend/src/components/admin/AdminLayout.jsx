@@ -174,7 +174,13 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
     // About Us Page Studio: /admin/about
     if (currentPath === '/admin/about' || currentPath.startsWith('/admin/about')) {
-      return <AdminAboutView onShowToast={onShowToast} onNavigate={handleNavigate} />;
+      return (
+        <AdminPageEditor 
+          pageId="about" 
+          onNavigate={handleNavigate} 
+          onShowToast={onShowToast} 
+        />
+      );
     }
 
     // Founder First Studio: /admin/founder or /admin/founder-first

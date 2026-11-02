@@ -16,6 +16,7 @@ import AdminTrendingView from './AdminTrendingView';
 import AdminCategoryStudioView from './AdminCategoryStudioView';
 import AdminTopicStudioView from './AdminTopicStudioView';
 import AdminAboutView from './AdminAboutView';
+import AboutSection from '../AboutSection';
 import ContactPage from '../ContactPage';
 import AdvertisePage from '../AdvertisePage';
 import AIStoryPage from '../AIStoryPage';
@@ -1003,10 +1004,11 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
     // 4. About Us Page
     if (normId === 'about' || normSlug === 'about' || normSlug === 'about-us') {
       return (
-        <AdminAboutView
+        <AboutSection
           isStudioView={true}
+          page={page}
           onShowToast={onShowToast}
-          onNavigate={onNavigate}
+          onBackToHome={() => onNavigate ? onNavigate('/admin/pages') : (window.location.href = '/admin/pages')}
         />
       );
     }
