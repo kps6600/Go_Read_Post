@@ -285,12 +285,13 @@ export default function AdminUsersView({ onShowToast }) {
         marginBottom: '20px',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        justifyContent: 'space-between',
+        gap: '14px',
         flexWrap: 'wrap',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
       }}>
-        {/* Search Box */}
-        <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '420px', minWidth: '240px' }}>
+        {/* Search Box - Expands dynamically across container */}
+        <div style={{ position: 'relative', flex: '1 1 320px', minWidth: '240px' }}>
           <Search size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
           <input
             type="text"
@@ -340,60 +341,64 @@ export default function AdminUsersView({ onShowToast }) {
           )}
         </div>
 
-        {/* Status Filter Dropdown */}
-        <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-          <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
-          <select
-            value={statusFilter}
-            onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
-            style={{
-              appearance: 'none',
-              height: '40px',
-              padding: '0 32px 0 32px',
-              border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: statusFilter !== 'all' ? '700' : '500',
-              background: statusFilter !== 'all' ? '#fff1f2' : '#f8fafc',
-              color: statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
-              cursor: 'pointer',
-              outline: 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active Only</option>
-            <option value="suspended">Suspended Only</option>
-          </select>
-          <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
-        </div>
+        {/* Right Controls: Status Filter & Reset */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          {/* Status Filter Dropdown */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
+            <select
+              value={statusFilter}
+              onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
+              style={{
+                appearance: 'none',
+                height: '40px',
+                minWidth: '150px',
+                padding: '0 32px 0 32px',
+                border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: statusFilter !== 'all' ? '700' : '500',
+                background: statusFilter !== 'all' ? '#fff1f2' : '#f8fafc',
+                color: statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="suspended">Suspended Only</option>
+            </select>
+            <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
+          </div>
 
-        {/* Reset Filters button */}
-        {(search || statusFilter !== 'all') && (
-          <button
-            type="button"
-            onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
-            title="Reset all filters"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              height: '40px',
-              padding: '0 12px',
-              borderRadius: '8px',
-              border: '1px dashed #cbd5e1',
-              background: '#ffffff',
-              color: '#dc2626',
-              fontSize: '12.5px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <RotateCcw size={13} />
-            <span>Reset</span>
-          </button>
-        )}
+          {/* Reset Filters button */}
+          {(search || statusFilter !== 'all') && (
+            <button
+              type="button"
+              onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
+              title="Reset all filters"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '40px',
+                padding: '0 12px',
+                borderRadius: '8px',
+                border: '1px dashed #cbd5e1',
+                background: '#ffffff',
+                color: '#dc2626',
+                fontSize: '12.5px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <RotateCcw size={13} />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Users Table */}
