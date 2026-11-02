@@ -178,38 +178,34 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Page Header (No split tabs) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', flexWrap: 'wrap', gap: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(220, 38, 38, 0.08)', color: 'var(--brand-primary, #dc2626)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={22} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
-                User List
-              </h2>
-              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--brand-primary, #dc2626)', background: 'rgba(220, 38, 38, 0.08)', padding: '2px 9px', borderRadius: '12px' }}>
-                {users.length} Total
-              </span>
-            </div>
-            <p style={{ margin: '3px 0 0', fontSize: '0.84rem', color: '#64748b' }}>
-              Manage platform administrators, editorial authors, and registered public readers.
-            </p>
+      {/* Header & Tab Bar (All Users and Team Users removed, only User List tab remains) */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <div
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
+              fontWeight: '700',
+              color: 'var(--brand-primary, #dc2626)',
+              borderBottom: '2px solid var(--brand-primary, #dc2626)',
+              fontSize: '0.94rem'
+            }}
+          >
+            <Users size={16} />
+            <span>User List ({users.length})</span>
           </div>
         </div>
 
         <button
           onClick={openCreateModal}
           style={{
-            display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 18px',
+            display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
             background: 'var(--brand-primary, #dc2626)', color: '#fff', border: 'none', borderRadius: '8px',
-            fontWeight: '600', fontSize: '0.86rem', cursor: 'pointer',
+            fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer', marginBottom: '4px',
             boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
             transition: 'all 0.15s ease'
           }}
         >
-          <Plus size={16} />
+          <Plus size={15} />
           <span>Add User</span>
         </button>
       </div>
