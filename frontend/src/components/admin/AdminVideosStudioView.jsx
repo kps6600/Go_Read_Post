@@ -295,16 +295,7 @@ export default function AdminVideosStudioView({ onShowToast, onNavigate, isStudi
             )}
           </div>
 
-          <div className="avsv-toolbar-meta">
-            <span className="avsv-meta-dot" />
-            <span>
-              {searchQuery ? (
-                <>Found <strong>{filteredVideos.length}</strong> matching episodes</>
-              ) : (
-                <>Viewing <strong>{activeSeries === 'all' ? 'All Episodes' : activeCategoryObj.label}</strong> &bull; {filteredVideos.length} {filteredVideos.length === 1 ? 'curated episode' : 'curated episodes'}</>
-              )}
-            </span>
-          </div>
+
         </div>
       </section>
 

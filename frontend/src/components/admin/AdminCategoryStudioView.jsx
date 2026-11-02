@@ -616,16 +616,7 @@ export default function AdminCategoryStudioView({
               )}
             </div>
 
-            <div className="acsv-toolbar-meta">
-              <span className="acsv-meta-dot" />
-              <span>
-                {searchQuery ? (
-                  <>Found <strong>{displayStories.length}</strong> matching stories</>
-                ) : (
-                  <>Viewing <strong>{activeCategory === 'All' ? 'All Editorial Desks' : `${activeCategory} Desk`}</strong> &bull; {displayStories.length} {displayStories.length === 1 ? 'curated story' : 'curated stories'}</>
-                )}
-              </span>
-            </div>
+
           </div>
         </div>
 
