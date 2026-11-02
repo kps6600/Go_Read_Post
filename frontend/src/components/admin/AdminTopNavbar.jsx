@@ -24,6 +24,7 @@ export default function AdminTopNavbar({
     if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
       if (currentPath.includes('/home/')) return 'Pages / Edit Homepage';
       if (currentPath.includes('/category/')) return 'Pages / Category Page Studio';
+      if (currentPath.includes('/videos')) return 'Pages / Videos (YS TV) Studio';
       return 'Pages / Edit Page & Sections';
     }
     if (currentPath === '/admin/pages') return 'Pages Manager';

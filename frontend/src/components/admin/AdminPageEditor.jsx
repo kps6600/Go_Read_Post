@@ -25,6 +25,7 @@ import SMBStoryPage from '../SMBStoryPage';
 import EnterpriseStoryPage from '../EnterpriseStoryPage';
 import TopicsPage from '../TopicsPage';
 import VideosPage from '../VideosPage';
+import AdminVideosStudioView from './AdminVideosStudioView';
 import { ALL_STORIES } from '../../data/storiesData';
 import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 
@@ -1054,7 +1055,13 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
       return <TopicsPage isStudioView={true} onShowToast={onShowToast} />;
     }
     if (normId === 'videos' || normSlug === 'videos') {
-      return <VideosPage isStudioView={true} onShowToast={onShowToast} />;
+      return (
+        <AdminVideosStudioView
+          isStudioView={true}
+          onShowToast={onShowToast}
+          onNavigate={onNavigate}
+        />
+      );
     }
     // 8. Homepage or any other Dynamic / Custom Landing Page (WYSIWYG sections studio)
     return (
@@ -1193,6 +1200,8 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
                   window.dispatchEvent(new CustomEvent('open:add-category-card'));
                 } else if (norm === 'about' || norm.includes('about')) {
                   window.dispatchEvent(new CustomEvent('open:add-about-card'));
+                } else if (norm === 'videos' || norm.includes('videos') || norm.includes('tv')) {
+                  window.dispatchEvent(new CustomEvent('open:add-video-card'));
                 } else {
                   window.dispatchEvent(new CustomEvent('open:add-card'));
                 }
