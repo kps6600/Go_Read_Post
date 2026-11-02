@@ -285,150 +285,115 @@ export default function AdminUsersView({ onShowToast }) {
         marginBottom: '20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         gap: '12px',
         flexWrap: 'wrap',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
       }}>
-        {/* Left: Search & Filter Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '300px', flexWrap: 'wrap' }}>
-          {/* Search Box */}
-          <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '420px', minWidth: '240px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
-            <input
-              type="text"
-              placeholder="Search by name, email, or username..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{
-                width: '100%',
-                height: '40px',
-                padding: '0 34px 0 38px',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                fontSize: '13.5px',
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none',
-                transition: 'all 0.15s ease'
-              }}
-              onFocus={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = 'var(--brand-primary, #dc2626)'; e.target.style.boxShadow = '0 0 0 2px rgba(220, 38, 38, 0.12)'; }}
-              onBlur={e => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                title="Clear search"
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: '#e2e8f0',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#475569',
-                  padding: 0
-                }}
-              >
-                <X size={12} />
-              </button>
-            )}
-          </div>
-
-          {/* Status Filter Dropdown */}
-          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-            <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
-            <select
-              value={statusFilter}
-              onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
-              style={{
-                appearance: 'none',
-                height: '40px',
-                padding: '0 32px 0 32px',
-                border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: statusFilter !== 'all' ? '700' : '500',
-                background: statusFilter !== 'all' ? '#fff1f2' : '#f8fafc',
-                color: statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
-                cursor: 'pointer',
-                outline: 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active Only</option>
-              <option value="suspended">Suspended Only</option>
-            </select>
-            <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
-          </div>
-
-          {/* Reset Filters button */}
-          {(search || statusFilter !== 'all') && (
+        {/* Search Box */}
+        <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '420px', minWidth: '240px' }}>
+          <Search size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+          <input
+            type="text"
+            placeholder="Search by name, email, or username..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              height: '40px',
+              padding: '0 34px 0 38px',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              fontSize: '13.5px',
+              background: '#f8fafc',
+              color: '#0f172a',
+              outline: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            onFocus={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = 'var(--brand-primary, #dc2626)'; e.target.style.boxShadow = '0 0 0 2px rgba(220, 38, 38, 0.12)'; }}
+            onBlur={e => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
+          />
+          {search && (
             <button
               type="button"
-              onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
-              title="Reset all filters"
+              onClick={() => setSearch('')}
+              title="Clear search"
               style={{
-                display: 'inline-flex',
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#e2e8f0',
+                border: 'none',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '5px',
-                height: '40px',
-                padding: '0 12px',
-                borderRadius: '8px',
-                border: '1px dashed #cbd5e1',
-                background: '#ffffff',
-                color: '#dc2626',
-                fontSize: '12.5px',
-                fontWeight: '600',
+                justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                color: '#475569',
+                padding: 0
               }}
             >
-              <RotateCcw size={13} />
-              <span>Reset</span>
+              <X size={12} />
             </button>
           )}
         </div>
 
-        {/* Right: Counter & Refresh Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
-            Showing <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> of {communityUsers.length}
-          </span>
+        {/* Status Filter Dropdown */}
+        <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+          <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
+          <select
+            value={statusFilter}
+            onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
+            style={{
+              appearance: 'none',
+              height: '40px',
+              padding: '0 32px 0 32px',
+              border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: statusFilter !== 'all' ? '700' : '500',
+              background: statusFilter !== 'all' ? '#fff1f2' : '#f8fafc',
+              color: statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
+              cursor: 'pointer',
+              outline: 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="suspended">Suspended Only</option>
+          </select>
+          <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
+        </div>
+
+        {/* Reset Filters button */}
+        {(search || statusFilter !== 'all') && (
           <button
-            onClick={loadData}
-            title="Refresh user directory"
+            type="button"
+            onClick={() => { setSearch(''); setStatusFilter('all'); setSelectedIds(new Set()); }}
+            title="Reset all filters"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '5px',
               height: '40px',
-              padding: '0 14px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
+              padding: '0 12px',
               borderRadius: '8px',
-              color: '#334155',
-              fontSize: '13px',
+              border: '1px dashed #cbd5e1',
+              background: '#ffffff',
+              color: '#dc2626',
+              fontSize: '12.5px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
+            <RotateCcw size={13} />
+            <span>Reset</span>
           </button>
-        </div>
+        )}
       </div>
 
       {/* Users Table */}
