@@ -368,6 +368,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       return (
         <AdminPageEditor 
           pageId={pageId} 
+          currentPath={currentPath} 
           onNavigate={handleNavigate} 
           onShowToast={onShowToast} 
         />
@@ -421,8 +422,6 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     currentPath.startsWith('/admin/founder') ||
     currentPath === '/admin/trending' ||
     currentPath.startsWith('/admin/trending') ||
-    currentPath === '/admin/category' ||
-    currentPath.startsWith('/admin/category') ||
     currentPath === '/admin/topic' ||
     currentPath.startsWith('/admin/topic') ||
     currentPath === '/admin/about' ||

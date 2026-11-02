@@ -490,7 +490,7 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
 
                   const handleEdit = () => {
                     if (pageType === 'home') onNavigate('/admin/homepage');
-                    else if (pageType === 'category') onNavigate('/admin/category');
+                    else if (pageType === 'category') onNavigate('/admin/pages/category/edit');
                     else if (pageType === 'about') onNavigate('/admin/about');
                     else if (pageType === 'contact') onNavigate('/admin/pages/contact/edit');
                     else if (pageType === 'advertise') onNavigate('/admin/pages/page_advertise/edit');

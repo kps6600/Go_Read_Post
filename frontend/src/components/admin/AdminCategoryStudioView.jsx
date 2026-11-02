@@ -105,8 +105,13 @@ export default function AdminCategoryStudioView({
   // Active Category filter on the live page - synced with URI
   const [activeCategory, setActiveCategory] = useState(() => {
     if (initialCategory) return resolveCategoryNameFromSlug(initialCategory);
-    if (typeof window !== 'undefined' && window.location.pathname.includes('/category')) {
-      return resolveCategoryNameFromSlug(window.location.pathname);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      if (catParam) return resolveCategoryNameFromSlug(catParam);
+      if (window.location.pathname.includes('/category')) {
+        return resolveCategoryNameFromSlug(window.location.pathname);
+      }
     }
     return 'All';
   });
@@ -125,7 +130,10 @@ export default function AdminCategoryStudioView({
   const handleSelectCategoryTab = (catName) => {
     setActiveCategory(catName);
     const slug = resolveSlugFromCategoryName(catName);
-    const newUri = slug ? `/admin/category/${slug}` : '/admin/category';
+    const isPagesRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin/pages');
+    const newUri = isPagesRoute
+      ? (slug ? `/admin/pages/category/edit?category=${slug}` : '/admin/pages/category/edit')
+      : (slug ? `/admin/category/${slug}` : '/admin/category');
     try {
       window.history.pushState(null, '', newUri);
     } catch (e) {}

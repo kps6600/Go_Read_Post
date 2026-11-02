@@ -245,9 +245,9 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
       targetUrl = '/admin/pages/home/edit';
     } else if (page.slug && page.slug.startsWith('category/')) {
       const catSlug = page.slug.replace('category/', '');
-      targetUrl = `/admin/category/${catSlug}`;
+      targetUrl = `/admin/pages/${page.id || catSlug}/edit`;
     } else if (page.id === 'category' || page.slug === 'category' || page.slug === 'categories') {
-      targetUrl = '/admin/category';
+      targetUrl = '/admin/pages/category/edit';
     } else if (page.slug && page.slug.startsWith('topic/')) {
       const topicSlug = page.slug.replace('topic/', '');
       targetUrl = `/admin/topic/${topicSlug}`;

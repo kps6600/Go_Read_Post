@@ -167,7 +167,7 @@ export default function AdminSidebar({
                   (item.id === 'archived' && (currentPath === '/admin/archived' || currentPath.startsWith('/admin/archived') || currentPath.includes('/archived'))) ||
                   (item.id === 'videos' && (currentPath === '/admin/videos' || currentPath.startsWith('/admin/videos'))) ||
                   (item.id === 'articles' && (currentPath === '/admin/articles' || currentPath.startsWith('/admin/articles') || currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs') || currentPath === '/admin/drafts' || currentPath.startsWith('/admin/drafts')) && !currentPath.includes('/archived')) ||
-                  (item.id === 'pages' && (currentPath === '/admin/pages' || (currentPath.startsWith('/admin/pages') && !currentPath.startsWith('/admin/homepage')))) ||
+                  (item.id === 'pages' && (currentPath === '/admin/pages' || (currentPath.startsWith('/admin/pages') && !currentPath.startsWith('/admin/homepage')) || currentPath === '/admin/category' || currentPath.startsWith('/admin/category'))) ||
                   (item.id === 'users' && (currentPath === '/admin/users' || currentPath === '/admin/roles'));
 
                 return (
