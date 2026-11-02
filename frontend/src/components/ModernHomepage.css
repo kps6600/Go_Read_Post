@@ -784,16 +784,17 @@
   left: 14px;
   z-index: 2;
   color: #ffffff !important;
-  font-size: 0.76rem;
-  font-weight: 850;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: transparent !important;
-  padding: 0 !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  background: var(--brand-primary, #dc2626) !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
   border: none !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
   pointer-events: none;
-  line-height: 1;
+  line-height: 1.25;
 }
 
 /* Floating Thumbnail Save Button */
@@ -1029,16 +1030,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: transparent;
-  border: 1px solid #e2e8f0;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 20px;
-  padding: 4px 9px;
-  font-size: 0.76rem;
+  padding: 3px 9px;
+  font-size: 0.74rem;
   font-weight: 700;
-  color: #64748b;
+  color: #dc2626;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  line-height: 1;
+  line-height: 1.2;
 }
 
 [data-theme='dark'] .mhp-blog-footer-like-btn {
@@ -1410,14 +1411,14 @@ main:has(.mhp-container) ~ .site-footer {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: transparent;
+  background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 4px 9px;
-  font-size: 0.76rem;
+  padding: 3px 9px;
+  font-size: 0.74rem;
   font-weight: 700;
-  color: #64748b;
-  line-height: 1;
+  color: #475569;
+  line-height: 1.2;
   user-select: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

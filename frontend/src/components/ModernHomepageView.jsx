@@ -691,10 +691,10 @@ export default function ModernHomepageView({
                 aria-label="Like story"
               >
                 <Heart 
-                  size={14} 
+                  size={13} 
                   className="mhp-like-icon"
-                  fill={isCardLiked ? '#ef4444' : 'none'} 
-                  color={isCardLiked ? '#ef4444' : 'currentColor'} 
+                  fill="#dc2626" 
+                  color="#dc2626" 
                 />
                 {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
               </button>
