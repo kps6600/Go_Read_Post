@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown,
-  Eye, EyeOff, Lock, Phone, Check, User
+  Eye, EyeOff, Lock, Phone, Check, User, Upload
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
+import { AuthService } from '../../services/authService';
 
 const USER_AVATAR_POOL = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
@@ -64,6 +65,8 @@ export default function AdminUsersView({ onShowToast }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState('');
+  const fileInputRef = useRef(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -109,6 +112,58 @@ export default function AdminUsersView({ onShowToast }) {
       );
     });
   }, [communityUsers, search, statusFilter]);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Selected image exceeds 5MB size limit.');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result;
+
+        try {
+          const token = AuthService.getToken();
+          const res = await fetch('/api/media/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              base64Data,
+              filename: `user_${(formData.username || 'avatar')}_${Date.now()}`
+            })
+          });
+
+          const json = await res.json();
+          if (res.ok && json.success && json.data?.url) {
+            setFormData(prev => ({ ...prev, avatar: json.data.url }));
+            if (onShowToast) onShowToast('Profile photo uploaded from device!');
+            return;
+          }
+        } catch (uploadErr) {
+          console.warn('Backend image upload fallback to Base64:', uploadErr);
+        }
+
+        // Fallback to local Base64 Data URL
+        setFormData(prev => ({ ...prev, avatar: base64Data }));
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('File read error:', err);
+      alert('Failed to read image from device');
+    } finally {
+      setUploadingPhoto(false);
+      if (e.target) e.target.value = '';
+    }
+  };
 
   const openCreateModal = () => {
     setEditingUser(null);
@@ -763,26 +818,66 @@ export default function AdminUsersView({ onShowToast }) {
                       }}
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      Profile Photo URL
-                    </label>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      Profile Photo
+                    </span>
                     <input
-                      type="url"
-                      placeholder="https://images.unsplash.com/photo-..."
-                      value={formData.avatar}
-                      onChange={e => setFormData({ ...formData, avatar: e.target.value })}
-                      style={{
-                        width: '100%',
-                        height: '36px',
-                        padding: '0 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        background: '#ffffff',
-                        outline: 'none'
-                      }}
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handlePhotoUpload}
                     />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingPhoto}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '7px 14px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '7px',
+                          fontSize: '12.5px',
+                          fontWeight: '600',
+                          color: '#1e293b',
+                          cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => { if (!uploadingPhoto) e.currentTarget.style.borderColor = '#94a3b8'; }}
+                        onMouseLeave={e => { if (!uploadingPhoto) e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                      >
+                        <Upload size={14} color="#64748b" />
+                        <span>{uploadingPhoto ? 'Uploading...' : 'Upload from Device'}</span>
+                      </button>
+
+                      {formData.avatar && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, avatar: '' }))}
+                          style={{
+                            padding: '7px 12px',
+                            background: 'transparent',
+                            border: '1px solid #fecaca',
+                            borderRadius: '7px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: '#dc2626',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
