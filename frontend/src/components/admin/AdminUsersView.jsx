@@ -448,16 +448,7 @@ export default function AdminUsersView({ onShowToast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                <th style={{ width: '40px', padding: '12px 16px' }}>
-                  <input 
-                    type="checkbox"
-                    checked={selectedIds.size > 0 && selectedIds.size === filteredUsers.length}
-                    onChange={(e) => {
-                      if (e.target.checked) setSelectedIds(new Set(filteredUsers.map(u => u._id)));
-                      else setSelectedIds(new Set());
-                    }}
-                  />
-                </th>
+                <th style={{ width: '40px', padding: '12px 16px' }}></th>
                 <th style={{ padding: '12px 16px', fontWeight: '600' }}>Name & Username</th>
                 <th style={{ padding: '12px 16px', fontWeight: '600' }}>Email Address</th>
                 <th style={{ padding: '12px 16px', fontWeight: '600' }}>Role</th>
