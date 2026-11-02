@@ -1157,7 +1157,7 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
             <span>{activeTab === 'seo' ? 'Live UI Studio' : 'Page Info & SEO'}</span>
           </button>
 
-          {(pageId === 'home' || !pageId) && (
+          {(pageId === 'home' || !pageId || isHomepage) && (
             <button
               type="button"
               onClick={() => setIsAddSectionOpen(true)}
@@ -1180,40 +1180,42 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => {
-              const norm = (pageId || slug || '').toLowerCase().trim();
-              if (norm === 'latest' || norm.includes('latest')) {
-                window.dispatchEvent(new CustomEvent('open:add-latest-card'));
-              } else if (norm === 'trending' || norm.includes('trending')) {
-                window.dispatchEvent(new CustomEvent('open:add-trending-card'));
-              } else if (norm === 'category' || norm.includes('categories') || norm.includes('category')) {
-                window.dispatchEvent(new CustomEvent('open:add-category-card'));
-              } else if (norm === 'about' || norm.includes('about')) {
-                window.dispatchEvent(new CustomEvent('open:add-about-card'));
-              } else {
-                window.dispatchEvent(new CustomEvent('open:add-card'));
-              }
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.55rem 1.05rem',
-              borderRadius: '8px',
-              border: '1px solid #ea580c',
-              background: '#fff7ed',
-              color: '#ea580c',
-              fontSize: '0.86rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-            title="Add a card to this page"
-          >
-            <Plus size={15} />
-            <span>Add Card</span>
-          </button>
+          {!isHomepage && (
+            <button
+              type="button"
+              onClick={() => {
+                const norm = (pageId || slug || '').toLowerCase().trim();
+                if (norm === 'latest' || norm.includes('latest')) {
+                  window.dispatchEvent(new CustomEvent('open:add-latest-card'));
+                } else if (norm === 'trending' || norm.includes('trending')) {
+                  window.dispatchEvent(new CustomEvent('open:add-trending-card'));
+                } else if (norm === 'category' || norm.includes('categories') || norm.includes('category')) {
+                  window.dispatchEvent(new CustomEvent('open:add-category-card'));
+                } else if (norm === 'about' || norm.includes('about')) {
+                  window.dispatchEvent(new CustomEvent('open:add-about-card'));
+                } else {
+                  window.dispatchEvent(new CustomEvent('open:add-card'));
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '0.55rem 1.05rem',
+                borderRadius: '8px',
+                border: '1px solid #ea580c',
+                background: '#fff7ed',
+                color: '#ea580c',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+              title="Add a card to this page"
+            >
+              <Plus size={15} />
+              <span>Add Card</span>
+            </button>
+          )}
 
 
           <button
