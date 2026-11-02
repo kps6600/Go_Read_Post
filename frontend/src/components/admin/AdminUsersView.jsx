@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown
+  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown, UserCheck, UserX
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -41,6 +41,8 @@ export default function AdminUsersView({ onShowToast }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [bulkStatusUpdating, setBulkStatusUpdating] = useState(false);
   const [error, setError] = useState(null);
 
   // Modal State
@@ -179,6 +181,55 @@ export default function AdminUsersView({ onShowToast }) {
       alert('Error during bulk delete: ' + err.message);
     } finally {
       setBulkDeleting(false);
+    }
+  };
+
+  const handleToggleStatus = async (user) => {
+    if (user.role === 'SUPER_ADMIN' || user.username === 'admin' || user.email === 'admin@goreadpost.com') {
+      alert('Cannot change status for the Super Administrator account.');
+      return;
+    }
+    const nextStatus = user.isActive === false;
+    setUpdatingStatusId(user._id);
+
+    // Optimistic update
+    setUsers(prev => prev.map(u => u._id === user._id ? { ...u, isActive: nextStatus } : u));
+
+    try {
+      await UserService.updateUserStatus(user._id, nextStatus);
+      if (onShowToast) {
+        onShowToast(nextStatus 
+          ? `User "${user.name}" is now Active.`
+          : `User "${user.name}" has been Suspended.`
+        );
+      }
+    } catch (err) {
+      // Rollback on failure
+      setUsers(prev => prev.map(u => u._id === user._id ? { ...u, isActive: !nextStatus } : u));
+      alert(err.message || 'Failed to update user status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  const handleBulkStatus = async (isActive) => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    const actionLabel = isActive ? 'activate' : 'suspend';
+    if (!window.confirm(`Are you sure you want to ${actionLabel} ${count} selected account(s)?`)) return;
+
+    setBulkStatusUpdating(true);
+    try {
+      await UserService.bulkUpdateStatus(Array.from(selectedIds), isActive);
+      if (onShowToast) {
+        onShowToast(`Successfully ${isActive ? 'activated' : 'suspended'} ${count} accounts.`);
+      }
+      setSelectedIds(new Set());
+      loadData();
+    } catch (err) {
+      alert('Error during bulk status update: ' + err.message);
+    } finally {
+      setBulkStatusUpdating(false);
     }
   };
 
@@ -393,9 +444,31 @@ export default function AdminUsersView({ onShowToast }) {
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {selectedIds.size > 0 && (
-                <div className="abv-bulk-actions-group">
+                <div className="abv-bulk-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleBulkStatus(true)}
+                    disabled={bulkStatusUpdating}
+                    className="abv-bulk-btn"
+                    style={{ background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    title="Activate selected accounts"
+                  >
+                    <UserCheck size={14} />
+                    <span>{bulkStatusUpdating ? 'Updating...' : `Activate (${selectedIds.size})`}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleBulkStatus(false)}
+                    disabled={bulkStatusUpdating}
+                    className="abv-bulk-btn"
+                    style={{ background: '#fff7ed', color: '#c2410c', borderColor: '#fed7aa', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    title="Suspend selected accounts"
+                  >
+                    <UserX size={14} />
+                    <span>{bulkStatusUpdating ? 'Updating...' : `Suspend (${selectedIds.size})`}</span>
+                  </button>
                   <button
                     type="button"
                     onClick={handleBulkDelete}
@@ -512,31 +585,102 @@ export default function AdminUsersView({ onShowToast }) {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: u.isActive !== false ? '#059669' : '#94a3b8' }}>
-                        {u.isActive !== false ? '● Active' : '○ Suspended'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                       <button
-                        onClick={() => handleDelete(u)}
+                        type="button"
+                        onClick={() => handleToggleStatus(u)}
+                        disabled={updatingStatusId === u._id || isRoot}
+                        title={isRoot ? 'Cannot suspend Super Admin' : (u.isActive !== false ? 'Click to suspend this account' : 'Click to activate this account')}
                         style={{
-                          padding: '6px',
-                          border: '1px solid #fecaca',
-                          background: '#fff',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          color: '#dc2626',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.15s ease'
+                          gap: '6px',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: isRoot ? 'not-allowed' : 'pointer',
+                          border: u.isActive !== false ? '1px solid #bbf7d0' : '1px solid #fed7aa',
+                          background: u.isActive !== false ? '#f0fdf4' : '#fff7ed',
+                          color: u.isActive !== false ? '#15803d' : '#c2410c',
+                          transition: 'all 0.15s ease',
+                          opacity: updatingStatusId === u._id ? 0.6 : 1
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#dc2626'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
-                        title="Delete Account"
+                        onMouseEnter={e => {
+                          if (!isRoot) e.currentTarget.style.filter = 'brightness(0.95)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.filter = 'none';
+                        }}
                       >
-                        <Trash2 size={14} />
+                        <span style={{
+                          width: '7px',
+                          height: '7px',
+                          borderRadius: '50%',
+                          background: u.isActive !== false ? '#16a34a' : '#ea580c',
+                          display: 'inline-block'
+                        }} />
+                        <span>{u.isActive !== false ? 'Active' : 'Suspended'}</span>
                       </button>
+                    </td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
+                        {!isRoot && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(u)}
+                            disabled={updatingStatusId === u._id}
+                            style={{
+                              padding: '6px 10px',
+                              border: u.isActive !== false ? '1px solid #fed7aa' : '1px solid #bbf7d0',
+                              background: u.isActive !== false ? '#fffaf5' : '#f0fdf4',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              color: u.isActive !== false ? '#d97706' : '#16a34a',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = u.isActive !== false ? '#ffedd5' : '#dcfce7'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = u.isActive !== false ? '#fffaf5' : '#f0fdf4'; }}
+                            title={u.isActive !== false ? 'Suspend User Account' : 'Activate User Account'}
+                          >
+                            {u.isActive !== false ? (
+                              <>
+                                <UserX size={13} />
+                                <span>Suspend</span>
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck size={13} />
+                                <span>Activate</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(u)}
+                          style={{
+                            padding: '6px',
+                            border: '1px solid #fecaca',
+                            background: '#fff',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            color: '#dc2626',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#dc2626'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
+                          title="Delete Account"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

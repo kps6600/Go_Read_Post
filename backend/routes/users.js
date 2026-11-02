@@ -122,7 +122,7 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
 });
 
 // 4. PUT /api/admin/users/:id (Update User)
-router.put('/:id', protectAdmin, requireSuperAdmin, async (req, res) => {
+router.put('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, role, email, isActive, password } = req.body;
@@ -157,6 +157,49 @@ router.put('/:id', protectAdmin, requireSuperAdmin, async (req, res) => {
     if (idx !== -1) {
       fallbackUsers[idx] = { ...fallbackUsers[idx], ...req.body };
       return res.json({ success: true, message: 'User updated (local mode)', data: fallbackUsers[idx] });
+    }
+    res.status(404).json({ success: false, message: 'User not found' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 4b. PATCH /api/admin/users/:id/status (Toggle / Update User Status: Active or Suspended)
+router.patch('/:id/status', protectAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'isActive boolean is required' });
+    }
+
+    if (isDbConnected()) {
+      const targetUser = await User.findById(id);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const isRootAdmin = targetUser.username === 'admin' || targetUser.email === 'admin@goreadpost.com' || targetUser.role === 'SUPER_ADMIN';
+      if (isRootAdmin && !isActive) {
+        return res.status(400).json({ success: false, message: 'Cannot suspend a Super Administrator account' });
+      }
+
+      targetUser.isActive = isActive;
+      await targetUser.save();
+      const userDoc = targetUser.toObject();
+      delete userDoc.passwordHash;
+
+      return res.json({
+        success: true,
+        message: `Account for ${targetUser.name} has been ${isActive ? 'activated' : 'suspended'}.`,
+        data: userDoc
+      });
+    }
+
+    const idx = fallbackUsers.findIndex(u => u._id === id);
+    if (idx !== -1) {
+      fallbackUsers[idx].isActive = isActive;
+      return res.json({ success: true, message: `Account status updated (local mode)`, data: fallbackUsers[idx] });
     }
     res.status(404).json({ success: false, message: 'User not found' });
   } catch (err) {
@@ -210,6 +253,42 @@ router.post('/bulk-delete', protectAdmin, requireSuperAdmin, async (req, res) =>
     const strIds = new Set(filteredIds.map(String));
     fallbackUsers = fallbackUsers.filter(u => !strIds.has(String(u._id)));
     res.json({ success: true, message: `Successfully deleted ${filteredIds.length} users` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 7. POST /api/admin/users/bulk-status (Bulk Activate / Suspend Users)
+router.post('/bulk-status', protectAdmin, async (req, res) => {
+  try {
+    const { ids, isActive } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0 || typeof isActive !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'Array of user IDs and isActive boolean are required' });
+    }
+
+    if (isDbConnected()) {
+      const filter = {
+        _id: { $in: ids }
+      };
+      if (!isActive) {
+        filter.username = { $ne: 'admin' };
+        filter.email = { $ne: 'admin@goreadpost.com' };
+        filter.role = { $ne: 'SUPER_ADMIN' };
+      }
+
+      const result = await User.updateMany(filter, { $set: { isActive } });
+      return res.json({
+        success: true,
+        message: `Successfully ${isActive ? 'activated' : 'suspended'} ${result.modifiedCount} accounts`
+      });
+    }
+
+    fallbackUsers.forEach(u => {
+      if (ids.includes(u._id) && !(u.role === 'SUPER_ADMIN' && !isActive)) {
+        u.isActive = isActive;
+      }
+    });
+    res.json({ success: true, message: `Successfully ${isActive ? 'activated' : 'suspended'} accounts (local mode)` });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

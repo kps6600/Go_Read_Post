@@ -49,6 +49,36 @@ export const UserService = {
     return json.data;
   },
 
+  async updateUserStatus(id, isActive) {
+    const token = AuthService.getToken();
+    const res = await fetch(`/api/admin/users/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ isActive })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update user status');
+    return json.data;
+  },
+
+  async bulkUpdateStatus(ids, isActive) {
+    const token = AuthService.getToken();
+    const res = await fetch('/api/admin/users/bulk-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ ids, isActive })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update user status in bulk');
+    return json;
+  },
+
   async deleteUser(id) {
     const token = AuthService.getToken();
     const res = await fetch(`/api/admin/users/${id}`, {
