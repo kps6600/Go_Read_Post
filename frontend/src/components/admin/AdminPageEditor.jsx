@@ -1185,44 +1185,50 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
             </button>
           )}
 
-          {!isHomepage && (
-            <button
-              type="button"
-              onClick={() => {
-                const norm = (pageId || slug || '').toLowerCase().trim();
-                if (norm === 'latest' || norm.includes('latest')) {
-                  window.dispatchEvent(new CustomEvent('open:add-latest-card'));
-                } else if (norm === 'trending' || norm.includes('trending')) {
-                  window.dispatchEvent(new CustomEvent('open:add-trending-card'));
-                } else if (norm === 'category' || norm.includes('categories') || norm.includes('category')) {
-                  window.dispatchEvent(new CustomEvent('open:add-category-card'));
-                } else if (norm === 'about' || norm.includes('about')) {
-                  window.dispatchEvent(new CustomEvent('open:add-about-card'));
-                } else if (norm === 'videos' || norm.includes('videos') || norm.includes('tv')) {
-                  window.dispatchEvent(new CustomEvent('open:add-video-card'));
-                } else {
-                  window.dispatchEvent(new CustomEvent('open:add-card'));
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.55rem 1.05rem',
-                borderRadius: '8px',
-                border: '1px solid #ea580c',
-                background: '#fff7ed',
-                color: '#ea580c',
-                fontSize: '0.86rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-              title="Add a card to this page"
-            >
-              <Plus size={15} />
-              <span>Add Card</span>
-            </button>
-          )}
+          {!isHomepage && (() => {
+            const norm = (pageId || slug || '').toLowerCase().trim();
+            // Hide "Add Card" for pages that use custom full-page studio editors
+            const isCustomStudioPage = [
+              'about', 'contact', 'advertise', 'page_advertise',
+              'pitch', 'pitch-story', 'contact-us', 'about-us'
+            ].some(k => norm === k || norm.includes(k));
+            if (isCustomStudioPage) return null;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  if (norm === 'latest' || norm.includes('latest')) {
+                    window.dispatchEvent(new CustomEvent('open:add-latest-card'));
+                  } else if (norm === 'trending' || norm.includes('trending')) {
+                    window.dispatchEvent(new CustomEvent('open:add-trending-card'));
+                  } else if (norm === 'category' || norm.includes('categories') || norm.includes('category')) {
+                    window.dispatchEvent(new CustomEvent('open:add-category-card'));
+                  } else if (norm === 'videos' || norm.includes('videos') || norm.includes('tv')) {
+                    window.dispatchEvent(new CustomEvent('open:add-video-card'));
+                  } else {
+                    window.dispatchEvent(new CustomEvent('open:add-card'));
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '0.55rem 1.05rem',
+                  borderRadius: '8px',
+                  border: '1px solid #ea580c',
+                  background: '#fff7ed',
+                  color: '#ea580c',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                title="Add a card to this page"
+              >
+                <Plus size={15} />
+                <span>Add Card</span>
+              </button>
+            );
+          })()}
 
 
           <button
