@@ -54,7 +54,6 @@ export const CANONICAL_FRONTEND_PAGES = [
   // 2. Discoverability & Multi-Media Dispatches
   { id: 'topics', title: 'Topics & Tags Directory', slug: 'topics', route: '/topics', status: 'published', order: 14, sectionsCount: 3 },
   { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 15, sectionsCount: 5 },
-  { id: 'newsletter', title: 'Newsletter Dispatches', slug: 'newsletter', route: '/newsletter', status: 'published', order: 16, sectionsCount: 3 },
   { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 17, sectionsCount: 2 },
 
   // 3. Topic Pages & Hubs (/topic/...)

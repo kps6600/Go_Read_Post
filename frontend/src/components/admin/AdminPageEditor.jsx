@@ -25,7 +25,6 @@ import SMBStoryPage from '../SMBStoryPage';
 import EnterpriseStoryPage from '../EnterpriseStoryPage';
 import TopicsPage from '../TopicsPage';
 import VideosPage from '../VideosPage';
-import NewsletterPage from '../NewsletterPage';
 import { ALL_STORIES } from '../../data/storiesData';
 import { StoryService, getDefaultSeedStories } from '../../services/storyService';
 
@@ -1057,10 +1056,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
     if (normId === 'videos' || normSlug === 'videos') {
       return <VideosPage isStudioView={true} onShowToast={onShowToast} />;
     }
-    if (normId === 'newsletter' || normSlug === 'newsletter') {
-      return <NewsletterPage isStudioView={true} onShowToast={onShowToast} />;
-    }
-
     // 8. Homepage or any other Dynamic / Custom Landing Page (WYSIWYG sections studio)
     return (
       <LiveWholePageStudio

@@ -121,17 +121,6 @@ export const DEFAULT_MENU_ITEMS = [
     visible: true,
     dropdownColumns: []
   },
-  {
-    id: "newsletter",
-    label: "Newsletter",
-    type: "anchor",
-    target: "newsletter",
-    hasDropdown: false,
-    isBadge: false,
-    order: 7,
-    visible: true,
-    dropdownColumns: []
-  }
 ];
 
 function readFallbackMenu() {

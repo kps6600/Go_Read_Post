@@ -261,7 +261,6 @@ export default function NotFoundPage({
               { label: '⚡ Latest Stories', url: '/latest' },
               { label: '🤖 Artificial Intelligence', url: '/topic/artificial-intelligence' },
               { label: '🏷️ #ChatGPT', url: '/tag/chatgpt' },
-              { label: '📬 Newsletter', url: '/newsletter' },
               { label: '🏢 About Us', url: '/about' },
               { label: '✉️ Contact Us', url: '/contact' },
               { label: '📢 Advertise', url: '/advertise' },

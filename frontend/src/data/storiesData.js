@@ -4,7 +4,6 @@ export const NAV_LINKS = [
   { id: "trending", label: "Trending", hasDropdown: false, url: "/trending" },
   { id: "categories", label: "Categories", hasDropdown: true, url: "/category/startups" },
   { id: "videos", label: "Videos", hasDropdown: false, url: "/videos" },
-  { id: "newsletter", label: "Newsletter", hasDropdown: false, url: "/newsletter" }
 ];
 
 export const NAV_DROPDOWNS_DATA = {
@@ -36,7 +35,6 @@ export const NAV_DROPDOWNS_DATA = {
         items: [
           { label: 'Trending News', url: '/trending', badge: 'Hot' },
           { label: 'Latest Dispatches', url: '/latest' },
-          { label: 'Newsletter Digest', url: '/newsletter' }
         ]
       }
     ]

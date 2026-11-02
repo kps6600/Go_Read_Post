@@ -33,7 +33,6 @@ import YSTVPage from './components/YSTVPage';
 import VideoSection from './components/VideoSection';
 import VideosPage from './components/VideosPage';
 import VideoPlayerModal from './components/VideoPlayerModal';
-import NewsletterPage from './components/NewsletterPage';
 import AboutSection from './components/AboutSection';
 import ContactPage from './components/ContactPage';
 import AdvertisePage from './components/AdvertisePage';
@@ -148,7 +147,10 @@ export const parseCurrentRoute = () => {
       return { route: 'home' };
     }
     if (pathname === '/newsletter' || pathname.startsWith('/newsletter')) {
-      return { route: 'newsletter' };
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
+      }
+      return { route: 'home' };
     }
     if (pathname.startsWith('/article/')) {
       const slug = pathname.replace('/article/', '').split('/')[0].split('?')[0];
@@ -1498,10 +1500,6 @@ useEffect(() => {
             }}
             onShowToast={showToast}
             onOpenAuthModal={(mode) => setAuthModal({ isOpen: true, mode: mode || 'login' })}
-          />
-        ) : (currentRoute.route === 'newsletter' || activeCategory === 'newsletter') && !searchQuery.trim() ? (
-          <NewsletterPage 
-            onBackToHome={handleBackToHome}
           />
         ) : (currentRoute.route === 'videos' || activeCategory === 'videos' || currentRoute.route === 'ystv' || activeCategory === 'ystv' || activeCategory === 'video') && !searchQuery.trim() ? (
           <VideosPage 

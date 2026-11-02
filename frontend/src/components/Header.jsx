@@ -325,10 +325,6 @@ export default function Header({
         return activeCategory === 'videos' || normCurrent === '/videos';
       }
 
-      if (normLink === '/newsletter') {
-        return activeCategory === 'newsletter' || normCurrent === '/newsletter';
-      }
-
 
       return normCurrent === normLink;
     }
@@ -459,16 +455,6 @@ export default function Header({
         return;
       }
 
-      if (directUrl === '/newsletter') {
-        setActiveCategory('newsletter');
-        setSearchQuery('');
-        window.history.pushState(null, '', directUrl);
-        window.dispatchEvent(new Event('popstate'));
-        setCurrentPath(directUrl);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-
       if (directUrl === '/resources') {
         setActiveCategory('all');
         setSearchQuery('');
@@ -589,17 +575,6 @@ export default function Header({
       window.history.pushState(null, '', '/');
       window.dispatchEvent(new Event('popstate'));
       setCurrentPath('/');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    if (targetDesk === 'newsletter') {
-      if (e) e.preventDefault();
-      setActiveCategory('newsletter');
-      setSearchQuery('');
-      window.history.pushState(null, '', '/newsletter');
-      window.dispatchEvent(new Event('popstate'));
-      setCurrentPath('/newsletter');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }

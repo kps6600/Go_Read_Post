@@ -208,19 +208,6 @@ export const DEFAULT_NAVIGATION_ITEMS = [
     openInNewTab: false,
     children: []
   },
-  {
-    title: 'Newsletter',
-    slug: 'newsletter',
-    url: '/newsletter',
-    type: 'link',
-    order: 7,
-    level: 0,
-    isActive: true,
-    isVisible: true,
-    visibility: 'PUBLIC',
-    openInNewTab: false,
-    children: []
-  }
 ];
 
 // Helper to flatten default tree for database seeding
