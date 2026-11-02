@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Shield, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown, RotateCcw
+  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown, RotateCcw
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -510,24 +510,26 @@ export default function AdminUsersView({ onShowToast }) {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '8px' }}>
-                        <button
-                          onClick={() => openEditModal(u)}
-                          style={{ padding: '6px', border: '1px solid #cbd5e1', background: '#fff', borderRadius: '6px', cursor: 'pointer', color: '#334155' }}
-                          title="Edit Account"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        {!isRoot && (
-                          <button
-                            onClick={() => handleDelete(u)}
-                            style={{ padding: '6px', border: '1px solid #fecaca', background: '#fff', borderRadius: '6px', cursor: 'pointer', color: '#dc2626' }}
-                            title="Delete Account"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        onClick={() => handleDelete(u)}
+                        style={{
+                          padding: '6px',
+                          border: '1px solid #fecaca',
+                          background: '#fff',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          color: '#dc2626',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#dc2626'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
+                        title="Delete Account"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 );
