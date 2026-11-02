@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Shield, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter
+  Users, Shield, Plus, Edit2, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown, RotateCcw
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -178,7 +178,7 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Header & Tab Bar (All Users and Team Users removed, only User List tab remains) */}
+      {/* Header & Tab Bar (Clean User List tab and Add User CTA) */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', gap: '8px' }}>
           <div
@@ -282,50 +282,188 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Search & Filter Toolbar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', width: '300px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8' }} />
+      {/* Modern Search & Filter Toolbar Card */}
+      <div style={{
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '12px 16px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        flexWrap: 'wrap',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
+      }}>
+        {/* Left: Search & Filter Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '300px', flexWrap: 'wrap' }}>
+          {/* Search Box */}
+          <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '420px', minWidth: '240px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Search users by name, username, email..."
+              placeholder="Search by name, email, or username..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '14px' }}
+              style={{
+                width: '100%',
+                height: '40px',
+                padding: '0 34px 0 38px',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                background: '#f8fafc',
+                color: '#0f172a',
+                outline: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              onFocus={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = 'var(--brand-primary, #dc2626)'; e.target.style.boxShadow = '0 0 0 2px rgba(220, 38, 38, 0.12)'; }}
+              onBlur={e => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                title="Clear search"
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: '#e2e8f0',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#475569',
+                  padding: 0
+                }}
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
 
-          {/* Role Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Filter size={14} color="#64748b" />
+          {/* Role Filter Dropdown */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <Shield size={14} color={roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
             <select
               value={roleFilter}
               onChange={e => { setRoleFilter(e.target.value); setSelectedIds(new Set()); }}
-              style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '13px', background: '#fff', color: '#334155', fontWeight: '500' }}
+              style={{
+                appearance: 'none',
+                height: '40px',
+                padding: '0 32px 0 34px',
+                border: roleFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: roleFilter !== 'all' ? '700' : '500',
+                background: roleFilter !== 'all' ? '#fff1f2' : '#f8fafc',
+                color: roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'all 0.15s ease'
+              }}
             >
               <option value="all">All Roles ({users.length})</option>
               <option value="SUPER_ADMIN">Super Admin ({superAdminCount})</option>
               <option value="AUTHOR">Authors ({authorCount})</option>
               <option value="USER">Users ({userCount})</option>
             </select>
+            <ChevronDown size={14} color={roleFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
           </div>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
-            style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '13px', background: '#fff', color: '#334155', fontWeight: '500' }}
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active Only</option>
-            <option value="suspended">Suspended Only</option>
-          </select>
+          {/* Status Filter Dropdown */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
+            <select
+              value={statusFilter}
+              onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
+              style={{
+                appearance: 'none',
+                height: '40px',
+                padding: '0 32px 0 32px',
+                border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: statusFilter !== 'all' ? '700' : '500',
+                background: statusFilter !== 'all' ? '#fff1f2' : '#f8fafc',
+                color: statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#334155',
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="suspended">Suspended Only</option>
+            </select>
+            <ChevronDown size={14} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#94a3b8'} style={{ position: 'absolute', right: '10px', pointerEvents: 'none' }} />
+          </div>
+
+          {/* Reset Filters button */}
+          {(search || roleFilter !== 'all' || statusFilter !== 'all') && (
+            <button
+              type="button"
+              onClick={() => { setSearch(''); setRoleFilter('all'); setStatusFilter('all'); setSelectedIds(new Set()); }}
+              title="Reset all filters"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '40px',
+                padding: '0 12px',
+                borderRadius: '8px',
+                border: '1px dashed #cbd5e1',
+                background: '#ffffff',
+                color: '#dc2626',
+                fontSize: '12.5px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <RotateCcw size={13} />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
 
-        <button onClick={loadData} title="Refresh list" style={{ background: '#f1f5f9', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-        </button>
+        {/* Right: Counter & Refresh Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+            Showing <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> of {users.length}
+          </span>
+          <button
+            onClick={loadData}
+            title="Refresh user directory"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '40px',
+              padding: '0 14px',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              color: '#334155',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Users Table */}
