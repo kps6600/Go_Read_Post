@@ -19,20 +19,31 @@ import '../ModernHomepage.css';
 import '../LatestArticlesPage.css';
 import LatestArticlesPage from '../LatestArticlesPage';
 
+// Helper to sanitize read times and avoid repeated suffixes
+const sanitizeReadTime = (val, defaultTime = '4 min read') => {
+  if (typeof val === 'number') return `${val} min read`;
+  if (typeof val === 'string' && val.trim()) {
+    const clean = val.replace(/\s*min\s*read\s*/gi, '').trim();
+    return `${clean || '4'} min read`;
+  }
+  return defaultTime;
+};
+
 // Helper to format an article as a Hero Carousel slide
 const formatForHeroSlide = (article) => {
-  const id = article._id || article.id || `slide-${Date.now()}`;
+  const id = article._id || article.id || article.articleId || `slide-${Date.now()}`;
   const title = article.title || 'Featured Story';
   const excerpt = article.summary || article.excerpt || article.description || 
     (typeof article.content === 'string' ? article.content.slice(0, 160) : '') || 
     'Comprehensive reporting on innovation and founder journeys.';
-  const category = article.categoryLabel || article.category || 'Startups';
-  const image = article.image || article.coverImage || article.bannerImage || article.fallbackImage || 
+  const category = article.categoryLabel || (typeof article.category === 'object' ? article.category?.name : article.category) || 'Startups';
+  const image = article.image || article.coverImage || article.bannerImage || 
+    (typeof article.featuredImage === 'string' ? article.featuredImage : article.featuredImage?.url) || article.fallbackImage || 
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80';
   const authorName = typeof article.author === 'object' ? (article.author?.name || 'Editorial Bureau') : (article.author || 'Editorial Bureau');
-  const authorAvatar = article.author?.avatar || article.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+  const authorAvatar = article.authorAvatar || article.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
   const date = article.publishedAt || article.date || article.formattedDate || 'Today';
-  const readTime = article.readTime || (article.readingTime ? `${article.readingTime} min read` : '4 min read');
+  const readTime = sanitizeReadTime(article.readTime || article.readingTime, '4 min read');
   const slug = article.slug || id;
   const link = `/stories/${slug}`;
 
@@ -47,7 +58,7 @@ const formatForHeroSlide = (article) => {
     authorAvatar,
     date,
     readTime,
-    primaryBtnText: 'Read More',
+    primaryBtnText: article.primaryBtnText || 'Read More',
     link,
     slug,
     isCustom: true
@@ -56,12 +67,13 @@ const formatForHeroSlide = (article) => {
 
 // Helper to format an article for Popular Posts sidebar
 const formatForPopularPost = (article) => {
-  const id = article._id || article.id || `popular-${Date.now()}`;
+  const id = article._id || article.id || article.articleId || `popular-${Date.now()}`;
   const title = article.title || 'Popular Story';
-  const image = article.image || article.coverImage || article.fallbackImage || 
+  const image = article.image || article.coverImage || 
+    (typeof article.featuredImage === 'string' ? article.featuredImage : article.featuredImage?.url) || article.fallbackImage || 
     'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
-  const readTime = article.readTime || (article.readingTime ? `${article.readingTime} min read` : '3 min read');
-  const category = article.categoryLabel || article.category || 'Trending';
+  const readTime = sanitizeReadTime(article.readTime || article.readingTime, '4 min read');
+  const category = article.categoryLabel || (typeof article.category === 'object' ? article.category?.name : article.category) || 'Trending';
   const slug = article.slug || id;
   const link = `/stories/${slug}`;
   const author = typeof article.author === 'object' ? (article.author?.name || 'Author') : (article.author || 'Editorial');
@@ -129,6 +141,13 @@ export default function LiveWholePageStudio({
     }
   }, [sections]);
 
+  // Synchronize incoming initialSections when loaded from parent
+  useEffect(() => {
+    if (initialSections && Array.isArray(initialSections) && initialSections.length > 0) {
+      setSections(initialSections);
+    }
+  }, [initialSections]);
+
   // Load sections from MongoDB on mount
   useEffect(() => {
     let isMounted = true;
@@ -181,22 +200,25 @@ export default function LiveWholePageStudio({
     return () => { isMounted = false; };
   }, [pageId]);
 
+  // Pool of stories: Live database stories prioritized, exactly matching ModernHomepageView.jsx
   const pool = useMemo(() => {
-    const combined = [...availableArticles];
+    const list = Array.isArray(stories) && stories.length > 0 ? stories : ALL_STORIES;
+    const combined = [...list];
     const seen = new Set(
-      combined.map(a => String(a.slug || a.id || a._id || a.title || '').trim().toLowerCase())
+      combined.map(a => String(a.title || a.slug || a.id || a._id || '').trim().toLowerCase())
     );
 
-    const fallbackList = [...(stories || []), ...ALL_STORIES];
-    for (const item of fallbackList) {
-      const key = String(item.slug || item.id || item._id || item.title || '').trim().toLowerCase();
-      if (key && !seen.has(key)) {
-        seen.add(key);
-        combined.push(item);
+    if (Array.isArray(availableArticles)) {
+      for (const item of availableArticles) {
+        const key = String(item.title || item.slug || item.id || item._id || '').trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          combined.push(item);
+        }
       }
     }
     return combined;
-  }, [availableArticles, stories]);
+  }, [stories, availableArticles]);
 
   const getSectionMaxFit = (sec) => {
     const isLatestFeed = pageId === 'latest' && (sec?.id === 'latest_feed' || sec?.type === 'latest_feed' || sec?.type === 'latest_blogs');
@@ -206,20 +228,56 @@ export default function LiveWholePageStudio({
   };
 
   const resolveSectionArticles = (sec) => {
-    const data = sec?.data || {};
-    const cat = data.category || data.filterCategory;
-    let source = pool;
-    if (cat && cat.trim()) {
-      const filtered = pool.filter(s => (s.category || s.categoryLabel || s.categoryName || '').toLowerCase().includes(cat.toLowerCase().trim()));
-      if (filtered.length > 0) source = filtered;
-    }
-    const sorted = [...source].sort((a, b) => new Date(b.publishedAt || b.date || b.createdAt || 0) - new Date(a.publishedAt || a.date || a.createdAt || 0));
+    const data = { ...(sec?.customConfig || {}), ...(sec?.data || {}) };
+    const limit = 4;
+    const seen = new Set();
+    const result = [];
 
-    if (Array.isArray(data.articles) && data.articles.length > 0) {
-      return data.articles.filter(Boolean);
+    const addArticles = (list) => {
+      if (!Array.isArray(list)) return;
+      for (const item of list) {
+        if (!item) continue;
+        const key = String(item.title || item.id || item._id || item.articleId || item.slug || '').trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+          if (result.length >= limit) return;
+        }
+      }
+    };
+
+    // 1. Curated section articles from admin
+    if (data.articles && Array.isArray(data.articles)) {
+      addArticles(data.articles);
     }
-    const initialCount = data.limit || 4;
-    return sorted.slice(0, initialCount);
+    if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
+      addArticles(sec.articles);
+    }
+
+    // 2. Curated article IDs
+    if (result.length < limit && data.articleIds && Array.isArray(data.articleIds)) {
+      const ids = new Set(data.articleIds.map(a => String(typeof a === 'object' ? a._id || a.id : a)));
+      const matched = pool.filter(s => ids.has(String(s._id || s.id || s.slug)));
+      addArticles(matched);
+    }
+
+    // 3. Section category filter
+    const filterCat = data.category || data.filterCategory || sec?.filterCategory;
+    if (result.length < limit && filterCat && filterCat.trim()) {
+      const cat = filterCat.toLowerCase().trim();
+      const filtered = pool.filter(s => {
+        const c = (s.category || s.categoryLabel || '').toLowerCase();
+        return c.includes(cat);
+      });
+      addArticles(filtered);
+    }
+
+    // 4. Backfill from pool
+    if (result.length < limit) {
+      addArticles(pool);
+    }
+
+    return result.slice(0, limit);
   };
 
   // ─────────────────────────────────────────────────────────
@@ -230,26 +288,94 @@ export default function LiveWholePageStudio({
   }, [sections]);
 
   const heroSlides = useMemo(() => {
-    const data = heroSection?.data || {};
+    const data = { ...(heroSection?.customConfig || {}), ...(heroSection?.data || {}) };
     if (Array.isArray(data.slides) && data.slides.length > 0) {
-      return data.slides;
+      const liveSlides = data.slides.filter(s => {
+        if (!s) return false;
+        if (s.isCustom || !s.articleId) return true;
+        const id = String(s.id || s._id || s.articleId || s.slug);
+        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === s.title);
+      });
+      const slidesToUse = liveSlides.length > 0 ? liveSlides : data.slides;
+      return slidesToUse.map(formatForHeroSlide);
     }
-    return pool.slice(0, 5).map(formatForHeroSlide);
+
+    if (data.heroSource === 'static') {
+      return [{
+        id: 'static-hero-slide',
+        title: data.headline || data.title || 'Stories That Matter in Startups, Technology & Capital',
+        excerpt: data.subheadline || data.description || 'Unfiltered founder playbooks, deep tech breakthroughs, and market movements.',
+        category: data.badge || data.category || 'HEADLINE STORIES',
+        image: data.bgImage || data.image || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80',
+        author: 'Editorial Bureau',
+        authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+        date: 'Today',
+        readTime: '3 min read',
+        primaryBtnText: data.primaryBtnText || 'Read More',
+        link: data.primaryBtnUrl || '/latest',
+        isCustom: true
+      }];
+    }
+
+    let sourcePool = pool;
+    if (data.category && data.category.trim()) {
+      const cat = data.category.toLowerCase().trim();
+      const filtered = pool.filter(s => (s.category || s.categoryLabel || '').toLowerCase().includes(cat));
+      if (filtered.length > 0) sourcePool = filtered;
+    }
+
+    const maxSlides = data.slideLimit || 5;
+    const heroPool = sourcePool.filter(s => 
+      s.isHero || 
+      (Array.isArray(s.placements) && s.placements.includes('homepage_hero')) ||
+      s.isFeatured || s.tag === 'FEATURED' || s.tag === 'BREAKING' || s.isLead || s.tag === 'TOP PICK'
+    );
+    heroPool.sort((a, b) => {
+      const aHero = Boolean(a.isHero || (Array.isArray(a.placements) && a.placements.includes('homepage_hero')));
+      const bHero = Boolean(b.isHero || (Array.isArray(b.placements) && b.placements.includes('homepage_hero')));
+      if (aHero && !bHero) return -1;
+      if (!aHero && bHero) return 1;
+      return new Date(b.publishedAt || b.createdAt || 0) - new Date(a.publishedAt || a.createdAt || 0);
+    });
+    if (heroPool.length >= 3) return heroPool.slice(0, maxSlides).map(formatForHeroSlide);
+    const combined = [...heroPool, ...sourcePool.filter(s => !heroPool.some(f => (f.id || f._id || f.slug) === (s.id || s._id || s.slug)))];
+    return combined.slice(0, maxSlides).map(formatForHeroSlide);
   }, [heroSection, pool]);
 
   const activeSlide = heroSlides[heroSlideIdx] || heroSlides[0] || LEAD_STORY;
 
   const popularArticles = useMemo(() => {
-    const data = heroSection?.data || {};
-    if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
-      return (data.popularArticles || []).slice(0, 5);
+    const data = { ...(heroSection?.customConfig || {}), ...(heroSection?.data || {}) };
+    if (data.hasCustomPopular || (Array.isArray(data.popularArticles) && data.popularArticles.length > 0)) {
+      const livePopular = (data.popularArticles || []).filter(item => {
+        if (!item) return false;
+        if (item.isCustom || !item.articleId) return true;
+        const id = String(item._id || item.id || item.articleId || item.slug);
+        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
+      });
+      if (livePopular.length > 0) {
+        return livePopular.slice(0, 5).map(formatForPopularPost);
+      }
     }
-    const trending = pool.filter(s => s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING');
-    if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
-    return pool.slice(0, 5).map(formatForPopularPost);
-  }, [heroSection, pool]);
 
-  // Target section-related pool in Studio (prioritizes section-related articles at top, followed by full catalog)
+    const currentHero = heroSlides[heroSlideIdx] || heroSlides[0];
+    const heroId = currentHero?.id || currentHero?._id || currentHero?.slug;
+    const heroTitle = currentHero?.title;
+
+    const trending = pool.filter(s => 
+      (s.isTrending || s.trending || s.tag === 'POPULAR' || s.tag === 'TRENDING') &&
+      String(s.id || s._id || s.slug) !== String(heroId) &&
+      (!heroTitle || s.title !== heroTitle)
+    );
+    if (trending.length >= 5) return trending.slice(0, 5).map(formatForPopularPost);
+    const remaining = pool.filter(s => 
+      String(s.id || s._id || s.slug) !== String(heroId) &&
+      (!heroTitle || s.title !== heroTitle) &&
+      !trending.some(t => String(t.id || t._id || t.slug) === String(s.id || s._id || s.slug) || (t.title && t.title === s.title))
+    );
+    return [...trending, ...remaining].slice(0, 5).map(formatForPopularPost);
+  }, [heroSection, pool, heroSlides, heroSlideIdx]);
+
   const targetSectionRelatedPool = useMemo(() => {
     if (!pickerTarget?.sectionId) return pool;
     const sec = sections.find(s => s.id === pickerTarget.sectionId || s.sectionKey === pickerTarget.sectionId);
@@ -1150,7 +1276,7 @@ export default function LiveWholePageStudio({
                           {/* Right Popular Sidebar */}
                           <div className="mhp-popular-card">
                             <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div className="mhp-section-title-wrap">
                                 <span 
                                   style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'default', userSelect: 'none' }}
                                 >
@@ -1158,28 +1284,12 @@ export default function LiveWholePageStudio({
                                 </span>
                               </div>
 
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <button
-                                  type="button"
-                                  className="lbe-btn-add-mini article"
-                                  disabled={popularArticles.length >= 5}
-                                  style={{
-                                    opacity: popularArticles.length >= 5 ? 0.45 : 1,
-                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
-                                  }}
-                                  onClick={() => {
-                                    if (popularArticles.length >= 5) {
-                                      alert("Popular Posts is full (5/5 cards). Delete a card first to select new ones.");
-                                      return;
-                                    }
-                                    handleOpenPicker({ type: 'popular-add', mode: 'articles' });
-                                  }}
-                                  title="Add an article to Popular Posts (Max 5)"
-                                >
-                                  <Plus size={12} strokeWidth={2.5} />
-                                  <span>Article</span>
-                                </button>
-                              </div>
+                              <span 
+                                className="mhp-view-all-link"
+                                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#ea580c' }}
+                              >
+                                View All <ArrowRight size={14} />
+                              </span>
                             </div>
 
                             <div className="mhp-popular-list">
@@ -1188,43 +1298,57 @@ export default function LiveWholePageStudio({
                                   <h3 className="lbe-popular-empty-title">Popular Posts</h3>
                                 </div>
                               ) : (
-                                popularArticles.map((item, idx) => (
-                                  <div key={item.id || idx} className="lbe-popular-manage-item">
-                                    <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
-                                      {idx + 1}
-                                    </div>
+                                popularArticles.map((item, idx) => {
+                                  const itemTitle = item.title || 'Popular Story';
+                                  const itemImg = item.image || item.coverImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
+                                  const itemReadTime = sanitizeReadTime(item.readTime || item.readingTime, '4 min read');
 
-                                    {/* Thumbnail */}
-                                    <div style={{ position: 'relative', width: '56px', height: '56px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }} className="lbe-popular-thumb-wrap">
+                                  return (
+                                    <div 
+                                      key={item.id || idx} 
+                                      className="mhp-popular-item"
+                                      style={{ cursor: 'default' }}
+                                    >
+                                      <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
+                                        {idx + 1}
+                                      </div>
+
+                                      {/* Thumbnail */}
                                       <img 
-                                        src={item.image} 
-                                        alt={item.title} 
+                                        src={itemImg} 
+                                        alt={itemTitle} 
                                         className="mhp-popular-thumb"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                          e.target.onerror = null;
+                                          e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
+                                        }}
                                         loading="lazy"
                                       />
-                                    </div>
 
-                                    <div className="mhp-popular-info">
-                                      <h4 
-                                        className="mhp-popular-title"
-                                        style={{ cursor: 'default', userSelect: 'none' }}
-                                      >
-                                        {item.title}
-                                      </h4>
-                                      <span className="mhp-popular-meta">
-                                        <span 
-                                          style={{ color: '#fb923c', marginRight: '4px', pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
+                                      <div className="mhp-popular-info">
+                                        <h4 
+                                          className="mhp-popular-title"
+                                          style={{ cursor: 'default', userSelect: 'none' }}
                                         >
-                                          {item.category || 'Startups'} •
+                                          {itemTitle}
+                                        </h4>
+                                        <span className="mhp-popular-meta">
+                                          {itemReadTime}
                                         </span>
-                                        {item.readTime || '3 min read'}
-                                      </span>
+                                      </div>
+
+                                      <button 
+                                        type="button" 
+                                        className="mhp-popular-save-btn"
+                                        title="Save to read later"
+                                        aria-label="Save story"
+                                        style={{ pointerEvents: 'none' }}
+                                      >
+                                        <Bookmark size={15} />
+                                      </button>
                                     </div>
-
-
-                                  </div>
-                                ))
+                                  );
+                                })
                               )}
                             </div>
                           </div>
@@ -1410,74 +1534,6 @@ export default function LiveWholePageStudio({
                               );
                             })}
 
-                            {/* + Plus Add Article Card */}
-                            {secArticles.length < maxFit ? (
-                              <div
-                                className="mhp-blog-card lse-add-article-card"
-                                onClick={() => handleOpenPicker({ sectionId: sec.id, type: 'feed-add' })}
-                                role="button"
-                                tabIndex={0}
-                                title={`Add an article to slot #${secArticles.length + 1} of ${maxFit}`}
-                                style={{
-                                  position: 'relative',
-                                  minHeight: '380px',
-                                  background: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)',
-                                  border: '2px dashed #ea580c',
-                                  borderRadius: '16px',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  padding: '1.75rem 1.25rem',
-                                  textAlign: 'center',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    width: '56px',
-                                    height: '56px',
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)',
-                                    color: '#ffffff',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: '0 8px 22px rgba(234, 88, 12, 0.35)',
-                                    marginBottom: '1rem'
-                                  }}
-                                >
-                                  <Plus size={30} strokeWidth={2.6} />
-                                </div>
-
-                                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.4rem' }}>
-                                  + Add Article Card
-                                </h4>
-
-                                <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem', lineHeight: 1.45, maxWidth: '220px' }}>
-                                  Insert article into slot #{secArticles.length + 1}
-                                </p>
-
-                                <span
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '6px',
-                                    padding: '8px 16px',
-                                    borderRadius: '9999px',
-                                    background: '#ea580c',
-                                    color: '#ffffff',
-                                    fontWeight: 750,
-                                    fontSize: '0.82rem',
-                                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)'
-                                  }}
-                                >
-                                  <Plus size={15} /> Select Article
-                                </span>
-                              </div>
-                            ) : null}
                           </div>
                         </section>
                       )}

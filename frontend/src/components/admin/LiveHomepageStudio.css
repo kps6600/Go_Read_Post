@@ -436,24 +436,23 @@
 /* ── Section Visual Wrapper & Control Bar on the Whole Homepage ── */
 .lhs-section-block {
   position: relative;
-  padding: 1.5rem 1rem 1rem;
-  margin: 1.5rem 0;
-  border: 2px dashed rgba(234, 88, 12, 0.45);
-  border-radius: 14px;
-  background: rgba(254, 242, 242, 0.15);
-  transition: all 0.25s ease;
+  padding: 0;
+  margin: 0 0 2rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  transition: all 0.2s ease;
 }
 
 .lhs-section-block:hover {
-  border-color: #ea580c;
-  background: rgba(254, 242, 242, 0.28);
-  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.12);
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .lhs-section-block.disabled {
   opacity: 0.55;
   filter: grayscale(0.5);
-  border-color: #cbd5e1;
 }
 
 /* Floating Section Control Bar */
@@ -465,6 +464,13 @@
   align-items: center;
   justify-content: flex-end;
   z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.lhs-section-block:hover .lhs-section-control-bar {
+  opacity: 1;
   pointer-events: auto;
 }
 
