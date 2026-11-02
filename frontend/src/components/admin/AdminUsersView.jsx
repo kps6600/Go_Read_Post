@@ -289,6 +289,20 @@ export default function AdminUsersView({ onShowToast }) {
     }
   };
 
+  // Safe fallback helper in case any cached components or references invoke role styling
+  const getRoleBadgeStyle = (role) => {
+    switch ((role || '').toUpperCase()) {
+      case 'SUPER_ADMIN':
+        return { background: '#fdf2f8', color: '#be185d', border: '1px solid #fbcfe8', label: 'Super Admin' };
+      case 'AUTHOR':
+        return { background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', label: 'Author' };
+      case 'USER':
+      case 'READER':
+      default:
+        return { background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', label: 'User' };
+    }
+  };
+
   return (
     <div className="admin-page-container">
       {error && (
