@@ -70,7 +70,7 @@ router.get('/roles', protectAdmin, async (req, res) => {
 // 3. POST /api/admin/users (Create User)
 router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
   try {
-    const { name, username, email, password, role } = req.body;
+    const { name, username, email, password, role, avatar } = req.body;
     if (!name || !username || !email || !password) {
       return res.status(400).json({ success: false, message: 'All fields (name, username, email, password) are required.' });
     }
@@ -94,6 +94,7 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
         username: username.toLowerCase().trim(),
         email: email.toLowerCase().trim(),
         passwordHash,
+        avatar: avatar || '',
         role: chosenRole,
         isActive: true
       });

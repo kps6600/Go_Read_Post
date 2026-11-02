@@ -4,6 +4,36 @@ import {
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
+const USER_AVATAR_POOL = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&auto=format&fit=crop&q=80'
+];
+
+function getUserAvatar(user) {
+  if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim()) {
+    return user.avatar;
+  }
+  const str = (user.username || user.email || user.name || 'user').toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return USER_AVATAR_POOL[Math.abs(hash) % USER_AVATAR_POOL.length];
+}
+
+function getUserInitials(name) {
+  if (!name) return 'U';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function AdminUsersView({ onShowToast }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +51,7 @@ export default function AdminUsersView({ onShowToast }) {
     username: '',
     email: '',
     password: '',
+    avatar: '',
     role: 'USER',
     isActive: true
   });
@@ -78,6 +109,7 @@ export default function AdminUsersView({ onShowToast }) {
       username: '',
       email: '',
       password: '',
+      avatar: '',
       role: 'USER',
       isActive: true
     });
@@ -438,6 +470,8 @@ export default function AdminUsersView({ onShowToast }) {
                 const badge = getRoleBadgeStyle(u.role);
                 const isSelected = selectedIds.has(u._id);
                 const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
+                const avatarUrl = getUserAvatar(u);
+                const initials = getUserInitials(u.name);
 
                 return (
                   <tr key={u._id} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: isSelected ? '#fff1f2' : 'transparent' }}>
@@ -454,8 +488,51 @@ export default function AdminUsersView({ onShowToast }) {
                       />
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <div style={{ fontWeight: '700', color: '#0f172a' }}>{u.name}</div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>@{u.username}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ position: 'relative', width: '38px', height: '38px', flexShrink: 0 }}>
+                          <img
+                            src={avatarUrl}
+                            alt={u.name}
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '1.5px solid #e2e8f0',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                              display: 'block'
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              if (e.currentTarget.nextElementSibling) {
+                                e.currentTarget.nextElementSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '50%',
+                              background: '#f1f5f9',
+                              color: '#475569',
+                              display: 'none',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: '700',
+                              fontSize: '13px',
+                              border: '1.5px solid #cbd5e1',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            {initials}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: '700', color: '#0f172a' }}>{u.name}</div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>@{u.username}</div>
+                        </div>
+                      </div>
                     </td>
                     <td style={{ padding: '12px 16px', color: '#334155' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -575,6 +652,17 @@ export default function AdminUsersView({ onShowToast }) {
                   placeholder={editingUser ? '••••••••' : 'Minimum 6 characters'}
                   value={formData.password}
                   onChange={e => setFormData({ ...formData, password: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Profile Photo / Logo URL (Optional)</label>
+                <input
+                  type="url"
+                  placeholder="https://images.unsplash.com/photo-..."
+                  value={formData.avatar || ''}
+                  onChange={e => setFormData({ ...formData, avatar: e.target.value })}
                   style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
                 />
               </div>
