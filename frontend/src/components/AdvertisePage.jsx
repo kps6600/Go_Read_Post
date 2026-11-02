@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, ArrowRight, Check, CheckCircle2, 
   Megaphone, Target, Handshake, PhoneCall, Send, Sparkles
@@ -7,40 +7,184 @@ import confetti from 'canvas-confetti';
 import { PageService } from '../services/pageService';
 import './AdvertisePage.css';
 
-export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudioView = false }) {
-  const [heroHeading, setHeroHeading] = useState(() => page?.data?.heading || page?.title || 'Advertise With Us');
-  const [heroSubtext, setHeroSubtext] = useState(() => page?.data?.subtext || page?.description || 'Reach the right audience for your brand. Promote your business, products or services through our blogging platform and get connected with engaged readers.');
+const ADVERTISE_STORAGE_KEY = 'goreadpost_advertise_custom_v2';
 
-  const handleUpdateAdv = async (patch) => {
-    if (patch.heading) setHeroHeading(patch.heading);
-    if (patch.subtext) setHeroSubtext(patch.subtext);
-    try {
-      await PageService.updatePage('page_advertise', {
-        title: patch.heading || heroHeading,
-        description: patch.subtext || heroSubtext,
-        data: {
-          heading: patch.heading || heroHeading,
-          subtext: patch.subtext || heroSubtext,
-          ...patch
+const DEFAULT_ADV_STATE = {
+  heroHeading: 'Advertise With Us',
+  heroSubtext: "Partner with India's leading technology, founders, and capital intelligence publication.",
+  heroChecks: [
+    'Increase Brand Visibility',
+    'Reach Target Audience',
+    'Flexible Ad Options'
+  ],
+  whyTitle: 'Your Brand Deserves to Be Seen',
+  benefits: [
+    'Promote Your Business',
+    'Flexible Ad Options',
+    'Personalised Support'
+  ],
+  calloutTitle: 'Need to Talk Directly?',
+  callBtnText: 'Call Now',
+  contactPhone: '+91 928 933 8990',
+  formTitle: 'Submit Your Enquiry',
+  labelFullName: 'Full Name',
+  labelCompany: 'Company / Business Name',
+  labelEmail: 'Email Address',
+  labelPhone: 'Phone Number',
+  labelAdType: 'Type of Advertisement',
+  labelMessage: 'Your Message',
+  submitBtnText: 'Send'
+};
+
+const getStoredAdvData = () => {
+  try {
+    const raw = localStorage.getItem(ADVERTISE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          ...DEFAULT_ADV_STATE,
+          ...parsed,
+          heroChecks: Array.isArray(parsed.heroChecks) && parsed.heroChecks.length ? parsed.heroChecks : DEFAULT_ADV_STATE.heroChecks,
+          benefits: Array.isArray(parsed.benefits) && parsed.benefits.length ? parsed.benefits : DEFAULT_ADV_STATE.benefits
+        };
+      }
+    }
+  } catch (e) {}
+  return DEFAULT_ADV_STATE;
+};
+
+const saveStoredAdvData = (data) => {
+  try {
+    localStorage.setItem(ADVERTISE_STORAGE_KEY, JSON.stringify(data));
+    window.dispatchEvent(new Event('storage'));
+  } catch (e) {}
+};
+
+export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudioView = false }) {
+  const [advData, setAdvData] = useState(() => {
+    if (page?.data && typeof page.data === 'object' && Object.keys(page.data).length > 0) {
+      return { ...DEFAULT_ADV_STATE, ...page.data };
+    }
+    return getStoredAdvData();
+  });
+
+  const advDataRef = useRef(advData);
+  useEffect(() => {
+    advDataRef.current = advData;
+  }, [advData]);
+
+  // Load latest page data from MongoDB API on mount or when page prop changes
+  useEffect(() => {
+    let isMounted = true;
+    if (page?.data && typeof page.data === 'object' && Object.keys(page.data).length > 0) {
+      const merged = { ...DEFAULT_ADV_STATE, ...page.data };
+      setAdvData(merged);
+      advDataRef.current = merged;
+    } else {
+      PageService.getPageById('page_advertise').then(res => {
+        if (isMounted && res && res.data && typeof res.data === 'object' && Object.keys(res.data).length > 0) {
+          const merged = { ...DEFAULT_ADV_STATE, ...res.data };
+          setAdvData(merged);
+          advDataRef.current = merged;
+          saveStoredAdvData(merged);
+        } else if (isMounted) {
+          const stored = getStoredAdvData();
+          setAdvData(stored);
+          advDataRef.current = stored;
+        }
+      }).catch(() => {
+        if (isMounted) {
+          const stored = getStoredAdvData();
+          setAdvData(stored);
+          advDataRef.current = stored;
         }
       });
-      if (onShowToast) onShowToast('Advertise page content saved live!');
-    } catch (e) {
-      console.warn('Failed to update advertise page:', e);
     }
+
+    const handleStorageUpdate = () => {
+      const stored = getStoredAdvData();
+      setAdvData(stored);
+      advDataRef.current = stored;
+    };
+
+    window.addEventListener('storage', handleStorageUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
+  }, [page]);
+
+  // Persist helper for local storage and MongoDB page update
+  const persistAdvData = (newData) => {
+    advDataRef.current = newData;
+    setAdvData(newData);
+    saveStoredAdvData(newData);
+    try {
+      PageService.updatePage('page_advertise', {
+        title: newData.heroHeading || 'Advertise With Us',
+        description: newData.heroSubtext || DEFAULT_ADV_STATE.heroSubtext,
+        slug: 'advertise',
+        status: 'published',
+        data: newData
+      }).catch(err => console.warn('Sync advertise page note:', err));
+    } catch (e) {}
   };
+
+  const updateField = (field, value) => {
+    const updated = {
+      ...advDataRef.current,
+      [field]: value
+    };
+    persistAdvData(updated);
+  };
+
+  const updateHeroCheck = (idx, value) => {
+    const checks = [...(advDataRef.current.heroChecks || DEFAULT_ADV_STATE.heroChecks)];
+    checks[idx] = value;
+    const updated = {
+      ...advDataRef.current,
+      heroChecks: checks
+    };
+    persistAdvData(updated);
+  };
+
+  const updateBenefit = (idx, value) => {
+    const benefits = [...(advDataRef.current.benefits || DEFAULT_ADV_STATE.benefits)];
+    benefits[idx] = value;
+    const updated = {
+      ...advDataRef.current,
+      benefits
+    };
+    persistAdvData(updated);
+  };
+
+  // Listen to Studio Top Bar "Publish Live" event
+  useEffect(() => {
+    const handlePublishEvent = () => {
+      persistAdvData(advDataRef.current);
+      if (onShowToast) onShowToast('Advertise page published live successfully!');
+    };
+    window.addEventListener('admin:publish-live-studio', handlePublishEvent);
+    return () => {
+      window.removeEventListener('admin:publish-live-studio', handlePublishEvent);
+    };
+  }, [onShowToast]);
+
   // Page Title & Meta tags for SEO
   useEffect(() => {
-    document.title = 'Advertise With Us | GoReadPost Brand Partnerships';
+    document.title = `${advData.heroHeading || 'Advertise With Us'} | GoReadPost Brand Partnerships`;
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement('meta');
       meta.name = 'description';
       document.head.appendChild(meta);
     }
-    meta.setAttribute('content', 'Reach the right audience for your brand. Promote your business, products or services through our blogging platform and get connected with engaged readers.');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    meta.setAttribute('content', advData.heroSubtext || DEFAULT_ADV_STATE.heroSubtext);
+    if (!isStudioView) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [advData.heroHeading, advData.heroSubtext, isStudioView]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -55,8 +199,8 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const contactPhone = '+91 928 933 8990';
-  const rawWhatsAppPhone = '919289338990';
+  const contactPhone = advData.contactPhone || DEFAULT_ADV_STATE.contactPhone;
+  const rawWhatsAppPhone = (contactPhone || '').replace(/[^0-9]/g, '') || '919289338990';
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -65,6 +209,11 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isStudioView) {
+      if (onShowToast) onShowToast('Advertising enquiry form is interactive in public view.');
+      return;
+    }
 
     // Validation
     if (!formData.fullName.trim()) {
@@ -152,7 +301,40 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
   };
 
   return (
-    <div className="adv-exact-page">
+    <div className={`adv-exact-page ${isStudioView ? 'adv-studio-mode' : ''}`}>
+
+      {/* ── Studio View Breadcrumb ── */}
+      {isStudioView && (
+        <nav 
+          className="contact-breadcrumb-nav" 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            fontSize: '0.88rem', 
+            color: '#64748b',
+            marginBottom: '1rem',
+            padding: '0 0.5rem'
+          }}
+        >
+          <button 
+            type="button" 
+            onClick={onBackToHome}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: '#dc2626', 
+              fontWeight: 700, 
+              cursor: 'pointer', 
+              padding: 0 
+            }}
+          >
+            Home
+          </button>
+          <span>/</span>
+          <span style={{ color: '#0f172a', fontWeight: 700 }}>Advertise With Us</span>
+        </nav>
+      )}
 
       {/* ─── 1. TOP HERO BANNER (DARK NAVY WITH LAPTOP MOCKUP) ─── */}
       <section className="adv-hero-banner">
@@ -164,50 +346,51 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
               contentEditable={isStudioView}
               suppressContentEditableWarning={true}
               className={isStudioView ? "adv-hero-heading lse-direct-editable" : "adv-hero-heading"}
+              title={isStudioView ? "Click directly to edit headline" : undefined}
               onBlur={(e) => {
                 const val = e.currentTarget.textContent.trim();
-                if (val && val !== heroHeading) handleUpdateAdv({ heading: val });
+                if (val && val !== advData.heroHeading) updateField('heroHeading', val);
               }}
-              title={isStudioView ? "Click directly to edit headline" : undefined}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
             >
-              {heroHeading}
+              {advData.heroHeading}
             </h1>
 
             <p 
               contentEditable={isStudioView}
               suppressContentEditableWarning={true}
               className={isStudioView ? "adv-hero-subtext lse-direct-editable" : "adv-hero-subtext"}
+              title={isStudioView ? "Click directly to edit subtext" : undefined}
               onBlur={(e) => {
                 const val = e.currentTarget.textContent.trim();
-                if (val && val !== heroSubtext) handleUpdateAdv({ subtext: val });
+                if (val && val !== advData.heroSubtext) updateField('heroSubtext', val);
               }}
-              title={isStudioView ? "Click directly to edit subtext" : undefined}
             >
-              {heroSubtext}
+              {advData.heroSubtext}
             </p>
 
             {/* 3 Checkmark Feature Badges */}
             <div className="adv-hero-checks">
-              <div className="adv-check-pill">
-                <span className="adv-check-icon">
-                  <Check size={14} strokeWidth={3} />
-                </span>
-                <span className="adv-check-text">Increase Brand Visibility</span>
-              </div>
-
-              <div className="adv-check-pill">
-                <span className="adv-check-icon">
-                  <Check size={14} strokeWidth={3} />
-                </span>
-                <span className="adv-check-text">Reach Target Audience</span>
-              </div>
-
-              <div className="adv-check-pill">
-                <span className="adv-check-icon">
-                  <Check size={14} strokeWidth={3} />
-                </span>
-                <span className="adv-check-text">Flexible Ad Options</span>
-              </div>
+              {(advData.heroChecks || DEFAULT_ADV_STATE.heroChecks).map((check, idx) => (
+                <div key={idx} className="adv-check-pill">
+                  <span className="adv-check-icon">
+                    <Check size={14} strokeWidth={3} />
+                  </span>
+                  <span 
+                    contentEditable={isStudioView}
+                    suppressContentEditableWarning={true}
+                    className={isStudioView ? "adv-check-text lse-direct-editable" : "adv-check-text"}
+                    title={isStudioView ? "Click directly to edit feature badge" : undefined}
+                    onBlur={(e) => {
+                      const val = e.currentTarget.textContent.trim();
+                      if (val && val !== check) updateHeroCheck(idx, val);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                  >
+                    {check}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -227,7 +410,6 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
         </div>
       </section>
 
-
       {/* ─── 2. TWO-COLUMN MAIN BODY (LEFT: BENEFITS | RIGHT: ENQUIRY FORM) ─── */}
       <main className="adv-main-section">
         <div className="adv-main-container">
@@ -236,78 +418,128 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
           <div className="adv-left-column">
             
             <div className="adv-why-header">
-              <h2 className="adv-why-title">
-                Your Brand Deserves<br />to Be Seen
+              <h2 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "adv-why-title lse-direct-editable" : "adv-why-title"}
+                title={isStudioView ? "Click directly to edit section title" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== advData.whyTitle) updateField('whyTitle', val);
+                }}
+              >
+                {advData.whyTitle}
               </h2>
             </div>
 
             {/* 3 Benefit Feature Items */}
             <div className="adv-benefits-list">
-              
-              {/* Feature 1: Promote Your Business */}
-              <div className="adv-benefit-item">
-                <div className="adv-benefit-icon-wrap adv-icon-blue">
-                  <Megaphone size={22} strokeWidth={2.2} />
-                </div>
-                <div className="adv-benefit-text">
-                  <h3 className="adv-benefit-title">Promote Your Business</h3>
-                </div>
-              </div>
-
-              {/* Feature 2: Flexible Ad Options */}
-              <div className="adv-benefit-item">
-                <div className="adv-benefit-icon-wrap adv-icon-green">
-                  <Target size={22} strokeWidth={2.2} />
-                </div>
-                <div className="adv-benefit-text">
-                  <h3 className="adv-benefit-title">Flexible Ad Options</h3>
-                </div>
-              </div>
-
-              {/* Feature 3: Personalised Support */}
-              <div className="adv-benefit-item">
-                <div className="adv-benefit-icon-wrap adv-icon-purple">
-                  <Handshake size={22} strokeWidth={2.2} />
-                </div>
-                <div className="adv-benefit-text">
-                  <h3 className="adv-benefit-title">Personalised Support</h3>
-                </div>
-              </div>
-
+              {(advData.benefits || DEFAULT_ADV_STATE.benefits).map((benefit, idx) => {
+                const iconWraps = [
+                  <div key="0" className="adv-benefit-icon-wrap adv-icon-blue"><Megaphone size={22} strokeWidth={2.2} /></div>,
+                  <div key="1" className="adv-benefit-icon-wrap adv-icon-green"><Target size={22} strokeWidth={2.2} /></div>,
+                  <div key="2" className="adv-benefit-icon-wrap adv-icon-purple"><Handshake size={22} strokeWidth={2.2} /></div>
+                ];
+                return (
+                  <div key={idx} className="adv-benefit-item">
+                    {iconWraps[idx % iconWraps.length]}
+                    <div className="adv-benefit-text">
+                      <h3 
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "adv-benefit-title lse-direct-editable" : "adv-benefit-title"}
+                        title={isStudioView ? "Click directly to edit benefit title" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== benefit) updateBenefit(idx, val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {benefit}
+                      </h3>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Need to Talk Directly? Card */}
             <div className="adv-callout-card">
-              <h4 className="adv-callout-title">Need to Talk Directly?</h4>
+              <h4 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "adv-callout-title lse-direct-editable" : "adv-callout-title"}
+                title={isStudioView ? "Click directly to edit callout title" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== advData.calloutTitle) updateField('calloutTitle', val);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {advData.calloutTitle}
+              </h4>
 
               <div className="adv-callout-action-row">
                 <button 
                   type="button" 
                   className="adv-call-now-btn" 
-                  onClick={handleCallNow}
+                  onClick={(e) => {
+                    if (isStudioView) { e.preventDefault(); return; }
+                    handleCallNow();
+                  }}
                 >
                   <PhoneCall size={16} />
-                  <span>Call Now</span>
+                  <span
+                    contentEditable={isStudioView}
+                    suppressContentEditableWarning={true}
+                    className={isStudioView ? "lse-direct-editable" : ""}
+                    title={isStudioView ? "Click directly to edit button text" : undefined}
+                    onBlur={(e) => {
+                      const val = e.currentTarget.textContent.trim();
+                      if (val && val !== advData.callBtnText) updateField('callBtnText', val);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                  >
+                    {advData.callBtnText}
+                  </span>
                 </button>
                 <span className="adv-callout-divider" />
-                <a 
-                  href={`tel:${contactPhone.replace(/\s+/g, '')}`} 
-                  className="adv-callout-phone-link"
+                <span 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "adv-callout-phone-link lse-direct-editable" : "adv-callout-phone-link"}
+                  title={isStudioView ? "Click directly to edit contact phone" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== advData.contactPhone) updateField('contactPhone', val);
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
                 >
-                  {contactPhone}
-                </a>
+                  {advData.contactPhone}
+                </span>
               </div>
             </div>
 
           </div>
-
 
           {/* ────── Right Column: Submit Your Enquiry Card ────── */}
           <div className="adv-right-column">
             <div className="adv-form-card">
               
               <div className="adv-form-header">
-                <h2 className="adv-form-title">Submit Your Enquiry</h2>
+                <h2 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "adv-form-title lse-direct-editable" : "adv-form-title"}
+                  title={isStudioView ? "Click directly to edit form title" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== advData.formTitle) updateField('formTitle', val);
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                >
+                  {advData.formTitle}
+                </h2>
               </div>
 
               <form onSubmit={handleSubmit} className="adv-enquiry-form">
@@ -316,7 +548,21 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                 <div className="adv-form-row adv-two-cols">
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Full Name <span className="adv-required">*</span>
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelFullName) updateField('labelFullName', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelFullName || 'Full Name'}
+                      </span>
+                      {' '}
+                      <span className="adv-required">*</span>
                     </label>
                     <input 
                       type="text" 
@@ -326,12 +572,25 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                       placeholder="Enter your full name" 
                       className="adv-input"
                       required
+                      disabled={isStudioView}
                     />
                   </div>
 
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Company / Business Name
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelCompany) updateField('labelCompany', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelCompany || 'Company / Business Name'}
+                      </span>
                     </label>
                     <input 
                       type="text" 
@@ -340,6 +599,7 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                       onChange={handleInputChange}
                       placeholder="Enter your company name" 
                       className="adv-input"
+                      disabled={isStudioView}
                     />
                   </div>
                 </div>
@@ -348,7 +608,21 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                 <div className="adv-form-row adv-two-cols">
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Email Address <span className="adv-required">*</span>
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelEmail) updateField('labelEmail', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelEmail || 'Email Address'}
+                      </span>
+                      {' '}
+                      <span className="adv-required">*</span>
                     </label>
                     <input 
                       type="email" 
@@ -358,12 +632,27 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                       placeholder="you@example.com" 
                       className="adv-input"
                       required
+                      disabled={isStudioView}
                     />
                   </div>
 
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Phone Number <span className="adv-required">*</span>
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelPhone) updateField('labelPhone', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelPhone || 'Phone Number'}
+                      </span>
+                      {' '}
+                      <span className="adv-required">*</span>
                     </label>
                     <input 
                       type="tel" 
@@ -373,6 +662,7 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                       placeholder="+91 98765 43210" 
                       className="adv-input"
                       required
+                      disabled={isStudioView}
                     />
                   </div>
                 </div>
@@ -381,7 +671,21 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                 <div className="adv-form-row">
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Type of Advertisement <span className="adv-required">*</span>
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelAdType) updateField('labelAdType', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelAdType || 'Type of Advertisement'}
+                      </span>
+                      {' '}
+                      <span className="adv-required">*</span>
                     </label>
                     <div className="adv-select-wrapper">
                       <select 
@@ -390,6 +694,7 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                         onChange={handleInputChange}
                         className="adv-select"
                         required
+                        disabled={isStudioView}
                       >
                         <option value="" disabled>Select an option</option>
                         <option value="Banner Ads">Banner Ads (Header, Sidebar, In-Article)</option>
@@ -407,7 +712,21 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                 <div className="adv-form-row">
                   <div className="adv-field-group">
                     <label className="adv-label">
-                      Your Message <span className="adv-required">*</span>
+                      <span
+                        contentEditable={isStudioView}
+                        suppressContentEditableWarning={true}
+                        className={isStudioView ? "lse-direct-editable" : ""}
+                        title={isStudioView ? "Click directly to edit label" : undefined}
+                        onBlur={(e) => {
+                          const val = e.currentTarget.textContent.trim();
+                          if (val && val !== advData.labelMessage) updateField('labelMessage', val);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                      >
+                        {advData.labelMessage || 'Your Message'}
+                      </span>
+                      {' '}
+                      <span className="adv-required">*</span>
                     </label>
                     <textarea 
                       name="message"
@@ -417,6 +736,7 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                       rows={4}
                       className="adv-textarea"
                       required
+                      disabled={isStudioView}
                     />
                   </div>
                 </div>
@@ -426,10 +746,26 @@ export default function AdvertisePage({ page, onBackToHome, onShowToast, isStudi
                   type="submit" 
                   className="adv-whatsapp-btn"
                   disabled={isSubmitting}
+                  onClick={(e) => {
+                    if (isStudioView) {
+                      e.preventDefault();
+                      return;
+                    }
+                  }}
                 >
                   <Send size={18} className="adv-wa-icon" />
-                  <span className="adv-wa-btn-text">
-                    {isSubmitting ? 'Sending...' : 'Send'}
+                  <span 
+                    contentEditable={isStudioView}
+                    suppressContentEditableWarning={true}
+                    className={isStudioView ? "adv-wa-btn-text lse-direct-editable" : "adv-wa-btn-text"}
+                    title={isStudioView ? "Click directly to edit button label" : undefined}
+                    onBlur={(e) => {
+                      const val = e.currentTarget.textContent.trim();
+                      if (val && val !== advData.submitBtnText) updateField('submitBtnText', val);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                  >
+                    {isSubmitting ? 'Sending...' : advData.submitBtnText}
                   </span>
                   <ArrowRight size={18} className="adv-wa-arrow" />
                 </button>

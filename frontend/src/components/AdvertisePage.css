@@ -575,3 +575,24 @@
     display: none;
   }
 }
+
+
+/* ── Direct In-Place Visual UI Editable Styles for Advertise Page ── */
+.adv-exact-page .lse-direct-editable {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+  cursor: text;
+}
+
+.adv-exact-page .lse-direct-editable:hover {
+  outline: 2px dashed #ea580c !important;
+  outline-offset: 3px;
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.adv-exact-page .lse-direct-editable:focus {
+  outline: 2px solid #ea580c !important;
+  outline-offset: 3px;
+  background: rgba(234, 88, 12, 0.12);
+}

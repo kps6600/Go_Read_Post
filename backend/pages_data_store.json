@@ -3706,7 +3706,7 @@
     "title": "Advertise With Us",
     "slug": "advertise",
     "brand": "GoReadPost",
-    "description": "Partner with India’s leading technology, founders, and capital intelligence publication.",
+    "description": "Partner with India's leading technology, founders, and capital intelligence publication.",
     "heroHeadline": "Amplify Your Brand to 5M+ Founders, Decision Makers & Investors",
     "heroSubhead": "High-impact sponsored stories, native brand integration, newsletter takeovers, and executive events.",
     "heroBanner": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&auto=format&fit=crop&q=80",
@@ -3783,6 +3783,32 @@
           "address": "Ad Sales Bureau, Indiranagar, Bengaluru 560038"
         }
       }
-    ]
+    ],
+    "data": {
+      "heroHeading": "Advertise With Us",
+      "heroSubtext": "Partner with India's leading technology, founders, and capital intelligence publication.",
+      "heroChecks": [
+        "Increase Brand Visibility",
+        "Reach Target Audience",
+        "Flexible Ad Options"
+      ],
+      "whyTitle": "Your Brand Deserves to Be Seen",
+      "benefits": [
+        "Promote Your Business",
+        "Flexible Ad Options",
+        "Personalised Support"
+      ],
+      "calloutTitle": "Need to Talk Directly?",
+      "callBtnText": "Call Now",
+      "contactPhone": "+91 928 933 8990",
+      "formTitle": "Submit Your Enquiry",
+      "labelFullName": "Full Name",
+      "labelCompany": "Company / Business Name",
+      "labelEmail": "Email Address",
+      "labelPhone": "Phone Number",
+      "labelAdType": "Type of Advertisement",
+      "labelMessage": "Your Message",
+      "submitBtnText": "Send"
+    }
   }
 ]
