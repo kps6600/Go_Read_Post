@@ -204,29 +204,14 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Header & Tab Bar (Clean User List tab and Add User CTA) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <div
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
-              fontWeight: '700',
-              color: 'var(--brand-primary, #dc2626)',
-              borderBottom: '2px solid var(--brand-primary, #dc2626)',
-              fontSize: '0.94rem'
-            }}
-          >
-            <Users size={16} />
-            <span>User List ({communityUsers.length})</span>
-          </div>
-        </div>
-
+      {/* Top Action Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '16px' }}>
         <button
           onClick={openCreateModal}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
             background: 'var(--brand-primary, #dc2626)', color: '#fff', border: 'none', borderRadius: '8px',
-            fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer', marginBottom: '4px',
+            fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer',
             boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
             transition: 'all 0.15s ease'
           }}
