@@ -594,12 +594,12 @@ export default function AdminCategoryStudioView({
             ))}
           </div>
 
-          <div className="acsv-toolbar-right">
+          <div className="acsv-toolbar-bottom-row">
             <div className="acsv-search-box">
               <Search size={15} color="#94a3b8" />
               <input
                 type="text"
-                placeholder="Search stories in desk..."
+                placeholder={`Search in ${activeCategory === 'All' ? 'all desks' : activeCategory + ' desk'}...`}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="acsv-search-input"
@@ -608,11 +608,23 @@ export default function AdminCategoryStudioView({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                  className="acsv-search-clear-btn"
+                  title="Clear search"
                 >
                   <X size={14} />
                 </button>
               )}
+            </div>
+
+            <div className="acsv-toolbar-meta">
+              <span className="acsv-meta-dot" />
+              <span>
+                {searchQuery ? (
+                  <>Found <strong>{displayStories.length}</strong> matching stories</>
+                ) : (
+                  <>Viewing <strong>{activeCategory === 'All' ? 'All Editorial Desks' : `${activeCategory} Desk`}</strong> &bull; {displayStories.length} {displayStories.length === 1 ? 'curated story' : 'curated stories'}</>
+                )}
+              </span>
             </div>
           </div>
         </div>
