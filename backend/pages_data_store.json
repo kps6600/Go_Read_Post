@@ -3606,7 +3606,100 @@
           "secondaryBtnUrl": "/editorial-team"
         }
       }
-    ]
+    ],
+    "data": {
+      "hero": {
+        "badge": "",
+        "titlePrefix": "Welcome to Our Blog —",
+        "titleHighlight": "Ideas, Stories & Inspiration",
+        "introLead": "We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.",
+        "missionPrefix": "Our mission is simple:",
+        "missionStatement": "to make useful information accessible, engaging, and easy to understand.",
+        "primaryBtnText": "Explore Latest Articles",
+        "primaryBtnTarget": "/latest",
+        "secondaryBtnText": "Contact Us",
+        "secondaryBtnTarget": "/contact"
+      },
+      "whoWeAre": {
+        "badge": "",
+        "title": "Who We Are",
+        "content": "We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life.",
+        "traits": [
+          "Content Creators",
+          "Researchers",
+          "Curious Minds"
+        ]
+      },
+      "whatWeShare": {
+        "badge": "",
+        "title": "What We Share",
+        "lead": "",
+        "items": [
+          {
+            "id": "share-1",
+            "icon": "book",
+            "title": "Informative Articles",
+            "description": "Useful insights to help you learn and grow."
+          },
+          {
+            "id": "share-2",
+            "icon": "lightbulb",
+            "title": "Tips & Guides",
+            "description": "Practical advice you can apply in everyday life."
+          },
+          {
+            "id": "share-3",
+            "icon": "trending",
+            "title": "Trending Topics",
+            "description": "Fresh perspectives on what's happening around us."
+          },
+          {
+            "id": "share-4",
+            "icon": "sparkles",
+            "title": "Stories & Inspiration",
+            "description": "Ideas that spark curiosity and creativity."
+          }
+        ]
+      },
+      "mission": {
+        "badge": "",
+        "title": "Our Mission",
+        "description": "Our mission is to inform, inspire, and empower our readers through quality content. We focus on making every article meaningful, easy to read, and worth your time."
+      },
+      "vision": {
+        "badge": "",
+        "title": "Our Vision",
+        "description": "We aspire to build a trusted blogging community where readers can explore ideas, discover opportunities, and keep learning. Your time and trust matter to us, and we strive to make every visit worthwhile."
+      },
+      "whyChooseUs": {
+        "badge": "",
+        "title": "Why Choose Us?",
+        "points": [
+          "Reader-focused and easy-to-understand content.",
+          "Informative articles designed to provide real value.",
+          "A commitment to quality, clarity, and continuous improvement.",
+          "A welcoming platform where curiosity leads to discovery."
+        ]
+      },
+      "community": {
+        "badge": "",
+        "title": "Join Our Community",
+        "paragraph1": "",
+        "paragraph2": "",
+        "contactQuestion": "Have a question or want to collaborate?",
+        "queryFormTitle": "Have a Query or Want to Collaborate?",
+        "submitBtnText": "Submit Query",
+        "contactActionText": "Visit our Contact Us page. We'd love to hear from you.",
+        "contactBtnText": "Visit Contact Us Page",
+        "contactBtnTarget": "/contact",
+        "tagline": "Read. Discover. Learn. Grow."
+      },
+      "seo": {
+        "title": "About Us | GoReadPost",
+        "description": "Welcome to Our Blog — Ideas, Stories & Inspiration. Discover fresh perspectives, informative articles, practical tips, and inspiring stories.",
+        "keywords": "About Us, GoReadPost, Ideas Stories Inspiration, Informative Articles, Tips & Guides, Trending Topics"
+      }
+    }
   },
   {
     "id": "page_advertise",

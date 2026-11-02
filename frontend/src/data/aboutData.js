@@ -7,7 +7,8 @@ export const DEFAULT_ABOUT_DATA = {
     titlePrefix: 'Welcome to Our Blog —',
     titleHighlight: 'Ideas, Stories & Inspiration',
     introLead: 'We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.',
-    missionStatement: 'Our mission is simple: to make useful information accessible, engaging, and easy to understand.',
+    missionPrefix: 'Our mission is simple:',
+    missionStatement: 'to make useful information accessible, engaging, and easy to understand.',
     primaryBtnText: 'Explore Latest Articles',
     primaryBtnTarget: '/latest',
     secondaryBtnText: 'Contact Us',
@@ -16,7 +17,8 @@ export const DEFAULT_ABOUT_DATA = {
   whoWeAre: {
     badge: '',
     title: 'Who We Are',
-    content: 'We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life.'
+    content: 'We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life.',
+    traits: ['Content Creators', 'Researchers', 'Curious Minds']
   },
   whatWeShare: {
     badge: '',
@@ -75,6 +77,8 @@ export const DEFAULT_ABOUT_DATA = {
     paragraph1: '',
     paragraph2: '',
     contactQuestion: 'Have a question or want to collaborate?',
+    queryFormTitle: 'Have a Query or Want to Collaborate?',
+    submitBtnText: 'Submit Query',
     contactActionText: "Visit our Contact Us page. We'd love to hear from you.",
     contactBtnText: 'Visit Contact Us Page',
     contactBtnTarget: '/contact',

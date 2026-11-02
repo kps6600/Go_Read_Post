@@ -33,11 +33,22 @@ export default function AboutSection({
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [newCard, setNewCard] = useState({ title: '', description: '' });
 
+  // Load from MongoDB API on mount or when page prop changes
   useEffect(() => {
+    let isMounted = true;
     if (page?.data && typeof page.data === 'object' && (page.data.hero || page.data.whatWeShare)) {
       setAboutData({ ...DEFAULT_ABOUT_DATA, ...page.data });
     } else {
-      setAboutData(getStoredAboutData());
+      PageService.getPageById('about').then(res => {
+        if (isMounted && res && res.data && typeof res.data === 'object' && Object.keys(res.data).length > 0) {
+          setAboutData({ ...DEFAULT_ABOUT_DATA, ...res.data });
+          saveStoredAboutData({ ...DEFAULT_ABOUT_DATA, ...res.data });
+        } else if (isMounted) {
+          setAboutData(getStoredAboutData());
+        }
+      }).catch(() => {
+        if (isMounted) setAboutData(getStoredAboutData());
+      });
     }
 
     const handleStorageUpdate = () => {
@@ -45,8 +56,110 @@ export default function AboutSection({
     };
 
     window.addEventListener('storage', handleStorageUpdate);
-    return () => window.removeEventListener('storage', handleStorageUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
   }, [page]);
+
+  // General Updater with automatic local and API persistence
+  const updateAboutData = (updater) => {
+    setAboutData(prev => {
+      const updated = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      saveStoredAboutData(updated);
+      try {
+        PageService.updatePage('about', {
+          title: 'About Us',
+          slug: 'about',
+          status: 'published',
+          data: updated
+        }).catch(() => {});
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const updateHero = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      hero: { ...(prev.hero || DEFAULT_ABOUT_DATA.hero), ...fields }
+    }));
+  };
+
+  const updateWhoWeAre = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      whoWeAre: { ...(prev.whoWeAre || DEFAULT_ABOUT_DATA.whoWeAre), ...fields }
+    }));
+  };
+
+  const updateWhoWeAreTrait = (idx, val) => {
+    updateAboutData(prev => {
+      const traits = [...(prev.whoWeAre?.traits || DEFAULT_ABOUT_DATA.whoWeAre.traits || ['Content Creators', 'Researchers', 'Curious Minds'])];
+      traits[idx] = val;
+      return {
+        ...prev,
+        whoWeAre: { ...(prev.whoWeAre || DEFAULT_ABOUT_DATA.whoWeAre), traits }
+      };
+    });
+  };
+
+  const updateWhatWeShare = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      whatWeShare: { ...(prev.whatWeShare || DEFAULT_ABOUT_DATA.whatWeShare), ...fields }
+    }));
+  };
+
+  const updateShareCard = (idx, fields) => {
+    updateAboutData(prev => {
+      const items = [...(prev.whatWeShare?.items || [])];
+      items[idx] = { ...items[idx], ...fields };
+      return {
+        ...prev,
+        whatWeShare: { ...(prev.whatWeShare || DEFAULT_ABOUT_DATA.whatWeShare), items }
+      };
+    });
+  };
+
+  const updateMission = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      mission: { ...(prev.mission || DEFAULT_ABOUT_DATA.mission), ...fields }
+    }));
+  };
+
+  const updateVision = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      vision: { ...(prev.vision || DEFAULT_ABOUT_DATA.vision), ...fields }
+    }));
+  };
+
+  const updateWhyChooseUs = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      whyChooseUs: { ...(prev.whyChooseUs || DEFAULT_ABOUT_DATA.whyChooseUs), ...fields }
+    }));
+  };
+
+  const updateWhyChoosePoint = (idx, val) => {
+    updateAboutData(prev => {
+      const points = [...(prev.whyChooseUs?.points || DEFAULT_ABOUT_DATA.whyChooseUs.points || [])];
+      points[idx] = val;
+      return {
+        ...prev,
+        whyChooseUs: { ...(prev.whyChooseUs || DEFAULT_ABOUT_DATA.whyChooseUs), points }
+      };
+    });
+  };
+
+  const updateCommunity = (fields) => {
+    updateAboutData(prev => ({
+      ...prev,
+      community: { ...(prev.community || DEFAULT_ABOUT_DATA.community), ...fields }
+    }));
+  };
 
   // Listen to Studio Top Bar "+ Add Card" event
   useEffect(() => {
@@ -71,6 +184,8 @@ export default function AboutSection({
           slug: 'about',
           status: 'published',
           data: aboutData
+        }).then(() => {
+          if (onShowToast) onShowToast('About Us page published live successfully!');
         }).catch(() => {});
       } catch (e) {}
     };
@@ -78,7 +193,7 @@ export default function AboutSection({
     return () => {
       window.removeEventListener('admin:publish-live-studio', handlePublishEvent);
     };
-  }, [aboutData]);
+  }, [aboutData, onShowToast]);
 
   useEffect(() => {
     if (aboutData?.seo?.title) {
@@ -109,6 +224,10 @@ export default function AboutSection({
 
   const handleQuerySubmit = async (e) => {
     e.preventDefault();
+    if (isStudioView) {
+      if (onShowToast) onShowToast('Query form is interactive in public view.');
+      return;
+    }
     if (!queryForm.name.trim() || !queryForm.email.trim() || !queryForm.message.trim()) {
       setQueryError('Please fill in all required fields.');
       return;
@@ -164,11 +283,7 @@ export default function AboutSection({
       }
     };
 
-    setAboutData(updated);
-    saveStoredAboutData(updated);
-    try {
-      PageService.updatePage('about', { data: updated }).catch(() => {});
-    } catch (e) {}
+    updateAboutData(updated);
 
     if (onShowToast) {
       onShowToast('Card deleted from "What We Share"');
@@ -200,11 +315,7 @@ export default function AboutSection({
       }
     };
 
-    setAboutData(updated);
-    saveStoredAboutData(updated);
-    try {
-      PageService.updatePage('about', { data: updated }).catch(() => {});
-    } catch (e) {}
+    updateAboutData(updated);
 
     setNewCard({ title: '', description: '' });
     setIsAddCardModalOpen(false);
@@ -256,19 +367,85 @@ export default function AboutSection({
         {/* ── 1. HERO SECTION ── */}
         <section className="nexus-hero-section">
           <h1 className="nexus-hero-title">
-            {hero?.titlePrefix || 'Welcome to Our Blog —'}{' '}
-            <span className="nexus-gradient-text">{hero?.titleHighlight || 'Ideas, Stories & Inspiration'}</span>
+            <span
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "lse-direct-editable" : ""}
+              title={isStudioView ? "Click directly to edit title prefix" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (hero?.titlePrefix || 'Welcome to Our Blog —')) {
+                  updateHero({ titlePrefix: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {hero?.titlePrefix || 'Welcome to Our Blog —'}
+            </span>{' '}
+            <span 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-gradient-text lse-direct-editable" : "nexus-gradient-text"}
+              title={isStudioView ? "Click directly to edit title highlight" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (hero?.titleHighlight || 'Ideas, Stories & Inspiration')) {
+                  updateHero({ titleHighlight: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {hero?.titleHighlight || 'Ideas, Stories & Inspiration'}
+            </span>
           </h1>
 
-          <p className="nexus-hero-lead">
+          <p 
+            contentEditable={isStudioView}
+            suppressContentEditableWarning={true}
+            className={isStudioView ? "nexus-hero-lead lse-direct-editable" : "nexus-hero-lead"}
+            title={isStudioView ? "Click directly to edit lead paragraph" : undefined}
+            onBlur={(e) => {
+              const val = e.currentTarget.textContent.trim();
+              if (val && val !== (hero?.introLead || '')) {
+                updateHero({ introLead: val });
+              }
+            }}
+          >
             {hero?.introLead || 
               'We believe every great idea deserves to be shared. Our blog is a platform for discovering fresh perspectives, learning something new, and staying updated with the topics that matter to you.'}
           </p>
 
           <div className="nexus-mission-callout">
             <p className="nexus-mission-text">
-              <span className="nexus-mission-highlight">Our mission is simple:</span>{' '}
-              {hero?.missionStatement?.replace(/^Our mission is simple:\s*/i, '') || 'to make useful information accessible, engaging, and easy to understand.'}
+              <span 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "nexus-mission-highlight lse-direct-editable" : "nexus-mission-highlight"}
+                title={isStudioView ? "Click directly to edit mission callout prefix" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (hero?.missionPrefix || 'Our mission is simple:')) {
+                    updateHero({ missionPrefix: val });
+                  }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {hero?.missionPrefix || 'Our mission is simple:'}
+              </span>{' '}
+              <span
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "lse-direct-editable" : ""}
+                title={isStudioView ? "Click directly to edit mission statement" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (hero?.missionStatement || 'to make useful information accessible, engaging, and easy to understand.')) {
+                    updateHero({ missionStatement: val });
+                  }
+                }}
+              >
+                {hero?.missionStatement?.replace(/^Our mission is simple:\s*/i, '') || 'to make useful information accessible, engaging, and easy to understand.'}
+              </span>
             </p>
           </div>
 
@@ -276,19 +453,53 @@ export default function AboutSection({
             <button 
               type="button" 
               className="nexus-btn-primary"
-              onClick={() => handleNavigate(hero?.primaryBtnTarget || '/latest')}
+              onClick={(e) => {
+                if (isStudioView) { e.preventDefault(); return; }
+                handleNavigate(hero?.primaryBtnTarget || '/latest');
+              }}
             >
-              <span>{hero?.primaryBtnText || 'Explore Latest Articles'}</span>
+              <span
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "lse-direct-editable" : ""}
+                title={isStudioView ? "Click directly to edit button label" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (hero?.primaryBtnText || 'Explore Latest Articles')) {
+                    updateHero({ primaryBtnText: val });
+                  }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {hero?.primaryBtnText || 'Explore Latest Articles'}
+              </span>
               <ArrowRight size={16} className="nexus-btn-arrow" />
             </button>
 
             <button 
               type="button" 
               className="nexus-btn-secondary"
-              onClick={() => handleNavigate(hero?.secondaryBtnTarget || '/contact')}
+              onClick={(e) => {
+                if (isStudioView) { e.preventDefault(); return; }
+                handleNavigate(hero?.secondaryBtnTarget || '/contact');
+              }}
             >
               <MessageSquare size={16} />
-              <span>{hero?.secondaryBtnText || 'Contact Us'}</span>
+              <span
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "lse-direct-editable" : ""}
+                title={isStudioView ? "Click directly to edit button label" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (hero?.secondaryBtnText || 'Contact Us')) {
+                    updateHero({ secondaryBtnText: val });
+                  }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {hero?.secondaryBtnText || 'Contact Us'}
+              </span>
             </button>
           </div>
         </section>
@@ -296,28 +507,68 @@ export default function AboutSection({
         {/* ── 2. WHO WE ARE SECTION ── */}
         <section id="who-we-are" className="nexus-section nexus-who-section">
           <div className="nexus-section-header">
-            <h2 className="nexus-section-title">{whoWeAre?.title || 'Who We Are'}</h2>
+            <h2 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-section-title lse-direct-editable" : "nexus-section-title"}
+              title={isStudioView ? "Click directly to edit section title" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (whoWeAre?.title || 'Who We Are')) {
+                  updateWhoWeAre({ title: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {whoWeAre?.title || 'Who We Are'}
+            </h2>
           </div>
 
           <div className="nexus-who-card">
-            <p className="nexus-who-content">
+            <p 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-who-content lse-direct-editable" : "nexus-who-content"}
+              title={isStudioView ? "Click directly to edit who we are content" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (whoWeAre?.content || '')) {
+                  updateWhoWeAre({ content: val });
+                }
+              }}
+            >
               {whoWeAre?.content || 
                 'We are a passionate team of content creators, researchers, and curious minds who love exploring ideas and sharing knowledge. From informative articles and practical guides to trending topics and inspiring stories, we aim to create content that adds value to your everyday life.'}
             </p>
 
             <div className="nexus-who-traits">
-              <div className="nexus-trait-pill">
-                <PenTool size={16} className="nexus-trait-icon" />
-                <span>Content Creators</span>
-              </div>
-              <div className="nexus-trait-pill">
-                <Search size={16} className="nexus-trait-icon" />
-                <span>Researchers</span>
-              </div>
-              <div className="nexus-trait-pill">
-                <Compass size={16} className="nexus-trait-icon" />
-                <span>Curious Minds</span>
-              </div>
+              {(whoWeAre?.traits || ['Content Creators', 'Researchers', 'Curious Minds']).map((trait, tIdx) => {
+                const iconElements = [
+                  <PenTool key="0" size={16} className="nexus-trait-icon" />, 
+                  <Search key="1" size={16} className="nexus-trait-icon" />, 
+                  <Compass key="2" size={16} className="nexus-trait-icon" />
+                ];
+                return (
+                  <div key={tIdx} className="nexus-trait-pill">
+                    {iconElements[tIdx % iconElements.length]}
+                    <span
+                      contentEditable={isStudioView}
+                      suppressContentEditableWarning={true}
+                      className={isStudioView ? "lse-direct-editable" : ""}
+                      title={isStudioView ? "Click directly to edit trait" : undefined}
+                      onBlur={(e) => {
+                        const val = e.currentTarget.textContent.trim();
+                        if (val && val !== trait) {
+                          updateWhoWeAreTrait(tIdx, val);
+                        }
+                      }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                    >
+                      {trait}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -325,7 +576,21 @@ export default function AboutSection({
         {/* ── 3. WHAT WE SHARE SECTION ── */}
         <section id="what-we-share" className="nexus-section nexus-share-section">
           <div className="nexus-section-header">
-            <h2 className="nexus-section-title">{whatWeShare?.title || 'What We Share'}</h2>
+            <h2 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-section-title lse-direct-editable" : "nexus-section-title"}
+              title={isStudioView ? "Click directly to edit section title" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (whatWeShare?.title || 'What We Share')) {
+                  updateWhatWeShare({ title: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {whatWeShare?.title || 'What We Share'}
+            </h2>
           </div>
 
           <div className="nexus-share-grid">
@@ -334,8 +599,35 @@ export default function AboutSection({
                 key={item.id || idx} 
                 className="nexus-share-card"
               >
-                <h3 className="nexus-share-card-title">{item.title}</h3>
-                <p className="nexus-share-card-desc">{item.description}</p>
+                <h3 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "nexus-share-card-title lse-direct-editable" : "nexus-share-card-title"}
+                  title={isStudioView ? "Click directly to edit card title" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== item.title) {
+                      updateShareCard(idx, { title: val });
+                    }
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                >
+                  {item.title}
+                </h3>
+                <p 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "nexus-share-card-desc lse-direct-editable" : "nexus-share-card-desc"}
+                  title={isStudioView ? "Click directly to edit card description" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== item.description) {
+                      updateShareCard(idx, { description: val });
+                    }
+                  }}
+                >
+                  {item.description}
+                </p>
               </div>
             ))}
           </div>
@@ -347,8 +639,33 @@ export default function AboutSection({
             
             {/* Mission Card */}
             <div className="nexus-dual-card nexus-mission-card">
-              <h2 className="nexus-dual-title">{mission?.title || 'Our Mission'}</h2>
-              <p className="nexus-dual-desc">
+              <h2 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "nexus-dual-title lse-direct-editable" : "nexus-dual-title"}
+                title={isStudioView ? "Click directly to edit mission title" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (mission?.title || 'Our Mission')) {
+                    updateMission({ title: val });
+                  }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {mission?.title || 'Our Mission'}
+              </h2>
+              <p 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "nexus-dual-desc lse-direct-editable" : "nexus-dual-desc"}
+                title={isStudioView ? "Click directly to edit mission text" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (mission?.description || '')) {
+                    updateMission({ description: val });
+                  }
+                }}
+              >
                 {mission?.description || 
                   'Our mission is to inform, inspire, and empower our readers through quality content. We focus on making every article meaningful, easy to read, and worth your time.'}
               </p>
@@ -356,8 +673,33 @@ export default function AboutSection({
 
             {/* Vision Card */}
             <div className="nexus-dual-card nexus-vision-card">
-              <h2 className="nexus-dual-title">{vision?.title || 'Our Vision'}</h2>
-              <p className="nexus-dual-desc">
+              <h2 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "nexus-dual-title lse-direct-editable" : "nexus-dual-title"}
+                title={isStudioView ? "Click directly to edit vision title" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (vision?.title || 'Our Vision')) {
+                    updateVision({ title: val });
+                  }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              >
+                {vision?.title || 'Our Vision'}
+              </h2>
+              <p 
+                contentEditable={isStudioView}
+                suppressContentEditableWarning={true}
+                className={isStudioView ? "nexus-dual-desc lse-direct-editable" : "nexus-dual-desc"}
+                title={isStudioView ? "Click directly to edit vision text" : undefined}
+                onBlur={(e) => {
+                  const val = e.currentTarget.textContent.trim();
+                  if (val && val !== (vision?.description || '')) {
+                    updateVision({ description: val });
+                  }
+                }}
+              >
                 {vision?.description || 
                   'We aspire to build a trusted blogging community where readers can explore ideas, discover opportunities, and keep learning. Your time and trust matter to us, and we strive to make every visit worthwhile.'}
               </p>
@@ -369,7 +711,21 @@ export default function AboutSection({
         {/* ── 5. WHY CHOOSE US? SECTION ── */}
         <section id="why-choose-us" className="nexus-section nexus-why-section">
           <div className="nexus-section-header">
-            <h2 className="nexus-section-title">{whyChooseUs?.title || 'Why Choose Us?'}</h2>
+            <h2 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-section-title lse-direct-editable" : "nexus-section-title"}
+              title={isStudioView ? "Click directly to edit section title" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (whyChooseUs?.title || 'Why Choose Us?')) {
+                  updateWhyChooseUs({ title: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {whyChooseUs?.title || 'Why Choose Us?'}
+            </h2>
           </div>
 
           <div className="nexus-why-grid">
@@ -378,7 +734,20 @@ export default function AboutSection({
                 <div className="nexus-why-icon-box">
                   <CheckCircle2 size={20} className="nexus-check-icon" />
                 </div>
-                <div className="nexus-why-text">{point}</div>
+                <div 
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "nexus-why-text lse-direct-editable" : "nexus-why-text"}
+                  title={isStudioView ? "Click directly to edit this reason" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== point) {
+                      updateWhyChoosePoint(idx, val);
+                    }
+                  }}
+                >
+                  {point}
+                </div>
               </div>
             ))}
           </div>
@@ -387,7 +756,21 @@ export default function AboutSection({
         {/* ── 6. JOIN OUR COMMUNITY & CONTACT US ── */}
         <section id="community" className="nexus-section nexus-community-section">
           <div className="nexus-section-header">
-            <h2 className="nexus-section-title">{community?.title || 'Join Our Community'}</h2>
+            <h2 
+              contentEditable={isStudioView}
+              suppressContentEditableWarning={true}
+              className={isStudioView ? "nexus-section-title lse-direct-editable" : "nexus-section-title"}
+              title={isStudioView ? "Click directly to edit section title" : undefined}
+              onBlur={(e) => {
+                const val = e.currentTarget.textContent.trim();
+                if (val && val !== (community?.title || 'Join Our Community')) {
+                  updateCommunity({ title: val });
+                }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+            >
+              {community?.title || 'Join Our Community'}
+            </h2>
           </div>
 
           <div className="nexus-community-card">
@@ -395,7 +778,21 @@ export default function AboutSection({
             <div className="nexus-query-form-card">
               <div className="nexus-query-form-header">
                 <div className="nexus-query-title-row">
-                  <h3 className="nexus-query-title">Have a Query or Want to Collaborate?</h3>
+                  <h3 
+                    contentEditable={isStudioView}
+                    suppressContentEditableWarning={true}
+                    className={isStudioView ? "nexus-query-title lse-direct-editable" : "nexus-query-title"}
+                    title={isStudioView ? "Click directly to edit form title" : undefined}
+                    onBlur={(e) => {
+                      const val = e.currentTarget.textContent.trim();
+                      if (val && val !== (community?.queryFormTitle || community?.contactQuestion || 'Have a Query or Want to Collaborate?')) {
+                        updateCommunity({ queryFormTitle: val });
+                      }
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                  >
+                    {community?.queryFormTitle || community?.contactQuestion || 'Have a Query or Want to Collaborate?'}
+                  </h3>
                 </div>
               </div>
 
@@ -435,6 +832,7 @@ export default function AboutSection({
                         className="nexus-form-input"
                         value={queryForm.name}
                         onChange={(e) => setQueryForm({ ...queryForm, name: e.target.value })}
+                        disabled={isStudioView}
                       />
                     </div>
 
@@ -450,6 +848,7 @@ export default function AboutSection({
                         className="nexus-form-input"
                         value={queryForm.email}
                         onChange={(e) => setQueryForm({ ...queryForm, email: e.target.value })}
+                        disabled={isStudioView}
                       />
                     </div>
                   </div>
@@ -465,6 +864,7 @@ export default function AboutSection({
                       className="nexus-form-input"
                       value={queryForm.subject}
                       onChange={(e) => setQueryForm({ ...queryForm, subject: e.target.value })}
+                      disabled={isStudioView}
                     />
                   </div>
 
@@ -480,6 +880,7 @@ export default function AboutSection({
                       className="nexus-form-textarea"
                       value={queryForm.message}
                       onChange={(e) => setQueryForm({ ...queryForm, message: e.target.value })}
+                      disabled={isStudioView}
                     />
                   </div>
 
@@ -488,6 +889,12 @@ export default function AboutSection({
                       type="submit" 
                       className="nexus-query-submit-btn"
                       disabled={querySubmitting}
+                      onClick={(e) => {
+                        if (isStudioView) {
+                          e.preventDefault();
+                          return;
+                        }
+                      }}
                     >
                       {querySubmitting ? (
                         <>
@@ -497,7 +904,21 @@ export default function AboutSection({
                       ) : (
                         <>
                           <Send size={16} />
-                          <span>Submit Query</span>
+                          <span
+                            contentEditable={isStudioView}
+                            suppressContentEditableWarning={true}
+                            className={isStudioView ? "lse-direct-editable" : ""}
+                            title={isStudioView ? "Click directly to edit submit button text" : undefined}
+                            onBlur={(e) => {
+                              const val = e.currentTarget.textContent.trim();
+                              if (val && val !== (community?.submitBtnText || 'Submit Query')) {
+                                updateCommunity({ submitBtnText: val });
+                              }
+                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                          >
+                            {community?.submitBtnText || 'Submit Query'}
+                          </span>
                         </>
                       )}
                     </button>
@@ -509,7 +930,21 @@ export default function AboutSection({
             {/* Signature Tagline */}
             <div className="nexus-signature-ribbon">
               <span className="nexus-signature-quote">
-                <em>{community?.tagline || 'Read. Discover. Learn. Grow.'}</em>
+                <em
+                  contentEditable={isStudioView}
+                  suppressContentEditableWarning={true}
+                  className={isStudioView ? "lse-direct-editable" : ""}
+                  title={isStudioView ? "Click directly to edit tagline" : undefined}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.textContent.trim();
+                    if (val && val !== (community?.tagline || 'Read. Discover. Learn. Grow.')) {
+                      updateCommunity({ tagline: val });
+                    }
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                >
+                  {community?.tagline || 'Read. Discover. Learn. Grow.'}
+                </em>
               </span>
             </div>
           </div>

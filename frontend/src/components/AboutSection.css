@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    GOREADPOST ABOUT US - PREMIUM EDITORIAL DESIGN
    "Welcome to Our Blog — Ideas, Stories & Inspiration"
    Clean typography, smooth card interactions, responsive layout.
@@ -965,4 +965,25 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+
+/* ── Direct In-Place Visual UI Editable Styles for About Page ── */
+.nexus-about-studio-mode .lse-direct-editable {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+  cursor: text;
+}
+
+.nexus-about-studio-mode .lse-direct-editable:hover {
+  outline: 2px dashed #ea580c !important;
+  outline-offset: 3px;
+  background: rgba(234, 88, 12, 0.06);
+}
+
+.nexus-about-studio-mode .lse-direct-editable:focus {
+  outline: 2px solid #ea580c !important;
+  outline-offset: 3px;
+  background: rgba(234, 88, 12, 0.1);
 }
