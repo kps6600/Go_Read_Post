@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown,
-  Eye, EyeOff, Lock, Phone, Sparkles, Check, User
+  Eye, EyeOff, Lock, Phone, Check, User
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -783,55 +783,11 @@ export default function AdminUsersView({ onShowToast }) {
                         outline: 'none'
                       }}
                     />
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const rand = USER_AVATAR_POOL[Math.floor(Math.random() * USER_AVATAR_POOL.length)];
-                          setFormData({ ...formData, avatar: rand });
-                        }}
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          color: '#dc2626',
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Sparkles size={11} />
-                        <span>Random Avatar Preset</span>
-                      </button>
-                      {formData.avatar && (
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, avatar: '' })}
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: '600',
-                            color: '#64748b',
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 0
-                          }}
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
                   </div>
                 </div>
 
-                {/* Section 1: Personal Details */}
+                {/* Account Information */}
                 <div>
-                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
-                    1. Account Information
-                  </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
@@ -946,11 +902,8 @@ export default function AdminUsersView({ onShowToast }) {
                   </div>
                 </div>
 
-                {/* Section 2: Security & Password */}
+                {/* Security & Credentials */}
                 <div>
-                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
-                    2. Security & Credentials
-                  </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
@@ -1024,11 +977,11 @@ export default function AdminUsersView({ onShowToast }) {
                   </div>
                 </div>
 
-                {/* Section 3: Account Status */}
+                {/* Account Status */}
                 <div>
-                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-                    3. Account Status
-                  </div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '6px' }}>
+                    Account Status
+                  </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <button
                       type="button"
