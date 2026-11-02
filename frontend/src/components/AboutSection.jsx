@@ -333,95 +333,11 @@ export default function AboutSection({
               <div 
                 key={item.id || idx} 
                 className="nexus-share-card"
-                style={{ position: 'relative' }}
               >
-                {isStudioView && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCard(item.id || idx);
-                    }}
-                    title="Delete card"
-                    style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '8px',
-                      border: '1px solid #fecaca',
-                      background: '#fff1f2',
-                      color: '#dc2626',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      zIndex: 5
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#dc2626';
-                      e.currentTarget.style.color = '#ffffff';
-                      e.currentTarget.style.borderColor = '#dc2626';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#fff1f2';
-                      e.currentTarget.style.color = '#dc2626';
-                      e.currentTarget.style.borderColor = '#fecaca';
-                    }}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                )}
                 <h3 className="nexus-share-card-title">{item.title}</h3>
                 <p className="nexus-share-card-desc">{item.description}</p>
               </div>
             ))}
-
-            {isStudioView && (
-              <button
-                type="button"
-                onClick={() => setIsAddCardModalOpen(true)}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  minHeight: '170px',
-                  background: '#f8fafc',
-                  border: '2px dashed #cbd5e1',
-                  borderRadius: '16px',
-                  color: '#ea580c',
-                  cursor: 'pointer',
-                  padding: '1.5rem',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#fff7ed';
-                  e.currentTarget.style.borderColor = '#ea580c';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f8fafc';
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                }}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#ffedd5',
-                  color: '#ea580c',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Plus size={20} />
-                </div>
-                <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>+ Add Card</span>
-              </button>
-            )}
           </div>
         </section>
 

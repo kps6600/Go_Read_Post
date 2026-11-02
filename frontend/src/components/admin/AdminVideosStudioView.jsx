@@ -331,43 +331,7 @@ export default function AdminVideosStudioView({ onShowToast, onNavigate, isStudi
 
             return (
               <div key={vid.id || idx} className="avsv-video-card">
-                {/* Top Admin Control Bar */}
-                <div className="avsv-card-admin-bar">
-                  <div className={`avsv-rank-badge ${idx < 3 ? 'top-rank' : ''}`}>
-                    <span>#{idx + 1}</span>
-                  </div>
 
-                  <div className="avsv-card-btn-group">
-                    <button
-                      type="button"
-                      className="avsv-action-icon-btn"
-                      onClick={() => handleMoveVideo(targetIdx, 'up')}
-                      disabled={targetIdx === 0}
-                      title="Move Earlier"
-                    >
-                      <ArrowLeft size={12} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="avsv-action-icon-btn"
-                      onClick={() => handleMoveVideo(targetIdx, 'down')}
-                      disabled={targetIdx >= videos.length - 1}
-                      title="Move Later"
-                    >
-                      <ArrowRight size={12} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="avsv-action-icon-btn danger"
-                      onClick={() => handleDeleteVideo(targetIdx)}
-                      title="Remove from feed"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                </div>
 
                 {/* 16:9 Thumbnail with Overlay & Duration */}
                 <div 

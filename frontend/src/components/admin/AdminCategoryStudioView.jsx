@@ -654,55 +654,7 @@ export default function AdminCategoryStudioView({
 
               return (
                 <div key={story.id || idx} className="acsv-editorial-card">
-                  {/* Top Admin Control Bar on the card */}
-                  <div className="acsv-card-admin-bar">
-                    <div className="acsv-rank-badge">
-                      <span>#{idx + 1}</span>
-                      {story.isPinned && (
-                        <span style={{ 
-                          background: 'rgba(234, 88, 12, 0.15)', 
-                          color: '#ea580c', 
-                          padding: '1px 6px', 
-                          borderRadius: '4px',
-                          fontSize: '0.7rem',
-                          fontWeight: 800
-                        }}>
-                          PINNED TOP
-                        </span>
-                      )}
-                    </div>
 
-                    <div className="acsv-card-btn-group">
-                      <button
-                        type="button"
-                        className="acsv-action-icon-btn"
-                        onClick={() => handleMoveArticle(targetIdx, 'up')}
-                        disabled={targetIdx === 0}
-                        title="Move Up / Earlier"
-                      >
-                        <ArrowLeft size={12} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="acsv-action-icon-btn"
-                        onClick={() => handleMoveArticle(targetIdx, 'down')}
-                        disabled={targetIdx >= currentCategoryStories.length - 1}
-                        title="Move Down / Later"
-                      >
-                        <ArrowRight size={12} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="acsv-action-icon-btn danger"
-                        onClick={() => handleRemoveArticle(targetIdx)}
-                        title="Remove from desk"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
 
                   {/* Vertical 4-Cards Per Row Card Interior */}
                   <div className="acsv-card-grid-interior">
