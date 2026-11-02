@@ -1044,7 +1044,7 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0' }}>{subtitle}</p>}
+            
           </div>
           <button 
             type="button"
@@ -1276,7 +1276,7 @@ export default function ModernHomepageView({
             <div className="mhp-section-title-wrap">
               <span>{title}</span>
             </div>
-            {subtitle && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0' }}>{subtitle}</p>}
+            
           </div>
           <button 
             type="button"

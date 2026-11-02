@@ -1384,29 +1384,7 @@ export default function LiveWholePageStudio({
                                 </h2>
                               </div>
 
-                              {sec.data?.subtitle && (
-                                <p
-                                  contentEditable={true}
-                                  suppressContentEditableWarning={true}
-                                  className="lse-direct-editable"
-                                  onBlur={(e) => {
-                                    const val = e.currentTarget.textContent.trim();
-                                    if (val !== sec.data.subtitle) {
-                                      handleUpdateSectionData(sec.id, { subtitle: val });
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      e.currentTarget.blur();
-                                    }
-                                  }}
-                                  title="Click directly to edit subtitle"
-                                  style={{ margin: 0, fontSize: '0.86rem', color: '#64748b', cursor: 'text' }}
-                                >
-                                  {sec.data.subtitle}
-                                </p>
-                              )}
+                              
                             </div>
 
                             <span 
