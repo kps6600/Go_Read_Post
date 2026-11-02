@@ -11,7 +11,7 @@ export default function AdminUsersView({ onShowToast }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('team'); // 'team' (Super Admin & Author) | 'users' (Registered Users)
+  const [activeTab, setActiveTab] = useState('all'); // 'all' (All Accounts) | 'team' (Super Admin & Author) | 'users' (Registered Users)
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function AdminUsersView({ onShowToast }) {
 
   const teamUsers = useMemo(() => users.filter(isTeamUser), [users]);
   const generalUsers = useMemo(() => users.filter(u => !isTeamUser(u)), [users]);
-  const currentPool = activeTab === 'team' ? teamUsers : generalUsers;
+  const currentPool = activeTab === 'all' ? users : (activeTab === 'team' ? teamUsers : generalUsers);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -172,6 +172,23 @@ export default function AdminUsersView({ onShowToast }) {
       {/* Tabs Header & Actions Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('all'); setSelectedIds(new Set()); setSearch(''); }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
+              border: 'none', background: 'transparent', cursor: 'pointer',
+              fontWeight: activeTab === 'all' ? '700' : '500',
+              color: activeTab === 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b',
+              borderBottom: activeTab === 'all' ? '2px solid var(--brand-primary, #dc2626)' : '2px solid transparent',
+              fontSize: '0.92rem',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Users size={16} />
+            <span>All Users ({users.length})</span>
+          </button>
+
           <button
             type="button"
             onClick={() => { setActiveTab('team'); setSelectedIds(new Set()); setSearch(''); }}

@@ -48,6 +48,35 @@ export async function ensureDefaultAdmin() {
 
       console.log('🔐 Seeded default Super Admin credentials (admin@goreadpost.com / Admin@12345)');
     }
+
+    // 3. Seed Default Authors & Community Users if needed
+    const userTotal = await User.countDocuments();
+    if (userTotal <= 1) {
+      const defaultSalt = await bcrypt.genSalt(10);
+      const userHash = await bcrypt.hash('User@12345', defaultSalt);
+      const authorHash = await bcrypt.hash('Author@12345', defaultSalt);
+
+      const defaultTeamAndUsers = [
+        { name: 'Priya Kale', username: 'priyakale', email: 'priya@goreadpost.com', passwordHash: authorHash, role: 'AUTHOR', isActive: true },
+        { name: 'Dr. Arvind Ramesh', username: 'arvindramesh', email: 'arvind@goreadpost.com', passwordHash: authorHash, role: 'AUTHOR', isActive: true },
+        { name: 'Neha Singhania', username: 'nehasinghania', email: 'neha@goreadpost.com', passwordHash: authorHash, role: 'AUTHOR', isActive: true },
+        { name: 'Kunal Mehra', username: 'kunalmehra', email: 'kunal@goreadpost.com', passwordHash: authorHash, role: 'AUTHOR', isActive: true },
+        { name: 'Aarav Mehta', username: 'aaravm', email: 'aarav.mehta@gmail.com', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Pooja Iyer', username: 'poojaiyer', email: 'pooja.iyer@outlook.com', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Rohan Verma', username: 'rohanverma', email: 'rohan.v@techcorp.in', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Ananya Deshmukh', username: 'ananyad', email: 'ananya.d@gmail.com', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Vikramaditya Rao', username: 'vikramrao', email: 'vikram.rao@venturehub.co', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Sneha Kulkarni', username: 'snehak', email: 'sneha.k@startupgrowth.in', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Kabir Sen', username: 'kabirsen', email: 'kabir.sen@gmail.com', passwordHash: userHash, role: 'USER', isActive: true },
+        { name: 'Deepika Nair', username: 'deepikan', email: 'deepika.nair@hotmail.com', passwordHash: userHash, role: 'USER', isActive: true }
+      ];
+
+      for (const u of defaultTeamAndUsers) {
+        const exists = await User.findOne({ $or: [{ email: u.email }, { username: u.username }] });
+        if (!exists) await User.create(u).catch(() => {});
+      }
+      console.log('👥 Seeded default authors and registered platform users.');
+    }
   } catch (err) {
     console.error('Error seeding default admin/roles:', err.message);
   }
