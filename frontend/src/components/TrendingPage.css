@@ -461,38 +461,39 @@
 .tp-metric-pill {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 0.58rem;
-  font-weight: 550;
-  padding: 1.5px 6px;
-  border-radius: 9999px;
+  gap: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0;
+  border: none;
+  background: transparent !important;
   line-height: 1.2;
   white-space: nowrap;
   letter-spacing: -0.01em;
 }
 
 .tp-metric-views {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: transparent !important;
+  color: #64748b;
+  border: none;
 }
 
 [data-theme='dark'] .tp-metric-views {
-  background: #1e2638;
+  background: transparent !important;
   color: #94a3b8;
-  border-color: #2b354b;
+  border: none;
 }
 
 .tp-metric-likes {
-  background: #fef2f2;
+  background: transparent !important;
   color: #dc2626;
-  border: 1px solid #fecaca;
+  border: none;
 }
 
 [data-theme='dark'] .tp-metric-likes {
-  background: rgba(220, 38, 38, 0.15);
+  background: transparent !important;
   color: #f87171;
-  border-color: rgba(220, 38, 38, 0.3);
+  border: none;
 }
 
 @media (max-width: 768px) {
@@ -725,13 +726,14 @@
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  padding: 3px 11px;
-  border-radius: 20px;
-  color: #ffffff;
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: capitalize;
-  letter-spacing: 0.02em;
+  padding: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--brand-primary, #dc2626);
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 0;
   line-height: 1.25;
 }

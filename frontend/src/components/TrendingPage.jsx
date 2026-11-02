@@ -678,10 +678,7 @@ export default function TrendingPage({
                         <div className="tp-card-body">
                           {/* Top: Category Pill Badge + Engagement Metrics Badges */}
                           <div className="tp-card-meta-top">
-                            <span 
-                              className="tp-cat-badge"
-                              style={{ background: catStyle.badgeBg }}
-                            >
+                            <span className="tp-cat-badge">
                               {storyCat}
                             </span>
 
