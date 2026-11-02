@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ChevronRight, ChevronLeft, Search, Mail, CheckCircle2, 
   ArrowRight, ArrowLeft, ArrowLeftRight, Trash2, Plus, LayoutGrid, Tag, Layers, Cpu, Briefcase, 
-  GraduationCap, Heart, Plane, Utensils, Atom, Sparkles, TrendingUp,
+  GraduationCap, Heart, Eye, Plane, Utensils, Atom, Sparkles, TrendingUp,
   Edit3, Bookmark, Image as ImageIcon, Settings
 } from 'lucide-react';
 import './LatestArticlesPage.css';
@@ -298,7 +298,59 @@ export default function LatestArticlesPage({
   onShowToast,
   isSaved,
   onToggleSave, isStudioView = false }) {
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState(() => {
+    try {
+      const path = window.location.pathname;
+      if (path.startsWith('/category/')) {
+        const catSlug = path.replace(/^\/category\//, '').split('/')[0].split('?')[0];
+        if (catSlug && catSlug !== 'latest' && catSlug !== 'all') {
+          return catSlug;
+        }
+      }
+    } catch (e) {}
+    return 'All';
+  });
+  const [likedStories, setLikedStories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grp_liked_stories');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const handleToggleLike = (story, e) => {
+    if (e) e.stopPropagation();
+    const sId = getStoryId(story);
+    const wasLiked = Boolean(likedStories[sId]);
+    const newLiked = !wasLiked;
+    const updated = { ...likedStories, [sId]: newLiked };
+    setLikedStories(updated);
+    try {
+      localStorage.setItem('grp_liked_stories', JSON.stringify(updated));
+    } catch (err) {}
+    if (newLiked && onShowToast) {
+      onShowToast(`Liked "${getStoryTitle(story)}"`);
+    }
+  };
+
+  const getStoryViewsCount = (story) => {
+    if (typeof story?.views === 'number' && story.views > 0) return story.views;
+    if (typeof story?.viewsCount === 'number' && story.viewsCount > 0) return story.viewsCount;
+    if (typeof story?.claps === 'number' && story.claps > 0) return story.claps * 4;
+    return 520;
+  };
+
+  const getStoryLikesCount = (story, storyId) => {
+    const sId = storyId || getStoryId(story);
+    const baseLikes = typeof story?.claps === 'number' && story.claps > 0
+      ? story.claps 
+      : (typeof story?.likes === 'number' && story.likes > 0 
+          ? story.likes 
+          : (typeof story?.likes === 'string' ? parseInt(story.likes) || 0 : Math.max(12, Math.round(getStoryViewsCount(story) * 0.12))));
+    const isLiked = Boolean(likedStories[sId]);
+    return baseLikes + (isLiked ? 1 : 0);
+  };
   const [activeTag, setActiveTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -757,6 +809,14 @@ export default function LatestArticlesPage({
     setActiveCategory(cat);
     setActiveTag(null);
     setCurrentPage(1);
+    try {
+      if (cat.toLowerCase() === 'all') {
+        window.history.pushState(null, '', '/latest');
+      } else {
+        const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        window.history.pushState(null, '', `/category/${slug}`);
+      }
+    } catch (e) {}
   };
 
   const handleTagSelect = (tag) => {
@@ -953,6 +1013,9 @@ export default function LatestArticlesPage({
                 const storyDate = getStoryDate(story);
                 const storyReadTime = getStoryReadTime(story);
                 const isCardSaved = isSaved ? Boolean(isSaved(story.id || story._id || story.slug)) : false;
+                const storyViews = getStoryViewsCount(story);
+                const isCardLiked = Boolean(likedStories[storyId]);
+                const storyLikes = getStoryLikesCount(story, storyId);
 
                 return (
                   <article 
@@ -1115,23 +1178,6 @@ export default function LatestArticlesPage({
                     <div className="lap-card-body">
                       <h3 className="lap-card-title">{storyTitle}</h3>
 
-                      {storyExcerpt && (
-                        <p
-                          style={{
-                            fontSize: '0.82rem',
-                            color: '#64748b',
-                            lineHeight: 1.45,
-                            margin: '0 0 10px',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}
-                        >
-                          {storyExcerpt}
-                        </p>
-                      )}
-
                       <div className="lap-card-meta">
                         <div className="lap-card-meta-left">
                           <img 
@@ -1148,6 +1194,28 @@ export default function LatestArticlesPage({
                           <span>{storyDate}</span>
                           <span className="lap-meta-sep">•</span>
                           <span>{storyReadTime}</span>
+                        </div>
+
+                        <div className="lap-card-meta-right">
+                          <span className="lap-views-badge" title={`${storyViews} views`}>
+                            <Eye size={12} className="lap-views-icon" />
+                            <span>{storyViews}</span>
+                          </span>
+                          <button 
+                            type="button" 
+                            className={`lap-like-btn ${isCardLiked ? 'active' : ''}`}
+                            onClick={(e) => handleToggleLike(story, e)}
+                            title={isCardLiked ? 'Unlike story' : 'Like story'}
+                            aria-label="Like story"
+                          >
+                            <Heart 
+                              size={12} 
+                              className="lap-like-icon"
+                              fill={isCardLiked ? "#dc2626" : "none"} 
+                              color={isCardLiked ? "#dc2626" : "#64748b"} 
+                            />
+                            {storyLikes > 0 && <span className="lap-like-count">{storyLikes}</span>}
+                          </button>
                         </div>
                       </div>
                     </div>

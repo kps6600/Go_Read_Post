@@ -611,7 +611,31 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
                       </span>
                     </div>
 
-                    <div className="abv-video-actions">
+                    <div className="abv-video-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {!isPub && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleStatus(v, e)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontSize: '0.74rem',
+                            fontWeight: 750,
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(22, 163, 74, 0.25)'
+                          }}
+                          title="Approve this author video pitch & publish live on frontend"
+                        >
+                          <CheckCircle2 size={13} />
+                          <span>Approve Live</span>
+                        </button>
+                      )}
                       <button 
                         type="button" 
                         className="abv-icon-btn play"

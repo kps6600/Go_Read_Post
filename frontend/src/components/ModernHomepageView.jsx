@@ -693,8 +693,8 @@ export default function ModernHomepageView({
                 <Heart 
                   size={13} 
                   className="mhp-like-icon"
-                  fill="#dc2626" 
-                  color="#dc2626" 
+                  fill={isCardLiked ? "#dc2626" : "none"} 
+                  color={isCardLiked ? "#dc2626" : "#64748b"} 
                 />
                 {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
               </button>

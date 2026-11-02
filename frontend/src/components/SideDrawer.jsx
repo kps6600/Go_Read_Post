@@ -56,16 +56,48 @@ export default function SideDrawer({
     }
   }, [isOpen]);
 
+  const isPresentNavPage = (url, slug, labelOrId) => {
+    const raw = (url || '').trim().toLowerCase().replace(/\/$/, '');
+    const s = (slug || '').trim().toLowerCase();
+    const l = (labelOrId || '').trim().toLowerCase();
+    
+    // Explicit non-existent or unrouted pages in navbar
+    if (raw === '/newsletter' || s === 'newsletter' || l === 'newsletter') return false;
+    if (raw === '/editorial-team' || s.includes('editorial-team') || l.includes('editorial team')) return false;
+    if (raw === '/careers' || s.includes('careers') || l === 'careers') return false;
+    if (raw === '/pitch' || s === 'pitch' || s.includes('pitch-link') || l.includes('pitch story')) return false;
+    if (raw === '/editorial-policy' || s.includes('editorial-policy') || l.includes('editorial policy')) return false;
+    if (raw === '/privacy-policy' || s.includes('privacy-policy') || l.includes('privacy policy')) return false;
+    if (raw === '/terms' || raw === '/terms-of-service' || s.includes('terms') || l.includes('terms of service')) return false;
+    if (raw === '/disclaimer' || s.includes('disclaimer') || l === 'disclaimer') return false;
+    if (raw === '/resources' || s === 'resources') return false;
+    if (raw === '/brands' || s === 'brands') return false;
+    if (raw === '/hindi' || raw === '/ys-hindi' || s === 'hindi') return false;
+    if (raw === '/techsparks' || s === 'techsparks') return false;
+
+    return true;
+  };
+
   // Filter dynamic navigation items by active status and visibility
   const activeNavTree = useMemo(() => {
     return (navigationTree || [])
       .filter(item => {
         if (item.isActive === false || item.isVisible === false) return false;
+        if (!isPresentNavPage(item.url, item.slug, item.title || item.label)) return false;
         const vis = (item.visibility || 'PUBLIC').toUpperCase();
         if (vis === 'DESKTOP') return false; // Skip desktop-only on mobile
         if (vis === 'LOGGED_IN' && !currentUser) return false;
         if (vis === 'ADMIN_ONLY' && !AuthService.isStaff(currentUser)) return false;
         return true;
+      })
+      .map(item => {
+        if (item.children && Array.isArray(item.children)) {
+          return {
+            ...item,
+            children: item.children.filter(c => isPresentNavPage(c.url, c.slug, c.title || c.label))
+          };
+        }
+        return item;
       })
       .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
   }, [navigationTree, currentUser]);
@@ -407,6 +439,19 @@ export default function SideDrawer({
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{currentUser.name || currentUser.username}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)' }}>{currentUser.email}</div>
+                    <div style={{ marginTop: '4px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        fontSize: '0.62rem',
+                        fontWeight: 750,
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: AuthService.isAuthor(currentUser) ? 'rgba(220, 38, 38, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                        color: AuthService.isAuthor(currentUser) ? '#dc2626' : '#2563eb'
+                      }}>
+                        {AuthService.isAuthor(currentUser) ? '✍️ Author' : '📖 Reader'}
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={() => {
@@ -598,46 +643,48 @@ export default function SideDrawer({
             </div>
           )}
 
-          {/* Quick Pitch Action Card */}
-          <div style={{
-            background: 'var(--bg-secondary, #f9fafb)',
-            border: '1px solid var(--border-light, #e5e7eb)',
-            borderRadius: '10px',
-            padding: '1.15rem',
-            marginTop: 'auto'
-          }}>
-            <div style={{ fontWeight: '800', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
-              Are you building a startup?
+          {/* Quick Pitch Action Card - Only visible for Authors */}
+          {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (
+            <div style={{
+              background: 'var(--bg-secondary, #f9fafb)',
+              border: '1px solid var(--border-light, #e5e7eb)',
+              borderRadius: '10px',
+              padding: '1.15rem',
+              marginTop: 'auto'
+            }}>
+              <div style={{ fontWeight: '800', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
+                Are you building a startup?
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)', marginBottom: '0.85rem', lineHeight: '1.4' }}>
+                Submit your journey to our editorial bureau to get covered on GoReadPost.
+              </p>
+              <button 
+                className="pitch-btn" 
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '0.55rem',
+                  borderRadius: '6px',
+                  background: '#dc2626',
+                  color: '#fff',
+                  border: 'none',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                onClick={() => {
+                  onClose();
+                  if (onOpenPitchModal) onOpenPitchModal();
+                }}
+              >
+                <Send size={14} />
+                <span>Pitch Your Story</span>
+              </button>
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)', marginBottom: '0.85rem', lineHeight: '1.4' }}>
-              Submit your journey to our editorial bureau to get covered on GoReadPost.
-            </p>
-            <button 
-              className="pitch-btn" 
-              style={{
-                width: '100%',
-                justifyContent: 'center',
-                fontSize: '0.82rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.55rem',
-                borderRadius: '6px',
-                background: '#dc2626',
-                color: '#fff',
-                border: 'none',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                onClose();
-                if (onOpenPitchModal) onOpenPitchModal();
-              }}
-            >
-              <Send size={14} />
-              <span>Pitch Your Story</span>
-            </button>
-          </div>
+          )}
         </div>
 
         {/* Drawer Footer */}

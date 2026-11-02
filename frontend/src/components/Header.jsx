@@ -186,6 +186,29 @@ export default function Header({
     ? navigationTree
     : (navLinks && navLinks.length > 0 ? navLinks : NAV_LINKS);
 
+  // Filter out any navigation links that point to pages that are not present
+  const isPresentNavPage = (url, slug, labelOrId) => {
+    const raw = (url || '').trim().toLowerCase().replace(/\/$/, '');
+    const s = (slug || '').trim().toLowerCase();
+    const l = (labelOrId || '').trim().toLowerCase();
+    
+    // Explicit non-existent or unrouted pages in navbar
+    if (raw === '/newsletter' || s === 'newsletter' || l === 'newsletter') return false;
+    if (raw === '/editorial-team' || s.includes('editorial-team') || l.includes('editorial team')) return false;
+    if (raw === '/careers' || s.includes('careers') || l === 'careers') return false;
+    if (raw === '/pitch' || s === 'pitch' || s.includes('pitch-link') || l.includes('pitch story')) return false;
+    if (raw === '/editorial-policy' || s.includes('editorial-policy') || l.includes('editorial policy')) return false;
+    if (raw === '/privacy-policy' || s.includes('privacy-policy') || l.includes('privacy policy')) return false;
+    if (raw === '/terms' || raw === '/terms-of-service' || s.includes('terms') || l.includes('terms of service')) return false;
+    if (raw === '/disclaimer' || s.includes('disclaimer') || l === 'disclaimer') return false;
+    if (raw === '/resources' || s === 'resources') return false;
+    if (raw === '/brands' || s === 'brands') return false;
+    if (raw === '/hindi' || raw === '/ys-hindi' || s === 'hindi') return false;
+    if (raw === '/techsparks' || s === 'techsparks') return false;
+
+    return true;
+  };
+
   // Normalize slug/url aliases to a single dedup key so items like
   // "just-in" (slug) and "latest" (slug) that both represent the same
   // Latest section don't appear twice in the navbar.
@@ -202,6 +225,7 @@ export default function Header({
     return sourceNav
       .filter(link => {
         if (link.isActive === false || link.visible === false || link.isVisible === false) return false;
+        if (!isPresentNavPage(link.url, link.slug, link.id || link.title || link.label)) return false;
         const vis = (link.visibility || 'PUBLIC').toUpperCase();
         if (vis === 'MOBILE') return false; // Skip mobile-only on desktop
         if (vis === 'LOGGED_IN' && !currentUser) return false;
@@ -222,6 +246,7 @@ export default function Header({
       const validChildren = (link.children || []).filter(c => {
         if (!c) return false;
         if (c.isActive === false || c.isVisible === false) return false;
+        if (!isPresentNavPage(c.url, c.slug, c.title || c.label)) return false;
         return Boolean(c.title || c.label);
       });
       const hasValidChildren = validChildren.length > 0;
@@ -266,6 +291,14 @@ export default function Header({
 
       if ((!columns || columns.length === 0) && fallbackData?.columns) {
         columns = fallbackData.columns;
+      }
+      if (columns && columns.length > 0) {
+        columns = columns
+          .map(col => ({
+            ...col,
+            items: (col.items || []).filter(sub => isPresentNavPage(sub.url || sub.target, sub.slug, sub.label || sub.title))
+          }))
+          .filter(col => col.items && col.items.length > 0);
       }
       const dropdownData = (columns && columns.length > 0)
         ? { columns, align: fallbackData?.align || 'center' }
@@ -419,6 +452,16 @@ export default function Header({
         window.history.pushState(null, '', directUrl);
         window.dispatchEvent(new Event('popstate'));
         setCurrentPath(directUrl);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      if (directUrl === '/topics' || directUrl === '/topics/' || directUrl === '/tags') {
+        setActiveCategory('topics');
+        setSearchQuery('');
+        window.history.pushState(null, '', '/topics');
+        window.dispatchEvent(new Event('popstate'));
+        setCurrentPath('/topics');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
@@ -1083,11 +1126,38 @@ export default function Header({
                           color: '#dc2626',
                           textTransform: 'uppercase'
                         }}>
-                          {currentUser.role || 'READER'}
+                          {AuthService.isAuthor(currentUser) ? '✍️ AUTHOR' : '📖 READER'}
                         </span>
                       </div>
                     </div>
 
+                    {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          if (onOpenPitchStory) onOpenPitchStory();
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 10px',
+                          background: 'none',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          color: '#dc2626',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <Send size={15} color="#dc2626" />
+                        <span>Pitch Story (Author Studio)</span>
+                      </button>
+                    )}
                     {AuthService.isStaff(currentUser) && (
                       <button
                         type="button"
@@ -1226,11 +1296,17 @@ export default function Header({
               )}
             </button>
 
-            {/* Pitch Story / Submit Website Primary CTA */}
-            <button className="modern-pitch-btn" onClick={onOpenPitchModal}>
-              <Send size={18} />
-              <span className="pitch-btn-label">Pitch Story</span>
-            </button>
+            {/* Pitch Story / Submit Website Primary CTA - Only visible for Authors */}
+            {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (
+              <button 
+                className="modern-pitch-btn" 
+                onClick={onOpenPitchModal}
+                title="Pitch Your Story (Author)"
+              >
+                <Send size={18} />
+                <span className="pitch-btn-label">Pitch Story</span>
+              </button>
+            )}
           </div>
         </div>
 

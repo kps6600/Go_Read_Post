@@ -2,14 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Play, Tv, ArrowLeft, Eye, Clock, Share2, Sparkles, X, 
   Search, Check, User, ChevronRight, ChevronLeft, ThumbsUp, Flame, Radio,
-  Filter, SlidersHorizontal, ChevronDown, Bookmark
+  Filter, SlidersHorizontal, ChevronDown, Bookmark, Heart
 } from 'lucide-react';
 import { VIDEO_EPISODES, VIDEO_CATEGORIES, getStoredVideos } from '../data/videoData';
 import { VideoService } from '../services/videoService';
 import VideoPlayerModal from './VideoPlayerModal';
 import './VideosPage.css';
 
-export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onToggleSave }) {
+export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onToggleSave, onShowToast }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -19,6 +19,60 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
   const [heroIndex, setHeroIndex] = useState(0);
   const [allVideos, setAllVideos] = useState(() => getStoredVideos());
   const [isHeroHovered, setIsHeroHovered] = useState(false);
+  const [likedVideos, setLikedVideos] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grp_liked_videos');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const parseVideoLikes = (likes) => {
+    if (typeof likes === 'number') return likes;
+    if (!likes) return 120;
+    const str = String(likes).trim().toUpperCase();
+    if (str.endsWith('K')) {
+      return Math.round(parseFloat(str.replace('K', '')) * 1000);
+    }
+    if (str.endsWith('M')) {
+      return Math.round(parseFloat(str.replace('M', '')) * 1000000);
+    }
+    const parsed = parseInt(str.replace(/[^0-9]/g, ''));
+    return isNaN(parsed) ? 120 : parsed;
+  };
+
+  const formatVideoLikes = (num) => {
+    if (!num || num <= 0) return '';
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(num);
+  };
+
+  const getVideoLikesCount = (vid) => {
+    const vId = vid.id || vid._id;
+    const isLiked = Boolean(likedVideos[vId]);
+    if (isLiked) {
+      const baseNum = parseVideoLikes(vid.likes);
+      return formatVideoLikes(baseNum + 1);
+    }
+    return vid.likes || '120';
+  };
+
+  const handleToggleLike = (vid, e) => {
+    if (e) e.stopPropagation();
+    const vId = vid.id || vid._id;
+    const wasLiked = Boolean(likedVideos[vId]);
+    const newLiked = !wasLiked;
+    const updated = { ...likedVideos, [vId]: newLiked };
+    setLikedVideos(updated);
+    try {
+      localStorage.setItem('grp_liked_videos', JSON.stringify(updated));
+    } catch (err) {}
+    if (newLiked && onShowToast) {
+      onShowToast(`Liked "${vid.title}"`);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -229,15 +283,7 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
                   <span>{isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'Saved' : 'Save'}</span>
                 </button>
 
-                <button 
-                  type="button" 
-                  className="vpage-share-hero-btn"
-                  onClick={(e) => handleShareVideo(e, heroVideo)}
-                  title="Copy share link"
-                >
-                  {copiedId === heroVideo.id ? <Check size={16} color="#34d399" /> : <Share2 size={16} />}
-                  <span>{copiedId === heroVideo.id ? 'Link Copied!' : 'Share'}</span>
-                </button>
+
               </div>
 
               {/* Auto sliding indicator dots without text */}
@@ -405,7 +451,11 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
       <section className="vpage-grid-section">
         {filteredVideos.length > 0 ? (
           <div className="vpage-video-grid">
-            {filteredVideos.map(vid => (
+            {filteredVideos.map((vid) => {
+              const isVidLiked = Boolean(likedVideos[vid.id || vid._id]);
+              const likesDisplay = getVideoLikesCount(vid);
+
+              return (
               <article 
                 key={vid.id} 
                 className="vpage-card"
@@ -447,17 +497,6 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
                 <div className="vpage-card-content">
                   <div className="vpage-card-top-row">
                     <span className="vpage-series-tag">{vid.series}</span>
-                    <div className="vpage-card-actions-group">
-                      <button 
-                        type="button" 
-                        className="vpage-card-share-btn"
-                        onClick={(e) => handleShareVideo(e, vid)}
-                        title="Share episode link"
-                        aria-label="Share episode"
-                      >
-                        {copiedId === vid.id ? <Check size={14} color="#34d399" /> : <Share2 size={14} />}
-                      </button>
-                    </div>
                   </div>
 
                   <h3 className="vpage-card-title">{vid.title}</h3>
@@ -467,14 +506,32 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
                       <User size={13} style={{ display: 'inline', marginRight: '4px' }} />
                       <span>{vid.guest}</span>
                     </div>
-                    <div className="vpage-card-views">
-                      <Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                      <span>{vid.views}</span>
+                    <div className="vpage-card-metrics">
+                      <span className="vpage-card-views" title={`${vid.views} views`}>
+                        <Eye size={13} className="vpage-views-icon" />
+                        <span>{vid.views}</span>
+                      </span>
+                      <button 
+                        type="button" 
+                        className={`vpage-card-like-btn ${isVidLiked ? 'active' : ''}`}
+                        onClick={(e) => handleToggleLike(vid, e)}
+                        title={isVidLiked ? 'Unlike episode' : 'Like episode'}
+                        aria-label="Like episode"
+                      >
+                        <Heart 
+                          size={13} 
+                          className="vpage-like-icon"
+                          fill={isVidLiked ? "#dc2626" : "none"} 
+                          color={isVidLiked ? "#dc2626" : "#64748b"} 
+                        />
+                        {likesDisplay && <span className="vpage-like-count">{likesDisplay}</span>}
+                      </button>
                     </div>
                   </div>
                 </div>
               </article>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <div className="vpage-empty-state">

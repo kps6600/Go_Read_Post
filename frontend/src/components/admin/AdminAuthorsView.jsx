@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
-  CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, ArrowLeft, 
+  CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, EyeOff, Copy, ArrowLeft, 
   Calendar, FileText, User, LayoutGrid, List, SlidersHorizontal, Filter, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -91,6 +91,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef(null);
+  const [showModalPassword, setShowModalPassword] = useState(true);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -100,6 +101,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
     image: '',
     profileImage: '',
     email: '',
+    password: 'Author@12345',
     socialLinks: {
       linkedin: '',
       facebook: '',
@@ -178,6 +180,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
       image: '',
       profileImage: '',
       email: '',
+      password: 'Author@12345',
       socialLinks: {
         linkedin: '',
         facebook: '',
@@ -201,7 +204,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
       bio: author.bio || '',
       image: author.image || author.profileImage || '',
       profileImage: author.profileImage || author.image || '',
-      email: author.email || '',
+      email: author.email || ((author.slug || 'author') + '@goreadpost.com'),
+      password: author.password || 'Author@12345',
       socialLinks: {
         linkedin: author.socialLinks?.linkedin || '',
         facebook: author.socialLinks?.facebook || '',
@@ -292,7 +296,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
         bio: formData.bio.trim(),
         image: formData.image || formData.profileImage || '',
         profileImage: formData.profileImage || formData.image || '',
-        email: formData.email.trim(),
+        email: formData.email.trim() || ((formData.slug || 'author') + '@goreadpost.com'),
+        password: formData.password || 'Author@12345',
         socialLinks: {
           linkedin: formData.socialLinks.linkedin.trim(),
           facebook: formData.socialLinks.facebook.trim(),
@@ -516,6 +521,101 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                     onChange={e => setFormData({ ...formData, designation: e.target.value })}
                     className="aav-form-input"
                   />
+                </div>
+              </div>
+
+              {/* Author Login Credentials */}
+              <div className="aav-form-section" style={{ background: '#fdf2f2', border: '1px solid #fee2e2', borderRadius: '10px', padding: '14px' }}>
+                <div className="aav-form-section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#991b1b', fontWeight: 800 }}>
+                    <Lock size={15} color="#dc2626" />
+                    <span>Author Login Credentials (Author Simple Login)</span>
+                  </span>
+                  <span style={{ fontSize: '0.72rem', background: '#dc2626', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                    {editingAuthor ? 'EDIT CREDENTIALS' : 'NEW AUTHOR'}
+                  </span>
+                </div>
+
+                <div className="aav-form-grid-2">
+                  <div className="aav-form-field">
+                    <label className="aav-form-label" style={{ fontWeight: 700, color: '#374151' }}>Author Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g., author@goreadpost.com"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      className="aav-form-input"
+                      style={{ background: '#ffffff', borderColor: '#fca5a5' }}
+                    />
+                  </div>
+
+                  <div className="aav-form-field">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="aav-form-label" style={{ margin: 0, fontWeight: 700, color: '#374151' }}>Author Login Password *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const rand = 'Author@' + Math.floor(1000 + Math.random() * 9000);
+                          setFormData(prev => ({ ...prev, password: rand }));
+                          if (onShowToast) onShowToast(`Generated new password: ${rand}`);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#dc2626',
+                          fontSize: '0.72rem',
+                          fontWeight: 750,
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        ⚡ Randomize
+                      </button>
+                    </div>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <input
+                        type={showModalPassword ? 'text' : 'password'}
+                        required
+                        placeholder="e.g., Author@12345"
+                        value={formData.password}
+                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        className="aav-form-input"
+                        style={{
+                          background: '#ffffff',
+                          borderColor: '#fca5a5',
+                          paddingRight: '64px',
+                          fontFamily: showModalPassword ? 'monospace' : 'inherit',
+                          fontWeight: 700,
+                          color: '#dc2626'
+                        }}
+                      />
+                      <div style={{ position: 'absolute', right: '6px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setShowModalPassword(!showModalPassword)}
+                          title={showModalPassword ? 'Hide password' : 'Show password'}
+                          style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                        >
+                          {showModalPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(formData.password || 'Author@12345');
+                            if (onShowToast) onShowToast('Password copied to clipboard!');
+                          }}
+                          title="Copy password"
+                          style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                        >
+                          <Copy size={15} />
+                        </button>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#7f1d1d', marginTop: '4px', display: 'block' }}>
+                      Use this password when signing in through the public modal to unlock <strong>Pitch Story</strong>.
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -916,8 +1016,14 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.84rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                      <span>Email:</span>
-                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{author.email || 'Not provided'}</span>
+                      <span>Login Email:</span>
+                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{author.email || ((author.slug || 'author') + '@goreadpost.com')}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                      <span>Login Password:</span>
+                      <span style={{ fontWeight: 700, color: '#dc2626', fontFamily: 'monospace', background: '#fef2f2', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fecaca' }}>
+                        {author.password || 'Author@12345'}
+                      </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
                       <span>Status:</span>
@@ -1223,6 +1329,26 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   {author.bio || 'GoReadPost editorial journalist covering innovative startups, tech disruptors, and founders.'}
                 </p>
 
+                {/* List Author Credentials */}
+                <div style={{
+                  fontSize: '0.72rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3px',
+                  minWidth: '170px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  padding: '6px 8px',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{ color: '#0f172a', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={author.email}>
+                    ✉️ {author.email || ((author.slug || 'author') + '@goreadpost.com')}
+                  </div>
+                  <div style={{ color: '#dc2626', fontWeight: 700, fontFamily: 'monospace' }}>
+                    🔑 {author.password || 'Author@12345'}
+                  </div>
+                </div>
+
                 {/* Social Links */}
                 <div className="aav-list-socials">
                   
@@ -1395,6 +1521,30 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   <p className="aav-card-bio" title={author.bio}>
                     {author.bio || 'GoReadPost editorial journalist covering innovative startups, tech disruptors, and founders.'}
                   </p>
+
+                  {/* Author Login Credentials Box */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '8px 10px',
+                    marginBottom: '10px',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#64748b' }}>Email:</span>
+                      <strong style={{ color: '#0f172a' }}>{author.email || ((author.slug || 'author') + '@goreadpost.com')}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#64748b' }}>Password:</span>
+                      <strong style={{ color: '#dc2626', fontFamily: 'monospace', background: '#fef2f2', padding: '1px 6px', borderRadius: '4px' }}>
+                        {author.password || 'Author@12345'}
+                      </strong>
+                    </div>
+                  </div>
                 </div>
 
                 <div>

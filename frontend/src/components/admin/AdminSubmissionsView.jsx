@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
   Trash2, Search, Filter, RefreshCw, ExternalLink, Sparkles, BookOpen, 
-  ArrowUpRight, AlertCircle, FileText, Phone, User
+  ArrowUpRight, AlertCircle, FileText, Phone, User, Film, Play
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
 
@@ -57,19 +57,25 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
     }
   };
 
-  const handleConvertToArticle = async (id) => {
+  const handleConvertToArticle = async (id, pitchFormat) => {
     setActionId(id);
     try {
       const res = await SubmissionService.convertToArticle(id);
-      onShowToast?.(res.message || 'Pitch successfully converted into an article!');
-      loadSubmissions();
+      const isVideo = pitchFormat === 'video';
+      onShowToast?.(res.message || (isVideo ? 'Video Story approved & published live!' : 'Pitch successfully published as article!'));
+      await loadSubmissions();
+
       if (res.article?._id && onNavigate) {
         setTimeout(() => {
-          onNavigate(`/admin/articles`);
+          onNavigate('/admin/articles');
+        }, 1200);
+      } else if (res.video?._id && onNavigate) {
+        setTimeout(() => {
+          onNavigate('/admin/videos');
         }, 1200);
       }
     } catch (err) {
-      onShowToast?.(err.message || 'Failed to convert pitch');
+      onShowToast?.(err.message || 'Failed to publish story');
     } finally {
       setActionId(null);
     }
@@ -99,7 +105,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
             Startup Pitches &amp; Inbound Leads
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
-            Review pitch deck submissions from tech founders and partner inquiries from the live website.
+            Review authored story pitches, pitch deck submissions from tech founders, and partner inquiries.
           </p>
         </div>
         <button 
@@ -117,7 +123,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       <div className="adv-stats-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '1.5rem' }}>
         <div className="adv-stat-card">
           <div className="adv-stat-content">
-            <span className="adv-stat-label">Startup Pitches</span>
+            <span className="adv-stat-label">Story &amp; Startup Pitches</span>
             <div className="adv-stat-number">{metrics.totalPitches}</div>
           </div>
         </div>
@@ -142,7 +148,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
             { id: 'all', label: 'All Submissions' },
-            { id: 'pitch', label: 'Startup Pitches' },
+            { id: 'pitch', label: 'Startup & Story Pitches' },
             { id: 'contact', label: 'Contact Messages' }
           ].map(tab => (
             <button
@@ -178,7 +184,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input 
               type="text" 
-              placeholder="Search startup, founder, subject..."
+              placeholder="Search startup, author, headline..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="form-input"
@@ -199,14 +205,51 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         <div className="admin-empty-card" style={{ padding: '3.5rem 1rem', textAlign: 'center', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-light)', borderRadius: '10px' }}>
           <Send size={36} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
           <h4 style={{ margin: 0, fontWeight: 700 }}>No submissions found</h4>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>No startup pitches or contact leads matched your criteria.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>No story pitches or contact leads matched your criteria.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {submissions.map((sub) => {
             const subId = sub._id || sub.id;
             const isPitch = sub.type === 'pitch';
+            const isVideo = sub.pitchFormat === 'video';
+            const isArticlePitch = sub.pitchFormat === 'article';
             const isBusy = actionId === subId;
+
+            // Icon & Badges
+            let iconBox = <Building size={18} />;
+            let iconBg = 'rgba(220, 38, 38, 0.1)';
+            let iconColor = '#dc2626';
+            let badgeText = 'Startup Pitch';
+            let badgeBg = '#fff1f2';
+            let badgeColor = '#dc2626';
+
+            if (!isPitch) {
+              iconBox = <Mail size={18} />;
+              iconBg = 'rgba(14, 165, 233, 0.1)';
+              iconColor = '#0284c7';
+              badgeText = 'Contact Lead';
+              badgeBg = '#f0f9ff';
+              badgeColor = '#0284c7';
+            } else if (isVideo) {
+              iconBox = <Film size={18} />;
+              iconBg = 'rgba(147, 51, 234, 0.1)';
+              iconColor = '#9333ea';
+              badgeText = '🎬 Video Story Pitch';
+              badgeBg = '#faf5ff';
+              badgeColor = '#9333ea';
+            } else if (isArticlePitch) {
+              iconBox = <FileText size={18} />;
+              iconBg = 'rgba(220, 38, 38, 0.1)';
+              iconColor = '#dc2626';
+              badgeText = '✍️ Article Story Pitch';
+              badgeBg = '#fff1f2';
+              badgeColor = '#dc2626';
+            }
+
+            const authorOrFounder = sub.founderName || sub.authorName || sub.name || 'Contributing Author';
+            const role = sub.founderRole || (isVideo ? 'Video Creator' : 'Author / Contributor');
+            const headlineTitle = sub.headline || sub.title || sub.startupName || 'Untitled Pitch';
 
             return (
               <div 
@@ -230,19 +273,20 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         width: '38px',
                         height: '38px',
                         borderRadius: '8px',
-                        background: isPitch ? 'rgba(220, 38, 38, 0.1)' : 'rgba(14, 165, 233, 0.1)',
-                        color: isPitch ? '#dc2626' : '#0284c7',
+                        background: iconBg,
+                        color: iconColor,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}
                     >
-                      {isPitch ? <Building size={18} /> : <Mail size={18} />}
+                      {iconBox}
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
-                          {isPitch ? sub.startupName : sub.subject || 'Inquiry'}
+                          {isPitch ? (sub.startupName || headlineTitle) : (sub.subject || 'Inquiry')}
                         </h4>
                         <span 
                           style={{
@@ -251,17 +295,17 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                             padding: '2px 8px',
                             borderRadius: '4px',
                             textTransform: 'uppercase',
-                            background: isPitch ? '#fff1f2' : '#f0f9ff',
-                            color: isPitch ? '#dc2626' : '#0284c7'
+                            background: badgeBg,
+                            color: badgeColor
                           }}
                         >
-                          {isPitch ? 'Startup Pitch' : 'Contact Lead'}
+                          {badgeText}
                         </span>
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <span>From: <strong>{isPitch ? `${sub.founderName} (${sub.founderRole || 'Founder'})` : sub.name}</strong></span>
-                        {(sub.email || sub.phone) && (
-                          <span>Contact: {[sub.email, sub.phone].filter(Boolean).join(' · ')}</span>
+                        <span>From: <strong>{authorOrFounder}</strong> ({role})</span>
+                        {(sub.email || sub.authorEmail || sub.phone) && (
+                          <span>Contact: {[sub.email || sub.authorEmail, sub.phone].filter(Boolean).join(' · ')}</span>
                         )}
                         <span>Received {new Date(sub.createdAt).toLocaleDateString()}</span>
                       </div>
@@ -288,27 +332,54 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
                 {/* Details Body */}
                 {isPitch ? (
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #edf2f7', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      "{sub.headline}"
-                    </div>
-                    <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                      {sub.summary}
-                    </div>
-                    {sub.details && (
-                      <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '4px' }}>
-                        {sub.details}
+                  <div style={{ 
+                    background: '#f8fafc', 
+                    padding: '1rem', 
+                    borderRadius: '8px', 
+                    border: '1px solid #edf2f7', 
+                    display: 'flex', 
+                    gap: '14px', 
+                    alignItems: 'flex-start',
+                    flexWrap: 'wrap'
+                  }}>
+                    {/* Optional Thumbnail */}
+                    {(sub.coverImage || sub.image) && (
+                      <div style={{ width: '120px', height: '75px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e2e8f0', background: '#000' }}>
+                        <img 
+                          src={sub.coverImage || sub.image} 
+                          alt="Pitch Cover" 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
                       </div>
                     )}
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
-                      {sub.sector && <span>Sector: <strong>{sub.sector}</strong></span>}
-                      {sub.stage && <span>Stage: <strong>{sub.stage}</strong></span>}
-                      {sub.metricMoat && <span>Traction: <strong style={{ color: '#059669' }}>{sub.metricMoat}</strong></span>}
-                      {sub.website && (
-                        <a href={sub.website} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--brand-primary)' }}>
-                          <span>Website</span> <ExternalLink size={12} />
-                        </a>
+
+                    <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        "{sub.headline || headlineTitle}"
+                      </div>
+                      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                        {sub.summary}
+                      </div>
+                      {sub.details && (
+                        <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '4px', whiteSpace: 'pre-line' }}>
+                          {sub.details}
+                        </div>
                       )}
+                      <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
+                        {sub.sector && <span>Category / Sector: <strong>{sub.sector}</strong></span>}
+                        {sub.stage && <span>Status: <strong>{sub.stage}</strong></span>}
+                        {sub.metricMoat && <span>Traction: <strong style={{ color: '#059669' }}>{sub.metricMoat}</strong></span>}
+                        {sub.videoUrl && (
+                          <a href={sub.videoUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#9333ea', fontWeight: 600 }}>
+                            <Play size={12} /> <span>Watch Video</span> <ExternalLink size={12} />
+                          </a>
+                        )}
+                        {sub.website && (
+                          <a href={sub.website} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--brand-primary)' }}>
+                            <span>Website</span> <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -317,17 +388,23 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                   </div>
                 )}
 
-                {/* Actions */}
+                {/* Actions Bar */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', borderTop: '1px solid var(--border-light, #f1f5f9)', paddingTop: '0.75rem' }}>
+                  {isPitch && sub.status === 'published' && (
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '5px', marginRight: 'auto' }}>
+                      <CheckCircle size={15} /> Published Live on GoReadPost
+                    </span>
+                  )}
+
                   {isPitch && sub.status !== 'published' && (
                     <button
                       className="admin-btn-primary"
-                      style={{ height: '32px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      style={{ height: '32px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}
                       disabled={isBusy}
-                      onClick={() => handleConvertToArticle(subId)}
+                      onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
                     >
                       <Sparkles size={14} />
-                      Publish as Article
+                      {isVideo ? 'Approve & Publish Video' : 'Approve & Publish Article'}
                     </button>
                   )}
 

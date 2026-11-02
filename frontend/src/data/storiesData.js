@@ -15,26 +15,7 @@ export const NAV_DROPDOWNS_DATA = {
         items: [
           { label: 'About Us', url: '/about', badge: 'Our Story' },
           { label: 'Contact Us', url: '/contact', badge: 'Get in Touch' },
-          { label: 'Advertise With Us', url: '/advertise', badge: 'Partner' },
-          { label: 'Editorial Team', url: '/editorial-team', badge: 'Newsroom' },
-          { label: 'Careers', url: '/careers', badge: "We're Hiring" },
-          { label: 'Pitch Story', url: '/pitch', badge: 'Submit' }
-        ]
-      },
-      {
-        title: 'STANDARDS & TRUST',
-        items: [
-          { label: 'Editorial Policy', url: '/editorial-policy', badge: 'Ethics' },
-          { label: 'Privacy Policy', url: '/privacy-policy' },
-          { label: 'Terms of Service', url: '/terms' },
-          { label: 'Disclaimer', url: '/disclaimer' }
-        ]
-      },
-      {
-        title: 'FEATURED HUBS',
-        items: [
-          { label: 'Trending News', url: '/trending', badge: 'Hot' },
-          { label: 'Latest Dispatches', url: '/latest' },
+          { label: 'Advertise With Us', url: '/advertise', badge: 'Partner' }
         ]
       }
     ]

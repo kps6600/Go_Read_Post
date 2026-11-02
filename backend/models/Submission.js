@@ -8,6 +8,36 @@ const submissionSchema = new mongoose.Schema(
       default: 'pitch',
       index: true
     },
+    pitchFormat: {
+      type: String,
+      enum: ['article', 'video', 'deck', 'other'],
+      default: 'article'
+    },
+    draftArticleId: {
+      type: String,
+      default: null
+    },
+    draftVideoId: {
+      type: String,
+      default: null
+    },
+    coverImage: {
+      type: String,
+      default: ''
+    },
+    videoUrl: {
+      type: String,
+      default: ''
+    },
+    authorEmail: {
+      type: String,
+      default: ''
+    },
+    category: {
+      type: String,
+      default: ''
+    },
+
     // Pitch fields
     startupName: {
       type: String,

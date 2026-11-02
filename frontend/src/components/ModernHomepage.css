@@ -1022,7 +1022,7 @@
 .mhp-blog-footer-actions {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -1031,32 +1031,33 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 20px;
-  padding: 3px 9px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
   font-size: 0.74rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1.2;
 }
 
 [data-theme='dark'] .mhp-blog-footer-like-btn {
-  border-color: #373744;
-  color: #94a3b8;
+  background: transparent !important;
+  border: none !important;
+  color: #f43f5e;
 }
 
 .mhp-blog-footer-like-btn:hover {
-  border-color: #ef4444;
+  background: transparent !important;
+  border: none !important;
   color: #ef4444;
-  background: rgba(220, 38, 38, 0.08);
 }
 
 .mhp-blog-footer-like-btn.active {
-  background: rgba(220, 38, 38, 0.12);
-  border-color: #ef4444;
+  background: transparent !important;
+  border: none !important;
   color: #ef4444;
 }
 
@@ -1412,10 +1413,10 @@ main:has(.mhp-container) ~ .site-footer {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 3px 9px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
   font-size: 0.74rem;
   font-weight: 700;
   color: #475569;
@@ -1425,7 +1426,8 @@ main:has(.mhp-container) ~ .site-footer {
 }
 
 [data-theme='dark'] .mhp-blog-views-badge {
-  border-color: #373744;
+  background: transparent !important;
+  border: none !important;
   color: #94a3b8;
 }
 

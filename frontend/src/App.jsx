@@ -180,10 +180,7 @@ export const parseCurrentRoute = () => {
       return { route: 'category', slug: 'content' };
     }
     if (pathname === '/topics' || pathname === '/topics/' || pathname === '/tags' || pathname === '/tags/') {
-      if (typeof window !== 'undefined') {
-        window.history.replaceState(null, '', '/');
-      }
-      return { route: 'home' };
+      return { route: 'topics' };
     }
     if (pathname.startsWith('/category/') || pathname.startsWith('/cotegory/')) {
       const slug = pathname.replace(/^\/(category|cotegory)\//, '').split('/')[0].split('?')[0];
@@ -227,13 +224,12 @@ export const parseCurrentRoute = () => {
       return { route: 'category', slug: 'latest' };
     }
     const brand = params.get('brand');
-    if (brand === 'brands' || brand === 'resources') {
+    if (brand === 'brands' || brand === 'resources' || brand === 'newsletter') {
       if (typeof window !== 'undefined') {
         window.history.replaceState(null, '', '/');
       }
       return { route: 'home' };
     }
-    if (brand === 'newsletter') return { route: 'newsletter' };
     if (brand === 'ai-story' || brand === 'aistory' || brand === 'ai') return { route: 'category', slug: 'ai' };
     if (brand === 'her-story' || brand === 'herstory') return { route: 'category', slug: 'herstory' };
     if (brand === 'social-story' || brand === 'socialstory') return { route: 'category', slug: 'social-story' };
@@ -386,7 +382,7 @@ export default function App() {
         return 'all';
       }
       if (brand && brand.toLowerCase() === 'newsletter') {
-        return 'newsletter';
+        return 'all';
       }
       if (brand && (brand.toLowerCase() === 'advertise' || brand.toLowerCase() === 'advertise-with-us')) {
         return 'advertise';
@@ -918,8 +914,10 @@ useEffect(() => {
           setActiveCategory('all');
         } else if (route.route === 'resources') {
           setActiveCategory('all');
+        } else if (route.route === 'topics') {
+          setActiveCategory('topics');
         } else if (route.route === 'newsletter') {
-          setActiveCategory('newsletter');
+          setActiveCategory('all');
         } else if (route.route === 'about') {
           setActiveCategory('about');
         } else if (route.route === 'advertise') {
@@ -952,7 +950,7 @@ useEffect(() => {
         } else if (brand && brand.toLowerCase() === 'resources') {
           setActiveCategory('all');
         } else if (brand && brand.toLowerCase() === 'newsletter') {
-          setActiveCategory('newsletter');
+          setActiveCategory('all');
         } else {
           setActiveCategory('all');
         }
@@ -1261,6 +1259,7 @@ useEffect(() => {
             onSelectVideo={(video) => setSelectedVideo(video)}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
+            onShowToast={showToast}
           />
         ) : currentRoute.route === 'not-found' ? (
           <NotFoundPage 
@@ -1298,8 +1297,10 @@ useEffect(() => {
             onToggleSave={handleToggleSave}
           />
         ) : (
+          currentRoute.route === 'topics' ||
           (currentRoute.route === 'topic' && currentRoute.slug) || 
-          (activeCategory && activeCategory.startsWith('topic:') && activeCategory !== 'topic:')
+          (activeCategory && activeCategory.startsWith('topic:') && activeCategory !== 'topic:') ||
+          activeCategory === 'topics'
         ) && !searchQuery.trim() ? (
           <TopicsPage 
             topicSlug={
@@ -1363,7 +1364,7 @@ useEffect(() => {
           currentRoute.route !== 'contact' &&
           currentRoute.route !== 'founder-first' &&
           !searchQuery.trim() && 
-          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'newsletter', 'about', 'contact', 'advertise', 'founder-first', 'topics'].includes(activeCategory)
+          !['trending', 'latest', 'just-in', 'videos', 'ystv', 'techsparks', 'about', 'contact', 'advertise', 'founder-first', 'topics'].includes(activeCategory)
         )) ? (
           <CategoryContentPage 
             slug={currentRoute.route === 'category' ? (currentRoute.slug || 'content') : activeCategory}
@@ -1507,6 +1508,7 @@ useEffect(() => {
             onSelectVideo={(video) => setSelectedVideo(video)}
             isSaved={isSaved}
             onToggleSave={handleToggleSave}
+            onShowToast={showToast}
           />
 
         ) : (currentRoute.route === 'dynamic-page' || sitePages.some(p => {
@@ -1612,6 +1614,7 @@ useEffect(() => {
         onClose={() => setIsPitchModalOpen(false)}
         onAddStory={handleAddStory}
         onShowToast={showToast}
+        currentUser={currentUser}
       />
 
       {/* Auth Modal (Log in / Sign Up) */}
@@ -1698,13 +1701,15 @@ useEffect(() => {
           <span>Saved ({currentUser ? savedStories.length : 0})</span>
         </button>
 
-        <button 
-          className="mobile-nav-item"
-          onClick={() => setIsPitchModalOpen(true)}
-        >
-          <Send size={19} />
-          <span>Pitch</span>
-        </button>
+        {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (
+          <button 
+            className="mobile-nav-item"
+            onClick={() => setIsPitchModalOpen(true)}
+          >
+            <Send size={19} />
+            <span>Pitch</span>
+          </button>
+        )}
       </nav>
 
       {/* Toast Notice */}

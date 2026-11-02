@@ -369,10 +369,10 @@ function sanitizeArticlePayload(raw) {
     payload.status = String(payload.status).toLowerCase().trim().replace(/[\s-]+/g, '_');
   }
 
-  // Prevent Cast to ObjectId failed for value ""
-  if (payload.authorId === '' || payload.authorId === undefined) payload.authorId = null;
-  if (payload.categoryId === '' || payload.categoryId === undefined) payload.categoryId = null;
-  if (payload.subCategoryId === '' || payload.subCategoryId === undefined) payload.subCategoryId = null;
+  // Prevent Cast to ObjectId failed for invalid values like "" or non-ObjectId strings ("cat_startups", "auth_author")
+  if (!payload.authorId || !mongoose.Types.ObjectId.isValid(payload.authorId)) payload.authorId = null;
+  if (!payload.categoryId || !mongoose.Types.ObjectId.isValid(payload.categoryId)) payload.categoryId = null;
+  if (!payload.subCategoryId || !mongoose.Types.ObjectId.isValid(payload.subCategoryId)) payload.subCategoryId = null;
 
   // Sanitize featuredImage so that url is always a string and not nested object
   if (payload.featuredImage !== undefined) {

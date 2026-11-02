@@ -140,22 +140,7 @@ const navigationTreeData = [
         children: [
           { title: 'About Us', slug: 'about-us', url: '/about', type: 'link', order: 1 },
           { title: 'Contact Us', slug: 'contact-us', url: '/contact', type: 'link', order: 2 },
-          { title: 'Advertise With Us', slug: 'advertise-link', url: '/advertise', type: 'link', order: 3 },
-          { title: 'Editorial Team', slug: 'editorial-team-link', url: '/editorial-team', type: 'link', order: 4 },
-          { title: 'Careers', slug: 'careers-link', url: '/careers', type: 'link', order: 5 },
-          { title: 'Pitch Story', slug: 'pitch-link', url: '/pitch', type: 'link', order: 6 }
-        ]
-      },
-      {
-        title: 'Standards & Legal',
-        slug: 'standards-legal',
-        type: 'group',
-        order: 2,
-        children: [
-          { title: 'Editorial Policy', slug: 'editorial-policy-link', url: '/editorial-policy', type: 'link', order: 1 },
-          { title: 'Privacy Policy', slug: 'privacy-policy-link', url: '/privacy-policy', type: 'link', order: 2 },
-          { title: 'Terms of Service', slug: 'terms-link', url: '/terms', type: 'link', order: 3 },
-          { title: 'Disclaimer', slug: 'disclaimer-link', url: '/disclaimer', type: 'link', order: 4 }
+          { title: 'Advertise With Us', slug: 'advertise-link', url: '/advertise', type: 'link', order: 3 }
         ]
       }
     ]
@@ -166,17 +151,6 @@ const navigationTreeData = [
     url: '/videos',
     type: 'link',
     order: 6,
-    isActive: true,
-    isVisible: true,
-    visibility: 'PUBLIC',
-    children: []
-  },
-  {
-    title: 'Newsletter',
-    slug: 'newsletter',
-    url: '/newsletter',
-    type: 'link',
-    order: 7,
     isActive: true,
     isVisible: true,
     visibility: 'PUBLIC',

@@ -1,6 +1,8 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Submission from '../models/Submission.js';
 import Article from '../models/Article.js';
+import Video from '../models/Video.js';
 import Story from '../models/Story.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin } from '../middleware/auth.js';
@@ -18,6 +20,7 @@ const fallbackSubmissionsPath = path.join(__dirname, '..', 'submissions_data_sto
 const INITIAL_SUBMISSIONS = [
   {
     type: 'pitch',
+    pitchFormat: 'article',
     startupName: 'Neuraflow AI',
     founderName: 'Aditya Kulkarni',
     founderRole: 'Founder & CEO',
@@ -74,15 +77,123 @@ export async function ensureSubmissionsSeeded() {
   } catch (e) {}
 }
 
-// PUBLIC: POST /api/submissions (submit pitch or contact lead)
+// Sync any authored draft pitches (articles or videos) into the submissions collection
+async function syncAuthorDraftPitchesToSubmissions() {
+  if (!isDbConnected()) return;
+  try {
+    // 1. Sync Draft Articles
+    const draftArticles = await Article.find({
+      $or: [
+        { isPitch: true },
+        { status: 'draft' }
+      ]
+    }).sort({ createdAt: -1 }).limit(30);
+
+    for (const draft of draftArticles) {
+      const headline = draft.title || '';
+      if (!headline) continue;
+
+      const exists = await Submission.findOne({
+        $or: [
+          { draftArticleId: String(draft._id) },
+          { headline: headline }
+        ]
+      });
+
+      if (!exists) {
+        await Submission.create({
+          type: 'pitch',
+          pitchFormat: 'article',
+          draftArticleId: String(draft._id),
+          startupName: draft.categoryName || 'Author Story Pitch',
+          founderName: draft.authorName || 'Contributing Author',
+          founderRole: draft.authorTitle || 'Contributing Author',
+          sector: draft.categoryName || 'Startups',
+          stage: 'Authored Story Draft',
+          headline: headline,
+          summary: draft.subtitle || draft.excerpt || 'Authored article story awaiting editorial approval.',
+          details: draft.content ? draft.content.replace(/<[^>]*>/g, '').slice(0, 400) : '',
+          coverImage: draft.featuredImage?.url || draft.image || '',
+          name: draft.authorName || 'Contributing Author',
+          email: draft.pitchedByEmail || '',
+          authorEmail: draft.pitchedByEmail || '',
+          category: draft.categoryName || 'Startups',
+          status: draft.status === 'published' ? 'published' : 'pending',
+          createdAt: draft.createdAt || new Date()
+        });
+      }
+    }
+
+    // 2. Sync Draft Videos
+    if (mongoose.models.Video) {
+      const draftVideos = await Video.find({
+        $or: [
+          { isPitch: true },
+          { status: 'draft' }
+        ]
+      }).sort({ createdAt: -1 }).limit(30);
+
+      for (const vid of draftVideos) {
+        const headline = vid.title || '';
+        if (!headline) continue;
+
+        const exists = await Submission.findOne({
+          $or: [
+            { draftVideoId: String(vid._id) },
+            { headline: headline }
+          ]
+        });
+
+        if (!exists) {
+          await Submission.create({
+            type: 'pitch',
+            pitchFormat: 'video',
+            draftVideoId: String(vid._id),
+            startupName: vid.series || vid.categoryLabel || 'Video Story Pitch',
+            founderName: vid.author || vid.guestName || 'Contributing Creator',
+            founderRole: vid.guestRole || 'Video Creator',
+            sector: vid.categoryLabel || vid.category || 'Interviews',
+            stage: 'Authored Video Draft',
+            headline: headline,
+            summary: vid.description ? vid.description.slice(0, 300) : 'Pitched video story awaiting editorial review.',
+            details: `YouTube URL: ${vid.videoUrl || vid.youtubeEmbedUrl}\nDuration: ${vid.duration || '20:00'}\nSeries: ${vid.series || 'Spotlight'}`,
+            coverImage: vid.image || '',
+            videoUrl: vid.videoUrl || vid.youtubeEmbedUrl || '',
+            name: vid.author || 'Contributing Creator',
+            email: vid.pitchedByEmail || '',
+            authorEmail: vid.pitchedByEmail || '',
+            category: vid.categoryLabel || vid.category || 'Interviews',
+            status: vid.status === 'published' ? 'published' : 'pending',
+            createdAt: vid.createdAt || new Date()
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Sync draft pitches warning:', err.message);
+  }
+}
+
+// PUBLIC / AUTHOR: POST /api/submissions (submit pitch or contact lead)
 router.post('/', async (req, res) => {
   try {
     const payload = req.body;
     const type = payload.type || 'pitch';
 
     if (type === 'pitch') {
-      if (!payload.startupName || !payload.headline || !payload.summary) {
-        return res.status(400).json({ success: false, message: 'Startup Name, Headline, and Summary are required.' });
+      const headline = payload.headline || payload.title;
+      const summary = payload.summary || payload.subtitle || payload.excerpt || payload.description;
+      const startupName = payload.startupName || payload.categoryName || payload.series || (payload.pitchFormat === 'video' ? 'Video Pitch' : 'Author Story Pitch');
+
+      if (!headline || !summary) {
+        return res.status(400).json({ success: false, message: 'Story Headline/Title and Summary are required.' });
+      }
+
+      payload.headline = headline;
+      payload.summary = summary;
+      payload.startupName = startupName;
+      if (!payload.founderName) {
+        payload.founderName = payload.name || payload.authorName || 'Author Contributor';
       }
     } else {
       if (!payload.name || !payload.email || !payload.message) {
@@ -93,7 +204,7 @@ router.post('/', async (req, res) => {
     const submissionData = {
       ...payload,
       type,
-      status: 'pending',
+      status: payload.status || 'pending',
       createdAt: new Date()
     };
 
@@ -101,7 +212,7 @@ router.post('/', async (req, res) => {
       const created = await Submission.create(submissionData);
       return res.status(201).json({
         success: true,
-        message: type === 'pitch' ? 'Pitch submitted successfully to GoReadPost Bureau!' : 'Message received! Our team will get back to you.',
+        message: type === 'pitch' ? 'Pitch submitted successfully to Editorial Bureau!' : 'Message received! Our team will get back to you.',
         data: created
       });
     }
@@ -128,6 +239,8 @@ adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
 
     if (isDbConnected()) {
       await ensureSubmissionsSeeded();
+      await syncAuthorDraftPitchesToSubmissions();
+
       const filter = {};
       if (type && type !== 'all') filter.type = type;
       if (status && status !== 'all') filter.status = status;
@@ -138,6 +251,7 @@ adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
           { founderName: regex },
           { name: regex },
           { email: regex },
+          { authorEmail: regex },
           { headline: regex },
           { subject: regex }
         ];
@@ -188,7 +302,7 @@ adminSubmissionsRouter.put('/:id', protectAdmin, async (req, res) => {
   }
 });
 
-// ADMIN: POST /api/admin/submissions/:id/convert-to-article
+// ADMIN: POST /api/admin/submissions/:id/convert-to-article (Approve & Publish Live)
 adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -197,6 +311,53 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
       const subm = await Submission.findById(id);
       if (!subm) return res.status(404).json({ success: false, message: 'Submission not found' });
 
+      // 1. If linked to an existing draft Article, publish it!
+      if (subm.draftArticleId) {
+        let existingArticle = null;
+        try {
+          existingArticle = await Article.findById(subm.draftArticleId);
+        } catch (e) {}
+
+        if (existingArticle) {
+          existingArticle.status = 'published';
+          existingArticle.publishedAt = new Date();
+          await existingArticle.save();
+
+          subm.status = 'published';
+          subm.convertedArticleId = existingArticle._id;
+          await subm.save();
+
+          return res.json({
+            success: true,
+            message: `Successfully approved & published article "${existingArticle.title}" live to GoReadPost!`,
+            article: existingArticle
+          });
+        }
+      }
+
+      // 2. If linked to an existing draft Video, publish it!
+      if (subm.draftVideoId) {
+        let existingVideo = null;
+        try {
+          existingVideo = await Video.findById(subm.draftVideoId);
+        } catch (e) {}
+
+        if (existingVideo) {
+          existingVideo.status = 'published';
+          await existingVideo.save();
+
+          subm.status = 'published';
+          await subm.save();
+
+          return res.json({
+            success: true,
+            message: `Successfully approved & published video "${existingVideo.title}" live to GoReadPost!`,
+            video: existingVideo
+          });
+        }
+      }
+
+      // 3. Inbound Startup Pitch without pre-existing draft: create new published Article
       const slug = (subm.startupName || subm.headline || 'pitch')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -207,17 +368,17 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
         slug,
         subtitle: `${subm.startupName} founded by ${subm.founderName}. ${subm.metricMoat ? `Traction metric: ${subm.metricMoat}` : ''}`,
         excerpt: subm.summary,
-        content: `<p>${subm.summary}</p><p>${subm.details || 'Building next-generation infrastructure for high-scale enterprise and consumer adoption.'}</p>${subm.metricMoat ? `<h3>Traction & Moat</h3><p>${subm.metricMoat}</p>` : ''}${subm.website ? `<p><strong>Official Website:</strong> <a href="${subm.website}" target="_blank" rel="noopener noreferrer">${subm.website}</a></p>` : ''}`,
-        authorName: subm.founderName || 'Founder Contributor',
+        content: subm.details ? `<p>${subm.summary}</p><p>${subm.details}</p>` : `<p>${subm.summary}</p>`,
+        authorName: subm.founderName || subm.name || 'Founder Contributor',
         authorTitle: `${subm.founderRole || 'Founder'}, ${subm.startupName}`,
-        categoryName: subm.sector?.includes('AI') ? 'AI & DeepTech' : 'Startups',
+        categoryName: subm.category || (subm.sector?.includes('AI') ? 'AI & DeepTech' : 'Startups'),
         tags: [subm.startupName, subm.sector, subm.stage].filter(Boolean),
         status: 'published',
         publishedAt: new Date(),
         views: 120,
         claps: 25,
         featuredImage: {
-          url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80',
+          url: subm.coverImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80',
           caption: `${subm.startupName} founders`,
           credit: 'GoReadPost Editorial'
         }
@@ -229,12 +390,19 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
 
       return res.json({
         success: true,
-        message: `Successfully converted pitch to published article "${newArticle.title}"!`,
+        message: `Successfully approved & published pitch as article "${newArticle.title}"!`,
         article: newArticle
       });
     }
 
-    res.status(200).json({ success: true, message: 'Converted (offline simulation)' });
+    // Fallback mode
+    const list = readFallbackSubmissions();
+    const idx = list.findIndex(i => String(i._id || i.id) === String(id));
+    if (idx !== -1) {
+      list[idx].status = 'published';
+      writeFallbackSubmissions(list);
+    }
+    res.status(200).json({ success: true, message: 'Story pitch approved & published live!' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

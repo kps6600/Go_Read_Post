@@ -9,7 +9,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
     name: '',
     email: '',
     username: '',
-    password: ''
+    password: '',
+    role: 'READER'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,7 +55,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
           name: formData.name.trim(),
           email: formData.email.trim(),
           username: formData.username.trim() || undefined,
-          password: formData.password
+          password: formData.password,
+          role: formData.role || 'READER'
         });
 
         try {
@@ -196,6 +198,8 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
         <form onSubmit={handleSubmit} className="auth-form">
           {mode === 'signup' && (
             <>
+              
+
               <div className="auth-input-group">
                 <label className="auth-label">Full Name</label>
                 <div className="auth-input-wrap">
@@ -264,6 +268,21 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
               </button>
             </div>
           </div>
+
+          {mode === 'login' && (
+            <div style={{
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary, #64748b)',
+              backgroundColor: 'var(--bg-secondary, #f8fafc)',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-color, #e2e8f0)',
+              marginBottom: '1rem',
+              lineHeight: 1.45
+            }}>
+              💡 <strong>Author login:</strong> Sign in with an author account (e.g. <code>author@goreadpost.com</code> or <code>priya@goreadpost.com</code> / <code>Author@12345</code>) to enable the <strong>Pitch Story</strong> button.
+            </div>
+          )}
 
           <button 
             type="submit" 

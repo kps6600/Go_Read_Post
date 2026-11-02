@@ -4137,6 +4137,23 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         <span className="abv-status-dot" />
                         {article.status || 'published'}
                       </button>
+                      {(article.isPitch || article.pitchedBy) && (
+                        <span style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          zIndex: 3,
+                          background: '#eff6ff',
+                          color: '#1d4ed8',
+                          border: '1px solid #bfdbfe',
+                          borderRadius: '6px',
+                          fontSize: '0.7rem',
+                          fontWeight: 750,
+                          padding: '2px 8px'
+                        }}>
+                          📥 Author Pitch
+                        </span>
+                      )}
 
                       {/* Unified Badges: Category & Trending/Featured together side-by-side */}
                       <div className="abv-card-media-badges">
@@ -4239,7 +4256,34 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                           <span>{viewsCount.toLocaleString()}</span>
                         </div>
 
-                        <div className="abv-card-actions">
+                        <div className="abv-card-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {(article.status === 'draft' || article.isPitch) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTogglePublish(article);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                background: '#16a34a',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontSize: '0.74rem',
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(22, 163, 74, 0.25)'
+                              }}
+                              title="Approve this author pitch and publish live on frontend"
+                            >
+                              <CheckCircle size={13} />
+                              <span>Approve Live</span>
+                            </button>
+                          )}
                           <button 
                             type="button"
                             className="abv-action-btn edit"

@@ -88,20 +88,5 @@
     "isVisible": true,
     "visibility": "PUBLIC",
     "openInNewTab": false
-  },
-  {
-    "_id": "nav_newsletter",
-    "title": "Newsletter",
-    "slug": "newsletter",
-    "url": "/newsletter",
-    "type": "link",
-    "parentId": null,
-    "order": 7,
-    "level": 0,
-    "status": "PUBLISHED",
-    "isActive": true,
-    "isVisible": true,
-    "visibility": "PUBLIC",
-    "openInNewTab": false
   }
 ]

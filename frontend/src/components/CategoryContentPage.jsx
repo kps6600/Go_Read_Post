@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft, ArrowRight, ChevronRight, ChevronLeft, Search, Mail, 
-  Sparkles, Flame, Heart, Clock, Calendar, Bookmark, TrendingUp, BookOpen, 
+  Sparkles, Flame, Heart, Eye, Clock, Calendar, Bookmark, TrendingUp, BookOpen, 
   Send, CheckCircle2, X, LayoutGrid, Columns, Layers
 } from 'lucide-react';
 import './CategoryContentPage.css';
@@ -175,6 +175,29 @@ export default function CategoryContentPage({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [likedStories, setLikedStories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grp_liked_stories');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const handleToggleLike = (story, e) => {
+    if (e) e.stopPropagation();
+    const sId = getStoryId(story);
+    const wasLiked = Boolean(likedStories[sId]);
+    const newLiked = !wasLiked;
+    const updated = { ...likedStories, [sId]: newLiked };
+    setLikedStories(updated);
+    try {
+      localStorage.setItem('grp_liked_stories', JSON.stringify(updated));
+    } catch (err) {}
+    if (newLiked && onShowToast) {
+      onShowToast(`Liked "${getStoryTitle(story)}"`);
+    }
+  };
 
   // ── Dynamic Page Configuration (CMS Live Studio Integration) ──
   const [liveConfig, setLiveConfig] = useState(() => {
@@ -707,8 +730,10 @@ export default function CategoryContentPage({
                 const storyReadTime = getStoryReadTime(story);
                 const storyImg = getStoryImage(story);
                 const isStorySaved = isSaved && isSaved(storyId);
-                const storyViews = typeof story.views === 'number' ? story.views : (typeof story.claps === 'number' ? story.claps * 4 : 540);
-                const storyLikes = typeof story.likes === 'number' ? story.likes : (typeof story.claps === 'number' ? story.claps : Math.max(12, Math.round(storyViews * 0.12)));
+                const storyViews = typeof story.views === 'number' && story.views > 0 ? story.views : (typeof story.claps === 'number' && story.claps > 0 ? story.claps * 4 : 540);
+                const isCardLiked = Boolean(likedStories[storyId]);
+                const baseLikes = typeof story.likes === 'number' && story.likes > 0 ? story.likes : (typeof story.claps === 'number' && story.claps > 0 ? story.claps : Math.max(12, Math.round(storyViews * 0.12)));
+                const storyLikes = baseLikes + (isCardLiked ? 1 : 0);
 
                 return (
                   <article 
@@ -751,14 +776,22 @@ export default function CategoryContentPage({
                           <span>{storyReadTime}</span>
                         </div>
 
-                        <div style={{ fontSize: '0.72rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#e11d48' }}>
-                            <Heart size={11} fill="#e11d48" /> {storyLikes.toLocaleString()}
+                        <div className="cat-card-meta-right" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="cat-views-badge" title={`${storyViews} views`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#475569', fontSize: '0.72rem', fontWeight: 700 }}>
+                            <Eye size={12} color="#64748b" />
+                            <span>{storyViews.toLocaleString()}</span>
                           </span>
-                          <span style={{ color: '#cbd5e1' }}>•</span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#ea580c' }}>
-                            <Flame size={11} fill="#ea580c" /> {storyViews.toLocaleString()}
-                          </span>
+                          <button 
+                            type="button" 
+                            className={`cat-like-btn ${isCardLiked ? 'active' : ''}`}
+                            onClick={(e) => handleToggleLike(story, e)}
+                            title={isCardLiked ? 'Unlike story' : 'Like story'}
+                            aria-label="Like story"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', padding: 0, color: isCardLiked ? '#dc2626' : '#64748b', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', lineHeight: 1.2 }}
+                          >
+                            <Heart size={12} fill={isCardLiked ? "#dc2626" : "none"} color={isCardLiked ? "#dc2626" : "#64748b"} />
+                            {storyLikes > 0 && <span>{storyLikes.toLocaleString()}</span>}
+                          </button>
                         </div>
                       </div>
 

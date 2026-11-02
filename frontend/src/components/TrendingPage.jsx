@@ -206,6 +206,29 @@ export default function TrendingPage({
   const [activeTag, setActiveTag] = useState(null);
   const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
   const [sortMode, setSortMode] = useState('views'); // 'views' | 'likes' | 'trending'
+  const [likedStories, setLikedStories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('grp_liked_stories');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const handleToggleLike = (story, e) => {
+    if (e) e.stopPropagation();
+    const sId = String(story._id || story.id || story.slug);
+    const wasLiked = Boolean(likedStories[sId]);
+    const newLiked = !wasLiked;
+    const updated = { ...likedStories, [sId]: newLiked };
+    setLikedStories(updated);
+    try {
+      localStorage.setItem('grp_liked_stories', JSON.stringify(updated));
+    } catch (err) {}
+    if (newLiked && onShowToast) {
+      onShowToast(`Liked "${getStoryTitle(story)}"`);
+    }
+  };
   const [liveArticles, setLiveArticles] = useState([]);
 
   // Fetch live articles from MongoDB backend (both Article API and Story API)
@@ -625,7 +648,10 @@ export default function TrendingPage({
                     const storyDate = getStoryDate(story);
                     const storyReadTime = getStoryReadTime(story);
                     const storyViews = getStoryViews(story);
-                    const storyLikes = getStoryLikes(story);
+                    const sId = String(story._id || story.id || story.slug || `story-${globalIdx}`);
+                    const isCardLiked = Boolean(likedStories[sId]);
+                    const baseLikes = getStoryLikes(story);
+                    const totalLikes = baseLikes + (isCardLiked ? 1 : 0);
                     const storyImg = story.featuredImage?.url || 
                                     (typeof story.featuredImage === 'string' ? story.featuredImage : null) || 
                                     story.heroImage || 
@@ -684,13 +710,24 @@ export default function TrendingPage({
 
                             <div className="tp-card-metrics-row">
                               <span className="tp-metric-pill tp-metric-views" title={`${formatCount(storyViews)} views`}>
-                                <Eye size={10} />
+                                <Eye size={13} className="tp-metric-icon" />
                                 <span>{formatCount(storyViews)}</span>
                               </span>
-                              <span className="tp-metric-pill tp-metric-likes" title={`${formatCount(storyLikes)} likes`}>
-                                <Heart size={10} fill="currentColor" />
-                                <span>{formatCount(storyLikes)}</span>
-                              </span>
+                              <button 
+                                type="button" 
+                                className={`tp-metric-pill tp-metric-likes ${isCardLiked ? 'active' : ''}`}
+                                onClick={(e) => handleToggleLike(story, e)}
+                                title={isCardLiked ? "Unlike story" : "Like story"}
+                                aria-label="Like story"
+                              >
+                                <Heart 
+                                  size={13} 
+                                  className="tp-like-icon"
+                                  fill={isCardLiked ? "#dc2626" : "none"} 
+                                  color={isCardLiked ? "#dc2626" : "#64748b"} 
+                                />
+                                <span>{formatCount(totalLikes)}</span>
+                              </button>
                             </div>
                           </div>
 

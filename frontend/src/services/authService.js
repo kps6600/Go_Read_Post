@@ -163,7 +163,16 @@ export const AuthService = {
     const u = user || this.getAdminUser() || this.getUser();
     if (!u || !u.role) return false;
     const role = (u.role || '').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
-    return ['SUPER_ADMIN', 'AUTHOR', 'ADMIN', 'EDITOR'].includes(role);
+    return ['SUPER_ADMIN', 'ADMIN', 'EDITOR'].includes(role);
+  },
+
+  isAuthor(user = null) {
+    // If user is passed as null or undefined, inspect public user ONLY (never admin fallback)
+    const u = (user !== null && user !== undefined) ? user : this.getUser();
+    if (!u || !u.role) return false;
+    const role = (u.role || '').toUpperCase().trim();
+    // Only genuine AUTHOR accounts have access to Pitch Story
+    return role === 'AUTHOR';
   },
 
   isSuperAdmin(user = null) {
@@ -253,9 +262,9 @@ export const AuthService = {
           localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(activeUser));
         }
       } else {
-        // Public reader portal
-        if (this.isAdmin(activeUser)) {
-          throw new Error('Super Administrator and Staff accounts cannot sign in through the public reader portal. Super Admin can only log in through the Admin Panel.');
+        // Public reader & author portal
+        if (this.isSuperAdmin(activeUser)) {
+          throw new Error('Super Administrator accounts cannot sign in through the public reader portal. Super Admin can only log in through the Admin Panel.');
         }
         if (data.token) {
           localStorage.setItem(USER_TOKEN_KEY, data.token);

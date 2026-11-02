@@ -18,6 +18,7 @@ const authorSchema = new mongoose.Schema(
       github: { type: String, default: '' }
     },
     email: { type: String, default: '' },
+    password: { type: String, default: 'Author@12345' },
     isActive: { type: Boolean, default: true }
   },
   { timestamps: true }

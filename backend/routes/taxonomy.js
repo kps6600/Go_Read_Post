@@ -39,6 +39,7 @@ const INITIAL_TAXONOMY = {
       bio: 'GoReadPost Senior Editorial Staff covering venture ecosystems, founders, and deep tech.',
       designation: 'Senior Tech Reporter',
       email: 'editorial@goreadpost.com',
+      password: 'Author@12345',
       isActive: true
     },
     {
@@ -50,6 +51,7 @@ const INITIAL_TAXONOMY = {
       bio: 'Editor specializing in women leadership, consumer brands, and bootstrap journeys.',
       designation: 'Editor - HerStory',
       email: 'rekha@goreadpost.com',
+      password: 'Author@12345',
       isActive: true
     },
     {
@@ -61,6 +63,7 @@ const INITIAL_TAXONOMY = {
       bio: 'Investigative tech analyst covering AI, enterprise infrastructure, and venture rounds.',
       designation: 'Chief Technology Editor',
       email: 'kamlesh@goreadpost.com',
+      password: 'Author@12345',
       isActive: true
     }
   ],
@@ -639,6 +642,13 @@ async function getAuthorsWithArticleCounts(authorsList) {
           count = nameMap.get(aName);
         }
         doc.publishedArticlesCount = count;
+        if (!doc.email) {
+          const clean = (doc.slug || doc.name || 'author').toLowerCase().replace(/[^a-z0-9]+/g, '');
+          doc.email = clean + '@goreadpost.com';
+        }
+        if (!doc.password) {
+          doc.password = 'Author@12345';
+        }
         doc.totalPublishedArticles = count;
         return doc;
       });
@@ -957,6 +967,9 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
       github: socialLinks?.github || ''
     };
 
+    const authorEmail = email || ((cleanSlug || 'author') + '@goreadpost.com');
+    const authorPassword = req.body.password || 'Author@12345';
+
     if (isDbConnected()) {
       const created = await Author.create({
         name,
@@ -965,9 +978,32 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
         profileImage: profileImage || image || '',
         bio: bio || '',
         designation: designation || 'Staff Reporter',
-        email: email || '',
+        email: authorEmail,
+        password: authorPassword,
         socialLinks: formattedSocialLinks
       });
+
+      // Also create or sync matching User account so the author can login
+      try {
+        const User = (await import('../models/User.js')).default;
+        const bcrypt = (await import('bcryptjs')).default;
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(authorPassword, salt);
+        await User.findOneAndUpdate(
+          { $or: [{ email: authorEmail }, { username: cleanSlug }] },
+          {
+            name,
+            username: cleanSlug,
+            email: authorEmail,
+            passwordHash,
+            role: 'AUTHOR',
+            isActive: true
+          },
+          { upsert: true, new: true }
+        );
+      } catch (userSyncErr) {
+        console.warn('Could not sync author user account:', userSyncErr.message);
+      }
       const [enriched] = await getAuthorsWithArticleCounts([created]);
       return res.status(201).json({ success: true, data: enriched || created });
     }
@@ -981,7 +1017,8 @@ router.post('/admin/authors', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN',
       profileImage: profileImage || image || '',
       bio: bio || '',
       designation: designation || 'Staff Reporter',
-      email: email || '',
+      email: authorEmail,
+      password: authorPassword,
       socialLinks: formattedSocialLinks,
       isActive: true
     };
@@ -1027,6 +1064,33 @@ router.put('/admin/authors/:id', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMI
       const query = isOid ? { _id: id } : { slug: id };
       const updated = await Author.findOneAndUpdate(query, req.body, { new: true });
       if (!updated) return res.status(404).json({ success: false, message: 'Author not found' });
+
+      // Sync User account credentials if password or email was updated
+      if (req.body.password || req.body.email) {
+        try {
+          const User = (await import('../models/User.js')).default;
+          const authorEmail = updated.email || `${updated.slug}@goreadpost.com`;
+          const updateFields = {
+            name: updated.name,
+            email: authorEmail,
+            role: 'AUTHOR',
+            isActive: true
+          };
+          if (req.body.password) {
+            const bcrypt = (await import('bcryptjs')).default;
+            const salt = await bcrypt.genSalt(10);
+            updateFields.passwordHash = await bcrypt.hash(req.body.password, salt);
+          }
+          await User.findOneAndUpdate(
+            { $or: [{ email: authorEmail }, { username: updated.slug }] },
+            updateFields,
+            { upsert: true, new: true }
+          );
+        } catch (syncErr) {
+          console.warn('Could not sync updated author user credentials:', syncErr.message);
+        }
+      }
+
       const [enriched] = await getAuthorsWithArticleCounts([updated]);
       return res.json({ success: true, data: enriched || updated });
     }

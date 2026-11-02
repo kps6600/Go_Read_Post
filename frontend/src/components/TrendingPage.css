@@ -453,7 +453,7 @@
 .tp-card-metrics-row {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 12px;
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -461,9 +461,9 @@
 .tp-metric-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.74rem;
-  font-weight: 600;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
   padding: 0;
   border: none;
   background: transparent !important;
@@ -486,14 +486,36 @@
 
 .tp-metric-likes {
   background: transparent !important;
-  color: #dc2626;
+  color: #64748b;
   border: none;
+  cursor: pointer;
+  line-height: 1.2;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tp-metric-likes:hover {
+  color: #ef4444;
+}
+
+.tp-metric-likes.active {
+  color: #dc2626;
 }
 
 [data-theme='dark'] .tp-metric-likes {
-  background: transparent !important;
-  color: #f87171;
-  border: none;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .tp-metric-likes.active {
+  color: #f43f5e;
+}
+
+.tp-metric-likes .tp-like-icon {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tp-metric-likes:hover .tp-like-icon,
+.tp-metric-likes.active .tp-like-icon {
+  transform: scale(1.18);
 }
 
 @media (max-width: 768px) {
