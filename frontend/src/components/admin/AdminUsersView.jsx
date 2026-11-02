@@ -1024,114 +1024,57 @@ export default function AdminUsersView({ onShowToast }) {
                   </div>
                 </div>
 
-                {/* Section 3: Bio / About Reader (Optional) */}
+                {/* Section 3: Account Status */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
-                    About Reader / Bio <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '400' }}>(Optional)</span>
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Brief description, reading interests, or administrative notes..."
-                    value={formData.bio}
-                    onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '13px',
-                      outline: 'none',
-                      resize: 'none',
-                      fontFamily: 'inherit'
-                    }}
-                  />
-                </div>
-
-                {/* Section 4: Role & Status */}
-                <div>
-                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
-                    3. Role & Account Status
+                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    3. Account Status
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                    {/* Role (Locked to USER) */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '650', color: '#475569', marginBottom: '5px' }}>
-                        Account Role
-                      </label>
-                      <div style={{
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, isActive: true })}
+                      style={{
                         height: '42px',
-                        padding: '0 12px',
                         borderRadius: '8px',
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        border: formData.isActive ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
+                        background: formData.isActive ? '#f0fdf4' : '#ffffff',
+                        color: formData.isActive ? '#15803d' : '#64748b',
+                        fontWeight: '650',
+                        fontSize: '13px',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} />
+                      <span>Active</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, isActive: false })}
+                      style={{
+                        height: '42px',
+                        borderRadius: '8px',
+                        border: !formData.isActive ? '1.5px solid #ea580c' : '1px solid #e2e8f0',
+                        background: !formData.isActive ? '#fff7ed' : '#ffffff',
+                        color: !formData.isActive ? '#c2410c' : '#64748b',
+                        fontWeight: '650',
                         fontSize: '13px',
-                        fontWeight: '600',
-                        color: '#334155'
-                      }}>
-                        <span>User (Community Reader)</span>
-                        <span style={{ fontSize: '11px', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px' }}>Locked</span>
-                      </div>
-                      <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginTop: '3px' }}>
-                        Authors are managed under the Authors desk.
-                      </span>
-                    </div>
-
-                    {/* Status Toggle Cards */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '650', color: '#475569', marginBottom: '5px' }}>
-                        Initial Status
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, isActive: true })}
-                          style={{
-                            height: '42px',
-                            borderRadius: '8px',
-                            border: formData.isActive ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
-                            background: formData.isActive ? '#f0fdf4' : '#ffffff',
-                            color: formData.isActive ? '#15803d' : '#64748b',
-                            fontWeight: '650',
-                            fontSize: '12.5px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} />
-                          <span>Active</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, isActive: false })}
-                          style={{
-                            height: '42px',
-                            borderRadius: '8px',
-                            border: !formData.isActive ? '1.5px solid #ea580c' : '1px solid #e2e8f0',
-                            background: !formData.isActive ? '#fff7ed' : '#ffffff',
-                            color: !formData.isActive ? '#c2410c' : '#64748b',
-                            fontWeight: '650',
-                            fontSize: '12.5px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ea580c' }} />
-                          <span>Suspended</span>
-                        </button>
-                      </div>
-                    </div>
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c' }} />
+                      <span>Suspended</span>
+                    </button>
                   </div>
                 </div>
 
