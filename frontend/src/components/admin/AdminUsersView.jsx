@@ -289,19 +289,6 @@ export default function AdminUsersView({ onShowToast }) {
     }
   };
 
-  const getRoleBadgeStyle = (role) => {
-    switch ((role || '').toUpperCase()) {
-      case 'SUPER_ADMIN':
-        return { background: '#fdf2f8', color: '#be185d', border: '1px solid #fbcfe8', label: 'Super Admin' };
-      case 'AUTHOR':
-        return { background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', label: 'Author' };
-      case 'USER':
-      case 'READER':
-      default:
-        return { background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', label: 'User' };
-    }
-  };
-
   return (
     <div className="admin-page-container">
       {error && (
@@ -532,9 +519,6 @@ export default function AdminUsersView({ onShowToast }) {
                 <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   Email Address
                 </th>
-                <th style={{ width: '110px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Role
-                </th>
                 <th style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
                   Status
                 </th>
@@ -545,7 +529,6 @@ export default function AdminUsersView({ onShowToast }) {
             </thead>
             <tbody>
               {filteredUsers.map((u, index) => {
-                const badge = getRoleBadgeStyle(u.role);
                 const isSelected = selectedIds.has(u._id);
                 const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
                 const avatarUrl = getUserAvatar(u);
@@ -632,20 +615,6 @@ export default function AdminUsersView({ onShowToast }) {
                         <Mail size={13} color="#94a3b8" />
                         <span>{u.email}</span>
                       </div>
-                    </td>
-                    <td style={{ width: '110px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        padding: '3px 10px',
-                        borderRadius: '6px',
-                        background: badge.background,
-                        color: badge.color,
-                        border: badge.border
-                      }}>
-                        {badge.label}
-                      </span>
                     </td>
                     <td style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
                       <button
