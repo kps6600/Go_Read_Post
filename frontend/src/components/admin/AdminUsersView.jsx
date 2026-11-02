@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown
+  Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown,
+  UserPlus, Eye, EyeOff, Lock, Phone, Sparkles, Check, User
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 
@@ -51,12 +52,18 @@ export default function AdminUsersView({ onShowToast }) {
     name: '',
     username: '',
     email: '',
+    phone: '',
+    bio: '',
     password: '',
+    confirmPassword: '',
     avatar: '',
     role: 'USER',
     isActive: true
   });
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -105,11 +112,17 @@ export default function AdminUsersView({ onShowToast }) {
 
   const openCreateModal = () => {
     setEditingUser(null);
+    setFormError('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setFormData({
       name: '',
       username: '',
       email: '',
+      phone: '',
+      bio: '',
       password: '',
+      confirmPassword: '',
       avatar: '',
       role: 'USER',
       isActive: true
@@ -119,11 +132,18 @@ export default function AdminUsersView({ onShowToast }) {
 
   const openEditModal = (user) => {
     setEditingUser(user);
+    setFormError('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setFormData({
       name: user.name || '',
       username: user.username || '',
       email: user.email || '',
+      phone: user.phone || '',
+      bio: user.bio || '',
       password: '',
+      confirmPassword: '',
+      avatar: user.avatar || '',
       role: user.role || 'USER',
       isActive: user.isActive !== false
     });
@@ -132,19 +152,77 @@ export default function AdminUsersView({ onShowToast }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    const cleanName = (formData.name || '').trim();
+    const cleanUsername = (formData.username || '').trim().toLowerCase();
+    const cleanEmail = (formData.email || '').trim().toLowerCase();
+
+    // Field Validations
+    if (!cleanName) {
+      setFormError('Full Name is required.');
+      return;
+    }
+    if (!cleanUsername) {
+      setFormError('Username is required.');
+      return;
+    }
+    if (!/^[a-z0-9_.-]+$/.test(cleanUsername)) {
+      setFormError('Username may only contain letters, numbers, underscores (_), hyphens (-), and dots (.).');
+      return;
+    }
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setFormError('Please enter a valid email address.');
+      return;
+    }
+
+    if (!editingUser) {
+      if (!formData.password || formData.password.length < 6) {
+        setFormError('Password must be at least 6 characters.');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setFormError('Passwords do not match. Please re-check.');
+        return;
+      }
+    } else {
+      if (formData.password && formData.password.length < 6) {
+        setFormError('New password must be at least 6 characters.');
+        return;
+      }
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        setFormError('Passwords do not match. Please re-check.');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
+      const payload = {
+        name: cleanName,
+        username: cleanUsername,
+        email: cleanEmail,
+        phone: (formData.phone || '').trim(),
+        bio: (formData.bio || '').trim(),
+        avatar: (formData.avatar || '').trim(),
+        role: 'USER',
+        isActive: formData.isActive
+      };
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+
       if (editingUser) {
-        await UserService.updateUser(editingUser._id, formData);
-        if (onShowToast) onShowToast(`User "${formData.name}" updated successfully!`);
+        await UserService.updateUser(editingUser._id, payload);
+        if (onShowToast) onShowToast(`User account "${cleanName}" updated successfully!`);
       } else {
-        await UserService.createUser(formData);
-        if (onShowToast) onShowToast(`User "${formData.name}" created successfully!`);
+        await UserService.createUser(payload);
+        if (onShowToast) onShowToast(`User account "${cleanName}" created successfully!`);
       }
       setIsModalOpen(false);
       loadData();
     } catch (err) {
-      alert(err.message || 'Error saving user');
+      setFormError(err.message || 'Error saving user account.');
     } finally {
       setSaving(false);
     }
@@ -640,128 +718,495 @@ export default function AdminUsersView({ onShowToast }) {
 
       {/* Create / Edit User Modal */}
       {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>
-                {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
-              </h3>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-                <X size={20} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626' }}>
+                  <UserPlus size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '750', color: '#0f172a' }}>
+                    {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#64748b' }}>
+                    {editingUser ? 'Update community reader details and credentials.' : 'Enter reader profile details and login credentials.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
+              >
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSave}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            {/* Modal Scrollable Body */}
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '22px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                
+                {/* Form Error Alert */}
+                {formError && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '8px', color: '#dc2626', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    <span>{formError}</span>
+                  </div>
+                )}
+
+                {/* Profile Avatar Card */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ position: 'relative', width: '56px', height: '56px', flexShrink: 0 }}>
+                    <img
+                      src={formData.avatar || USER_AVATAR_POOL[0]}
+                      alt="Avatar Preview"
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid #ffffff',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = USER_AVATAR_POOL[0];
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      Profile Photo URL
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={formData.avatar}
+                      onChange={e => setFormData({ ...formData, avatar: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '36px',
+                        padding: '0 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        background: '#ffffff',
+                        outline: 'none'
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const rand = USER_AVATAR_POOL[Math.floor(Math.random() * USER_AVATAR_POOL.length)];
+                          setFormData({ ...formData, avatar: rand });
+                        }}
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#dc2626',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        <span>Random Avatar Preset</span>
+                      </button>
+                      {formData.avatar && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, avatar: '' })}
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#64748b',
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0
+                          }}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Personal Details */}
                 <div>
-                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. John Doe"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                    1. Account Information
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        Full Name <span style={{ color: '#dc2626' }}>*</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <User size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Deepika Nair"
+                          value={formData.name}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const update = { name: val };
+                            if (!editingUser && (!formData.username || formData.username === formData.name.toLowerCase().replace(/[^a-z0-9]/g, ''))) {
+                              update.username = val.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+                            }
+                            setFormData({ ...formData, ...update });
+                          }}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 12px 0 34px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        Username <span style={{ color: '#dc2626' }}>*</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', fontWeight: '600', pointerEvents: 'none' }}>@</span>
+                        <input
+                          type="text"
+                          required
+                          disabled={!!editingUser}
+                          placeholder="deepikan"
+                          value={formData.username}
+                          onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, '') })}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 12px 0 30px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            background: editingUser ? '#f8fafc' : '#ffffff',
+                            color: editingUser ? '#64748b' : '#0f172a',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        Email Address <span style={{ color: '#dc2626' }}>*</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Mail size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <input
+                          type="email"
+                          required
+                          placeholder="deepika.nair@hotmail.com"
+                          value={formData.email}
+                          onChange={e => setFormData({ ...formData, email: e.target.value })}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 12px 0 34px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        Phone Number <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '400' }}>(Optional)</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Phone size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <input
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          value={formData.phone}
+                          onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 12px 0 34px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Security & Password */}
+                <div>
+                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                    2. Security & Credentials
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        {editingUser ? 'New Password' : 'Password'} <span style={{ color: '#dc2626' }}>{editingUser ? '' : '*'}</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Lock size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required={!editingUser}
+                          placeholder={editingUser ? 'Leave blank to keep' : 'Min. 6 characters'}
+                          value={formData.password}
+                          onChange={e => setFormData({ ...formData, password: e.target.value })}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 36px 0 34px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            outline: 'none'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0 }}
+                        >
+                          {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                        Confirm Password <span style={{ color: '#dc2626' }}>{editingUser && !formData.password ? '' : '*'}</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Lock size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          required={!editingUser || !!formData.password}
+                          placeholder="Re-enter password"
+                          value={formData.confirmPassword}
+                          onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            padding: '0 36px 0 34px',
+                            borderRadius: '8px',
+                            border: formData.confirmPassword && formData.password !== formData.confirmPassword ? '1px solid #f87171' : '1px solid #cbd5e1',
+                            fontSize: '13.5px',
+                            outline: 'none'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0 }}
+                        >
+                          {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+                      {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                        <div style={{ fontSize: '11.5px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '3px' }}>
+                          <Check size={12} />
+                          <span>Passwords match</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Bio / About Reader (Optional) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '650', color: '#1e293b', marginBottom: '5px' }}>
+                    About Reader / Bio <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '400' }}>(Optional)</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Brief description, reading interests, or administrative notes..."
+                    value={formData.bio}
+                    onChange={e => setFormData({ ...formData, bio: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      outline: 'none',
+                      resize: 'none',
+                      fontFamily: 'inherit'
+                    }}
                   />
                 </div>
 
+                {/* Section 4: Role & Status */}
                 <div>
-                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Username *</label>
-                  <input
-                    type="text"
-                    required
-                    disabled={!!editingUser}
-                    placeholder="e.g. johndoe"
-                    value={formData.username}
-                    onChange={e => setFormData({ ...formData, username: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: editingUser ? '#f8fafc' : '#fff' }}
-                  />
+                  <div style={{ fontSize: '11.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                    3. Role & Account Status
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    {/* Role (Locked to USER) */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '650', color: '#475569', marginBottom: '5px' }}>
+                        Account Role
+                      </label>
+                      <div style={{
+                        height: '42px',
+                        padding: '0 12px',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: '#334155'
+                      }}>
+                        <span>User (Community Reader)</span>
+                        <span style={{ fontSize: '11px', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px' }}>Locked</span>
+                      </div>
+                      <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginTop: '3px' }}>
+                        Authors are managed under the Authors desk.
+                      </span>
+                    </div>
+
+                    {/* Status Toggle Cards */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '650', color: '#475569', marginBottom: '5px' }}>
+                        Initial Status
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, isActive: true })}
+                          style={{
+                            height: '42px',
+                            borderRadius: '8px',
+                            border: formData.isActive ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
+                            background: formData.isActive ? '#f0fdf4' : '#ffffff',
+                            color: formData.isActive ? '#15803d' : '#64748b',
+                            fontWeight: '650',
+                            fontSize: '12.5px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} />
+                          <span>Active</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, isActive: false })}
+                          style={{
+                            height: '42px',
+                            borderRadius: '8px',
+                            border: !formData.isActive ? '1.5px solid #ea580c' : '1px solid #e2e8f0',
+                            background: !formData.isActive ? '#fff7ed' : '#ffffff',
+                            color: !formData.isActive ? '#c2410c' : '#64748b',
+                            fontWeight: '650',
+                            fontSize: '12.5px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ea580c' }} />
+                          <span>Suspended</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
               </div>
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="john@goreadpost.com"
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
-                  {editingUser ? 'New Password (Leave blank to keep existing)' : 'Password *'}
-                </label>
-                <input
-                  type="password"
-                  required={!editingUser}
-                  placeholder={editingUser ? '••••••••' : 'Minimum 6 characters'}
-                  value={formData.password}
-                  onChange={e => setFormData({ ...formData, password: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Profile Photo / Logo URL (Optional)</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={formData.avatar || ''}
-                  onChange={e => setFormData({ ...formData, avatar: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
-                    Account Role
-                  </label>
-                  <select
-                    value="USER"
-                    disabled
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#f8fafc', color: '#475569', cursor: 'not-allowed' }}
-                  >
-                    <option value="USER">User (Reader)</option>
-                  </select>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                    Registered community reader. Authors are managed under Authors desk.
-                  </span>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
-                    Account Status
-                  </label>
-                  <select
-                    value={formData.isActive ? 'active' : 'suspended'}
-                    onChange={e => setFormData({ ...formData, isActive: e.target.value === 'active' })}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
-                  >
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              {/* Modal Sticky Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', background: '#fafbfc', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', color: '#475569' }}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  style={{ padding: '8px 18px', background: 'var(--brand-primary, #dc2626)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'var(--brand-primary, #dc2626)',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
+                    opacity: saving ? 0.7 : 1,
+                    transition: 'all 0.15s ease'
+                  }}
                 >
-                  {saving ? 'Saving...' : editingUser ? 'Update Account' : 'Create User'}
+                  {saving && <RefreshCw size={13} className="animate-spin" />}
+                  <span>{saving ? 'Saving...' : editingUser ? 'Update Account' : 'Create User Account'}</span>
                 </button>
               </div>
             </form>

@@ -68,11 +68,11 @@ router.get('/roles', protectAdmin, async (req, res) => {
 });
 
 // 3. POST /api/admin/users (Create User)
-router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
+router.post('/', protectAdmin, async (req, res) => {
   try {
-    const { name, username, email, password, role, avatar } = req.body;
+    const { name, username, email, password, role, avatar, bio, phone, isActive } = req.body;
     if (!name || !username || !email || !password) {
-      return res.status(400).json({ success: false, message: 'All fields (name, username, email, password) are required.' });
+      return res.status(400).json({ success: false, message: 'All required fields (name, username, email, password) must be provided.' });
     }
 
     const validRoles = ['SUPER_ADMIN', 'AUTHOR', 'USER', 'READER'];
@@ -83,20 +83,22 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
         $or: [{ email: email.toLowerCase().trim() }, { username: username.toLowerCase().trim() }]
       });
       if (existing) {
-        return res.status(400).json({ success: false, message: 'User with this email or username already exists.' });
+        return res.status(400).json({ success: false, message: 'A user with this email or username already exists.' });
       }
 
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(password, salt);
 
       const newUser = await User.create({
-        name,
+        name: name.trim(),
         username: username.toLowerCase().trim(),
         email: email.toLowerCase().trim(),
         passwordHash,
         avatar: avatar || '',
+        bio: bio || '',
+        phone: phone || '',
         role: chosenRole,
-        isActive: true
+        isActive: typeof isActive === 'boolean' ? isActive : true
       });
 
       const userDoc = newUser.toObject();
@@ -107,11 +109,14 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
 
     const mockNew = {
       _id: `user_${Date.now()}`,
-      name,
+      name: name.trim(),
       username: username.toLowerCase().trim(),
       email: email.toLowerCase().trim(),
+      avatar: avatar || '',
+      bio: bio || '',
+      phone: phone || '',
       role: chosenRole,
-      isActive: true,
+      isActive: typeof isActive === 'boolean' ? isActive : true,
       createdAt: new Date().toISOString()
     };
     fallbackUsers.push(mockNew);
@@ -125,7 +130,7 @@ router.post('/', protectAdmin, requireSuperAdmin, async (req, res) => {
 router.put('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, email, isActive, password } = req.body;
+    const { name, role, email, isActive, password, avatar, bio, phone } = req.body;
 
     if (isDbConnected()) {
       const targetUser = await User.findById(id);
@@ -136,8 +141,11 @@ router.put('/:id', protectAdmin, async (req, res) => {
       const isRootAdmin = targetUser.username === 'admin' || targetUser.email === 'admin@goreadpost.com';
 
       const updateData = {};
-      if (name) updateData.name = name;
+      if (name) updateData.name = name.trim();
       if (email) updateData.email = email.toLowerCase().trim();
+      if (avatar !== undefined) updateData.avatar = avatar;
+      if (bio !== undefined) updateData.bio = bio;
+      if (phone !== undefined) updateData.phone = phone;
       if (role) {
         updateData.role = isRootAdmin ? 'SUPER_ADMIN' : role.toUpperCase();
       }
