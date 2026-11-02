@@ -443,17 +443,30 @@ export default function AdminUsersView({ onShowToast }) {
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                <th style={{ width: '40px', padding: '12px 16px' }}></th>
-                <th style={{ padding: '12px 16px', fontWeight: '600' }}>Name & Username</th>
-                <th style={{ padding: '12px 16px', fontWeight: '600' }}>Email Address</th>
-                <th style={{ padding: '12px 16px', fontWeight: '600' }}>Role</th>
-                <th style={{ padding: '12px 16px', fontWeight: '600' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontWeight: '600', textAlign: 'right' }}>Actions</th>
+              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <th style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}></th>
+                <th style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Sr. No.
+                </th>
+                <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Name & Username
+                </th>
+                <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Email Address
+                </th>
+                <th style={{ width: '110px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Role
+                </th>
+                <th style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Status
+                </th>
+                <th style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((u) => {
+              {filteredUsers.map((u, index) => {
                 const badge = getRoleBadgeStyle(u.role);
                 const isSelected = selectedIds.has(u._id);
                 const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
@@ -461,8 +474,17 @@ export default function AdminUsersView({ onShowToast }) {
                 const initials = getUserInitials(u.name);
 
                 return (
-                  <tr key={u._id} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: isSelected ? '#fff1f2' : 'transparent' }}>
-                    <td style={{ padding: '12px 16px' }}>
+                  <tr 
+                    key={u._id} 
+                    style={{ 
+                      borderBottom: '1px solid #f1f5f9', 
+                      backgroundColor: isSelected ? '#fff1f2' : 'transparent',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                  >
+                    <td style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
                       <input 
                         type="checkbox"
                         checked={isSelected}
@@ -472,9 +494,15 @@ export default function AdminUsersView({ onShowToast }) {
                           else next.delete(u._id);
                           setSelectedIds(next);
                         }}
+                        style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
                       />
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ position: 'relative', width: '38px', height: '38px', flexShrink: 0 }}>
                           <img
@@ -516,22 +544,23 @@ export default function AdminUsersView({ onShowToast }) {
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontWeight: '700', color: '#0f172a' }}>{u.name}</div>
+                          <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '13.5px' }}>{u.name}</div>
                           <div style={{ fontSize: '12px', color: '#64748b' }}>@{u.username}</div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: '12px 16px', color: '#334155' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <td style={{ padding: '12px 16px', color: '#334155', verticalAlign: 'middle' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
                         <Mail size={13} color="#94a3b8" />
                         <span>{u.email}</span>
                       </div>
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ width: '110px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
                       <span style={{
+                        display: 'inline-block',
                         fontSize: '11px',
                         fontWeight: '700',
-                        padding: '3px 9px',
+                        padding: '3px 10px',
                         borderRadius: '6px',
                         background: badge.background,
                         color: badge.color,
@@ -540,7 +569,7 @@ export default function AdminUsersView({ onShowToast }) {
                         {badge.label}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
                       <button
                         type="button"
                         onClick={() => handleToggleStatus(u)}
@@ -550,7 +579,7 @@ export default function AdminUsersView({ onShowToast }) {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
-                          padding: '4px 10px',
+                          padding: '4px 11px',
                           borderRadius: '20px',
                           fontSize: '12px',
                           fontWeight: '600',
@@ -578,7 +607,7 @@ export default function AdminUsersView({ onShowToast }) {
                         <span>{u.isActive !== false ? 'Active' : 'Suspended'}</span>
                       </button>
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                    <td style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle' }}>
                       <button
                         onClick={() => handleDelete(u)}
                         style={{
