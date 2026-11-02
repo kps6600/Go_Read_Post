@@ -204,23 +204,6 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
       )}
 
-      {/* Top Action Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '16px' }}>
-        <button
-          onClick={openCreateModal}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
-            background: 'var(--brand-primary, #dc2626)', color: '#fff', border: 'none', borderRadius: '8px',
-            fontWeight: '600', fontSize: '0.84rem', cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Plus size={15} />
-          <span>Add User</span>
-        </button>
-      </div>
-
       {/* Modern Search & Filter Toolbar Card */}
       <div style={{
         background: '#ffffff',
@@ -286,7 +269,7 @@ export default function AdminUsersView({ onShowToast }) {
           )}
         </div>
 
-        {/* Right Controls: Status Filter & Reset */}
+        {/* Right Controls: Status Filter, Reset & Add User Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           {/* Status Filter Dropdown */}
           <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
@@ -343,6 +326,32 @@ export default function AdminUsersView({ onShowToast }) {
               <span>Reset</span>
             </button>
           )}
+
+          {/* Add User CTA Button */}
+          <button
+            type="button"
+            onClick={openCreateModal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '40px',
+              padding: '0 16px',
+              background: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '13.5px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Plus size={15} />
+            <span>Add User</span>
+          </button>
         </div>
       </div>
 
