@@ -1138,14 +1138,7 @@ export default function ModernHomepageView({
 
         <div className="mhp-blog-cards-grid">
           {articles.map((blog, idx) => 
-            renderStoryCard(
-              blog, 
-              idx, 
-              <span className="mhp-editor-pick-pill">
-                <Sparkles size={12} fill="#ffffff" color="#ffffff" />
-                {badgeText}
-              </span>
-            )
+            renderStoryCard(blog, idx)
           )}
         </div>
       </section>
