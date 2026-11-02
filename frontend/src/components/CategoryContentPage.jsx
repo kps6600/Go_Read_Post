@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft, ArrowRight, ChevronRight, ChevronLeft, Search, Mail, 
-  Sparkles, Flame, Clock, Calendar, Bookmark, TrendingUp, BookOpen, 
+  Sparkles, Flame, Heart, Clock, Calendar, Bookmark, TrendingUp, BookOpen, 
   Send, CheckCircle2, X, LayoutGrid, Columns, Layers
 } from 'lucide-react';
 import './CategoryContentPage.css';
@@ -263,7 +263,14 @@ export default function CategoryContentPage({
   }, [liveConfig?.layoutMode]);
 
   // Cards per page from CMS config (default 12 for 3 full rows of 4 cards)
-  const CARDS_PER_PAGE = liveConfig?.cardsPerPage ? Number(liveConfig.cardsPerPage) : 12;
+  // Cards per page from CMS config (always normalized to a multiple of 4: 8, 12, 16, etc. to prevent empty slots)
+  const CARDS_PER_PAGE = useMemo(() => {
+    const raw = Number(liveConfig?.cardsPerPage);
+    if (raw && !isNaN(raw) && raw > 0) {
+      return Math.max(8, Math.ceil(raw / 4) * 4);
+    }
+    return 12;
+  }, [liveConfig?.cardsPerPage]);
 
   // Master stories pool
   const masterPool = useMemo(() => {
@@ -446,9 +453,59 @@ export default function CategoryContentPage({
 
   const totalPages = Math.max(1, Math.ceil(filteredGridStories.length / CARDS_PER_PAGE));
   const currentGridPage = useMemo(() => {
+    if (!filteredGridStories || filteredGridStories.length === 0) return [];
     const start = (currentPage - 1) * CARDS_PER_PAGE;
-    return filteredGridStories.slice(start, start + CARDS_PER_PAGE);
-  }, [filteredGridStories, currentPage]);
+    let slice = filteredGridStories.slice(start, start + CARDS_PER_PAGE);
+
+    if (slice.length > 0 && slice.length < CARDS_PER_PAGE && filteredGridStories.length >= CARDS_PER_PAGE) {
+      slice = filteredGridStories.slice(-CARDS_PER_PAGE);
+    }
+
+    // Fill remaining space so that every row in the 4-column grid is 100% full (no empty slots)
+    if (slice.length > 0 && (slice.length % 4 !== 0 || slice.length < CARDS_PER_PAGE)) {
+      const res = [...slice];
+      const seen = new Set(res.map(s => String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase()));
+
+      for (const s of categoryStories) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      for (const s of masterPool) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      while (res.length % 4 !== 0 && masterPool.length > 0) {
+        let added = false;
+        for (const s of masterPool) {
+          if (!s) continue;
+          const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            res.push(s);
+            added = true;
+            if (res.length % 4 === 0) break;
+          }
+        }
+        if (!added) break;
+      }
+
+      return res;
+    }
+
+    return slice;
+  }, [filteredGridStories, currentPage, CARDS_PER_PAGE, categoryStories, masterPool]);
 
   // Smart Ellipsis Pagination Items
   const paginationItems = useMemo(() => {
@@ -620,14 +677,6 @@ export default function CategoryContentPage({
 
         {/* ── 4. Main Articles Grid ── */}
         <section className="cat-grid-section">
-          <div className="cat-grid-section-header">
-            <h2 className="cat-grid-heading">
-              {categoryInfo.name}
-            </h2>
-            <span className="cat-grid-counter">
-              Showing <strong>{filteredGridStories.length > 0 ? (currentPage - 1) * CARDS_PER_PAGE + 1 : 0}–{Math.min(filteredGridStories.length, currentPage * CARDS_PER_PAGE)}</strong> of <strong>{filteredGridStories.length}</strong>
-            </span>
-          </div>
 
           {filteredGridStories.length === 0 ? (
             <div className="cat-empty-box">
@@ -658,6 +707,8 @@ export default function CategoryContentPage({
                 const storyReadTime = getStoryReadTime(story);
                 const storyImg = getStoryImage(story);
                 const isStorySaved = isSaved && isSaved(storyId);
+                const storyViews = typeof story.views === 'number' ? story.views : (typeof story.claps === 'number' ? story.claps * 4 : 540);
+                const storyLikes = typeof story.likes === 'number' ? story.likes : (typeof story.claps === 'number' ? story.claps : Math.max(12, Math.round(storyViews * 0.12)));
 
                 return (
                   <article 
@@ -691,12 +742,24 @@ export default function CategoryContentPage({
                     </div>
 
                     <div className="cat-card-body">
-                      <div className="cat-card-meta">
-                        <span className="cat-card-cat-meta-label">{storyCat}</span>
-                        <span>•</span>
-                        <span>{storyDate}</span>
-                        <span>•</span>
-                        <span>{storyReadTime}</span>
+                      <div className="cat-card-meta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span className="cat-card-cat-meta-label">{storyCat}</span>
+                          <span>•</span>
+                          <span>{storyDate}</span>
+                          <span>•</span>
+                          <span>{storyReadTime}</span>
+                        </div>
+
+                        <div style={{ fontSize: '0.72rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#e11d48' }}>
+                            <Heart size={11} fill="#e11d48" /> {storyLikes.toLocaleString()}
+                          </span>
+                          <span style={{ color: '#cbd5e1' }}>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#ea580c' }}>
+                            <Flame size={11} fill="#ea580c" /> {storyViews.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
 
                       <h3 className="cat-card-title">

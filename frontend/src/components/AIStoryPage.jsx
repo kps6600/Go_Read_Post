@@ -122,7 +122,31 @@ export default function AIStoryPage({
   const totalPages = Math.max(1, Math.ceil(gridStories.length / storiesPerPage));
   const validPage = Math.min(Math.max(1, currentPage), totalPages);
   const startIndex = (validPage - 1) * storiesPerPage;
-  const currentStories = gridStories.slice(startIndex, startIndex + storiesPerPage);
+  let currentStories = gridStories.slice(startIndex, startIndex + storiesPerPage);
+  // Fill remaining space so that every row in the 3-column grid is 100% full
+  if (currentStories.length > 0 && (currentStories.length % 3 !== 0 || currentStories.length < storiesPerPage)) {
+    const res = [...currentStories];
+    const seen = new Set(res.map(s => String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase()));
+    for (const s of gridStories) {
+      if (res.length >= storiesPerPage && res.length % 3 === 0) break;
+      if (!s) continue;
+      const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        res.push(s);
+      }
+    }
+    for (const s of aiStories) {
+      if (res.length >= storiesPerPage && res.length % 3 === 0) break;
+      if (!s) continue;
+      const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        res.push(s);
+      }
+    }
+    currentStories = res;
+  }
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;

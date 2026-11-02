@@ -134,10 +134,23 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
   const [pickerCategory, setPickerCategory] = useState('All');
 
   const [editModal, setEditModal] = useState({ isOpen: false, target: null, data: null });
+  const [insertPosition, setInsertPosition] = useState(1);
 
   // Category Filter Popover Dropdown State
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const filterRef = useRef(null);
+
+  // Global listener from Top Bar "Add Card"
+  useEffect(() => {
+    const handleOpenAddCard = () => {
+      setInsertPosition(1);
+      setPickerSearch('');
+      setPickerCategory('All');
+      setPickerModal({ isOpen: true, target: { type: 'card-add' } });
+    };
+    window.addEventListener('open:add-trending-card', handleOpenAddCard);
+    return () => window.removeEventListener('open:add-trending-card', handleOpenAddCard);
+  }, []);
 
   // Close filter dropdown on outside click
   useEffect(() => {
@@ -221,9 +234,10 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
 
   // Search & Pagination State
   const [searchQuery, setSearchQuery] = useState('');
-  const [showAllCards, setShowAllCards] = useState(true);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const CARDS_PER_PAGE = 8;
+  const [cardsPerPage, setCardsPerPage] = useState(8);
+  const CARDS_PER_PAGE = cardsPerPage;
 
   // Category counts dynamically derived from allArticles
   const categoryStats = useMemo(() => {
@@ -274,6 +288,21 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
   }, [displayRankedArticles, showAllCards, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(displayRankedArticles.length / CARDS_PER_PAGE));
+
+  // Generate pagination numbers with ellipsis (e.g. 1 2 3 4 5 ... 16)
+  const paginationItems = useMemo(() => {
+    const current = currentPage + 1;
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (current <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (current >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', totalPages];
+  }, [currentPage, totalPages]);
 
   // Picker modal filtered pool
   const filteredPickerPool = useMemo(() => {
@@ -341,12 +370,22 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
         next[index] = formatted;
         return next;
       });
-    } else if (type === 'card-add') {
-      setRankedArticles(prev => [formatted, ...prev]);
+      if (onShowToast) onShowToast(`Replaced card with "${article.title.slice(0, 35)}..."`);
+    } else {
+      // type === 'card-add': Insert at selected rank position (1-based index)
+      const rawPos = parseInt(insertPosition, 10) || 1;
+      const pos = Math.max(0, Math.min(rawPos - 1, rankedArticles.length));
+      setRankedArticles(prev => {
+        const artKey = String(formatted.id || formatted._id || formatted.slug);
+        const filtered = prev.filter(a => String(a.id || a._id || a.slug) !== artKey);
+        const next = [...filtered];
+        next.splice(pos, 0, formatted);
+        return next;
+      });
+      if (onShowToast) onShowToast(`Added "${article.title.slice(0, 35)}..." at Position #${pos + 1}!`);
     }
 
     setPickerModal({ isOpen: false, target: null });
-    if (onShowToast) onShowToast(`Selected "${article.title.slice(0, 35)}..."`);
   };
 
   // ─────────────────────────────────────────────────────────
@@ -707,52 +746,6 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
           </div>
         </div>
 
-        {/* Count & View Mode Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px', fontSize: '0.85rem', color: '#64748b', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
-          <div>
-            Showing <strong style={{ color: '#0f172a' }}>{visibleArticles.length}</strong> of <strong style={{ color: '#0f172a' }}>{displayRankedArticles.length}</strong> {activeCategory !== 'All' ? `${activeCategory} ` : ''}Articles
-            {searchQuery && ` (filtered by "${searchQuery}")`}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 650 }}>View Mode:</span>
-            <button
-              type="button"
-              onClick={() => setShowAllCards(true)}
-              style={{
-                padding: '4px 12px',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: showAllCards ? '#ea580c' : '#cbd5e1',
-                background: showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
-                color: showAllCards ? '#ea580c' : '#475569',
-                fontSize: '0.76rem',
-                fontWeight: 750,
-                cursor: 'pointer'
-              }}
-            >
-              Show All ({displayRankedArticles.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAllCards(false)}
-              style={{
-                padding: '4px 12px',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: !showAllCards ? '#ea580c' : '#cbd5e1',
-                background: !showAllCards ? 'rgba(234, 88, 12, 0.1)' : '#ffffff',
-                color: !showAllCards ? '#ea580c' : '#475569',
-                fontSize: '0.76rem',
-                fontWeight: 750,
-                cursor: 'pointer'
-              }}
-            >
-              Paginated (8/page)
-            </button>
-          </div>
-        </div>
-
         {/* 2-Column Responsive Card Grid (arranged over the screen!) */}
         <div className="atv-cards-grid">
           {visibleArticles.map((article, inPageIdx) => {
@@ -768,6 +761,7 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
             const artDate = article.date || article.publishedAt || 'Today';
             const artReadTime = article.readTime || (article.readingTime ? `${article.readingTime} min read` : '5 min read');
             const artViews = typeof article.views === 'number' ? article.views : (typeof article.claps === 'number' ? article.claps * 4 : 450);
+            const artLikes = typeof article.likes === 'number' ? article.likes : (typeof article.claps === 'number' ? article.claps : Math.max(12, Math.round(artViews * 0.12)));
             
             const displayRank = showAllCards ? inPageIdx : currentPage * CARDS_PER_PAGE + inPageIdx;
             const rankColor = RANK_COLORS[displayRank % RANK_COLORS.length];
@@ -802,29 +796,6 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
                       title="Move later (# position)"
                     >
                       <ArrowRight size={13} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="atv-icon-btn"
-                      onClick={() => setPickerModal({ isOpen: true, target: { type: 'card-replace', index: targetIdx } })}
-                      title="Replace this article"
-                    >
-                      <RefreshCw size={13} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="atv-icon-btn"
-                      onClick={() => setEditModal({
-                        isOpen: true,
-                        target: 'ranked-card',
-                        index: targetIdx,
-                        data: { ...article }
-                      })}
-                      title="Edit article details"
-                    >
-                      <Edit2 size={13} />
                     </button>
 
                     <button
@@ -880,13 +851,19 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '0.4rem' }}>
                       <span 
                         className="atv-card-cat"
-                        style={{ background: getCategoryColor(artCat), margin: 0 }}
+                        style={{ margin: 0 }}
                       >
                         {artCat}
                       </span>
-                      <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 750 }}>
-                        🔥 {artViews.toLocaleString()} views
-                      </span>
+                      <div style={{ fontSize: '0.74rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#e11d48' }}>
+                          <Heart size={13} fill="#e11d48" /> {artLikes.toLocaleString()} likes
+                        </span>
+                        <span style={{ color: '#cbd5e1' }}>•</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#ea580c' }}>
+                          <Flame size={13} fill="#ea580c" /> {artViews.toLocaleString()} views
+                        </span>
+                      </div>
                     </div>
 
                     <h3 className="atv-card-title">{artTitle}</h3>
@@ -894,19 +871,6 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
                     {artExcerpt && (
                       <p className="atv-card-desc">{artExcerpt}</p>
                     )}
-
-                    <div style={{ marginTop: 'auto', paddingTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
-                      <a 
-                        href={`/articles/${article.slug || article._id || article.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="View published article"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#64748b', textDecoration: 'none', fontSize: '0.76rem', fontWeight: 650 }}
-                      >
-                        <ExternalLink size={12} />
-                        <span>Live</span>
-                      </a>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -914,45 +878,81 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
           })}
         </div>
 
-        {/* Pagination Bar when not showing all */}
+        {/* Numbered Pagination Bar */}
         {!showAllCards && totalPages > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9' }}>
+          <div className="atv-pagination-bar">
             <button
               type="button"
-              className="atv-btn-secondary"
+              className="atv-pagination-nav-btn"
               disabled={currentPage === 0}
-              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-              style={{ padding: '6px 12px', fontSize: '0.8rem', opacity: currentPage === 0 ? 0.5 : 1 }}
+              onClick={() => {
+                setCurrentPage(prev => Math.max(0, prev - 1));
+                const el = document.getElementById('atv-articles-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              aria-label="Previous Page"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={16} />
               <span>Previous</span>
             </button>
 
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', margin: '0 8px' }}>
-              Page {currentPage + 1} of {totalPages}
-            </span>
+            <div className="atv-pagination-numbers">
+              {paginationItems.map((item, pIdx) => {
+                if (item === '...') {
+                  return (
+                    <span key={`ellipsis-${pIdx}`} className="atv-pagination-ellipsis">
+                      ...
+                    </span>
+                  );
+                }
+                const pageIdx = item - 1;
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`atv-pagination-num-btn ${pageIdx === currentPage ? 'active' : ''}`}
+                    onClick={() => {
+                      setCurrentPage(pageIdx);
+                      const el = document.getElementById('atv-articles-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    aria-label={`Go to Page ${item}`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+            </div>
 
             <button
               type="button"
-              className="atv-btn-secondary"
-              disabled={currentPage === totalPages - 1}
-              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
-              style={{ padding: '6px 12px', fontSize: '0.8rem', opacity: currentPage === totalPages - 1 ? 0.5 : 1 }}
+              className="atv-pagination-nav-btn"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => {
+                setCurrentPage(prev => Math.min(totalPages - 1, prev + 1));
+                const el = document.getElementById('atv-articles-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              aria-label="Next Page"
             >
               <span>Next</span>
-              <ChevronRight size={14} />
+              <ChevronRight size={16} />
             </button>
           </div>
         )}
       </div>
       </div>
 
-      {/* ── MODAL 1: ARTICLE PICKER MODAL ── */}
+      {/* ── MODAL 1: ARTICLE PICKER / ADD CARD MODAL ── */}
       {pickerModal.isOpen && (
         <div className="atv-modal-overlay" onClick={() => setPickerModal({ isOpen: false, target: null })}>
-          <div className="atv-modal-card" onClick={e => e.stopPropagation()}>
+          <div className="atv-modal-card" style={{ maxWidth: '680px', width: '92%' }} onClick={e => e.stopPropagation()}>
             <div className="atv-modal-header">
-              <h3>Select Article from Library</h3>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem' }}>
+                  {pickerModal.target?.type === 'card-add' ? 'Select Article' : 'Replace Article from Library'}
+                </h3>
+              </div>
               <button 
                 type="button" 
                 className="atv-icon-btn" 
@@ -962,12 +962,57 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
               </button>
             </div>
 
+            {/* Position Selector Bar */}
+            {pickerModal.target?.type === 'card-add' && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '12px 1.5rem',
+                background: '#fff7ed',
+                borderBottom: '1px solid #fed7aa',
+                gap: '12px'
+              }}>
+                <label style={{ fontSize: '0.88rem', fontWeight: 750, color: '#9a3412' }}>
+                  Select Rank:
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={rankedArticles.length + 1}
+                  value={insertPosition}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setInsertPosition('');
+                    } else {
+                      setInsertPosition(Math.max(1, parseInt(val, 10) || 1));
+                    }
+                  }}
+                  onBlur={() => {
+                    if (!insertPosition || insertPosition < 1) setInsertPosition(1);
+                  }}
+                  style={{
+                    width: '84px',
+                    padding: '7px 12px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #ea580c',
+                    background: '#ffffff',
+                    color: '#ea580c',
+                    fontSize: '0.95rem',
+                    fontWeight: 800,
+                    textAlign: 'center',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+            )}
+
             <div className="atv-modal-body">
               <div className="atv-picker-search">
                 <Search size={16} color="#94a3b8" />
                 <input
                   type="text"
-                  placeholder="Search articles by title or topic..."
+                  placeholder="Search articles by title, author, or category..."
                   value={pickerSearch}
                   onChange={e => setPickerSearch(e.target.value)}
                   className="atv-input"
@@ -992,23 +1037,17 @@ export default function AdminTrendingView({ onShowToast, onNavigate, isStudioVie
                           {item.categoryLabel || item.category || 'Article'} • {item.author?.name || item.author || 'Desk'}
                         </span>
                       </div>
-                      <button type="button" className="atv-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+                      <button 
+                        type="button" 
+                        className="atv-btn-primary" 
+                        style={{ padding: '7px 16px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                      >
                         Select
                       </button>
                     </div>
                   );
                 })}
               </div>
-            </div>
-
-            <div className="atv-modal-footer">
-              <button
-                type="button"
-                className="atv-btn-secondary"
-                onClick={() => setPickerModal({ isOpen: false, target: null })}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>

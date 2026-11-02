@@ -100,7 +100,8 @@ export const DEFAULT_PAGES = [
           heading: "Latest Articles",
           subtitle: "",
           category: "",
-          limit: 16,
+          limit: 20,
+          cardsPerPage: 20,
           viewAllText: "Load More Stories",
           viewAllUrl: "/latest"
         }

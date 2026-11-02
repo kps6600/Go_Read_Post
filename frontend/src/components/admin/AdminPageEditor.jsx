@@ -169,7 +169,7 @@ export const isSectionAlreadyOnPage = (itemType, existingSections) => {
   });
 };
 
-export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
+export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initialCategory = null, currentPath = '' }) {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -953,10 +953,25 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
     }
 
     // 3. Category Desks & Beats Page
-    if (normId === 'category' || normId === 'categories' || normSlug === 'category' || normSlug === 'categories') {
+    if (
+      normId === 'category' || normId === 'categories' || normSlug === 'category' || normSlug === 'categories' ||
+      normId.startsWith('category') || normSlug.startsWith('category') ||
+      normId === 'smbstory' || normSlug === 'smbstory' ||
+      normId === 'startups' || normSlug === 'startups' ||
+      normId === 'technology' || normSlug === 'technology' ||
+      normId === 'fintech' || normSlug === 'fintech' ||
+      normId === 'enterprise' || normSlug === 'enterprise' ||
+      normId === 'her-story' || normSlug === 'her-story' ||
+      normId === 'social-story' || normSlug === 'social-story' ||
+      normId === 'ai-story' || normSlug === 'ai-story' ||
+      normId === 'leadership' || normSlug === 'leadership'
+    ) {
+      const deskSlug = initialCategory || (normSlug.startsWith('category/') ? normSlug.replace('category/', '') : (normId !== 'category' && normId !== 'categories' ? normId : null));
       return (
         <AdminCategoryStudioView
           isStudioView={true}
+          initialCategory={deskSlug}
+          currentPath={currentPath}
           onShowToast={onShowToast}
           onNavigate={onNavigate}
         />
@@ -1147,28 +1162,40 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast }) {
             </button>
           )}
 
-          {(pageId === 'latest' || slug === 'latest') && (
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open:add-latest-card'))}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.55rem 1.05rem',
-                borderRadius: '8px',
-                border: '1px solid #ea580c',
-                background: '#fff7ed',
-                color: '#ea580c',
-                fontSize: '0.86rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              <Plus size={15} />
-              <span>Add Card</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              const norm = (pageId || slug || '').toLowerCase().trim();
+              if (norm === 'latest' || norm.includes('latest')) {
+                window.dispatchEvent(new CustomEvent('open:add-latest-card'));
+              } else if (norm === 'trending' || norm.includes('trending')) {
+                window.dispatchEvent(new CustomEvent('open:add-trending-card'));
+              } else if (norm === 'category' || norm.includes('categories') || norm.includes('category')) {
+                window.dispatchEvent(new CustomEvent('open:add-category-card'));
+              } else if (norm === 'about' || norm.includes('about')) {
+                window.dispatchEvent(new CustomEvent('open:add-about-card'));
+              } else {
+                window.dispatchEvent(new CustomEvent('open:add-card'));
+              }
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.55rem 1.05rem',
+              borderRadius: '8px',
+              border: '1px solid #ea580c',
+              background: '#fff7ed',
+              color: '#ea580c',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+            title="Add a card to this page"
+          >
+            <Plus size={15} />
+            <span>Add Card</span>
+          </button>
 
 
           <button

@@ -250,9 +250,12 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
 
     // 6c. Category Page Live Studio: /admin/category or /admin/category-studio
     if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) {
+      const catSlug = currentPath.replace('/admin/category', '').replace(/^\/+/, '').split('/')[0].split('?')[0];
       return (
         <AdminPageEditor 
           pageId="category" 
+          initialCategory={catSlug || null}
+          currentPath={currentPath}
           onNavigate={handleNavigate} 
           onShowToast={onShowToast} 
         />

@@ -981,3 +981,15 @@ main:has(.lap-page-wrapper) + .site-footer {
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+/* Hide scrollbar stick on add card modal */
+.lap-no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.lap-no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

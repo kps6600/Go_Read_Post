@@ -688,6 +688,24 @@ export default function LiveWholePageStudio({
     setIsPickerOpen(true);
   };
 
+  // Global listener from Top Bar "Add Card"
+  useEffect(() => {
+    const handleGlobalAddCard = () => {
+      const targetSec = sections.find(s => s.type === 'articles-feed' || s.type === 'feed' || s.type === 'grid' || s.type?.includes('article')) || sections[0];
+      if (targetSec) {
+        handleOpenPicker({ sectionId: targetSec.id, type: 'feed-add' });
+      } else {
+        handleOpenPicker({ type: 'hero-add', mode: 'articles' });
+      }
+    };
+    window.addEventListener('open:add-card', handleGlobalAddCard);
+    window.addEventListener('open:add-homepage-card', handleGlobalAddCard);
+    return () => {
+      window.removeEventListener('open:add-card', handleGlobalAddCard);
+      window.removeEventListener('open:add-homepage-card', handleGlobalAddCard);
+    };
+  }, [sections]);
+
   const handleSelectPickerArticle = (article) => {
     if (!pickerTarget) return;
 

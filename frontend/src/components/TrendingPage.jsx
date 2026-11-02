@@ -401,9 +401,44 @@ export default function TrendingPage({
 
   const totalArticlePages = Math.max(1, Math.ceil(filteredStories.length / CARDS_PER_PAGE));
   const currentStoriesPage = useMemo(() => {
+    if (!filteredStories || filteredStories.length === 0) return [];
     const start = currentArticlePage * CARDS_PER_PAGE;
-    return filteredStories.slice(start, start + CARDS_PER_PAGE);
-  }, [filteredStories, currentArticlePage]);
+    let slice = filteredStories.slice(start, start + CARDS_PER_PAGE);
+
+    if (slice.length > 0 && slice.length < CARDS_PER_PAGE && filteredStories.length >= CARDS_PER_PAGE) {
+      slice = filteredStories.slice(-CARDS_PER_PAGE);
+    }
+
+    // Fill remaining space so that every row in the 2-column grid is 100% full
+    if (slice.length > 0 && (slice.length % 2 !== 0 || slice.length < CARDS_PER_PAGE)) {
+      const res = [...slice];
+      const seen = new Set(res.map(s => String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase()));
+
+      for (const s of filteredStories) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 2 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      for (const s of pool) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 2 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      return res;
+    }
+
+    return slice;
+  }, [filteredStories, currentArticlePage, CARDS_PER_PAGE, pool]);
 
   // Generate pagination numbers with ellipsis (e.g. 1 2 3 4 5 ... 31)
   const paginationItems = useMemo(() => {

@@ -28191,3 +28191,7 @@ body::-webkit-scrollbar:horizontal,
 [data-theme='dark'] .vpage-card:hover .vpage-card-title {
   color: #ef4444 !important;
 }
+
+/* Hide scrollbar sticks (slider stick) on all add card modals & picker lists */
+.atv-modal-card, .atv-modal-body, .atv-picker-list, .lap-modal-card, .lap-no-scrollbar, .acsv-modal-card, .acsv-modal-body, .afv-modal-card, .afv-modal-body, .afv-picker-list-viewport, .admin-modal-card, .admin-modal-body { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+.atv-modal-card::-webkit-scrollbar, .atv-modal-body::-webkit-scrollbar, .atv-picker-list::-webkit-scrollbar, .lap-modal-card::-webkit-scrollbar, .lap-no-scrollbar::-webkit-scrollbar, .acsv-modal-card::-webkit-scrollbar, .acsv-modal-body::-webkit-scrollbar, .afv-modal-card::-webkit-scrollbar, .afv-modal-body::-webkit-scrollbar, .afv-picker-list-viewport::-webkit-scrollbar, .admin-modal-card::-webkit-scrollbar, .admin-modal-body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }

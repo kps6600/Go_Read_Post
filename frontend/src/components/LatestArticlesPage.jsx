@@ -310,59 +310,16 @@ export default function LatestArticlesPage({
   const [isEditMode, setIsEditMode] = useState(true);
   const [liveArticles, setLiveArticles] = useState([]);
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState('create');
   const [pickerSearch, setPickerSearch] = useState('');
-  const [newCardForm, setNewCardForm] = useState({
-    title: '',
-    category: 'Startups',
-    summary: '',
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
-    author: 'Editorial Desk',
-    readTime: '4 min read'
-  });
 
   useEffect(() => {
-    const handleOpenAddCard = () => setIsAddCardModalOpen(true);
+    const handleOpenAddCard = () => {
+      setPickerSearch('');
+      setIsAddCardModalOpen(true);
+    };
     window.addEventListener('open:add-latest-card', handleOpenAddCard);
     return () => window.removeEventListener('open:add-latest-card', handleOpenAddCard);
   }, []);
-
-  const handleCreateNewCard = async (e) => {
-    e?.preventDefault();
-    if (!newCardForm.title.trim()) {
-      alert('Please enter an article title');
-      return;
-    }
-    const newArt = {
-      id: 'art_' + Date.now(),
-      title: newCardForm.title.trim(),
-      subtitle: newCardForm.summary.trim() || 'Exclusive reporting from GoReadPost newsroom.',
-      summary: newCardForm.summary.trim() || 'Exclusive reporting from GoReadPost newsroom.',
-      category: newCardForm.category || 'Startups',
-      categoryName: newCardForm.category || 'Startups',
-      categoryLabel: newCardForm.category || 'Startups',
-      authorName: newCardForm.author || 'Editorial Desk',
-      author: { name: newCardForm.author || 'Editorial Desk' },
-      image: newCardForm.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
-      publishedAt: new Date().toISOString(),
-      readTime: newCardForm.readTime || '4 min read',
-      isNewlyAdded: true
-    };
-    setLiveArticles(prev => [newArt, ...prev]);
-    try {
-      await ArticleService.createArticle(newArt);
-    } catch (err) {}
-    setIsAddCardModalOpen(false);
-    setNewCardForm({
-      title: '',
-      category: 'Startups',
-      summary: '',
-      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
-      author: 'Editorial Desk',
-      readTime: '4 min read'
-    });
-    if (onShowToast) onShowToast(`Card "${newArt.title}" added to Latest Articles!`);
-  };
 
   const handleAddExistingStoryToFeed = (story) => {
     const newArt = {
@@ -469,8 +426,6 @@ export default function LatestArticlesPage({
     if (onShowToast) onShowToast(`"${title}" removed from feed.`);
   };
 
-  const CARDS_PER_PAGE = 16;
-
   // Fetch live articles from MongoDB backend (both Article API and Story API)
   const fetchLiveArticles = async () => {
     try {
@@ -479,7 +434,7 @@ export default function LatestArticlesPage({
 
       // 1. Fetch from /api/articles (MongoDB Article collection)
       try {
-        const artRes = await ArticleService.getArticles({ limit: 100 });
+        const artRes = await ArticleService.getArticles({ limit: 300 });
         if (artRes && artRes.success && Array.isArray(artRes.data)) {
           artRes.data.forEach(item => {
             const normalized = normalizeMongoArticle(item);
@@ -495,7 +450,7 @@ export default function LatestArticlesPage({
 
       // 2. Fetch from /api/stories (MongoDB Story collection / synced cache)
       try {
-        const storyRes = await StoryService.getStories({ limit: 100 });
+        const storyRes = await StoryService.getStories({ limit: 300 });
         if (storyRes && Array.isArray(storyRes.data)) {
           storyRes.data.forEach(s => {
             const key = String(s._id || s.id || s.slug);
@@ -583,6 +538,17 @@ export default function LatestArticlesPage({
     if (!pageConfig?.sections) return null;
     return pageConfig.sections.find(s => s.type === 'newsletter' || s.id === 'latest_newsletter');
   }, [pageConfig]);
+
+  // Default to 20 cards per page (common multiple of 5 cols, 4 cols, 2 cols, and 1 col)
+  const CARDS_PER_PAGE = useMemo(() => {
+    if (feedSec?.data?.cardsPerPage && Number(feedSec.data.cardsPerPage) % 5 === 0) {
+      return Number(feedSec.data.cardsPerPage);
+    }
+    if (feedSec?.data?.limit && Number(feedSec.data.limit) % 5 === 0) {
+      return Number(feedSec.data.limit);
+    }
+    return 20;
+  }, [feedSec]);
 
   // Real content master pool (chronologically sorted so newly added articles are placed at the front)
   const pool = useMemo(() => {
@@ -733,9 +699,59 @@ export default function LatestArticlesPage({
   // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredStories.length / CARDS_PER_PAGE));
   const currentStories = useMemo(() => {
+    if (!filteredStories || filteredStories.length === 0) return [];
     const start = (currentPage - 1) * CARDS_PER_PAGE;
-    return filteredStories.slice(start, start + CARDS_PER_PAGE);
-  }, [filteredStories, currentPage]);
+    let slice = filteredStories.slice(start, start + CARDS_PER_PAGE);
+
+    if (slice.length > 0 && slice.length < CARDS_PER_PAGE && filteredStories.length >= CARDS_PER_PAGE) {
+      slice = filteredStories.slice(-CARDS_PER_PAGE);
+    }
+
+    // Fill remaining space so that every row in the 4-column grid is 100% full
+    if (slice.length > 0 && (slice.length % 4 !== 0 || slice.length < CARDS_PER_PAGE)) {
+      const res = [...slice];
+      const seen = new Set(res.map(s => String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase()));
+
+      for (const s of filteredStories) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      for (const s of pool) {
+        if (res.length >= CARDS_PER_PAGE && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      while (res.length % 4 !== 0 && pool.length > 0) {
+        let added = false;
+        for (const s of pool) {
+          if (!s) continue;
+          const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            res.push(s);
+            added = true;
+            if (res.length % 4 === 0) break;
+          }
+        }
+        if (!added) break;
+      }
+
+      return res;
+    }
+
+    return slice;
+  }, [filteredStories, currentPage, CARDS_PER_PAGE, pool]);
 
   const handleCategorySelect = (cat) => {
     setActiveCategory(cat);
@@ -886,37 +902,6 @@ export default function LatestArticlesPage({
           </div>
         </div>
       )}
-
-      {/* ── Page Header (Direct In-Place Editable) ── */}
-      <div className="lap-header" style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 className="lap-title" style={{ margin: 0 }}>
-          {pageConfig?.title || "Latest Articles"}
-        </h1>
-        {isAdminUser && (
-          <button
-            type="button"
-            className="lap-add-card-btn"
-            onClick={() => setIsAddCardModalOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              background: '#ea580c',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.85rem',
-              fontWeight: 750,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
-            }}
-          >
-            <Plus size={16} />
-            <span>+ Add New Card</span>
-          </button>
-        )}
-      </div>
 
       {/* ── Category Filter Pills Bar ── */}
       <div className="lap-category-pills-bar">
@@ -1248,22 +1233,23 @@ export default function LatestArticlesPage({
             onClick={e => e.stopPropagation()}
             style={{
               background: '#ffffff',
-              borderRadius: '20px',
-              width: '95vw',
-              maxWidth: modalTab === 'pick' ? '1280px' : '720px',
-              height: modalTab === 'pick' ? '88vh' : 'auto',
-              maxHeight: '90vh',
-              overflowY: 'auto',
+              borderRadius: '16px',
+              width: '92vw',
+              maxWidth: '680px',
+              maxHeight: '88vh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
               boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               border: '1px solid #e2e8f0',
-              transition: 'max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
             }}
           >
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>Add Article Card</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#64748b' }}>Insert a new card or pick from existing stories</p>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>Select Article Card</h3>
               </div>
               <button 
                 type="button" 
@@ -1274,261 +1260,89 @@ export default function LatestArticlesPage({
               </button>
             </div>
 
-            {/* Modal Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', padding: '0 1.5rem', gap: '1rem' }}>
-              <button
-                type="button"
-                onClick={() => setModalTab('create')}
-                style={{
-                  padding: '12px 4px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: modalTab === 'create' ? '2.5px solid #ea580c' : '2.5px solid transparent',
-                  color: modalTab === 'create' ? '#ea580c' : '#64748b',
-                  fontWeight: 750,
-                  fontSize: '0.88rem',
-                  cursor: 'pointer'
+            {/* Modal Body: Existing Articles Picker */}
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflow: 'hidden' }}>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Search articles by title or category..."
+                  value={pickerSearch}
+                  onChange={e => setPickerSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box'
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div 
+                className="lap-no-scrollbar"
+                style={{ 
+                  maxHeight: '58vh', 
+                  overflowY: 'auto', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
                 }}
               >
-                + Create New Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setModalTab('pick')}
-                style={{
-                  padding: '12px 4px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: modalTab === 'pick' ? '2.5px solid #ea580c' : '2.5px solid transparent',
-                  color: modalTab === 'pick' ? '#ea580c' : '#64748b',
-                  fontWeight: 750,
-                  fontSize: '0.88rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Choose from Existing ({availableExistingArticles.length})
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div style={{ padding: '1.5rem' }}>
-              {modalTab === 'create' ? (
-                <form onSubmit={handleCreateNewCard} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Article Title *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. AI Startup Secures Series A to Transform Telemetry"
-                      value={newCardForm.title}
-                      onChange={e => setNewCardForm(prev => ({ ...prev, title: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.9rem',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                        Category
-                      </label>
-                      <select
-                        value={newCardForm.category}
-                        onChange={e => setNewCardForm(prev => ({ ...prev, category: e.target.value }))}
+                {availableExistingArticles.length === 0 ? (
+                  <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>No articles match your search.</p>
+                ) : (
+                  availableExistingArticles.map(art => {
+                    const id = art._id || art.id || art.slug;
+                    const title = art.title || 'Untitled';
+                    const cat = art.categoryLabel || art.categoryName || art.category || 'Article';
+                    const img = art.image || art.coverImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
+                    return (
+                      <div 
+                        key={id}
                         style={{
-                          width: '100%',
-                          padding: '10px 12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 12px',
                           borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.88rem',
-                          boxSizing: 'border-box'
+                          border: '1px solid #e2e8f0',
+                          background: '#f8fafc',
+                          gap: '12px'
                         }}
                       >
-                        <option value="Startups">Startups</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Enterprise">Enterprise</option>
-                        <option value="SocialStory">SocialStory</option>
-                        <option value="SMBStory">SMBStory</option>
-                        <option value="Fintech">Fintech</option>
-                        <option value="AI & Robotics">AI & Robotics</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                        Author
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Editorial Desk"
-                        value={newCardForm.author}
-                        onChange={e => setNewCardForm(prev => ({ ...prev, author: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.88rem',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Summary / Excerpt
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Brief teaser summary about the story..."
-                      value={newCardForm.summary}
-                      onChange={e => setNewCardForm(prev => ({ ...prev, summary: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.88rem',
-                        boxSizing: 'border-box',
-                        resize: 'vertical'
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                      Thumbnail Image URL
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://images.unsplash.com/..."
-                      value={newCardForm.image}
-                      onChange={e => setNewCardForm(prev => ({ ...prev, image: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.88rem',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => setIsAddCardModalOpen(false)}
-                      style={{
-                        padding: '9px 18px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      style={{
-                        padding: '9px 22px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: '#ea580c',
-                        color: '#ffffff',
-                        fontWeight: 750,
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
-                      }}
-                    >
-                      + Add Card to Feed
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type="text"
-                      placeholder="Search existing articles by title or category..."
-                      value={pickerSearch}
-                      onChange={e => setPickerSearch(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.9rem',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ maxHeight: '62vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {availableExistingArticles.length === 0 ? (
-                      <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>No articles match your search.</p>
-                    ) : (
-                      availableExistingArticles.map(art => {
-                        const id = art._id || art.id || art.slug;
-                        const title = art.title || 'Untitled';
-                        const cat = art.categoryLabel || art.categoryName || art.category || 'Article';
-                        const img = art.image || art.coverImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
-                        return (
-                          <div 
-                            key={id}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              border: '1px solid #e2e8f0',
-                              background: '#f8fafc',
-                              gap: '12px'
-                            }}
-                          >
-                            <img src={img} alt="" style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover' }} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {title}
-                              </h4>
-                              <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 700 }}>{cat}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleAddExistingStoryToFeed(art)}
-                              style={{
-                                padding: '6px 14px',
-                                borderRadius: '6px',
-                                border: 'none',
-                                background: '#ea580c',
-                                color: '#ffffff',
-                                fontSize: '0.78rem',
-                                fontWeight: 750,
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              + Add
-                            </button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              )}
+                        <img src={img} alt="" style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover' }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {title}
+                          </h4>
+                          <span style={{ fontSize: '0.74rem', color: '#ea580c', fontWeight: 700 }}>{cat}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAddExistingStoryToFeed(art)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: '#ea580c',
+                            color: '#ffffff',
+                            fontSize: '0.78rem',
+                            fontWeight: 750,
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Select
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
         </div>,

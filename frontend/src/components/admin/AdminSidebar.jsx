@@ -43,11 +43,6 @@ export const ADMIN_NAV_GROUPS = [
   {
     group: 'SITE ARCHITECTURE & CMS',
     items: [
-      { id: 'homepage', path: '/admin/homepage', label: 'Homepage Studio', icon: Sparkles, badge: 'LIVE' },
-      { id: 'category', path: '/admin/category', label: 'Category Page Studio', icon: Layers, badge: 'LIVE' },
-      { id: 'contact', path: '/admin/pages/contact/edit', label: 'Contact Us Studio', icon: Mail, badge: 'LIVE' },
-      { id: 'about', path: '/admin/about', label: 'About Us Studio', icon: Compass, badge: 'LIVE' },
-      { id: 'advertise', path: '/admin/pages/page_advertise/edit', label: 'Advertise With Us', icon: Newspaper, badge: 'LIVE' },
       { id: 'pages', path: '/admin/pages', label: 'Pages Manager', icon: FileText },
       { id: 'navigation', path: '/admin/navigation', label: 'Navigation CMS', icon: MenuIcon },
       { id: 'footer', path: '/admin/footer', label: 'Footer CMS', icon: PanelBottom },

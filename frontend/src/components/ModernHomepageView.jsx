@@ -450,15 +450,15 @@ export default function ModernHomepageView({
       }
     };
 
-    // 1. Curated section articles from admin
-    if (sec?.data?.articles && Array.isArray(sec.data.articles) && sec.data.articles.length > 0) {
-      return sec.data.articles.filter(Boolean);
+    // 1. Curated section articles from admin (add first; backfill up to limit if fewer than 4)
+    if (sec?.data?.articles && Array.isArray(sec.data.articles)) {
+      addArticles(sec.data.articles);
     }
-    if (sec?.customConfig?.articles && Array.isArray(sec.customConfig.articles) && sec.customConfig.articles.length > 0) {
-      return sec.customConfig.articles.filter(Boolean);
+    if (result.length < limit && sec?.customConfig?.articles && Array.isArray(sec.customConfig.articles)) {
+      addArticles(sec.customConfig.articles);
     }
-    if (sec?.articles && Array.isArray(sec.articles) && sec.articles.length > 0) {
-      return sec.articles.filter(Boolean);
+    if (result.length < limit && sec?.articles && Array.isArray(sec.articles)) {
+      addArticles(sec.articles);
     }
 
     // 2. Curated article IDs

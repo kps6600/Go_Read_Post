@@ -3331,9 +3331,10 @@
           "heading": "Latest Articles",
           "subtitle": "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
           "category": "",
-          "limit": 16,
+          "limit": 20,
           "viewAllText": "Load More Stories",
-          "viewAllUrl": "/latest"
+          "viewAllUrl": "/latest",
+          "cardsPerPage": 20
         }
       },
       {
@@ -3357,7 +3358,7 @@
   {
     "id": "category",
     "title": "Category Page & Desks",
-    "slug": "categories",
+    "slug": "category",
     "brand": "GoReadPost",
     "description": "Comprehensive reporting, strategic perspectives, and startup breakdowns across all editorial categories and desks.",
     "heroHeadline": "Curated Reporting Across All Editorial Verticals",
@@ -3407,14 +3408,15 @@
           "heading": "All Editorial Desks",
           "subtitle": "Discover high-impact stories, breaking scoops, and founder journeys across curated verticals",
           "layoutMode": "grid",
-          "cardsPerPage": 10,
+          "cardsPerPage": 12,
           "defaultSort": "latest",
           "showPills": true,
           "showHero": true,
           "curation": {}
         }
       }
-    ]
+    ],
+    "route": "/category"
   },
   {
     "id": "contact",

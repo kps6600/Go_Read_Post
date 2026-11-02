@@ -3,7 +3,7 @@ import {
   ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Save, Eye, EyeOff, Layers, Sparkles, 
   RefreshCw, Check, CheckCircle2, AlertCircle, Plus, Trash2, 
   Pin, Edit2, Edit3, Search, X, Monitor, Tablet, Smartphone, 
-  ExternalLink, Globe, Sliders, Image as ImageIcon, BookOpen, Clock
+  ExternalLink, Globe, Sliders, Image as ImageIcon, BookOpen, Clock, Heart, Flame
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
 import { ArticleService } from '../../services/articleService';
@@ -14,6 +14,44 @@ import { ALL_ENTERPRISE_STORIES } from '../../data/enterpriseStoryData';
 import { ALL_SMB_STORIES } from '../../data/smbStoryData';
 import { CORE_CATEGORIES } from '../CategoryContentPage';
 import './AdminCategoryStudioView.css';
+
+// Slug to Category Display Name mapping
+export const CATEGORY_SLUG_MAP = {
+  all: 'All',
+  startups: 'Startups',
+  technology: 'Technology',
+  ai: 'AI & DeepTech',
+  'ai-story': 'AI & DeepTech',
+  enterprise: 'Enterprise',
+  fintech: 'FinTech',
+  smbstory: 'SMB & D2C',
+  smb: 'SMB & D2C',
+  'smb-story': 'SMB & D2C',
+  herstory: 'HerStory',
+  'her-story': 'HerStory',
+  socialstory: 'SocialStory',
+  'social-story': 'SocialStory',
+  leadership: 'Leadership'
+};
+
+export const resolveCategoryNameFromSlug = (slugOrPath) => {
+  if (!slugOrPath) return 'All';
+  const clean = String(slugOrPath).toLowerCase().replace(/^\/+/, '').split('?')[0];
+  const lastPart = clean.split('/').pop() || '';
+  if (!lastPart || lastPart === 'category' || lastPart === 'categories' || lastPart === 'all') return 'All';
+  if (CATEGORY_SLUG_MAP[lastPart]) return CATEGORY_SLUG_MAP[lastPart];
+  const found = CORE_CATEGORIES.find(c => 
+    c.key.toLowerCase() === lastPart || 
+    c.name.toLowerCase() === lastPart
+  );
+  return found ? found.name : 'All';
+};
+
+export const resolveSlugFromCategoryName = (name) => {
+  if (!name || name === 'All') return '';
+  const item = CORE_CATEGORIES.find(c => c.name === name);
+  return item ? item.key : name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+};
 
 // Normalize article object
 const normalizeStory = (s, idx = 0) => {
@@ -48,7 +86,13 @@ const normalizeStory = (s, idx = 0) => {
   };
 };
 
-export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStudioView = false }) {
+export default function AdminCategoryStudioView({ 
+  onShowToast, 
+  onNavigate, 
+  isStudioView = false,
+  initialCategory = null,
+  currentPath = ''
+}) {
   // Loading & saving states
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,8 +102,35 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
   const [allArticles, setAllArticles] = useState([]);
   const [page, setPage] = useState(null);
 
-  // Active Category filter on the live page
-  const [activeCategory, setActiveCategory] = useState('All');
+  // Active Category filter on the live page - synced with URI
+  const [activeCategory, setActiveCategory] = useState(() => {
+    if (initialCategory) return resolveCategoryNameFromSlug(initialCategory);
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/category')) {
+      return resolveCategoryNameFromSlug(window.location.pathname);
+    }
+    return 'All';
+  });
+
+  // Keep active category synced if route/prop updates externally
+  useEffect(() => {
+    if (initialCategory) {
+      const resolved = resolveCategoryNameFromSlug(initialCategory);
+      if (resolved && resolved !== activeCategory) {
+        setActiveCategory(resolved);
+      }
+    }
+  }, [initialCategory]);
+
+  // Push updated URI in browser address bar on category tab click
+  const handleSelectCategoryTab = (catName) => {
+    setActiveCategory(catName);
+    const slug = resolveSlugFromCategoryName(catName);
+    const newUri = slug ? `/admin/category/${slug}` : '/admin/category';
+    try {
+      window.history.pushState(null, '', newUri);
+    } catch (e) {}
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Layout & Feed Settings
@@ -85,6 +156,20 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
   // Load category page configuration & articles
   useEffect(() => {
     loadCategoryStudioData();
+  }, []);
+
+  // Global listener from Top Bar "Add Card"
+  useEffect(() => {
+    const handleOpenAddCard = () => {
+      setPickerSearch('');
+      setPickerModal({ isOpen: true, targetIndex: null });
+    };
+    window.addEventListener('open:add-category-card', handleOpenAddCard);
+    window.addEventListener('open:add-card', handleOpenAddCard);
+    return () => {
+      window.removeEventListener('open:add-category-card', handleOpenAddCard);
+      window.removeEventListener('open:add-card', handleOpenAddCard);
+    };
   }, []);
 
   const loadCategoryStudioData = async () => {
@@ -412,29 +497,6 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
         {/* ── SECTION A: Live Top Hero Spotlight Banner ── */}
         {showHero ? (
           <div className="acsv-hero-wrapper">
-            {/* Top-Right Floating Admin Edit Controls */}
-            <div className="acsv-hero-admin-controls">
-              <button
-                type="button"
-                className="acsv-hero-action-btn"
-                onClick={() => setHeroModalOpen(true)}
-                title="Edit headline, subhead, badge and image"
-              >
-                <Edit2 size={13} />
-                <span>Edit Hero Spotlight</span>
-              </button>
-
-              <button
-                type="button"
-                className="acsv-hero-action-btn"
-                onClick={() => setShowHero(false)}
-                title="Hide hero banner from page"
-              >
-                <EyeOff size={13} />
-                <span>Hide</span>
-              </button>
-            </div>
-
             {/* Live Hero Banner Render */}
             <div 
               className="acsv-hero-live-card"
@@ -464,12 +526,7 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
                     </div>
                   </div>
 
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px' }}>
-                    <span className="acsv-hero-badge" style={{ margin: 0 }}>
-                      <Sparkles size={13} style={{ display: 'inline', marginRight: '4px' }} />
-                      {heroBadge}
-                    </span>
-
+                  <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                     <button type="button" className="acsv-hero-cta-btn">
                       <span>{heroBtnText}</span>
                       <ArrowRight size={16} />
@@ -512,17 +569,17 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
             <button
               type="button"
               className={`acsv-desk-pill ${activeCategory === 'All' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('All')}
+              onClick={() => handleSelectCategoryTab('All')}
             >
-              <span>All Desks</span>
+              <span>All</span>
             </button>
 
-            {CORE_CATEGORIES.map(cat => (
+            {CORE_CATEGORIES.filter(cat => cat.key !== 'All' && cat.name !== 'All').map(cat => (
               <button
                 key={cat.key}
                 type="button"
                 className={`acsv-desk-pill ${activeCategory === cat.name ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.name)}
+                onClick={() => handleSelectCategoryTab(cat.name)}
               >
                 <span>{cat.name}</span>
               </button>
@@ -549,16 +606,6 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
                 </button>
               )}
             </div>
-
-            <button
-              type="button"
-              className="acsv-btn-primary"
-              onClick={() => setPickerModal({ isOpen: true, targetIndex: null })}
-              style={{ padding: '7px 16px', fontSize: '0.84rem' }}
-            >
-              <Plus size={15} />
-              <span>Add Story</span>
-            </button>
           </div>
         </div>
 
@@ -591,6 +638,9 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
               const masterIdx = currentCategoryStories.findIndex(s => (s.id || s._id || s.slug) === (story.id || story._id || story.slug));
               const targetIdx = masterIdx >= 0 ? masterIdx : idx;
 
+              const storyViews = typeof story.views === 'number' ? story.views : (typeof story.claps === 'number' ? story.claps * 4 : 520);
+              const storyLikes = typeof story.likes === 'number' ? story.likes : (typeof story.claps === 'number' ? story.claps : Math.max(12, Math.round(storyViews * 0.12)));
+
               return (
                 <div key={story.id || idx} className="acsv-editorial-card">
                   {/* Top Admin Control Bar on the card */}
@@ -614,15 +664,6 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
                     <div className="acsv-card-btn-group">
                       <button
                         type="button"
-                        className={`acsv-action-icon-btn ${story.isPinned ? 'pin-active' : ''}`}
-                        onClick={() => handleTogglePin(targetIdx)}
-                        title={story.isPinned ? "Unpin story" : "Pin to top of desk"}
-                      >
-                        <Pin size={12} />
-                      </button>
-
-                      <button
-                        type="button"
                         className="acsv-action-icon-btn"
                         onClick={() => handleMoveArticle(targetIdx, 'up')}
                         disabled={targetIdx === 0}
@@ -639,24 +680,6 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
                         title="Move Down / Later"
                       >
                         <ArrowRight size={12} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="acsv-action-icon-btn"
-                        onClick={() => setPickerModal({ isOpen: true, targetIndex: targetIdx })}
-                        title="Replace this story"
-                      >
-                        <RefreshCw size={12} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="acsv-action-icon-btn"
-                        onClick={() => setEditModal({ isOpen: true, index: targetIdx, data: { ...story } })}
-                        title="Edit Story Details"
-                      >
-                        <Edit2 size={12} />
                       </button>
 
                       <button
@@ -679,17 +702,32 @@ export default function AdminCategoryStudioView({ onShowToast, onNavigate, isStu
                         className="acsv-card-grid-thumb"
                         onError={e => { e.target.src = 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&fit=crop'; }}
                       />
-                      <span className="acsv-card-cat-badge">
+                      <span 
+                        className="acsv-card-cat-badge"
+                        style={{ background: 'transparent', color: '#ea580c', fontWeight: 800, padding: 0 }}
+                      >
                         {story.categoryName || story.category}
                       </span>
                     </div>
 
                     <div className="acsv-card-grid-body">
-                      <div className="acsv-card-meta-row">
-                        <Clock size={11} />
-                        <span>{story.date}</span>
-                        <span>•</span>
-                        <span>{story.readTime}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                        <div className="acsv-card-meta-row" style={{ margin: 0 }}>
+                          <Clock size={11} />
+                          <span>{story.date}</span>
+                          <span>•</span>
+                          <span>{story.readTime}</span>
+                        </div>
+
+                        <div style={{ fontSize: '0.72rem', fontWeight: 750, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#e11d48' }}>
+                            <Heart size={11} fill="#e11d48" /> {storyLikes.toLocaleString()}
+                          </span>
+                          <span style={{ color: '#cbd5e1' }}>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#ea580c' }}>
+                            <Flame size={11} fill="#ea580c" /> {storyViews.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
 
                       <h3 className="acsv-card-title">

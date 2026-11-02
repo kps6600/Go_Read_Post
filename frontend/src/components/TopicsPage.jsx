@@ -460,9 +460,55 @@ export default function TopicsPage({
   // Pagination calculation
   const totalPages = Math.ceil(filteredFeedArticles.length / articlesPerPage) || 1;
   const paginatedArticles = useMemo(() => {
+    if (!filteredFeedArticles || filteredFeedArticles.length === 0) return [];
     const start = (currentPage - 1) * articlesPerPage;
-    return filteredFeedArticles.slice(start, start + articlesPerPage);
-  }, [filteredFeedArticles, currentPage, articlesPerPage]);
+    let slice = filteredFeedArticles.slice(start, start + articlesPerPage);
+
+    // Fill remaining space so that every row in the 4-column grid is 100% full
+    if (slice.length > 0 && (slice.length % 4 !== 0 || slice.length < articlesPerPage)) {
+      const res = [...slice];
+      const seen = new Set(res.map(s => String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase()));
+
+      for (const s of filteredFeedArticles) {
+        if (res.length >= articlesPerPage && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      for (const s of allArticles) {
+        if (res.length >= articlesPerPage && res.length % 4 === 0) break;
+        if (!s) continue;
+        const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(s);
+        }
+      }
+
+      while (res.length % 4 !== 0 && allArticles.length > 0) {
+        let added = false;
+        for (const s of allArticles) {
+          if (!s) continue;
+          const key = String(s._id || s.id || s.slug || s.title || "").trim().toLowerCase();
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            res.push(s);
+            added = true;
+            if (res.length % 4 === 0) break;
+          }
+        }
+        if (!added) break;
+      }
+
+      return res;
+    }
+
+    return slice;
+  }, [filteredFeedArticles, currentPage, articlesPerPage, allArticles]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -479,14 +525,7 @@ export default function TopicsPage({
     return (
       <div className="top-page-wrapper">
 
-        {/* Topic Header Card */}
-        {activeTopic && (
-          <div className="top-single-header">
-            <h1 className="top-single-title">
-              {activeTopic.name}
-            </h1>
-          </div>
-        )}
+        {/* Topic Content */}
 
         {/* Single Topic Articles Grid */}
         {singleLoading ? (

@@ -403,9 +403,26 @@ function LiveGenericSectionStudio({
   const frontendArticles = useMemo(() => {
     const limit = maxArticlesFit;
 
-    // 1. If custom curated articles are set in data.articles, use exactly those curated articles (reflecting deletions and additions immediately)
+    // 1. If custom curated articles are set in data.articles, use curated articles and backfill up to limit so 4 cards are always shown
     if (Array.isArray(data.articles)) {
-      return data.articles.filter(Boolean).slice(0, maxArticlesFit);
+      const curated = data.articles.filter(Boolean);
+      if (curated.length >= limit) {
+        return curated.slice(0, limit);
+      }
+      const res = [...curated];
+      const seen = new Set(curated.map(c => String(c.id || c._id || c.slug || c.title || '').trim().toLowerCase()));
+      const fillSource = secType === 'trending'
+        ? [...pool.filter(s => s && (s.isTrending || s.trending || s.tag === 'TRENDING' || s.tag === 'POPULAR' || s.tag === 'VIRAL')), ...pool]
+        : pool;
+      for (const b of fillSource) {
+        if (res.length >= limit) break;
+        const key = String(b.id || b._id || b.slug || b.title || '').trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          res.push(b);
+        }
+      }
+      return res.slice(0, limit);
     }
     
     // 2. Otherwise compute default frontend pool matching ModernHomepageView

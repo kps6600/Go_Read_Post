@@ -44,6 +44,25 @@ export default function AdminAboutView({ onShowToast, onNavigate, isStudioView =
     loadAboutPage();
   }, []);
 
+  // Global listener from Top Bar "Add Card"
+  useEffect(() => {
+    const handleOpenAddCard = () => {
+      setActiveTab('team');
+      setMemberModal({
+        isOpen: true,
+        isCreate: true,
+        index: null,
+        data: { name: '', role: '', bio: '', image: '', linkedin: '', github: '', website: '', community: '' }
+      });
+    };
+    window.addEventListener('open:add-about-card', handleOpenAddCard);
+    window.addEventListener('open:add-card', handleOpenAddCard);
+    return () => {
+      window.removeEventListener('open:add-about-card', handleOpenAddCard);
+      window.removeEventListener('open:add-card', handleOpenAddCard);
+    };
+  }, []);
+
   const loadAboutPage = async () => {
     setLoading(true);
     try {

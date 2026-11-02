@@ -23,36 +23,32 @@ export const identifyEditablePage = (page) => {
 };
 
 export const CANONICAL_FRONTEND_PAGES = [
-  // 1. Core Platform Pages
+  // 1. Core Frontline Editorial Verticals & Desks
   { id: 'home', title: 'Homepage', slug: '', route: '/', status: 'published', order: 1, sectionsCount: 12 },
   { id: 'latest', title: 'Latest Articles', slug: 'latest', route: '/latest', status: 'published', order: 2, sectionsCount: 4 },
   { id: 'trending', title: 'Trending Stories', slug: 'trending', route: '/trending', status: 'published', order: 3, sectionsCount: 4 },
-  { id: 'category', title: 'Category Page & Desks', slug: 'categories', route: '/categories', status: 'published', order: 4, sectionsCount: 2 },
-  { id: 'topics', title: 'Topics & Tags Directory', slug: 'topics', route: '/topics', status: 'published', order: 5, sectionsCount: 3 },
-  { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 6, sectionsCount: 5 },
-  { id: 'newsletter', title: 'Newsletter Dispatches', slug: 'newsletter', route: '/newsletter', status: 'published', order: 7, sectionsCount: 3 },
-  { id: 'search', title: 'Search & Archive Discovery', slug: 'search', route: '/search', status: 'published', order: 8, sectionsCount: 2 },
+  { id: 'category', title: 'Category Page & Desks', slug: 'category', route: '/category', status: 'published', order: 4, sectionsCount: 2 },
+  { id: 'startups', title: 'Startups & Capital Desk', slug: 'category/startups', route: '/category/startups', status: 'published', order: 5, sectionsCount: 2 },
+  { id: 'technology', title: 'Technology & Cloud Desk', slug: 'category/technology', route: '/category/technology', status: 'published', order: 6, sectionsCount: 2 },
+  { id: 'ai-story', title: 'AI & DeepTech (AI Story)', slug: 'category/ai-story', route: '/category/ai-story', status: 'published', order: 7, sectionsCount: 2 },
+  { id: 'enterprise', title: 'Enterprise & IT Beat', slug: 'category/enterprise', route: '/category/enterprise', status: 'published', order: 8, sectionsCount: 2 },
+  { id: 'fintech', title: 'FinTech & Capital Beat', slug: 'category/fintech', route: '/category/fintech', status: 'published', order: 9, sectionsCount: 2 },
+  { id: 'smbstory', title: 'SMBStory (MSME, Retail & D2C)', slug: 'category/smbstory', route: '/category/smbstory', status: 'published', order: 10, sectionsCount: 2 },
+  { id: 'her-story', title: 'HerStory (Women Leaders)', slug: 'category/her-story', route: '/category/her-story', status: 'published', order: 11, sectionsCount: 2 },
+  { id: 'social-story', title: 'SocialStory (Impact & Climate)', slug: 'category/social-story', route: '/category/social-story', status: 'published', order: 12, sectionsCount: 2 },
+  { id: 'leadership', title: 'Leadership & Founder Playbooks', slug: 'category/leadership', route: '/category/leadership', status: 'published', order: 13, sectionsCount: 2 },
 
-  // 2. Specialty Hubs & Curated Brands
-  { id: 'ai-story', title: 'AI & DeepTech (AI Story)', slug: 'ai-story', route: '/ai-story', status: 'published', order: 9, sectionsCount: 3 },
-  { id: 'her-story', title: 'HerStory', slug: 'her-story', route: '/her-story', status: 'published', order: 10, sectionsCount: 3 },
-  { id: 'social-story', title: 'SocialStory', slug: 'social-story', route: '/social-story', status: 'published', order: 11, sectionsCount: 3 },
-  { id: 'smbstory', title: 'SMBStory', slug: 'smbstory', route: '/smbstory', status: 'published', order: 12, sectionsCount: 3 },
-  { id: 'enterprise', title: 'Enterprise Story', slug: 'enterprise', route: '/enterprise', status: 'published', order: 13, sectionsCount: 3 },
-  { id: 'founder-first', title: 'Founder First Playbooks', slug: 'founder-first', route: '/founder-first', status: 'published', order: 14, sectionsCount: 2 },
-  { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 15, sectionsCount: 2 },
-  { id: 'techsparks', title: 'TechSparks Summit', slug: 'techsparks', route: '/techsparks', status: 'published', order: 16, sectionsCount: 2 },
+  // 2. Discoverability & Multi-Media Dispatches
+  { id: 'topics', title: 'Topics & Tags Directory', slug: 'topics', route: '/topics', status: 'published', order: 14, sectionsCount: 3 },
+  { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 15, sectionsCount: 5 },
+  { id: 'newsletter', title: 'Newsletter Dispatches', slug: 'newsletter', route: '/newsletter', status: 'published', order: 16, sectionsCount: 3 },
+  { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 17, sectionsCount: 2 },
 
   // 3. Company, Trust & Information Pages
-  { id: 'about', title: 'About Us', slug: 'about', route: '/about', status: 'published', order: 17, sectionsCount: 3 },
-  { id: 'contact', title: 'Contact Us', slug: 'contact', route: '/contact', status: 'published', order: 18, sectionsCount: 4 },
-  { id: 'advertise', title: 'Advertise With Us', slug: 'advertise', route: '/advertise', status: 'published', order: 19, sectionsCount: 3 },
-  { id: 'editorial-team', title: 'Editorial Team & Masthead', slug: 'editorial-team', route: '/editorial-team', status: 'published', order: 20, sectionsCount: 3 },
-  { id: 'careers', title: 'Careers', slug: 'careers', route: '/careers', status: 'published', order: 21, sectionsCount: 2 },
-  { id: 'pitch', title: 'Pitch Story', slug: 'pitch', route: '/pitch', status: 'published', order: 22, sectionsCount: 2 },
-  { id: 'privacy', title: 'Privacy Policy', slug: 'privacy', route: '/privacy', status: 'published', order: 23, sectionsCount: 1 },
-  { id: 'terms', title: 'Terms of Service', slug: 'terms', route: '/terms', status: 'published', order: 24, sectionsCount: 1 },
-  { id: 'disclaimer', title: 'Disclaimer', slug: 'disclaimer', route: '/disclaimer', status: 'published', order: 25, sectionsCount: 1 }
+  { id: 'about', title: 'About Us', slug: 'about', route: '/about', status: 'published', order: 18, sectionsCount: 3 },
+  { id: 'contact', title: 'Contact Us', slug: 'contact', route: '/contact', status: 'published', order: 19, sectionsCount: 4 },
+  { id: 'advertise', title: 'Advertise With Us', slug: 'advertise', route: '/advertise', status: 'published', order: 20, sectionsCount: 3 },
+  { id: 'pitch', title: 'Pitch Story', slug: 'pitch', route: '/pitch', status: 'published', order: 21, sectionsCount: 2 }
 ];
 
 export default function AdminPagesView({ onNavigate, onShowToast, filterCategory }) {
@@ -227,8 +223,18 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
       const handleEditPage = (page) => {
     if (!page) return;
     const isHome = page.slug === '' || page.slug === '/' || page.id === 'home' || page.id === 'homepage' || (page.title && page.title.toLowerCase().startsWith('home'));
-    const targetId = isHome ? 'home' : (page.slug ? page.slug.replace(/^\/+/, '') : (page.id || page._id));
-    const targetUrl = `/admin/pages/${targetId}/edit`;
+    let targetUrl;
+    if (isHome) {
+      targetUrl = '/admin/pages/home/edit';
+    } else if (page.slug && page.slug.startsWith('category/')) {
+      const catSlug = page.slug.replace('category/', '');
+      targetUrl = `/admin/category/${catSlug}`;
+    } else if (page.id === 'category' || page.slug === 'category' || page.slug === 'categories') {
+      targetUrl = '/admin/category';
+    } else {
+      const targetId = page.slug ? page.slug.replace(/^\/+/, '') : (page.id || page._id);
+      targetUrl = `/admin/pages/${targetId}/edit`;
+    }
     if (onNavigate) {
       onNavigate(targetUrl);
     } else {
