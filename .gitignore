@@ -37,3 +37,7 @@ Thumbs.db
 # Temporary / scratch files
 scratch/
 */scratch/
+uploads/
+backend/uploads/
+!backend/uploads/.gitkeep
+
