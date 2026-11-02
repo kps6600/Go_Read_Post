@@ -42,15 +42,14 @@ export const CANONICAL_FRONTEND_PAGES = [
   { id: 'leadership', title: 'Leadership & Founder Playbooks', slug: 'category/leadership', route: '/category/leadership', status: 'published', order: 13, sectionsCount: 2 },
 
   // 2. Discoverability & Multi-Media Dispatches
-  { id: 'topics', title: 'Topics & Tags Directory', slug: 'topics', route: '/topics', status: 'published', order: 14, sectionsCount: 3 },
-  { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 15, sectionsCount: 5 },
-  { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 17, sectionsCount: 2 },
+  { id: 'videos', title: 'Videos (YS TV)', slug: 'videos', route: '/videos', status: 'published', order: 14, sectionsCount: 5 },
+  { id: 'hindi', title: 'YS Hindi', slug: 'hindi', route: '/hindi', status: 'published', order: 15, sectionsCount: 2 },
 
   // 4. Company, Trust & Information Pages
-  { id: 'about', title: 'About Us', slug: 'about', route: '/about', status: 'published', order: 18, sectionsCount: 3 },
-  { id: 'contact', title: 'Contact Us', slug: 'contact', route: '/contact', status: 'published', order: 19, sectionsCount: 4 },
-  { id: 'advertise', title: 'Advertise With Us', slug: 'advertise', route: '/advertise', status: 'published', order: 20, sectionsCount: 3 },
-  { id: 'pitch', title: 'Pitch Story', slug: 'pitch', route: '/pitch', status: 'published', order: 21, sectionsCount: 2 }
+  { id: 'about', title: 'About Us', slug: 'about', route: '/about', status: 'published', order: 16, sectionsCount: 3 },
+  { id: 'contact', title: 'Contact Us', slug: 'contact', route: '/contact', status: 'published', order: 17, sectionsCount: 4 },
+  { id: 'advertise', title: 'Advertise With Us', slug: 'advertise', route: '/advertise', status: 'published', order: 18, sectionsCount: 3 },
+  { id: 'pitch', title: 'Pitch Story', slug: 'pitch', route: '/pitch', status: 'published', order: 19, sectionsCount: 2 }
 ];
 
 export default function AdminPagesView({ onNavigate, onShowToast, filterCategory }) {

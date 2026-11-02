@@ -23,7 +23,6 @@ import HerStoryPage from '../HerStoryPage';
 import SocialStoryPage from '../SocialStoryPage';
 import SMBStoryPage from '../SMBStoryPage';
 import EnterpriseStoryPage from '../EnterpriseStoryPage';
-import TopicsPage from '../TopicsPage';
 import VideosPage from '../VideosPage';
 import AdminVideosStudioView from './AdminVideosStudioView';
 import { ALL_STORIES } from '../../data/storiesData';
@@ -1050,9 +1049,6 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
     }
     if (normId === 'enterprise' || normSlug === 'enterprise') {
       return <EnterpriseStoryPage isStudioView={true} onShowToast={onShowToast} />;
-    }
-    if (normId === 'topics' || normSlug === 'topics') {
-      return <TopicsPage isStudioView={true} onShowToast={onShowToast} />;
     }
     if (normId === 'videos' || normSlug === 'videos') {
       return (
