@@ -486,73 +486,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
         </div>
       </div>
 
-      {/* ── Page Types Filter Tab Bar ── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '1rem',
-        overflowX: 'auto',
-        whiteSpace: 'nowrap',
-        paddingBottom: '2px'
-      }}>
-        {[
-          { key: 'all', label: 'All Pages', count: pages.length },
-          { key: 'category', label: 'Category Desks', count: categoryPagesCount },
-          { key: 'core', label: 'Core Editorial', count: corePagesCount },
-          { key: 'company', label: 'Company & Info', count: companyPagesCount }
-        ].map(tab => {
-          const isSelected = typeFilter === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => { setTypeFilter(tab.key); }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                fontWeight: isSelected ? '800' : '600',
-                color: isSelected ? 'var(--brand-primary, #dc2626)' : '#64748b',
-                borderBottom: isSelected ? '2px solid var(--brand-primary, #dc2626)' : '2px solid transparent',
-                fontSize: '0.88rem',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>{tab.label}</span>
-              <span style={{
-                background: isSelected ? '#fee2e2' : '#f1f5f9',
-                color: isSelected ? '#dc2626' : '#64748b',
-                padding: '2px 7px',
-                borderRadius: '10px',
-                fontSize: '0.72rem',
-                fontWeight: 700
-              }}>
-                {tab.count}
-              </span>
-              {tab.badge && (
-                <span style={{
-                  background: '#10b981',
-                  color: '#ffffff',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  fontSize: '0.64rem',
-                  fontWeight: 800
-                }}>
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Search, Filters & Controls Bar ── */}
+      {/* ── Search, Filters & Controls Bar ── */}
       <div style={{
         background: '#ffffff',
         padding: '0.85rem 1.15rem',
