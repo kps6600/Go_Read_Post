@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { 
-  X, Check, Sparkles, Plus, Trash2, 
+import {
+  X, Check, Sparkles, Plus, Trash2,
   ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, Layers, Eye, EyeOff,
@@ -35,20 +35,20 @@ const formatForHeroSlide = (item) => {
   const id = item._id || item.id || `slide-${Date.now()}`;
   const title = item.title || 'Featured Story';
   const isVideo = item.itemType === 'video' || item.type === 'video' || !!item.duration || !!item.youtubeEmbedUrl;
-  const excerpt = item.summary || item.excerpt || item.description || 
-    (typeof item.content === 'string' ? item.content.slice(0, 160) : '') || 
+  const excerpt = item.summary || item.excerpt || item.description ||
+    (typeof item.content === 'string' ? item.content.slice(0, 160) : '') ||
     'Comprehensive reporting on innovation and founder journeys.';
   const category = extractCategory(item) || (isVideo ? 'Video' : 'Startups');
   const image = item.image || item.coverImage || item.bannerImage || item.fallbackImage || item.thumbnail ||
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1600&auto=format&fit=crop&q=80';
-  const authorName = typeof item.author === 'object' 
-    ? (item.author?.name || 'Editorial Bureau') 
+  const authorName = typeof item.author === 'object'
+    ? (item.author?.name || 'Editorial Bureau')
     : (item.author || item.host || item.guest || 'Editorial Bureau');
-  const authorAvatar = item.author?.avatar || item.authorAvatar || item.guestAvatar || 
+  const authorAvatar = item.author?.avatar || item.authorAvatar || item.guestAvatar ||
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
   const date = item.publishedAt || item.date || item.formattedDate || 'Today';
-  const readTime = isVideo 
-    ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video') 
+  const readTime = isVideo
+    ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video')
     : (item.readTime || (item.readingTime ? `${item.readingTime} min read` : '4 min read'));
   const slug = item.slug || id;
   const link = isVideo ? `/videos/${slug}` : `/stories/${slug}`;
@@ -76,7 +76,7 @@ const formatForPopularPost = (item) => {
   const id = item._id || item.id || `popular-${Date.now()}`;
   const title = item.title || 'Popular Story';
   const isVideo = item.itemType === 'video' || item.type === 'video' || !!item.duration || !!item.youtubeEmbedUrl;
-  const image = item.image || item.coverImage || item.fallbackImage || item.thumbnail || 
+  const image = item.image || item.coverImage || item.fallbackImage || item.thumbnail ||
     'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
   const readTime = isVideo
     ? (item.duration ? `🎬 ${item.duration}` : '🎬 Video')
@@ -103,10 +103,10 @@ const formatForPopularPost = (item) => {
   };
 };
 
-export default function LiveBannerEditor({ 
-  section, 
-  isOpen, 
-  onClose, 
+export default function LiveBannerEditor({
+  section,
+  isOpen,
+  onClose,
   onSave,
   stories = [],
   pageId = null,
@@ -188,9 +188,9 @@ export default function LiveBannerEditor({
 
   const combinedPool = useMemo(() => {
     const arts = pool.map(a => ({ ...a, itemType: 'article' }));
-    const vids = videoPool.map(v => ({ 
-      ...v, 
-      itemType: 'video', 
+    const vids = videoPool.map(v => ({
+      ...v,
+      itemType: 'video',
       categoryLabel: v.categoryLabel || v.series || 'Video',
       category: v.categoryLabel || v.series || 'Video'
     }));
@@ -230,7 +230,7 @@ export default function LiveBannerEditor({
   const availableCategories = useMemo(() => {
     const cats = new Set(['All']);
     const targetPool = pickerContentType === 'articles' ? pool : (pickerContentType === 'videos' ? videoPool : combinedPool);
-    
+
     targetPool.forEach(a => {
       const c = extractCategory(a);
       if (c && typeof c === 'string') cats.add(c.trim());
@@ -281,7 +281,7 @@ export default function LiveBannerEditor({
   const showPopular = data.showPopular !== false && pageId !== 'trending' && section?.id !== 'trending_hero';
 
   // ─────────────────────────────────────────────────────────
-  
+
   const handleInlineSlideUpdate = (updates) => {
     if (slides.length === 0) return;
     const nextSlides = [...slides];
@@ -701,8 +701,8 @@ export default function LiveBannerEditor({
           alignItems: 'center',
           gap: '7px',
           padding: '8px 20px',
-          background: saveStatus === 'saved' 
-            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+          background: saveStatus === 'saved'
+            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
             : saveStatus === 'error'
             ? '#ef4444'
             : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
@@ -775,11 +775,11 @@ export default function LiveBannerEditor({
 
           {/* ── Live Banner Section ── */}
           <section className={`mhp-hero-popular-grid ${!showPopular ? 'full-width' : ''}`}>
-            
+
             {/* ── Left Hero Slide Card ── */}
-            <div 
+            <div
               className={`mhp-hero-card ${slides.length === 0 ? 'empty-hero' : ''}`}
-              style={{ 
+              style={{
                 backgroundImage: slides.length > 0 && currentSlide.image ? `url(${currentSlide.image})` : 'none',
                 position: 'relative'
               }}
@@ -789,38 +789,7 @@ export default function LiveBannerEditor({
                   <div className="mhp-hero-overlay" />
 
                   {/* Direct Change Photo Overlay Button */}
-                  <div className="lse-card-img-overlay" style={{ top: '16px', right: '16px', zIndex: 30 }}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const currentImg = currentSlide.image || '';
-                        const newImg = window.prompt("Enter new background photo URL for this hero slide:", currentImg);
-                        if (newImg && newImg.trim() && newImg !== currentImg) {
-                          handleInlineSlideUpdate({ image: newImg.trim(), bgImage: newImg.trim() });
-                        }
-                      }}
-                      style={{
-                        background: 'rgba(15, 23, 42, 0.92)',
-                        color: '#ffffff',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        borderRadius: '8px',
-                        padding: '6px 12px',
-                        fontSize: '0.78rem',
-                        fontWeight: 750,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        cursor: 'pointer',
-                        backdropFilter: 'blur(8px)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
-                      }}
-                      title="Change Hero Background Photo URL"
-                    >
-                      <ImageIcon size={14} />
-                      <span>Change Photo</span>
-                    </button>
-                  </div>
+                  
 
 
 
@@ -828,7 +797,7 @@ export default function LiveBannerEditor({
                   <div className="mhp-hero-content">
                     {currentSlide.category && (
                       <div style={{ marginBottom: '0.65rem' }}>
-                        <span 
+                        <span
                           style={{
                             background: 'rgba(234, 88, 12, 0.3)',
                             border: '1px solid rgba(234, 88, 12, 0.6)',
@@ -843,7 +812,7 @@ export default function LiveBannerEditor({
                             alignItems: 'center'
                           }}
                         >
-                          <span 
+                          <span
                             style={{ pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
                           >
                             {currentSlide.category}
@@ -852,55 +821,17 @@ export default function LiveBannerEditor({
                       </div>
                     )}
 
-                    <h1 
-                      contentEditable={true}
-                      suppressContentEditableWarning={true}
-                      className="mhp-hero-title lse-direct-editable" 
-                      onBlur={(e) => {
-                        const val = e.currentTarget.textContent.trim();
-                        if (val && val !== currentSlide.title) {
-                          handleInlineSlideUpdate({ title: val, headline: val });
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          e.currentTarget.blur();
-                        }
-                      }}
-                      title="Click directly on text to edit headline"
-                      style={{ margin: '0 0 1rem', lineHeight: 1.2, cursor: 'text' }}
-                    >
+                    <h1 className="mhp-hero-title" style={{ margin: "0 0 1rem", lineHeight: 1.2, cursor: "default", userSelect: "none" }}>
                       {currentSlide.title}
                     </h1>
 
-                    <p 
-                        contentEditable={true}
-                        suppressContentEditableWarning={true}
-                        className="mhp-hero-desc lse-direct-editable" 
-                        onBlur={(e) => {
-                          const val = e.currentTarget.textContent.trim();
-                          if (val !== currentSlide.excerpt) {
-                            handleInlineSlideUpdate({ excerpt: val, subheadline: val });
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        title="Click directly on text to edit excerpt"
-                        style={{ margin: '0 0 1.25rem', cursor: 'text' }}
-                      >
-                        {currentSlide.excerpt || 'Click directly to edit excerpt'}
-                      </p>
+                    <p className="mhp-hero-desc" style={{ margin: "0 0 1.25rem", cursor: "default", userSelect: "none" }}>{currentSlide.excerpt || ""}</p>
 
                     <div className="mhp-author-meta" style={{ flexWrap: 'wrap', gap: '8px' }}>
                       {currentSlide.authorAvatar && (
-                        <img 
-                          src={currentSlide.authorAvatar} 
-                          alt={currentSlide.author || ''} 
+                        <img
+                          src={currentSlide.authorAvatar}
+                          alt={currentSlide.author || ''}
                           className="mhp-author-avatar"
                         />
                       )}
@@ -923,27 +854,7 @@ export default function LiveBannerEditor({
 
                     <div className="mhp-hero-bottom-actions">
                       <div className="mhp-hero-read-btn">
-                        <span
-                        contentEditable={true}
-                        suppressContentEditableWarning={true}
-                        className="lse-direct-editable"
-                        onBlur={(e) => {
-                          const val = e.currentTarget.textContent.trim();
-                          if (val && val !== (currentSlide.primaryBtnText || 'Read More')) {
-                            handleInlineSlideUpdate({ primaryBtnText: val });
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        title="Click directly to edit button label"
-                        style={{ cursor: 'text' }}
-                      >
-                        {currentSlide.primaryBtnText || 'Read More'}
-                      </span>
+                        <span>{currentSlide.primaryBtnText || "Read More"}</span>
                         <ArrowRight size={15} color="#0f172a" />
                       </div>
                       {currentSlide.category && (
@@ -959,24 +870,24 @@ export default function LiveBannerEditor({
                     <div className="mhp-slider-nav">
                       <div className="mhp-slider-dots">
                         {slides.map((_, idx) => (
-                          <span 
+                          <span
                             key={idx}
                             className={`mhp-slider-dot ${idx === activeSlideIdx ? 'active' : ''}`}
                             onClick={() => setActiveSlideIdx(idx)}
                           />
                         ))}
                       </div>
-                      <button 
+                      <button
                         type="button"
-                        className="mhp-slider-btn" 
+                        className="mhp-slider-btn"
                         onClick={() => setActiveSlideIdx((activeSlideIdx - 1 + slides.length) % slides.length)}
                         aria-label="Previous slide"
                       >
                         <ChevronLeft size={16} />
                       </button>
-                      <button 
+                      <button
                         type="button"
-                        className="mhp-slider-btn" 
+                        className="mhp-slider-btn"
                         onClick={() => setActiveSlideIdx((activeSlideIdx + 1) % slides.length)}
                         aria-label="Next slide"
                       >
@@ -998,7 +909,7 @@ export default function LiveBannerEditor({
               <div className="mhp-popular-card">
                 <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                   <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span 
+                    <span
                       contentEditable={true}
                       suppressContentEditableWarning={true}
                       className="lse-direct-editable"
@@ -1082,39 +993,21 @@ export default function LiveBannerEditor({
                         </div>
 
                         {/* Thumbnail */}
-                        <img 
-                          src={item.image} 
-                          alt={item.title} 
+                        <img
+                          src={item.image}
+                          alt={item.title}
                           className="mhp-popular-thumb"
                           loading="lazy"
                         />
 
                         {/* Info */}
                         <div className="mhp-popular-info">
-                          <h4 
-                          contentEditable={true}
-                          suppressContentEditableWarning={true}
-                          className="mhp-popular-title lse-direct-editable"
-                          onBlur={(e) => {
-                            const val = e.currentTarget.textContent.trim();
-                            if (val && val !== item.title) {
-                              handleInlinePopularUpdate(idx, { title: val });
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          title="Click directly to edit title"
-                          style={{ cursor: 'text' }}
-                        >
+                          <h4 className="mhp-popular-title" style={{ cursor: "default", userSelect: "none" }}>
                           {item.title}
                         </h4>
                           <span className="mhp-popular-meta">
                             {item.category && (
-                            <span 
+                            <span
                               style={{ color: '#fb923c', marginRight: '4px', pointerEvents: 'none', userSelect: 'none', cursor: 'default' }}
                             >
                               {item.category} •
@@ -1171,7 +1064,7 @@ export default function LiveBannerEditor({
       {isPickerOpen && typeof document !== 'undefined' && createPortal(
         <div className="lbe-picker-overlay" onClick={() => setIsPickerOpen(false)}>
           <div className="lbe-picker-modal" onClick={e => e.stopPropagation()}>
-            
+
             {/* Modal Header */}
             <div className="lbe-picker-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1196,14 +1089,14 @@ export default function LiveBannerEditor({
                     alignItems: 'center',
                     gap: '5px'
                   }}>
-                    {selectedPickerCards.length > 0 
-                      ? selectedPickerCards.length + '/' + maxSelectable + ' Selected' 
+                    {selectedPickerCards.length > 0
+                      ? selectedPickerCards.length + '/' + maxSelectable + ' Selected'
                       : maxSelectable + ' slot' + (maxSelectable > 1 ? 's' : '') + ' left to select'}
                   </span>
                 )}
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="lbe-picker-close-btn"
                 onClick={() => {
                   setIsPickerOpen(false);
@@ -1250,8 +1143,8 @@ export default function LiveBannerEditor({
                 />
                 <div className="lbe-picker-search-actions">
                   {pickerSearch && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setPickerSearch('')}
                       className="lbe-picker-search-clear-btn"
                       title="Clear search"
@@ -1340,8 +1233,8 @@ export default function LiveBannerEditor({
                     };
 
                     return (
-                      <div 
-                        key={artId} 
+                      <div
+                        key={artId}
                         className={'lbe-picker-card' + (isSelected ? ' selected' : '') + (alreadyInPopular ? ' already-added' : '')}
                         style={{
                           ...(isSelected ? { borderColor: '#38bdf8', boxShadow: '0 0 0 2px rgba(56, 189, 248, 0.45)' } : {}),
@@ -1398,8 +1291,8 @@ export default function LiveBannerEditor({
                             <span>•</span>
                             <span>{artDate}</span>
                           </div>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             disabled={alreadyInPopular || isSlotsFull}
                             className={'lbe-picker-select-btn ' + (isVid ? 'video' : 'article') + (isSelected ? ' selected' : '')}
                             style={

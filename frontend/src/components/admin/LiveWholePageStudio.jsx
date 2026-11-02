@@ -1094,22 +1094,18 @@ export default function LiveWholePageStudio({
                           >
                             <div className="mhp-hero-overlay" />
 
-                            {/* Direct Change Photo Overlay Button */}
-                            <div className="lse-card-img-overlay" style={{ top: '16px', right: '16px', zIndex: 30 }}>
+                            {/* Top Right Slide Actions: Add Slide, Swap, Delete Slide */}
+                            <div className="lse-card-img-overlay" style={{ top: '16px', right: '16px', zIndex: 30, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const currentImg = activeSlide.image || '';
-                                  const newImg = window.prompt("Enter new background photo URL for this hero slide:", currentImg);
-                                  if (newImg && newImg.trim() && newImg !== currentImg) {
-                                    handleInlineSlideUpdate({ image: newImg.trim(), bannerImage: newImg.trim() });
-                                  }
+                                  handleOpenPicker({ type: 'hero-add', mode: 'articles' });
                                 }}
                                 style={{
-                                  background: 'rgba(15, 23, 42, 0.92)',
+                                  background: '#ea580c',
                                   color: '#ffffff',
-                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  border: 'none',
                                   borderRadius: '8px',
                                   padding: '6px 12px',
                                   fontSize: '0.78rem',
@@ -1118,14 +1114,61 @@ export default function LiveWholePageStudio({
                                   alignItems: 'center',
                                   gap: '6px',
                                   cursor: 'pointer',
-                                  backdropFilter: 'blur(8px)',
-                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
+                                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.4)'
                                 }}
-                                title="Change Hero Background Photo URL"
+                                title="Add a new lead slide from articles"
                               >
-                                <ImageIcon size={14} />
-                                <span>Change Photo</span>
+                                <Plus size={14} />
+                                <span>Add Slide</span>
                               </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenPicker({ type: 'hero-replace', index: heroSlideIdx });
+                                }}
+                                style={{
+                                  background: 'rgba(15, 23, 42, 0.88)',
+                                  color: '#fb923c',
+                                  border: '1px solid rgba(234, 88, 12, 0.4)',
+                                  borderRadius: '8px',
+                                  padding: '6px 10px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 750,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  cursor: 'pointer',
+                                  backdropFilter: 'blur(8px)'
+                                }}
+                                title="Swap or Replace with another article"
+                              >
+                                <ArrowLeftRight size={14} />
+                                <span>Swap</span>
+                              </button>
+
+                              {heroSlides.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDeleteHeroSlide(heroSlideIdx, e)}
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.25)',
+                                    color: '#fca5a5',
+                                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    borderRadius: '8px',
+                                    padding: '6px 10px',
+                                    cursor: 'pointer',
+                                    backdropFilter: 'blur(8px)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Delete this slide"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
                             </div>
 
                             <div className="mhp-hero-content">
@@ -1137,47 +1180,17 @@ export default function LiveWholePageStudio({
                               </span>
 
                               <h1 
-                                contentEditable={true}
-                                suppressContentEditableWarning={true}
-                                className="mhp-hero-title lse-direct-editable"
-                                onBlur={(e) => {
-                                  const val = e.currentTarget.textContent.trim();
-                                  if (val && val !== activeSlide.title) {
-                                    handleInlineSlideUpdate({ title: val, headline: val });
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.currentTarget.blur();
-                                  }
-                                }}
-                                title="Click directly to edit headline"
-                                style={{ cursor: 'text', margin: '0 0 1rem' }}
+                                className="mhp-hero-title"
+                                style={{ margin: '0 0 1rem', cursor: 'default', userSelect: 'none' }}
                               >
                                 {activeSlide.title}
                               </h1>
 
                               <p 
-                                contentEditable={true}
-                                suppressContentEditableWarning={true}
-                                className="mhp-hero-subtitle lse-direct-editable"
-                                onBlur={(e) => {
-                                  const val = e.currentTarget.textContent.trim();
-                                  if (val !== activeSlide.excerpt) {
-                                    handleInlineSlideUpdate({ excerpt: val, summary: val, description: val });
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.currentTarget.blur();
-                                  }
-                                }}
-                                title="Click directly to edit excerpt"
-                                style={{ cursor: 'text', margin: '0 0 1.25rem' }}
+                                className="mhp-hero-subtitle"
+                                style={{ margin: '0 0 1.25rem', cursor: 'default', userSelect: 'none' }}
                               >
-                                {activeSlide.excerpt || 'Click directly to add lead excerpt summary'}
+                                {activeSlide.excerpt || ''}
                               </p>
 
                               <div className="mhp-hero-meta">
@@ -1216,23 +1229,7 @@ export default function LiveWholePageStudio({
                             <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <span 
-                                  contentEditable={true}
-                                  suppressContentEditableWarning={true}
-                                  className="lse-direct-editable"
-                                  onBlur={(e) => {
-                                    const val = e.currentTarget.textContent.trim();
-                                    if (val && val !== (heroSection?.data?.popularTitle || 'Popular Posts')) {
-                                      handleUpdateHeroData({ popularTitle: val });
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      e.currentTarget.blur();
-                                    }
-                                  }}
-                                  title="Click directly to edit title"
-                                  style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'text' }}
+                                  style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'default', userSelect: 'none' }}
                                 >
                                   {heroSection?.data?.popularTitle || 'Popular Posts'}
                                 </span>
@@ -1274,32 +1271,8 @@ export default function LiveWholePageStudio({
                                       {idx + 1}
                                     </div>
 
-                                    {/* Thumbnail with Photo Change Overlay */}
+                                    {/* Thumbnail */}
                                     <div style={{ position: 'relative', width: '56px', height: '56px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }} className="lbe-popular-thumb-wrap">
-                                      <div className="lse-card-img-overlay" style={{ top: '2px', right: '2px' }}>
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const newImg = window.prompt("Enter new photo URL for this story:", item.image);
-                                            if (newImg && newImg.trim() && newImg !== item.image) {
-                                              handleInlinePopularUpdate(idx, { image: newImg.trim(), coverImage: newImg.trim() });
-                                            }
-                                          }}
-                                          style={{
-                                            background: 'rgba(15, 23, 42, 0.92)',
-                                            color: '#ffffff',
-                                            border: '1px solid rgba(255,255,255,0.3)',
-                                            borderRadius: '4px',
-                                            padding: '2px 4px',
-                                            fontSize: '0.62rem',
-                                            cursor: 'pointer'
-                                          }}
-                                          title="Change photo URL"
-                                        >
-                                          <ImageIcon size={10} />
-                                        </button>
-                                      </div>
                                       <img 
                                         src={item.image} 
                                         alt={item.title} 
@@ -1311,23 +1284,8 @@ export default function LiveWholePageStudio({
 
                                     <div className="mhp-popular-info">
                                       <h4 
-                                        contentEditable={true}
-                                        suppressContentEditableWarning={true}
-                                        className="mhp-popular-title lse-direct-editable"
-                                        onBlur={(e) => {
-                                          const val = e.currentTarget.textContent.trim();
-                                          if (val && val !== item.title) {
-                                            handleInlinePopularUpdate(idx, { title: val });
-                                          }
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            e.currentTarget.blur();
-                                          }
-                                        }}
-                                        title="Click directly to edit title"
-                                        style={{ cursor: 'text' }}
+                                        className="mhp-popular-title"
+                                        style={{ cursor: 'default', userSelect: 'none' }}
                                       >
                                         {item.title}
                                       </h4>
@@ -1592,37 +1550,6 @@ export default function LiveWholePageStudio({
                                     className="mhp-blog-thumb-wrap"
                                     style={{ position: 'relative', width: '100%', height: '190px', overflow: 'hidden', background: '#0f172a' }}
                                   >
-                                    <div className="lse-card-img-overlay">
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          const newImg = window.prompt("Enter new photo URL for this article:", artImg);
-                                          if (newImg && newImg.trim() && newImg !== artImg) {
-                                            handleInlineArticleUpdate(sec.id, art, { image: newImg.trim(), featuredImage: newImg.trim() });
-                                          }
-                                        }}
-                                        style={{
-                                          background: 'rgba(15, 23, 42, 0.88)',
-                                          color: '#ffffff',
-                                          border: '1px solid rgba(255,255,255,0.25)',
-                                          borderRadius: '6px',
-                                          padding: '4px 8px',
-                                          fontSize: '0.72rem',
-                                          fontWeight: 750,
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          gap: '4px',
-                                          cursor: 'pointer',
-                                          backdropFilter: 'blur(4px)'
-                                        }}
-                                        title="Change photo URL"
-                                      >
-                                        <ImageIcon size={12} />
-                                        <span>Change Photo</span>
-                                      </button>
-                                    </div>
-
                                     <img 
                                       src={artImg} 
                                       alt={artTitle} 

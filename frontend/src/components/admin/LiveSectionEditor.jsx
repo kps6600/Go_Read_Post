@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  X, Check, Sparkles, Plus, Trash2, 
+import {
+  X, Check, Sparkles, Plus, Trash2,
   ArrowLeft, ArrowRight, ChevronLeft, ChevronRight,
   Monitor, Smartphone, ArrowUp, ArrowDown,
   Search, RefreshCw, ArrowLeftRight, Layers, Eye, EyeOff,
@@ -103,11 +103,11 @@ export default function LiveSectionEditor({
   if (!isOpen || !section) return null;
 
   // Delegate Hero sections directly to specialized LiveBannerEditor
-  const isHero = 
-    section.type === 'hero' || 
-    section.type === 'hero_popular' || 
-    section.sectionKey === 'hero_popular' || 
-    section.id === 'hero_popular' || 
+  const isHero =
+    section.type === 'hero' ||
+    section.type === 'hero_popular' ||
+    section.sectionKey === 'hero_popular' ||
+    section.id === 'hero_popular' ||
     (section.id || '').toLowerCase().includes('hero') ||
     (section.sectionKey || '').toLowerCase().includes('hero') ||
     (section.type || '').toLowerCase().includes('hero') ||
@@ -299,7 +299,7 @@ function LiveGenericSectionStudio({
     const isSpot = isSpotlight || secType === 'technology' || secType === 'ai' || titleLower.includes('spotlight') || titleLower.includes('tech');
     const isTrend = isTrending || titleLower.includes('trending');
     const isPop = secType === 'popular_editors' || secType === 'business' || section?.id === 'popular_editors' || titleLower.includes('popular') || titleLower.includes('editor');
-    
+
     // A. Explicit Category Configured or Category Desk Section
     const explicitCat = getSafeString(data.category || section?.category || data.filterCategory || '', '').toLowerCase().trim();
     if (explicitCat) {
@@ -329,21 +329,21 @@ function LiveGenericSectionStudio({
         const tag = getSafeString(s.tag || '', '').toUpperCase();
         const tags = Array.isArray(s.tags) ? s.tags.map(t => String(t).toLowerCase()) : [];
         const isTechCat = (
-          c.includes('tech') || 
-          c.includes('ai') || 
-          c.includes('startup') || 
-          c.includes('enterprise') || 
-          c.includes('fintech') || 
-          c.includes('deeptech') || 
+          c.includes('tech') ||
+          c.includes('ai') ||
+          c.includes('startup') ||
+          c.includes('enterprise') ||
+          c.includes('fintech') ||
+          c.includes('deeptech') ||
           c.includes('deep-tech')
         );
         const isTechTag = (
-          tag === 'TECHNOLOGY' || 
-          tag === 'STARTUP' || 
-          tag === 'AI' || 
-          tag === 'DEEPTECH' || 
-          tag === 'FINTECH' || 
-          tag === 'ENTERPRISE' || 
+          tag === 'TECHNOLOGY' ||
+          tag === 'STARTUP' ||
+          tag === 'AI' ||
+          tag === 'DEEPTECH' ||
+          tag === 'FINTECH' ||
+          tag === 'ENTERPRISE' ||
           tag === 'TECHSPARKS 2024' ||
           tags.some(t => t.includes('tech') || t.includes('ai') || t.includes('startup') || t.includes('software'))
         );
@@ -424,11 +424,11 @@ function LiveGenericSectionStudio({
       }
       return res.slice(0, limit);
     }
-    
+
     // 2. Otherwise compute default frontend pool matching ModernHomepageView
     let sectionPool = [];
     if (secType === 'trending') {
-      const trending = pool.filter(s => 
+      const trending = pool.filter(s =>
         s && (s.isTrending || s.trending || s.tag === 'TRENDING' || s.tag === 'POPULAR' || s.tag === 'VIRAL')
       );
       const combined = [...trending];
@@ -454,7 +454,7 @@ function LiveGenericSectionStudio({
       }
       sectionPool = combined;
     } else if (secType === 'popular_editors' || secType === 'business') {
-      const picks = pool.filter(s => 
+      const picks = pool.filter(s =>
         s && (s.isFeatured || s.tag === 'TOP PICK' || s.tag === 'FEATURED' || s.tag === 'EDITOR' || s.isLead)
       );
       const combined = [...picks];
@@ -620,11 +620,11 @@ function LiveGenericSectionStudio({
   };
 
   // Dedicated Article Edit Handlers
-  
+
   const handleInlineArticleUpdate = async (story, updates) => {
     if (!story) return;
     const artId = story._id || story.id || story.slug;
-    
+
     // Update activeArticles in state immediately
     const updatedActive = activeArticles.map(a => {
       const aId = a._id || a.id || a.slug;
@@ -846,12 +846,12 @@ function LiveGenericSectionStudio({
       nextArticles.push(formatted);
     }
 
-    const nextData = { 
-      ...data, 
-      articles: nextArticles, 
+    const nextData = {
+      ...data,
+      articles: nextArticles,
       articleIds: nextArticles.map(a => a._id || a.id || a.articleId).filter(Boolean),
-      limit: maxArticlesFit, 
-      hasCustomArticles: true 
+      limit: maxArticlesFit,
+      hasCustomArticles: true
     };
     setData(nextData);
     persistToDatabase(nextData);
@@ -873,11 +873,11 @@ function LiveGenericSectionStudio({
   const handleRemoveArticle = (idx, e) => {
     e?.stopPropagation();
     const nextArticles = activeArticles.filter((_, i) => i !== idx);
-    const nextData = { 
-      ...data, 
-      articles: nextArticles, 
-      limit: maxArticlesFit, 
-      hasCustomArticles: true 
+    const nextData = {
+      ...data,
+      articles: nextArticles,
+      limit: maxArticlesFit,
+      hasCustomArticles: true
     };
     setData(nextData);
     persistToDatabase(nextData);
@@ -954,8 +954,8 @@ function LiveGenericSectionStudio({
           alignItems: 'center',
           gap: '7px',
           padding: '8px 20px',
-          background: saveStatus === 'saved' 
-            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+          background: saveStatus === 'saved'
+            ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
             : saveStatus === 'error'
             ? '#ef4444'
             : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
@@ -1031,7 +1031,7 @@ function LiveGenericSectionStudio({
             <div className="lse-real-frontend-sheet">
               {/* Real Frontend Content Container */}
               <div className={pageId === 'latest' ? "lap-page-wrapper" : "mhp-container"} style={{ padding: '1.5rem clamp(1rem, 2.5vw, 2.5rem) 3rem' }}>
-                
+
                 {/* Active Section */}
                 <div className="lse-active-section-wrapper">
 
@@ -1041,7 +1041,7 @@ function LiveGenericSectionStudio({
               <div className="lap-page-wrapper" style={{ padding: '0 0 2rem' }}>
                 {/* Real Frontend Header (Title + Subtitle) */}
                 <div className="lap-header" style={{ marginBottom: '1.75rem' }}>
-                  <h1 
+                  <h1
                     contentEditable={true}
                     suppressContentEditableWarning={true}
                     className="lap-title lse-direct-editable"
@@ -1120,10 +1120,10 @@ function LiveGenericSectionStudio({
                         const artReadTime = getSafeString(story.readTime || (story.readingTime ? `${story.readingTime} min read` : '5 min read'), '5 min read');
 
                         return (
-                          <article 
-                            key={`${artId}-${idx}`} 
+                          <article
+                            key={`${artId}-${idx}`}
                             className="lap-card lse-hover-item"
-                            style={{ 
+                            style={{
                               position: 'relative',
                               background: '#ffffff',
                               borderRadius: '16px',
@@ -1136,7 +1136,7 @@ function LiveGenericSectionStudio({
                             }}
                           >
                           {/* Top Control Bar: Rank Badge + Horizontal Action Buttons directly ABOVE the card image */}
-                          <div 
+                          <div
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -1148,7 +1148,7 @@ function LiveGenericSectionStudio({
                             }}
                           >
                             {/* Left: Position Indicator Badge */}
-                            <div 
+                            <div
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -1163,7 +1163,7 @@ function LiveGenericSectionStudio({
                             </div>
 
                             {/* Right: Horizontal Action Buttons */}
-                            <div 
+                            <div
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -1264,49 +1264,19 @@ function LiveGenericSectionStudio({
                             </div>
                           </div>
 
-                          <div 
+                          <div
                             className="lap-thumb-wrap"
-                            style={{ 
-                              position: 'relative', 
-                              width: '100%', 
-                              height: '190px', 
-                              overflow: 'hidden', 
+                            style={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '190px',
+                              overflow: 'hidden',
                               background: '#0f172a'
                             }}
                           >
-                            <div className="lse-card-img-overlay">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const newImg = window.prompt("Enter new photo URL for this article:", artImg);
-                                  if (newImg && newImg.trim() && newImg !== artImg) {
-                                    handleInlineArticleUpdate(story, { image: newImg.trim(), featuredImage: newImg.trim() });
-                                  }
-                                }}
-                                style={{
-                                  background: 'rgba(15, 23, 42, 0.88)',
-                                  color: '#ffffff',
-                                  border: '1px solid rgba(255,255,255,0.25)',
-                                  borderRadius: '6px',
-                                  padding: '4px 8px',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 750,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  cursor: 'pointer',
-                                  backdropFilter: 'blur(4px)'
-                                }}
-                                title="Change photo URL"
-                              >
-                                <ImageIcon size={12} />
-                                <span>Change Photo</span>
-                              </button>
-                            </div>
-                            <img 
-                              src={artImg} 
-                              alt={artTitle} 
+                            <img
+                              src={artImg}
+                              alt={artTitle}
                               className="lap-thumb"
                               style={{
                                 width: '100%',
@@ -1322,7 +1292,7 @@ function LiveGenericSectionStudio({
                             />
 
                             {/* Bottom Gradient for Category Tag Legibility */}
-                            <div 
+                            <div
                               style={{
                                 position: 'absolute',
                                 inset: 0,
@@ -1331,22 +1301,7 @@ function LiveGenericSectionStudio({
                               }}
                             />
 
-                            <span 
-                              contentEditable={true}
-                              suppressContentEditableWarning={true}
-                              className="lse-direct-editable"
-                              onBlur={(e) => {
-                                const val = e.currentTarget.textContent.trim();
-                                if (val && val !== artCat) {
-                                  handleInlineArticleUpdate(story, { category: val, categoryName: val, categoryLabel: val });
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  e.currentTarget.blur();
-                                }
-                              }}
+                            <span
                               style={{
                                 position: 'absolute',
                                 bottom: '10px',
@@ -1361,15 +1316,16 @@ function LiveGenericSectionStudio({
                                 borderRadius: '5px',
                                 textTransform: 'uppercase',
                                 boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
-                                cursor: 'text'
+                                cursor: 'default',
+                                userSelect: 'none',
+                                pointerEvents: 'none'
                               }}
-                              title="Click directly to edit category badge"
                             >
                               {artCat}
                             </span>
                           </div>
 
-                            <div 
+                            <div
                               style={{
                                 padding: '1.15rem',
                                 display: 'flex',
@@ -1380,24 +1336,10 @@ function LiveGenericSectionStudio({
                               }}
                             >
                               <div>
-                                <h3 
-                                  contentEditable={true}
-                                  suppressContentEditableWarning={true}
-                                  className="lse-direct-editable"
-                                  onBlur={(e) => {
-                                    const val = e.currentTarget.textContent.trim();
-                                    if (val && val !== artTitle) {
-                                      handleInlineArticleUpdate(story, { title: val });
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      e.currentTarget.blur();
-                                    }
-                                  }}
-                                  style={{ 
-                                    cursor: 'text',
+                                <h3
+                                  style={{
+                                    cursor: 'default',
+                                    userSelect: 'none',
                                     fontSize: '0.98rem',
                                     fontWeight: 750,
                                     lineHeight: 1.38,
@@ -1408,28 +1350,13 @@ function LiveGenericSectionStudio({
                                     WebkitBoxOrient: 'vertical',
                                     overflow: 'hidden'
                                   }}
-                                  title="Click directly to edit title in-place"
                                 >
                                   {artTitle}
                                 </h3>
-                                <p 
-                                  contentEditable={true}
-                                  suppressContentEditableWarning={true}
-                                  className="lse-direct-editable"
-                                  onBlur={(e) => {
-                                    const val = e.currentTarget.textContent.trim();
-                                    if (val !== artExcerpt) {
-                                      handleInlineArticleUpdate(story, { excerpt: val, summary: val, subtitle: val });
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      e.currentTarget.blur();
-                                    }
-                                  }}
+                                <p
                                   style={{
-                                    cursor: 'text',
+                                    cursor: 'default',
+                                    userSelect: 'none',
                                     fontSize: '0.82rem',
                                     color: '#64748b',
                                     lineHeight: 1.45,
@@ -1439,11 +1366,10 @@ function LiveGenericSectionStudio({
                                     WebkitBoxOrient: 'vertical',
                                     overflow: 'hidden'
                                   }}
-                                  title="Click directly to edit excerpt in-place"
                                 >
-                                  {artExcerpt || "Click to add summary..."}
+                                  {artExcerpt || ""}
                                 </p>
-                                <div 
+                                <div
                                   style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1453,24 +1379,8 @@ function LiveGenericSectionStudio({
                                     fontWeight: 600
                                   }}
                                 >
-                                  <span 
-                                    contentEditable={true}
-                                    suppressContentEditableWarning={true}
-                                    className="lse-direct-editable"
-                                    onBlur={(e) => {
-                                      const val = e.currentTarget.textContent.trim();
-                                      if (val && val !== artAuthor) {
-                                        handleInlineArticleUpdate(story, { authorName: val, author: val });
-                                      }
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.currentTarget.blur();
-                                      }
-                                    }}
-                                    style={{ color: '#475569', fontWeight: 650, cursor: 'text' }}
-                                    title="Click directly to edit author"
+                                  <span
+                                    style={{ color: '#475569', fontWeight: 650, cursor: 'default', userSelect: 'none' }}
                                   >
                                     {artAuthor}
                                   </span>
@@ -1507,7 +1417,7 @@ function LiveGenericSectionStudio({
                             cursor: 'pointer'
                           }}
                         >
-                          
+
 
                           <div
                             className="lse-add-plus-badge"
@@ -1571,7 +1481,7 @@ function LiveGenericSectionStudio({
                               <Plus size={15} /> Select Article
                             </span>
 
-                            
+
                           </div>
                         </div>
                       ) : null}
@@ -1639,7 +1549,7 @@ function LiveGenericSectionStudio({
                       </h2>
                     </div>
                   </div>
-                  <span 
+                  <span
                     className="mhp-view-all-link"
                     style={{ cursor: 'default' }}
                   >
@@ -1658,10 +1568,10 @@ function LiveGenericSectionStudio({
                       const artDate = blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : getSafeString(blog.date, 'Today');
 
                       return (
-                        <article 
-                          key={artId} 
+                        <article
+                          key={artId}
                           className="mhp-blog-card lse-hover-item"
-                          style={{ 
+                          style={{
                             position: 'relative',
                             background: '#ffffff',
                             borderRadius: '16px',
@@ -1674,7 +1584,7 @@ function LiveGenericSectionStudio({
                           }}
                         >
                           {/* Top Control Bar: Rank Badge + Horizontal Action Buttons directly ABOVE the card image */}
-                          <div 
+                          <div
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -1686,7 +1596,7 @@ function LiveGenericSectionStudio({
                             }}
                           >
                             {/* Left: Position Indicator Badge with Live Indicator */}
-                            <div 
+                            <div
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -1697,14 +1607,14 @@ function LiveGenericSectionStudio({
                               title={`Position #${idx + 1} • Live on Frontend Grid`}
                             >
                               <span style={{ color: '#fb923c' }}>#{idx + 1}</span>
-                              <span 
-                                style={{ 
-                                  display: 'inline-flex', 
-                                  alignItems: 'center', 
-                                  gap: '4px', 
-                                  color: '#4ade80', 
-                                  fontSize: '0.64rem', 
-                                  fontWeight: 900, 
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  color: '#4ade80',
+                                  fontSize: '0.64rem',
+                                  fontWeight: 900,
                                   letterSpacing: '0.04em',
                                   background: 'rgba(34, 197, 94, 0.16)',
                                   padding: '2px 6px',
@@ -1717,7 +1627,7 @@ function LiveGenericSectionStudio({
                             </div>
 
                             {/* Right: Horizontal Action Buttons */}
-                            <div 
+                            <div
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -1800,49 +1710,20 @@ function LiveGenericSectionStudio({
                           </div>
 
                           {/* Thumbnail Wrap (Clean Image with Category Tag) */}
-                          <div 
+                          <div
                             className="mhp-blog-thumb-wrap"
-                            style={{ 
-                              position: 'relative', 
-                              width: '100%', 
-                              height: '190px', 
-                              overflow: 'hidden', 
+                            style={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '190px',
+                              overflow: 'hidden',
                               background: '#0f172a'
                             }}
                           >
-                            <div className="lse-card-img-overlay">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const newImg = window.prompt("Enter new photo URL for this article:", artImg);
-                                  if (newImg && newImg.trim() && newImg !== artImg) {
-                                    handleInlineArticleUpdate(blog, { image: newImg.trim(), featuredImage: newImg.trim() });
-                                  }
-                                }}
-                                style={{
-                                  background: 'rgba(15, 23, 42, 0.88)',
-                                  color: '#ffffff',
-                                  border: '1px solid rgba(255,255,255,0.25)',
-                                  borderRadius: '6px',
-                                  padding: '4px 8px',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 750,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  cursor: 'pointer',
-                                  backdropFilter: 'blur(4px)'
-                                }}
-                                title="Change photo URL"
-                              >
-                                <ImageIcon size={12} />
-                                <span>Change Photo</span>
-                              </button>
-                            </div>
-                            <img 
-                              src={artImg} 
-                              alt={artTitle} 
+                            
+                            <img
+                              src={artImg}
+                              alt={artTitle}
                               className="mhp-blog-thumb"
                               style={{
                                 width: '100%',
@@ -1858,7 +1739,7 @@ function LiveGenericSectionStudio({
                             />
 
                             {/* Bottom Legibility Gradient Overlay */}
-                            <div 
+                            <div
                               style={{
                                 position: 'absolute',
                                 inset: 0,
@@ -1868,7 +1749,7 @@ function LiveGenericSectionStudio({
                             />
 
                             {/* Category Pill in Bottom-Left of Image */}
-                            <span 
+                            <span
                               style={{
                                 position: 'absolute',
                                 bottom: '10px',
@@ -1893,7 +1774,7 @@ function LiveGenericSectionStudio({
                           </div>
 
                           {/* Card Content Body */}
-                          <div 
+                          <div
                             style={{
                               padding: '1.15rem',
                               display: 'flex',
@@ -1904,40 +1785,11 @@ function LiveGenericSectionStudio({
                             }}
                           >
                             <div>
-                              <h3 
-                                contentEditable={true}
-                                suppressContentEditableWarning={true}
-                                className="lse-direct-editable"
-                                onBlur={(e) => {
-                                  const val = e.currentTarget.textContent.trim();
-                                  if (val && val !== artTitle) {
-                                    handleInlineArticleUpdate(blog, { title: val });
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.currentTarget.blur();
-                                  }
-                                }}
-                                style={{ 
-                                  cursor: 'text',
-                                  fontSize: '0.98rem',
-                                  fontWeight: 750,
-                                  lineHeight: 1.38,
-                                  color: '#0f172a',
-                                  margin: '0 0 8px',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
-                                  overflow: 'hidden'
-                                }}
-                                title="Click directly to edit title in-place"
-                              >
+                              <h3 style={{ cursor: "default", userSelect: "none", fontSize: "0.98rem", fontWeight: 750, lineHeight: 1.38, color: "#0f172a", margin: "0 0 8px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                                 {artTitle}
                               </h3>
 
-                              <p 
+                              <p
                                   contentEditable={true}
                                   suppressContentEditableWarning={true}
                                   className="lse-direct-editable"
@@ -1969,7 +1821,7 @@ function LiveGenericSectionStudio({
                                   {blog.excerpt || 'Click directly to edit excerpt teaser'}
                                 </p>
 
-                              <div 
+                              <div
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
@@ -1979,7 +1831,7 @@ function LiveGenericSectionStudio({
                                   fontWeight: 600
                                 }}
                               >
-                                <span 
+                                <span
                                   contentEditable={true}
                                   suppressContentEditableWarning={true}
                                   className="lse-direct-editable"
@@ -2033,7 +1885,7 @@ function LiveGenericSectionStudio({
                           cursor: 'pointer'
                         }}
                       >
-                        
+
 
                         <div
                           className="lse-add-plus-badge"
@@ -2097,7 +1949,7 @@ function LiveGenericSectionStudio({
                             <Plus size={15} /> Select Article
                           </span>
 
-                          
+
                         </div>
                       </div>
                     ) : null}
@@ -2144,10 +1996,10 @@ function LiveGenericSectionStudio({
                       <Mail size={32} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <h2 
+                      <h2
                         contentEditable={true}
                         suppressContentEditableWarning={true}
-                        className="mhp-newsletter-title lse-direct-editable" 
+                        className="mhp-newsletter-title lse-direct-editable"
                         onBlur={(e) => {
                           const val = e.currentTarget.textContent.trim();
                           if (val && val !== (data.headline || data.title)) {
@@ -2165,10 +2017,10 @@ function LiveGenericSectionStudio({
                       >
                         {data.headline || data.title || "Get the Latest Blogs Delivered to Your Inbox"}
                       </h2>
-                      <p 
+                      <p
                         contentEditable={true}
                         suppressContentEditableWarning={true}
-                        className="lse-direct-editable" 
+                        className="lse-direct-editable"
                         onBlur={(e) => {
                           const val = e.currentTarget.textContent.trim();
                           if (val !== data.subtitle) {
@@ -2190,8 +2042,8 @@ function LiveGenericSectionStudio({
                   </div>
 
                   <form className="mhp-newsletter-form" onSubmit={(e) => e.preventDefault()}>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={data.placeholder !== undefined ? data.placeholder : "Enter your email address"}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -2204,8 +2056,8 @@ function LiveGenericSectionStudio({
                       title="Type directly to edit placeholder"
                       style={{ cursor: 'text', border: '1.5px dashed rgba(234, 88, 12, 0.45)', color: '#ffffff', background: 'rgba(255, 255, 255, 0.05)' }}
                     />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       contentEditable={true}
                       suppressContentEditableWarning={true}
                       className="mhp-newsletter-btn lse-direct-editable"
@@ -2236,41 +2088,41 @@ function LiveGenericSectionStudio({
               <div style={{ display: 'grid', gridTemplateColumns: deviceView === 'mobile' ? '1fr' : '1fr 1fr', gap: '2.5rem', alignItems: 'center' }}>
                 {data.imagePosition === 'left' && (
                   <div className="lse-inline-edit-hint" onClick={handleOpenEditModal} title="Click to edit image URL">
-                    <img 
-                      src={data.image || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80'} 
-                      alt="Banner" 
-                      style={{ width: '100%', maxHeight: '420px', objectFit: 'cover', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }} 
+                    <img
+                      src={data.image || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80'}
+                      alt="Banner"
+                      style={{ width: '100%', maxHeight: '420px', objectFit: 'cover', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
                     />
                   </div>
                 )}
                 <div>
                   {data.badge && (
-                    <span 
-                      className="lse-inline-edit-hint" 
+                    <span
+                      className="lse-inline-edit-hint"
                       onClick={handleOpenEditModal}
                       style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', background: 'rgba(234, 88, 12, 0.2)', color: '#fb923c', fontWeight: 800, fontSize: '0.78rem', marginBottom: '1rem' }}
                     >
                       {data.badge}
                     </span>
                   )}
-                  <h2 
-                    className="lse-inline-edit-hint" 
+                  <h2
+                    className="lse-inline-edit-hint"
                     onClick={handleOpenEditModal}
                     style={{ fontSize: '2rem', fontWeight: 850, color: '#ffffff', margin: '0 0 1rem', lineHeight: 1.25 }}
                   >
                     {data.heading || data.title || "Built for the Next Generation of Builders"}
                   </h2>
-                  <p 
-                    className="lse-inline-edit-hint" 
+                  <p
+                    className="lse-inline-edit-hint"
                     onClick={handleOpenEditModal}
                     style={{ fontSize: '1.05rem', color: '#94a3b8', lineHeight: 1.6, margin: '0 0 1.5rem' }}
                   >
                     {data.description || data.subtitle || "Comprehensive reporting that cuts through the noise. Get actionable frameworks and genuine founder journeys."}
                   </p>
                   {(data.buttonText || 'Read More') && (
-                    <button 
-                      type="button" 
-                      className="lse-inline-edit-hint" 
+                    <button
+                      type="button"
+                      className="lse-inline-edit-hint"
                       onClick={handleOpenEditModal}
                       style={{ padding: '10px 22px', borderRadius: '8px', background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', color: '#ffffff', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     >
@@ -2281,10 +2133,10 @@ function LiveGenericSectionStudio({
                 </div>
                 {data.imagePosition !== 'left' && (
                   <div className="lse-inline-edit-hint" onClick={handleOpenEditModal} title="Click to edit image URL">
-                    <img 
-                      src={data.image || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80'} 
-                      alt="Banner" 
-                      style={{ width: '100%', maxHeight: '420px', objectFit: 'cover', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }} 
+                    <img
+                      src={data.image || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=80'}
+                      alt="Banner"
+                      style={{ width: '100%', maxHeight: '420px', objectFit: 'cover', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
                     />
                   </div>
                 )}
@@ -2293,7 +2145,7 @@ function LiveGenericSectionStudio({
 
             {/* 4. CALL TO ACTION (CTA) RENDERER */}
             {isCTA && (
-              <div 
+              <div
                 style={{
                   padding: '3.5rem 2rem',
                   borderRadius: '16px',
@@ -2366,7 +2218,7 @@ function LiveGenericSectionStudio({
 
                 <div style={{ display: 'grid', gridTemplateColumns: deviceView === 'mobile' ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
                   {(data.items || []).map((item, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       className="lse-hover-item"
                       style={{ background: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1.5rem', position: 'relative' }}
@@ -2412,8 +2264,8 @@ function LiveGenericSectionStudio({
                 <Edit3 size={17} color="#fb923c" />
                 <span>Live Edit Section: {getSectionTitle()}</span>
               </h4>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setIsEditModalOpen(false)}
                 style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
               >
@@ -2587,8 +2439,8 @@ function LiveGenericSectionStudio({
                   {pickerTarget?.type === 'replace' ? `Replace Article #${(pickerTarget?.index ?? 0) + 1}` : 'Select Article to Add'}
                 </span>
               </h4>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="lbe-picker-close-btn"
                 onClick={() => setIsPickerOpen(false)}
               >
@@ -2608,8 +2460,8 @@ function LiveGenericSectionStudio({
                   autoFocus
                 />
                 {pickerSearch && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setPickerSearch('')}
                     style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
                   >
@@ -2647,8 +2499,8 @@ function LiveGenericSectionStudio({
                     const artAuthor = article.authorName || (typeof article.author === 'object' ? article.author?.name : (article.author || 'Author'));
 
                     return (
-                      <div 
-                        key={`${artId}-${pIdx}`} 
+                      <div
+                        key={`${artId}-${pIdx}`}
                         className="lbe-picker-card"
                         onClick={() => handleSelectArticle(article)}
                       >
@@ -2661,8 +2513,8 @@ function LiveGenericSectionStudio({
                           <div className="lbe-picker-card-meta">
                             <span>{artAuthor}</span>
                           </div>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             className="lbe-picker-select-btn"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -2697,8 +2549,8 @@ function LiveGenericSectionStudio({
                   </span>
                 </div>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="lbe-picker-close-btn"
                 onClick={() => setIsArticleEditModalOpen(false)}
               >
@@ -2798,11 +2650,11 @@ function LiveGenericSectionStudio({
                 />
                 {articleFormData.image && (
                   <div style={{ marginTop: '8px', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <img 
-                      src={articleFormData.image} 
-                      alt="Preview" 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      onError={e => { e.target.style.display = 'none'; }} 
+                    <img
+                      src={articleFormData.image}
+                      alt="Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={e => { e.target.style.display = 'none'; }}
                     />
                   </div>
                 )}
@@ -2810,9 +2662,9 @@ function LiveGenericSectionStudio({
             </div>
 
             <div className="lse-article-modal-footer">
-              <button 
-                type="button" 
-                className="lse-modal-btn cancel" 
+              <button
+                type="button"
+                className="lse-modal-btn cancel"
                 onClick={() => setIsArticleEditModalOpen(false)}
               >
                 Cancel
