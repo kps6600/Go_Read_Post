@@ -1814,3 +1814,41 @@
 }
 
 
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE S (320px) TARGETED RESPONSIVENESS
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 340px) {
+  .modern-article-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .map-headline {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+  .map-summary {
+    font-size: 0.88rem !important;
+    line-height: 1.5 !important;
+  }
+  .map-author-avatar-img {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  .map-author-name {
+    font-size: 0.85rem !important;
+  }
+  .map-share-toolbar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .map-share-btn {
+    padding: 6px 10px !important;
+    font-size: 0.75rem !important;
+  }
+  .map-content p {
+    font-size: 0.92rem !important;
+    line-height: 1.65 !important;
+  }
+}

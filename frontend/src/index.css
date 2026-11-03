@@ -4864,6 +4864,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .footer-social-btn {
@@ -28287,3 +28288,120 @@ body::-webkit-scrollbar:horizontal,
 /* Hide scrollbar sticks (slider stick) on all add card modals & picker lists */
 .atv-modal-card, .atv-modal-body, .atv-picker-list, .lap-modal-card, .lap-no-scrollbar, .acsv-modal-card, .acsv-modal-body, .afv-modal-card, .afv-modal-body, .afv-picker-list-viewport, .admin-modal-card, .admin-modal-body { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 .atv-modal-card::-webkit-scrollbar, .atv-modal-body::-webkit-scrollbar, .atv-picker-list::-webkit-scrollbar, .lap-modal-card::-webkit-scrollbar, .lap-no-scrollbar::-webkit-scrollbar, .acsv-modal-card::-webkit-scrollbar, .acsv-modal-body::-webkit-scrollbar, .afv-modal-card::-webkit-scrollbar, .afv-modal-body::-webkit-scrollbar, .afv-picker-list-viewport::-webkit-scrollbar, .admin-modal-card::-webkit-scrollbar, .admin-modal-body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+
+
+/* ==========================================================================
+   MOBILE S (320px) COMPREHENSIVE RESPONSIVE STYLES
+   ========================================================================== */
+@media (max-width: 340px) {
+  html {
+    font-size: 14px !important;
+  }
+  
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Typography Scale */
+  h1 {
+    font-size: 1.45rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 12px !important;
+  }
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 10px !important;
+  }
+  h3 {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 8px !important;
+  }
+  p {
+    font-size: 0.84rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Navbar */
+  .modern-nav-main {
+    padding: 0.45rem 0 !important;
+    gap: 0.4rem !important;
+  }
+  .brand-logo {
+    font-size: 1.05rem !important;
+    gap: 0.35rem !important;
+  }
+  .brand-emblem {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.78rem !important;
+  }
+  .modern-menu-btn {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 6px !important;
+  }
+  .mobile-search-toggle-btn,
+  .modern-theme-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .modern-nav-sub {
+    padding: 0.25rem 0.4rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-y: hidden !important;
+  }
+  .nav-pills-row {
+    gap: 0.3rem !important;
+  }
+  .modern-cat-tab {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  /* Footer */
+  .site-footer {
+    padding: 1.5rem 0.5rem 2rem !important;
+  }
+  .footer-social-icons {
+    gap: 0.35rem !important;
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+  }
+  .footer-social-btn {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+  }
+  .floating-back-to-top-btn {
+    bottom: 14px !important;
+    right: 14px !important;
+    padding: 7px 12px !important;
+    font-size: 0.76rem !important;
+  }
+  
+  /* Bookmarks Drawer */
+  .bdp-header {
+    padding: 12px 10px !important;
+  }
+  .bdp-header-title {
+    font-size: 1rem !important;
+  }
+  .bdp-toolbar {
+    padding: 8px 10px !important;
+  }
+  .bdp-search-input {
+    font-size: 0.8rem !important;
+  }
+  .bdp-item-card {
+    padding: 10px 8px !important;
+    gap: 8px !important;
+  }
+  .bdp-item-thumb {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}

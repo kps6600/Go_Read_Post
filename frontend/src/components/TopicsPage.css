@@ -856,3 +856,32 @@
   font-size: 0.92rem;
   margin: 0 0 1.5rem 0;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE S (320px) TARGETED RESPONSIVENESS
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 340px) {
+  .top-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .top-hero-card {
+    padding: 1.25rem 0.75rem !important;
+    border-radius: 12px !important;
+  }
+  .top-hero-title {
+    font-size: 1.3rem !important;
+  }
+  .top-card {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+  }
+  .top-article-card {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+  }
+  .top-article-title {
+    font-size: 0.95rem !important;
+  }
+}

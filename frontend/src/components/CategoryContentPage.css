@@ -1298,3 +1298,36 @@
   color: #ffffff;
 }
 
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE S (320px) TARGETED RESPONSIVENESS
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 340px) {
+  .cat-page-container {
+    padding: 0 0.5rem !important;
+  }
+  .cat-hero-card {
+    padding: 1.25rem 0.75rem !important;
+    border-radius: 12px !important;
+  }
+  .cat-hero-title {
+    font-size: 1.3rem !important;
+    line-height: 1.25 !important;
+  }
+  .cat-horiz-card {
+    flex-direction: column !important;
+    padding: 10px !important;
+  }
+  .cat-horiz-thumb-wrap {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 160px !important;
+  }
+  .cat-grid-card-body {
+    padding: 12px 10px !important;
+  }
+  .cat-grid-card-title {
+    font-size: 0.95rem !important;
+  }
+}

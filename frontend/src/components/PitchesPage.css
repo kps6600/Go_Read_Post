@@ -1062,3 +1062,63 @@
     font-size: 0.62rem;
   }
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE S (320px) TARGETED RESPONSIVENESS
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 340px) {
+  .pitches-page-root {
+    padding: 12px 6px 60px !important;
+  }
+  .pp-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .pp-kpi-card {
+    padding: 8px 8px !important;
+    border-radius: 8px !important;
+  }
+  .pp-kpi-num {
+    font-size: 1.15rem !important;
+  }
+  .pp-kpi-label {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.01em !important;
+  }
+  .pp-toolbar-container {
+    padding: 10px 8px !important;
+  }
+  .pp-search-input-wrap {
+    padding: 7px 10px !important;
+  }
+  .pp-primary-cta {
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+  }
+  .pp-filter-toggle-btn {
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+  }
+  .pp-card-media {
+    height: 160px !important;
+  }
+  .pp-card-body {
+    padding: 12px 10px !important;
+  }
+  .pp-card-title {
+    font-size: 0.96rem !important;
+  }
+  .pp-card-summary {
+    font-size: 0.78rem !important;
+  }
+  .pitch-modal-header {
+    padding: 1rem 0.85rem !important;
+  }
+  .pitch-modal-grid {
+    padding: 1rem 0.75rem !important;
+  }
+  .pitch-modal-card {
+    margin: 6px !important;
+  }
+}

@@ -1375,3 +1375,34 @@
   border-radius: 10px;
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE S (320px) TARGETED RESPONSIVENESS
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 340px) {
+  .vpage-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .vpage-stage-card {
+    min-height: 250px !important;
+    border-radius: 14px !important;
+  }
+  .vpage-stage-overlay {
+    padding: 1rem 0.75rem !important;
+  }
+  .vpage-stage-title {
+    font-size: 1.15rem !important;
+    line-height: 1.25 !important;
+  }
+  .vpage-card {
+    border-radius: 12px !important;
+  }
+  .vpage-card-body {
+    padding: 12px 10px !important;
+  }
+  .vpage-card-title {
+    font-size: 0.95rem !important;
+  }
+}
