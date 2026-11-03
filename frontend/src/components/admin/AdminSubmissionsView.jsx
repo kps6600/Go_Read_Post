@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
-  Trash2, Search, Filter, RefreshCw, Sparkles, BookOpen, 
+  Trash2, Search, Filter, RefreshCw, BookOpen, 
   ArrowUpRight, AlertCircle, FileText, Phone, User, Film
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
@@ -304,9 +304,9 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         className="asv-btn-approve"
                         disabled={isBusy}
                         onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
+                        title="Approve and make public"
                       >
-                        <Sparkles size={14} style={{ flexShrink: 0 }} />
-                        <span>Approve & Publish</span>
+                        <span>Public</span>
                       </button>
                     )}
 
