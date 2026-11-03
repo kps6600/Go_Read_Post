@@ -392,8 +392,26 @@
 /* Modern Compact Editorial Desks Grid */
 .adv-desks-grid-modern {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.85rem;
+}
+
+@media (max-width: 1200px) {
+  .adv-desks-grid-modern {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .adv-desks-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .adv-desks-grid-modern {
+    grid-template-columns: 1fr;
+  }
 }
 
 .adv-desk-card-modern {

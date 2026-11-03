@@ -295,6 +295,8 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
       <div className="adv-desks-grid-modern">
         {categories.map((cat) => {
           const count = getCategoryArticleCount(cat);
+          const style = getCategoryStyle(cat);
+          const Icon = style.icon;
           return (
             <div 
               key={cat._id || cat.id || cat.slug} 
@@ -302,11 +304,20 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
               onClick={() => onNavigate('/admin/articles')}
               title={`View ${cat.name} stories in database`}
             >
+              <div 
+                className="adv-desk-icon-bubble" 
+                style={{ background: style.bg, color: style.color }}
+              >
+                <Icon size={18} />
+              </div>
               <div className="adv-desk-info-compact">
                 <span className="adv-desk-title-compact">{cat.name}</span>
                 <span className="adv-desk-count-compact">
                   <strong>{count}</strong> {count === 1 ? 'Story' : 'Stories'}
                 </span>
+              </div>
+              <div className="adv-desk-arrow-pill" style={{ color: style.color }}>
+                <ArrowUpRight size={15} />
               </div>
             </div>
           );
