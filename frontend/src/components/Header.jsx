@@ -1152,33 +1152,7 @@ export default function Header({
                         <span>Pitch Story (Author Studio)</span>
                       </button>
                     )}
-                    {AuthService.isStaff(currentUser) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUserDropdownOpen(false);
-                          if (onOpenAdmin) onOpenAdmin();
-                        }}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '8px 10px',
-                          background: 'none',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          color: '#dc2626',
-                          fontWeight: 600,
-                          fontSize: '0.85rem',
-                          textAlign: 'left'
-                        }}
-                      >
-                        <LayoutDashboard size={15} color="#dc2626" />
-                        <span>Admin Console</span>
-                      </button>
-                    )}
+
 
 
 
