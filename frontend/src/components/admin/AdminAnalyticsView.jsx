@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, Eye, BookOpen, Users, FolderTree, TrendingUp, AlertCircle, ArrowUpRight, Flame, Heart, Sparkles, Layers
+  BarChart3, FolderTree, AlertCircle, ArrowUpRight, Flame, Sparkles, Layers
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
 
@@ -63,85 +63,54 @@ export default function AdminAnalyticsView() {
       )}
 
       {/* Primary KPI Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {/* 1. Total Views */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>TOTAL VIEWS</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Eye size={18} />
-            </div>
+        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            TOTAL VIEWS
           </div>
-          <div style={{ fontSize: '28px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
             {(metrics.totalViews || 0).toLocaleString()}
-          </div>
-          <div style={{ fontSize: '12px', color: '#10b981', fontWeight: '650', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <TrendingUp size={12} />
-            <span>Organic Reader Impressions</span>
           </div>
         </div>
 
         {/* 2. Total Published Articles */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>ARTICLES</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BookOpen size={18} />
-            </div>
+        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            ARTICLES
           </div>
-          <div style={{ fontSize: '28px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
             {metrics.totalArticles || 0}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', marginTop: '6px' }}>
-            <span>{metrics.publishedCount || 0} Published • {metrics.draftCount || 0} Drafts</span>
           </div>
         </div>
 
         {/* 3. Authors */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>AUTHORS</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(217, 119, 6, 0.1)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Users size={18} />
-            </div>
+        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            AUTHORS
           </div>
-          <div style={{ fontSize: '28px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
             {metrics.totalAuthors || 0}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', marginTop: '6px' }}>
-            <span>Contributing Reporters & Desks</span>
           </div>
         </div>
 
         {/* 4. Real Categories */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>CATEGORIES</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(126, 34, 206, 0.1)', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FolderTree size={18} />
-            </div>
+        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            CATEGORIES
           </div>
-          <div style={{ fontSize: '28px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
             {metrics.totalCategories || 0}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', marginTop: '6px' }}>
-            <span>Active Taxonomy Verticals</span>
           </div>
         </div>
 
         {/* 5. Reader Claps / Engagement */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>ENGAGEMENT</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Heart size={18} />
-            </div>
+        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            ENGAGEMENT
           </div>
-          <div style={{ fontSize: '28px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
             {(metrics.totalClaps || 0).toLocaleString()}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', marginTop: '6px' }}>
-            <span>Reader Claps & Reactions</span>
           </div>
         </div>
       </div>
