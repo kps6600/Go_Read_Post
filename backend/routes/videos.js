@@ -292,6 +292,47 @@ adminVideosRouter.put('/:id', protectAdmin, async (req, res) => {
 });
 
 // ADMIN: DELETE /api/admin/videos/:id
+
+// ADMIN: POST /api/admin/videos/bulk-delete
+adminVideosRouter.post('/bulk-delete', protectAdmin, async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid or empty IDs array' });
+    }
+    if (isDbConnected()) {
+      await Video.deleteMany({ _id: { $in: ids } });
+    }
+    let list = readFallbackVideos();
+    const idSet = new Set(ids.map(String));
+    list = list.filter(v => !idSet.has(String(v._id || v.id)));
+    writeFallbackVideos(list);
+    res.json({ success: true, count: ids.length, message: `Successfully deleted ${ids.length} videos` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ADMIN: POST /api/admin/videos/bulk-status
+adminVideosRouter.post('/bulk-status', protectAdmin, async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid or empty IDs array' });
+    }
+    if (isDbConnected()) {
+      await Video.updateMany({ _id: { $in: ids } }, { $set: { status, enabled: status !== 'draft', updatedAt: new Date() } });
+    }
+    let list = readFallbackVideos();
+    const idSet = new Set(ids.map(String));
+    list = list.map(v => idSet.has(String(v._id || v.id)) ? { ...v, status, enabled: status !== 'draft', updatedAt: new Date().toISOString() } : v);
+    writeFallbackVideos(list);
+    res.json({ success: true, count: ids.length, message: `Updated status for ${ids.length} videos` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 adminVideosRouter.delete('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;

@@ -100,6 +100,57 @@ export const VideoService = {
     return json.data;
   },
 
+
+  // Admin: Bulk delete videos
+  async bulkDeleteVideos(ids) {
+    const token = AuthService.getToken();
+    try {
+      const res = await fetch(`${ADMIN_API_BASE}/bulk-delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Bulk delete failed');
+      }
+      return json;
+    } catch (err) {
+      for (const id of ids) {
+        await this.deleteVideo(id);
+      }
+      return { success: true, count: ids.length };
+    }
+  },
+
+  // Admin: Bulk status change
+  async bulkUpdateStatus(ids, status) {
+    const token = AuthService.getToken();
+    try {
+      const res = await fetch(`${ADMIN_API_BASE}/bulk-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids, status })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Bulk status update failed');
+      }
+      return json;
+    } catch (err) {
+      for (const id of ids) {
+        await this.updateVideo(id, { status });
+      }
+      return { success: true, count: ids.length };
+    }
+  },
+
   // Admin: Delete video
   async deleteVideo(id) {
     const token = AuthService.getToken();

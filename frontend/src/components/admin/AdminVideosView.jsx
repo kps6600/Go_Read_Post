@@ -197,6 +197,67 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
     }
   };
 
+
+  // Selected videos computed
+  const selectedVideos = useMemo(() => {
+    return videos.filter(v => selectedIds.has(v._id || v.id));
+  }, [videos, selectedIds]);
+
+  const showBulkPublish = useMemo(() => {
+    return selectedVideos.some(v => v.status === 'draft' || v.enabled === false);
+  }, [selectedVideos]);
+
+  const showBulkDraft = useMemo(() => {
+    return selectedVideos.some(v => v.status !== 'draft' && v.enabled !== false);
+  }, [selectedVideos]);
+
+  const showBulkDelete = selectedIds.size > 0;
+
+  // Clear selection when filters or pagination changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [activeTab, selectedCategory, selectedSeries, search, sortBy, currentPage, pageSize]);
+
+  // Bulk delete handler
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    if (!window.confirm(`Are you sure you want to delete ${count} selected video ${count === 1 ? 'episode' : 'episodes'}? This action cannot be undone.`)) {
+      return;
+    }
+    const idsArray = Array.from(selectedIds);
+    const idsSet = new Set(idsArray.map(String));
+
+    // Optimistic UI update
+    setVideos(prev => prev.filter(v => !idsSet.has(String(v._id || v.id))));
+    setSelectedIds(new Set());
+    if (onShowToast) onShowToast(`Successfully deleted ${count} video ${count === 1 ? 'episode' : 'episodes'}.`);
+
+    try {
+      await VideoService.bulkDeleteVideos(idsArray);
+    } catch (err) {
+      console.error('Error deleting videos:', err);
+      if (onShowToast) onShowToast(`Error deleting videos: ${err.message}`);
+      loadVideos();
+    }
+  };
+
+  // Bulk status update handler
+  const handleBulkStatusChange = async (newStatus) => {
+    if (selectedIds.size === 0) return;
+    const idsArray = Array.from(selectedIds);
+    const idsSet = new Set(idsArray.map(String));
+    setVideos(prev => prev.map(v => idsSet.has(String(v._id || v.id)) ? { ...v, status: newStatus, enabled: newStatus !== 'draft' } : v));
+    setSelectedIds(new Set());
+    if (onShowToast) onShowToast(`Updated status to "${newStatus}" for ${idsArray.length} videos.`);
+    try {
+      await VideoService.bulkUpdateStatus(idsArray, newStatus);
+    } catch (err) {
+      alert('Error updating status: ' + err.message);
+      loadVideos();
+    }
+  };
+
   // Calculate Metrics
   const metrics = useMemo(() => {
     const total = videos.length;
@@ -466,37 +527,111 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
         </div>
       </div>
 
-      {/* ── Count Header & View Toggle ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
-          <span>
-            {activeTab === 'draft' && 'Drafts: '}
-            {activeTab === 'published' && 'Published: '}
-            {activeTab === 'all' && 'All Videos: '}
-            <strong style={{ color: '#0f172a' }}>{filteredVideos.length}</strong> {filteredVideos.length === 1 ? 'episode' : 'episodes'}
-            {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
-          </span>
+      {/* ── Cards Header: Select All, Bulk Actions, Count & View Mode ── */}
+      <div className="abv-cards-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label className="abv-select-all-label" title="Select videos on this page" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none', fontWeight: 600, fontSize: '0.84rem', color: '#475569' }}>
+            <input 
+              type="checkbox" 
+              className="admin-table-checkbox"
+              style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#dc2626' }}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    paginatedVideos.forEach(v => next.add(v._id || v.id));
+                    return next;
+                  });
+                } else {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    paginatedVideos.forEach(v => next.delete(v._id || v.id));
+                    return next;
+                  });
+                }
+              }}
+              checked={paginatedVideos.length > 0 && paginatedVideos.every(v => selectedIds.has(v._id || v.id))}
+            />
+            <span>Select Page</span>
+          </label>
+
+          {selectedIds.size > 0 && (
+            <span className="abv-selected-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '999px', background: '#fee2e2', color: '#dc2626', fontSize: '0.78rem', fontWeight: 700, border: '1px solid #fecaca' }}>
+              {selectedIds.size} of {filteredVideos.length} selected
+            </span>
+          )}
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
+            <span>
+              {activeTab === 'draft' && 'Drafts: '}
+              {activeTab === 'published' && 'Published: '}
+              {activeTab === 'all' && 'All Videos: '}
+              <strong style={{ color: '#0f172a' }}>{filteredVideos.length}</strong> {filteredVideos.length === 1 ? 'episode' : 'episodes'}
+              {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
+            </span>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button 
-            type="button" 
-            className={`abv-view-mode-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => setViewMode('grid')}
-            title="Grid View"
-            style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'grid' ? '#0f172a' : '#fff', color: viewMode === 'grid' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-          >
-            <LayoutGrid size={14} />
-          </button>
-          <button 
-            type="button" 
-            className={`abv-view-mode-btn ${viewMode === 'table' ? 'active' : ''}`}
-            onClick={() => setViewMode('table')}
-            title="Table View"
-            style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'table' ? '#0f172a' : '#fff', color: viewMode === 'table' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-          >
-            <List size={14} />
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <div className="abv-bulk-actions-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              {showBulkPublish && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatusChange('published')}
+                  className="abv-bulk-btn abv-bulk-btn-publish"
+                  title="Publish selected video(s)"
+                >
+                  <CheckCircle2 size={14} />
+                  <span>Publish</span>
+                </button>
+              )}
+              {showBulkDraft && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatusChange('draft')}
+                  className="abv-bulk-btn abv-bulk-btn-draft"
+                  title="Send selected video(s) to draft"
+                >
+                  <Clock size={14} />
+                  <span>Send Draft</span>
+                </button>
+              )}
+              {showBulkDelete && (
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  disabled={deleting}
+                  className="abv-bulk-btn abv-bulk-btn-delete"
+                  title="Delete selected video(s)"
+                >
+                  <Trash2 size={14} />
+                  <span>{deleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button 
+              type="button" 
+              className={`abv-view-mode-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+              style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'grid' ? '#0f172a' : '#fff', color: viewMode === 'grid' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+            >
+              <LayoutGrid size={14} />
+            </button>
+            <button 
+              type="button" 
+              className={`abv-view-mode-btn ${viewMode === 'table' ? 'active' : ''}`}
+              onClick={() => setViewMode('table')}
+              title="Table View"
+              style={{ padding: '6px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: viewMode === 'table' ? '#0f172a' : '#fff', color: viewMode === 'table' ? '#fff' : '#64748b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+            >
+              <List size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -530,11 +665,13 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
             /* ── Grid Cards View (16:9 Showcase Cards) ── */
         <div className="abv-video-cards-grid">
           {paginatedVideos.map((v) => {
+            const id = v._id || v.id;
+            const isSelected = selectedIds.has(id);
             const isPub = v.status !== 'draft' && v.enabled !== false;
             const thumbUrl = v.image || v.fallbackImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80';
 
             return (
-              <div key={v._id || v.id} className="abv-video-card">
+              <div key={id} className={`abv-video-card ${isSelected ? 'selected' : ''}`}>
                 {/* 16:9 Thumbnail Header */}
                 <div className="abv-video-thumb-wrap" onClick={() => setPreviewVideo(v)}>
                   <img 
@@ -548,6 +685,23 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
                       <Play size={20} fill="#ffffff" color="#ffffff" />
                     </div>
                   </div>
+
+                  {/* Card Select Checkbox */}
+                  <button 
+                    type="button"
+                    className={`abv-card-select-btn ${isSelected ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next = new Set(selectedIds);
+                      if (isSelected) next.delete(id);
+                      else next.add(id);
+                      setSelectedIds(next);
+                    }}
+                    title={isSelected ? "Deselect video" : "Select video"}
+                    aria-label={isSelected ? "Deselect video" : "Select video"}
+                  >
+                    <Check size={13} strokeWidth={3} className="abv-select-check-icon" />
+                  </button>
 
                   {/* Duration Pill */}
                   <div className="abv-video-duration-pill">
@@ -673,6 +827,29 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
           <table className="abv-video-table">
             <thead>
               <tr>
+                <th style={{ width: '40px', textAlign: 'center' }}>
+                  <input 
+                    type="checkbox" 
+                    className="admin-table-checkbox"
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#dc2626' }}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          paginatedVideos.forEach(v => next.add(v._id || v.id));
+                          return next;
+                        });
+                      } else {
+                        setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          paginatedVideos.forEach(v => next.delete(v._id || v.id));
+                          return next;
+                        });
+                      }
+                    }}
+                    checked={paginatedVideos.length > 0 && paginatedVideos.every(v => selectedIds.has(v._id || v.id))}
+                  />
+                </th>
                 <th style={{ width: '130px' }}>Preview</th>
                 <th>Episode Title & Series</th>
                 <th>Category</th>
@@ -684,11 +861,28 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
             </thead>
             <tbody>
               {paginatedVideos.map((v) => {
+                const id = v._id || v.id;
+                const isSelected = selectedIds.has(id);
                 const isPub = v.status !== 'draft' && v.enabled !== false;
                 const thumbUrl = v.image || v.fallbackImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80';
 
                 return (
-                  <tr key={v._id || v.id}>
+                  <tr key={id} className={isSelected ? 'selected-row' : ''}>
+                    <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        className="admin-table-checkbox"
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#dc2626' }}
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const next = new Set(selectedIds);
+                          if (isSelected) next.delete(id);
+                          else next.add(id);
+                          setSelectedIds(next);
+                        }}
+                      />
+                    </td>
                     <td>
                       <div className="abv-table-thumb-cell" onClick={() => setPreviewVideo(v)}>
                         <img src={thumbUrl} alt={v.title} className="abv-table-thumb-img" />
