@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Send, Search, Filter, Sparkles, Plus, ExternalLink, Calendar, 
   User, CheckCircle2, Clock, FileText, Tv, X, ChevronRight, ArrowLeft,
-  TrendingUp, Globe, Building, AlertCircle
+  TrendingUp, Globe, Building, AlertCircle, ChevronDown
 } from 'lucide-react';
 import { SubmissionService } from '../services/submissionService';
 import './PitchesPage.css';
@@ -19,6 +19,21 @@ export default function PitchesPage({
   const [formatFilter, setFormatFilter] = useState('all'); // 'all' | 'article' | 'video'
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'reviewing' | 'approved'
   const [selectedPitch, setSelectedPitch] = useState(null);
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const filterMenuRef = useRef(null);
+
+  // Close filter popover on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+        setFilterMenuOpen(false);
+      }
+    };
+    if (filterMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [filterMenuOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,6 +86,7 @@ export default function PitchesPage({
   const articlePitchesCount = pitches.filter(p => p.pitchFormat !== 'video').length;
   const videoPitchesCount = pitches.filter(p => p.pitchFormat === 'video').length;
   const pendingCount = pitches.filter(p => (p.status || 'pending') === 'pending').length;
+  const activeFiltersCount = (formatFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0);
 
   return (
     <div className="pitches-page-root">
@@ -143,68 +159,10 @@ export default function PitchesPage({
         </div>
       </div>
 
-      {/* Modern High-End Toolbar */}
+      {/* Modern High-End Toolbar: Searchbar + One Filter Button + Primary CTA */}
       <div className="pp-toolbar-container">
-        {/* Tier 1: Segmented Format Controls + Filter / Action CTAs */}
-        <div className="pp-toolbar-top-row">
-          {/* Segmented Capsule Tabs */}
-          <div className="pp-segmented-group" role="tablist">
-            <button 
-              type="button"
-              className={`pp-seg-btn ${formatFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setFormatFilter('all')}
-            >
-              <span>All Pitches</span>
-              <span className="pp-seg-badge">{totalCount}</span>
-            </button>
-            <button 
-              type="button"
-              className={`pp-seg-btn ${formatFilter === 'article' ? 'active' : ''}`}
-              onClick={() => setFormatFilter('article')}
-            >
-              <span>Article Pitches</span>
-              <span className="pp-seg-badge">{articlePitchesCount}</span>
-            </button>
-            <button 
-              type="button"
-              className={`pp-seg-btn ${formatFilter === 'video' ? 'active' : ''}`}
-              onClick={() => setFormatFilter('video')}
-            >
-              <span>Video Shows</span>
-              <span className="pp-seg-badge">{videoPitchesCount}</span>
-            </button>
-          </div>
-
-          {/* Right Action Cluster */}
-          <div className="pp-toolbar-actions">
-            <div className="pp-status-select-wrap">
-              <Filter size={14} className="pp-status-icon" />
-              <select
-                className="pp-status-select"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending Review</option>
-                <option value="reviewing">In Review</option>
-                <option value="approved">Approved &amp; Ready</option>
-              </select>
-            </div>
-
-            <button 
-              type="button" 
-              className="pp-primary-cta"
-              onClick={onOpenPitchModal}
-              title="Submit a new story pitch"
-            >
-              <Plus size={16} />
-              <span>Pitch a Story</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Tier 2: Sleek Omnisearch Bar with Live Metrics */}
-        <div className="pp-search-row">
+        <div className="pp-toolbar-single-row">
+          {/* 1. Search Input Bar */}
           <div className="pp-search-input-wrap">
             <Search size={18} className="pp-search-icon" />
             <input 
@@ -225,10 +183,144 @@ export default function PitchesPage({
               </button>
             )}
           </div>
-          <div className="pp-search-count-pill">
-            <span>Showing <strong>{filteredPitches.length}</strong> {filteredPitches.length === 1 ? 'pitch' : 'pitches'}</span>
+
+          {/* 2. One Filter Button after Searchbar */}
+          <div className="pp-filter-dropdown-container" ref={filterMenuRef}>
+            <button 
+              type="button"
+              className={`pp-filter-toggle-btn ${activeFiltersCount > 0 || filterMenuOpen ? 'active' : ''}`}
+              onClick={() => setFilterMenuOpen(prev => !prev)}
+              aria-expanded={filterMenuOpen}
+              title="Filter pitches by format and status"
+            >
+              <Filter size={15} />
+              <span>Filters</span>
+              {activeFiltersCount > 0 && (
+                <span className="pp-filter-active-count">{activeFiltersCount}</span>
+              )}
+              <ChevronDown size={14} className={`pp-filter-chevron ${filterMenuOpen ? 'rotated' : ''}`} />
+            </button>
+
+            {/* Floating Filter Popover */}
+            {filterMenuOpen && (
+              <div className="pp-filter-popover" role="dialog">
+                <div className="pp-popover-header">
+                  <span className="pp-popover-title">Filter Pitches</span>
+                  {activeFiltersCount > 0 && (
+                    <button 
+                      type="button" 
+                      className="pp-popover-reset"
+                      onClick={() => {
+                        setFormatFilter('all');
+                        setStatusFilter('all');
+                      }}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                {/* Format Filter Section */}
+                <div className="pp-popover-section">
+                  <span className="pp-popover-label">Format</span>
+                  <div className="pp-popover-options">
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${formatFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => { setFormatFilter('all'); setFilterMenuOpen(false); }}
+                    >
+                      <span>All Formats</span>
+                      <span className="pp-option-badge">{totalCount}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${formatFilter === 'article' ? 'active' : ''}`}
+                      onClick={() => { setFormatFilter('article'); setFilterMenuOpen(false); }}
+                    >
+                      <span>Article Pitches</span>
+                      <span className="pp-option-badge">{articlePitchesCount}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${formatFilter === 'video' ? 'active' : ''}`}
+                      onClick={() => { setFormatFilter('video'); setFilterMenuOpen(false); }}
+                    >
+                      <span>Video Shows</span>
+                      <span className="pp-option-badge">{videoPitchesCount}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status Filter Section */}
+                <div className="pp-popover-section">
+                  <span className="pp-popover-label">Review Status</span>
+                  <div className="pp-popover-options">
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${statusFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => { setStatusFilter('all'); setFilterMenuOpen(false); }}
+                    >
+                      <span>All Statuses</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${statusFilter === 'pending' ? 'active' : ''}`}
+                      onClick={() => { setStatusFilter('pending'); setFilterMenuOpen(false); }}
+                    >
+                      <span>Pending Review</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${statusFilter === 'reviewing' ? 'active' : ''}`}
+                      onClick={() => { setStatusFilter('reviewing'); setFilterMenuOpen(false); }}
+                    >
+                      <span>In Review</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${statusFilter === 'approved' ? 'active' : ''}`}
+                      onClick={() => { setStatusFilter('approved'); setFilterMenuOpen(false); }}
+                    >
+                      <span>Approved</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* 3. Primary CTA: Pitch a Story */}
+          <button 
+            type="button" 
+            className="pp-primary-cta"
+            onClick={onOpenPitchModal}
+            title="Submit a new story pitch"
+          >
+            <Plus size={16} />
+            <span>Pitch a Story</span>
+          </button>
         </div>
+
+        {/* Optional Active Filters Strip & Results Count */}
+        {(activeFiltersCount > 0 || searchQuery.trim()) && (
+          <div className="pp-active-filter-tags">
+            {formatFilter !== 'all' && (
+              <span className="pp-active-tag">
+                <span>{formatFilter === 'article' ? 'Article Pitches' : 'Video Shows'}</span>
+                <button type="button" onClick={() => setFormatFilter('all')} title="Remove filter"><X size={12} /></button>
+              </span>
+            )}
+            {statusFilter !== 'all' && (
+              <span className="pp-active-tag">
+                <span style={{ textTransform: 'capitalize' }}>Status: {statusFilter}</span>
+                <button type="button" onClick={() => setStatusFilter('all')} title="Remove filter"><X size={12} /></button>
+              </span>
+            )}
+            <span className="pp-search-count-pill">
+              Showing <strong>{filteredPitches.length}</strong> {filteredPitches.length === 1 ? 'pitch' : 'pitches'}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Grid of Pitches */}
