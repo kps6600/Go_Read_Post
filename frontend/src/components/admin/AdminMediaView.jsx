@@ -507,17 +507,7 @@ export default function AdminMediaView({ onShowToast }) {
             )}
           </div>
 
-          {/* Sync Database Button */}
-          <button
-            type="button"
-            className="abv-filter-btn"
-            onClick={handleSync}
-            disabled={syncing || loading}
-            title="Sync all media assets from database and files"
-          >
-            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
-            <span>{syncing ? 'Syncing...' : 'Sync Database'}</span>
-          </button>
+
 
           {/* Upload Media Button */}
           <label 
