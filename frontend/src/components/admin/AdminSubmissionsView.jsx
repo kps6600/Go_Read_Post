@@ -338,8 +338,8 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         disabled={isBusy}
                         onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
                       >
-                        <Sparkles size={14} />
-                        <span>{isVideo ? 'Approve & Publish Video' : 'Approve & Publish Article'}</span>
+                        <Sparkles size={14} style={{ flexShrink: 0 }} />
+                        <span>Approve & Publish</span>
                       </button>
                     )}
 
@@ -350,7 +350,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         disabled={isBusy}
                         onClick={() => handleUpdateStatus(subId, 'reviewing')}
                       >
-                        <Clock size={13} />
+                        <Clock size={13} style={{ flexShrink: 0 }} />
                         <span>Mark In Review</span>
                       </button>
                     ) : (
@@ -361,7 +361,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         onClick={() => handleUpdateStatus(subId, 'pending')}
                         title="Move back to pending queue"
                       >
-                        <Clock size={13} />
+                        <Clock size={13} style={{ flexShrink: 0 }} />
                         <span>Set Pending</span>
                       </button>
                     )}
