@@ -120,11 +120,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
           <h2 className="auth-title">
             {mode === 'login' ? 'Welcome Back' : 'Create Your Account'}
           </h2>
-          <p className="auth-subtitle">
-            {mode === 'login' 
-              ? 'Access saved stories, personal reading list, and community features.'
-              : 'Join GoReadPost to discover deeptech, startups, and exclusive founder stories.'}
-          </p>
         </div>
 
         {/* Tab Switcher */}
