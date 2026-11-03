@@ -3358,12 +3358,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 <EyeOff size={11} /> Hidden from Frontend
               </span>
             )}
-
-            {art.isFeatured && (
-              <span className="abv-flag-badge flag-featured" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
-                <Star size={11} /> Featured
-              </span>
-            )}
             {art.isTrending && (
               <span className="abv-flag-badge flag-trending" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
                 <TrendingUp size={11} /> Trending
@@ -4175,11 +4169,6 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                         {article.isTrending && (
                           <span className="abv-flag-badge flag-trending">
                             <TrendingUp size={11} /> Trending
-                          </span>
-                        )}
-                        {article.isFeatured && (
-                          <span className="abv-flag-badge flag-featured">
-                            <Star size={11} /> Featured
                           </span>
                         )}
                       </div>
