@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  FileText, Globe, CheckCircle, Clock, Eye, ThumbsUp, Plus, 
+  FileText, Globe, CheckCircle, Clock, Eye, Plus, 
   ArrowUpRight, Image as ImageIcon, Navigation, Settings, Search,
   RefreshCw, TrendingUp, Sparkles, Layers, ShieldCheck, BookOpen,
   Cpu, Heart, ShoppingBag, Building2, Languages, Rocket, Activity,
-  ChevronRight, Calendar, User, ExternalLink, Archive, FileEdit, RotateCcw,
+  ChevronRight, Calendar, ExternalLink, Archive, FileEdit, RotateCcw,
   Tv, Mail, MessageSquare, Send
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
@@ -29,7 +29,6 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
   const [newsletterMetric, setNewsletterMetric] = useState({ publicationsCount: 0, subscribersCount: 0 });
   const [videoCount, setVideoCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [storyFilter, setStoryFilter] = useState('all'); // 'all' | 'published' | 'draft' | 'archived'
   const user = AuthService.getUser() || { name: 'Editor-in-Chief', email: 'admin@goreadpost.com' };
 
   useEffect(() => {
@@ -287,167 +286,9 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
         })}
       </div>
 
-      {/* Two Column Layout: Recent Stories & Dynamic Pages */}
-      <div className="adv-two-col-grid">
-        {/* Left Column: Recent Stories */}
-        <div className="adv-panel-card">
-          <div className="adv-panel-header" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div>
-              <h3 className="adv-panel-title">Recent Editorial Stories</h3>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-              <button 
-                type="button" 
-                className={`adv-tab-pill ${storyFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setStoryFilter('all')}
-              >
-                All ({stories.length})
-              </button>
-              <button 
-                type="button" 
-                className={`adv-tab-pill ${storyFilter === 'published' ? 'active' : ''}`}
-                onClick={() => setStoryFilter('published')}
-              >
-                Live ({publishedStories})
-              </button>
-              <button 
-                type="button" 
-                className={`adv-tab-pill ${storyFilter === 'draft' ? 'active' : ''}`}
-                onClick={() => setStoryFilter('draft')}
-              >
-                Drafts ({draftStories})
-              </button>
-              <button 
-                className="adv-btn-sm" 
-                onClick={() => {
-                  onNavigate('/admin/articles');
-                }}
-              >
-                {storyFilter === 'draft' ? 'Manage Drafts' : 'Manage Stories'}
-              </button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="adv-loading-state">
-              <RefreshCw className="animate-spin" size={20} />
-              <span>Loading latest stories...</span>
-            </div>
-          ) : stories.length === 0 ? (
-            <div className="adv-empty-box">
-              <BookOpen size={36} color="var(--admin-text-faint)" />
-              <p>No stories published yet.</p>
-              <button className="adv-btn-primary" onClick={() => onNavigate('/admin/articles/create')}>
-                Publish First Story
-              </button>
-            </div>
-          ) : (
-            (() => {
-              const displayedStories = stories.filter(story => {
-                if (storyFilter === 'all') return true;
-                if (storyFilter === 'published') return story.status === 'published';
-                if (storyFilter === 'draft') return story.status === 'draft';
-                return true;
-              }).slice(0, 5);
-
-              if (displayedStories.length === 0) {
-                return (
-                  <div className="adv-empty-box" style={{ padding: '2rem 1rem' }}>
-                    {storyFilter === 'draft' ? (
-                      <>
-                        <FileEdit size={32} color="#d97706" style={{ margin: '0 auto 0.5rem' }} />
-                        <p style={{ fontWeight: 600, color: 'var(--text-primary)' }}>No draft stories currently</p>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-                          All editorial stories are currently published.
-                        </p>
-                        <button className="adv-btn-primary" onClick={() => onNavigate('/admin/articles/create')}>
-                          <Plus size={14} /> Create New Story Draft
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <BookOpen size={32} color="var(--admin-text-faint)" style={{ margin: '0 auto 0.5rem' }} />
-                        <p>No stories found in this view.</p>
-                      </>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
-                <div className="adv-stories-list">
-                  {displayedStories.map((story) => {
-                    const storyImg = story.featuredImage?.url || story.image;
-                    const deskOrCategory = story.brand || story.categoryName || 'GoReadPost';
-                    const storySlug = story.slug || (story._id || story.id);
-                    return (
-                      <div key={story._id || story.id} className="adv-story-row-modern">
-                        <div className="adv-story-thumb-wrap">
-                          {storyImg ? (
-                            <img 
-                              src={storyImg} 
-                              alt="" 
-                              className="adv-story-thumb-img" 
-                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                            />
-                          ) : (
-                            <div className="adv-story-thumb-fallback">
-                              <FileText size={18} color="var(--brand-primary)" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="adv-story-info-modern">
-                          <div className="adv-story-badge-row">
-                            <span className="adv-story-category-tag">{deskOrCategory}</span>
-                            <span className={`adv-story-status-tag ${story.status || 'published'}`}>
-                              {story.status === 'published' ? 'Live' : story.status === 'draft' ? 'Draft' : story.status === 'archived' ? 'Archived' : 'Scheduled'}
-                            </span>
-                          </div>
-                          <h4 
-                            className="adv-story-headline"
-                            onClick={() => onNavigate(`/admin/posts/${story._id || story.id}/edit`)}
-                            title={story.title}
-                          >
-                            {story.title}
-                          </h4>
-                          <div className="adv-story-meta-row">
-                            <span><User size={11} /> {story.authorName || 'Editorial Desk'}</span>
-                            <span>•</span>
-                            <span><Eye size={11} /> {(story.views || 0).toLocaleString()} views</span>
-                            <span>•</span>
-                            <span><ThumbsUp size={11} /> {story.claps || 0} claps</span>
-                          </div>
-                        </div>
-                        <div className="adv-story-actions-modern">
-                          <button 
-                            className="adv-btn-edit-action" 
-                            onClick={() => onNavigate(`/admin/posts/${story._id || story.id}/edit`)}
-                            title="Edit Story"
-                          >
-                            Edit
-                          </button>
-                          <a 
-                            href={`/story/${storySlug}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="adv-btn-view-action"
-                            title="View Story Live"
-                          >
-                            <ExternalLink size={13} />
-                          </a>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()
-          )}
-        </div>
-
-        {/* Right Column: Dynamic Pages & System Health */}
-        <div className="adv-right-col">
-          {/* Dynamic Pages Box */}
+      {/* Editable Site Pages */}
+      <div style={{ marginTop: '0.75rem' }}>
+        {/* Dynamic Pages Box */}
           <div className="adv-panel-card">
             <div className="adv-panel-header">
               <div>
@@ -543,8 +384,6 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
               </button>
             )}
           </div>
-
-        </div>
       </div>
     </div>
   );
