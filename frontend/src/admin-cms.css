@@ -250,11 +250,11 @@
 /* KPI Stats Row */
 .adv-stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 960px) {
   .adv-stats-row {
     grid-template-columns: repeat(2, 1fr);
   }
