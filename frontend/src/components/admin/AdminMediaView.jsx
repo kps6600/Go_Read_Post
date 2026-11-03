@@ -30,6 +30,26 @@ export default function AdminMediaView({ onShowToast }) {
   const [isDragging, setIsDragging] = useState(false);
   const [brokenImages, setBrokenImages] = useState(new Set());
 
+  // Filter Popover state matching other admin pages
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
+    if (isFilterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterDropdownOpen]);
+
+  const activeFilterCount = (typeFilter !== 'all' ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0);
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -395,79 +415,115 @@ export default function AdminMediaView({ onShowToast }) {
       )}
 
 
-      {/* ── Toolbar: Search, Sort & Upload ── */}
-      <div className="amv-toolbar-wrap">
-        <div className="amv-toolbar-left">
-          {/* Search Box */}
-          <div className="amv-search-bar">
-            <Search size={15} className="amv-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search media files by name..." 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="amv-search-input"
-            />
-            {search && (
-              <button 
-                type="button" 
-                className="amv-search-clear" 
-                onClick={() => setSearch('')}
-                title="Clear search"
-              >
-                <X size={14} />
-              </button>
+      {/* ── Toolbar: Search, Filters & Upload (Matching other admin pages) ── */}
+      <div className="abv-filter-bar abv-controls-panel">
+        {/* Search Box */}
+        <div className="abv-search-box">
+          <Search size={16} className="abv-search-icon" />
+          <input 
+            type="text" 
+            placeholder="Search media files by name..." 
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button className="abv-clear-search" onClick={() => setSearch('')} title="Clear search">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Filter Group: Unified Filters Popover & Actions */}
+        <div className="abv-filter-group">
+          {/* Unified Filter Button & Popover */}
+          <div className="abv-filter-dropdown-container" ref={filterDropdownRef} style={{ position: 'relative' }}>
+            <button 
+              type="button" 
+              className={`abv-filter-btn ${activeFilterCount > 0 ? 'active' : ''} ${isFilterDropdownOpen ? 'open' : ''}`}
+              onClick={() => setIsFilterDropdownOpen(prev => !prev)}
+              title="Filter by Asset Type & Sort Order"
+            >
+              <Filter size={14} className="abv-filter-icon" />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="abv-filter-count-badge">{activeFilterCount}</span>
+              )}
+              <ChevronDown size={13} className={`abv-filter-chevron ${isFilterDropdownOpen ? 'rotated' : ''}`} />
+            </button>
+
+            {isFilterDropdownOpen && (
+              <div className="abv-filter-popover" style={{ minWidth: '240px' }}>
+                <div className="abv-filter-popover-header">
+                  <div className="abv-filter-popover-title">
+                    <Filter size={13} />
+                    <span>Filter Media</span>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button 
+                      type="button" 
+                      className="abv-filter-reset-btn"
+                      onClick={() => {
+                        setTypeFilter('all');
+                        setSortBy('newest');
+                      }}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                <div className="abv-filter-popover-body">
+                  {/* Asset Type */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">ASSET TYPE</label>
+                    <select 
+                      className="abv-popover-select"
+                      value={typeFilter} 
+                      onChange={e => setTypeFilter(e.target.value)}
+                    >
+                      <option value="all">All Media (Images & Videos)</option>
+                      <option value="image">Images Only</option>
+                      <option value="video">Videos Only</option>
+                    </select>
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="abv-filter-field">
+                    <label className="abv-filter-label">SORT ORDER</label>
+                    <select 
+                      className="abv-popover-select"
+                      value={sortBy} 
+                      onChange={e => setSortBy(e.target.value)}
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="largest">Largest Size</option>
+                      <option value="smallest">Smallest Size</option>
+                      <option value="name">Name (A-Z)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Custom Sort Selector */}
-          <div className="amv-sort-wrap">
-            <ArrowUpDown size={13} className="amv-sort-icon" />
-            <select 
-              value={sortBy} 
-              onChange={e => setSortBy(e.target.value)} 
-              className="amv-sort-dropdown"
-              title="Sort media files"
-            >
-              <option value="newest">Sort: Newest</option>
-              <option value="oldest">Sort: Oldest</option>
-              <option value="largest">Sort: Largest</option>
-              <option value="smallest">Sort: Smallest</option>
-              <option value="name">Sort: Name (A-Z)</option>
-            </select>
-            <ChevronDown size={13} className="amv-sort-chevron" />
-          </div>
-        </div>
-
-        <div className="amv-toolbar-right">
+          {/* Sync Database Button */}
           <button
             type="button"
-            className="amv-btn-secondary"
+            className="abv-filter-btn"
             onClick={handleSync}
             disabled={syncing || loading}
             title="Sync all media assets from database and files"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              background: '#fff',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              color: '#334155',
-              cursor: (syncing || loading) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease'
-            }}
           >
             <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
             <span>{syncing ? 'Syncing...' : 'Sync Database'}</span>
           </button>
 
+          {/* Upload Media Button */}
           <label 
-            className={`amv-btn-upload-primary ${uploading ? 'disabled' : ''}`}
+            className="abv-create-article-btn"
             title="Upload image or video file"
+            style={{ cursor: uploading ? 'not-allowed' : 'pointer', margin: 0 }}
           >
             <Upload size={15} />
             <span>{uploading ? 'Uploading...' : 'Upload Media'}</span>
