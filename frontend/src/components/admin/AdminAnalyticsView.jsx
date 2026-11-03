@@ -53,24 +53,24 @@ export default function AdminAnalyticsView() {
   const totalCatArticles = (data?.categoryBreakdown || []).reduce((sum, c) => sum + (c.articlesCount || 0), 0) || Math.max(1, metrics.totalArticles);
 
   return (
-    <div className="aav-container">
+    <div className="anv-container">
       {/* Overview Header Card */}
-      <div className="aav-header-card">
-        <div className="aav-header-left">
-          <h2 className="aav-page-title">
+      <div className="anv-header-card">
+        <div className="anv-header-left">
+          <h2 className="anv-page-title">
             <BarChart3 size={20} color="#dc2626" />
             <span>Readership & Analytics</span>
           </h2>
-          <p className="aav-page-subtitle">Real-time reader volume, catalog distribution, and content engagement.</p>
+          <p className="anv-page-subtitle">Real-time reader volume, catalog distribution, and content engagement.</p>
         </div>
-        <div className="aav-header-actions">
-          <div className="aav-live-badge">
-            <span className="aav-pulse-dot" />
+        <div className="anv-header-actions">
+          <div className="anv-live-badge">
+            <span className="anv-pulse-dot" />
             <span>Live Data</span>
           </div>
           <button 
             type="button" 
-            className="aav-refresh-btn" 
+            className="anv-refresh-btn" 
             onClick={loadAnalytics}
             disabled={loading}
             title="Refresh Analytics"
@@ -89,98 +89,98 @@ export default function AdminAnalyticsView() {
       )}
 
       {/* Primary KPI Cards Grid (Balanced 2-col on Mobile, 5-col on Desktop) */}
-      <div className="aav-kpi-grid">
+      <div className="anv-kpi-grid">
         {/* 1. Total Views */}
-        <div className="aav-kpi-card">
-          <div className="aav-kpi-top">
-            <span className="aav-kpi-label">TOTAL READS</span>
-            <div className="aav-kpi-icon-pill aav-kpi-icon-blue">
+        <div className="anv-kpi-card">
+          <div className="anv-kpi-top">
+            <span className="anv-kpi-label">TOTAL READS</span>
+            <div className="anv-kpi-icon-pill anv-kpi-icon-blue">
               <Eye size={15} />
             </div>
           </div>
-          <div className="aav-kpi-value">
+          <div className="anv-kpi-value">
             {(metrics.totalViews || 0).toLocaleString()}
           </div>
-          <div className="aav-kpi-footer">
+          <div className="anv-kpi-footer">
             <span>avg ~{metrics.avgViewsPerArticle || 0} / story</span>
           </div>
         </div>
 
         {/* 2. Total Articles */}
-        <div className="aav-kpi-card">
-          <div className="aav-kpi-top">
-            <span className="aav-kpi-label">ARTICLES</span>
-            <div className="aav-kpi-icon-pill aav-kpi-icon-emerald">
+        <div className="anv-kpi-card">
+          <div className="anv-kpi-top">
+            <span className="anv-kpi-label">ARTICLES</span>
+            <div className="anv-kpi-icon-pill anv-kpi-icon-emerald">
               <FileText size={15} />
             </div>
           </div>
-          <div className="aav-kpi-value">
+          <div className="anv-kpi-value">
             {metrics.totalArticles || 0}
           </div>
-          <div className="aav-kpi-footer">
+          <div className="anv-kpi-footer">
             <span>{metrics.publishedCount || 0} published stories</span>
           </div>
         </div>
 
         {/* 3. Authors */}
-        <div className="aav-kpi-card">
-          <div className="aav-kpi-top">
-            <span className="aav-kpi-label">AUTHORS</span>
-            <div className="aav-kpi-icon-pill aav-kpi-icon-purple">
+        <div className="anv-kpi-card">
+          <div className="anv-kpi-top">
+            <span className="anv-kpi-label">AUTHORS</span>
+            <div className="anv-kpi-icon-pill anv-kpi-icon-purple">
               <Users size={15} />
             </div>
           </div>
-          <div className="aav-kpi-value">
+          <div className="anv-kpi-value">
             {metrics.totalAuthors || 0}
           </div>
-          <div className="aav-kpi-footer">
+          <div className="anv-kpi-footer">
             <span>verified contributors</span>
           </div>
         </div>
 
         {/* 4. Real Categories */}
-        <div className="aav-kpi-card">
-          <div className="aav-kpi-top">
-            <span className="aav-kpi-label">CATEGORIES</span>
-            <div className="aav-kpi-icon-pill aav-kpi-icon-amber">
+        <div className="anv-kpi-card">
+          <div className="anv-kpi-top">
+            <span className="anv-kpi-label">CATEGORIES</span>
+            <div className="anv-kpi-icon-pill anv-kpi-icon-amber">
               <Layers size={15} />
             </div>
           </div>
-          <div className="aav-kpi-value">
+          <div className="anv-kpi-value">
             {metrics.totalCategories || 0}
           </div>
-          <div className="aav-kpi-footer">
+          <div className="anv-kpi-footer">
             <span>editorial verticals</span>
           </div>
         </div>
 
         {/* 5. Reader Claps / Engagement */}
-        <div className="aav-kpi-card">
-          <div className="aav-kpi-top">
-            <span className="aav-kpi-label">TOTAL ENGAGEMENT</span>
-            <div className="aav-kpi-icon-pill aav-kpi-icon-rose">
+        <div className="anv-kpi-card">
+          <div className="anv-kpi-top">
+            <span className="anv-kpi-label">TOTAL ENGAGEMENT</span>
+            <div className="anv-kpi-icon-pill anv-kpi-icon-rose">
               <Heart size={15} />
             </div>
           </div>
-          <div className="aav-kpi-value">
+          <div className="anv-kpi-value">
             {(metrics.totalClaps || 0).toLocaleString()}
           </div>
-          <div className="aav-kpi-footer">
+          <div className="anv-kpi-footer">
             <span>reader claps & reactions</span>
           </div>
         </div>
       </div>
 
       {/* Grid: Top Articles & Categories Breakdown */}
-      <div className="aav-details-grid">
+      <div className="anv-details-grid">
         {/* Top Articles by Real Views */}
-        <div className="aav-card">
-          <div className="aav-card-header">
-            <h3 className="aav-card-title">
+        <div className="anv-card">
+          <div className="anv-card-header">
+            <h3 className="anv-card-title">
               <TrendingUp size={18} color="#dc2626" />
               <span>Most Read Articles</span>
             </h3>
-            <span className="aav-card-badge">
+            <span className="anv-card-badge">
               Top 10 Readership
             </span>
           </div>
@@ -188,16 +188,16 @@ export default function AdminAnalyticsView() {
           {(data?.topArticles || []).length === 0 ? (
             <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '13px', margin: '16px 0' }}>No readership data accumulated yet.</p>
           ) : (
-            <div className="aav-articles-list">
+            <div className="anv-articles-list">
               {(data?.topArticles || []).map((art, idx) => {
                 const catColor = CATEGORY_ACCENTS[art.categoryName] || '#dc2626';
-                const rankClass = idx === 0 ? 'aav-rank-top1' : idx === 1 ? 'aav-rank-top2' : idx === 2 ? 'aav-rank-top3' : 'aav-rank-other';
+                const rankClass = idx === 0 ? 'anv-rank-top1' : idx === 1 ? 'anv-rank-top2' : idx === 2 ? 'anv-rank-top3' : 'anv-rank-other';
                 
                 return (
-                  <div key={art._id || idx} className="aav-article-row">
-                    <div className="aav-article-top-row">
-                      <span className={`aav-rank-badge ${rankClass}`}>#{idx + 1}</span>
-                      <span className="aav-views-chip">
+                  <div key={art._id || idx} className="anv-article-row">
+                    <div className="anv-article-top-row">
+                      <span className={`anv-rank-badge ${rankClass}`}>#{idx + 1}</span>
+                      <span className="anv-views-chip">
                         <Eye size={12} />
                         {(art.views || 0).toLocaleString()}
                       </span>
@@ -207,15 +207,15 @@ export default function AdminAnalyticsView() {
                       href={`/article/${art.slug}`} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="aav-article-title-link"
+                      className="anv-article-title-link"
                       title={art.title}
                     >
                       {art.title}
                     </a>
 
-                    <div className="aav-article-meta-row">
+                    <div className="anv-article-meta-row">
                       <span 
-                        className="aav-cat-chip"
+                        className="anv-cat-chip"
                         style={{
                           color: catColor,
                           background: `${catColor}14`,
@@ -224,12 +224,12 @@ export default function AdminAnalyticsView() {
                       >
                         {art.categoryName || 'Startups'}
                       </span>
-                      <span className="aav-dot-sep">•</span>
+                      <span className="anv-dot-sep">•</span>
                       <span>{art.authorName || 'Editorial Desk'}</span>
                       {art.claps > 0 && (
                         <>
-                          <span className="aav-dot-sep">•</span>
-                          <span className="aav-claps-chip">
+                          <span className="anv-dot-sep">•</span>
+                          <span className="anv-claps-chip">
                             <Heart size={10} color="#e11d48" fill="#e11d48" />
                             <span>{art.claps}</span>
                           </span>
@@ -244,13 +244,13 @@ export default function AdminAnalyticsView() {
         </div>
 
         {/* Real Category Volume Breakdown */}
-        <div className="aav-card">
-          <div className="aav-card-header">
-            <h3 className="aav-card-title">
+        <div className="anv-card">
+          <div className="anv-card-header">
+            <h3 className="anv-card-title">
               <Layers size={18} color="#0284c7" />
               <span>Category Volume</span>
             </h3>
-            <span className="aav-card-badge">
+            <span className="anv-card-badge">
               Vertical Distribution
             </span>
           </div>
@@ -258,31 +258,31 @@ export default function AdminAnalyticsView() {
           {(data?.categoryBreakdown || []).length === 0 ? (
             <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '13px', margin: '16px 0' }}>No categories available.</p>
           ) : (
-            <div className="aav-cats-list">
+            <div className="anv-cats-list">
               {(data?.categoryBreakdown || []).map((cat, idx) => {
                 const color = CATEGORY_ACCENTS[cat.name] || '#0284c7';
                 const sharePercent = Math.round((cat.articlesCount / totalCatArticles) * 100);
 
                 return (
-                  <div key={idx} className="aav-cat-item">
-                    <div className="aav-cat-item-top">
-                      <div className="aav-cat-name-box">
-                        <span className="aav-cat-bullet" style={{ background: color }} />
+                  <div key={idx} className="anv-cat-item">
+                    <div className="anv-cat-item-top">
+                      <div className="anv-cat-name-box">
+                        <span className="anv-cat-bullet" style={{ background: color }} />
                         <span>{cat.name}</span>
                       </div>
-                      <span className="aav-cat-views-badge" style={{ color: color }}>
+                      <span className="anv-cat-views-badge" style={{ color: color }}>
                         {(cat.views || 0).toLocaleString()} reads
                       </span>
                     </div>
 
-                    <div className="aav-cat-item-sub">
+                    <div className="anv-cat-item-sub">
                       <span>{cat.articlesCount} articles</span>
                       <span>{sharePercent}% volume</span>
                     </div>
 
-                    <div className="aav-progress-track">
+                    <div className="anv-progress-track">
                       <div
-                        className="aav-progress-bar"
+                        className="anv-progress-bar"
                         style={{
                           width: `${Math.min(100, Math.max(5, sharePercent))}%`,
                           background: color
