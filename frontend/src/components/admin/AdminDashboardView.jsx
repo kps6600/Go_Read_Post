@@ -203,76 +203,46 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
       {/* Top Metric KPI Cards */}
       <div className="adv-stats-row">
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/articles')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Total Articles</span>
-              <div className="adv-stat-number">{stories.length}</div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626' }}>
-              <BookOpen size={22} />
-            </div>
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Total Articles</span>
+            <div className="adv-stat-number">{stories.length}</div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/articles')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Drafts & Revisions</span>
-              <div className="adv-stat-number" style={{ color: draftStories > 0 ? '#d97706' : 'inherit' }}>
-                {draftStories}
-              </div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(217, 119, 6, 0.1)', color: '#d97706' }}>
-              <FileEdit size={22} />
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Drafts & Revisions</span>
+            <div className="adv-stat-number" style={{ color: draftStories > 0 ? '#d97706' : 'inherit' }}>
+              {draftStories}
             </div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/pages')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Dynamic Landing Pages</span>
-              <div className="adv-stat-number">{pages.length}</div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(79, 70, 229, 0.1)', color: '#4f46e5' }}>
-              <Layers size={22} />
-            </div>
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Dynamic Landing Pages</span>
+            <div className="adv-stat-number">{pages.length}</div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/videos')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Video Productions</span>
-              <div className="adv-stat-number">{videoCount} Shows</div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(147, 51, 234, 0.1)', color: '#9333ea' }}>
-              <Tv size={22} />
-            </div>
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Video Productions</span>
+            <div className="adv-stat-number">{videoCount} Shows</div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/comments')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Reader Comments</span>
-              <div className="adv-stat-number">{commentsMetric.totalComments || 0}</div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7' }}>
-              <MessageSquare size={22} />
-            </div>
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Reader Comments</span>
+            <div className="adv-stat-number">{commentsMetric.totalComments || 0}</div>
           </div>
         </div>
 
         <div className="adv-stat-card" onClick={() => onNavigate('/admin/submissions')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="adv-stat-content">
-              <span className="adv-stat-label">Startup Pitches & Leads</span>
-              <div className="adv-stat-number">{submissionsMetric.totalPitches || 0}</div>
-            </div>
-            <div className="adv-stat-icon-wrap" style={{ background: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}>
-              <Send size={22} />
-            </div>
+          <div className="adv-stat-content">
+            <span className="adv-stat-label">Startup Pitches & Leads</span>
+            <div className="adv-stat-number">{submissionsMetric.totalPitches || 0}</div>
           </div>
         </div>
       </div>
