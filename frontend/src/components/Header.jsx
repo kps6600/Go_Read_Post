@@ -1117,20 +1117,6 @@ export default function Header({
                     <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--border-color, #f3f4f6)', marginBottom: '8px' }}>
                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser.name || currentUser.username}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
-                      <div style={{ marginTop: '6px' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                          color: '#dc2626',
-                          textTransform: 'uppercase'
-                        }}>
-                          {AuthService.isAuthor(currentUser) ? '✍️ AUTHOR' : '📖 READER'}
-                        </span>
-                      </div>
                     </div>
 
                     {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (

@@ -439,19 +439,6 @@ export default function SideDrawer({
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{currentUser.name || currentUser.username}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)' }}>{currentUser.email}</div>
-                    <div style={{ marginTop: '4px' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        fontSize: '0.62rem',
-                        fontWeight: 750,
-                        padding: '1px 6px',
-                        borderRadius: '6px',
-                        backgroundColor: AuthService.isAuthor(currentUser) ? 'rgba(220, 38, 38, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                        color: AuthService.isAuthor(currentUser) ? '#dc2626' : '#2563eb'
-                      }}>
-                        {AuthService.isAuthor(currentUser) ? '✍️ Author' : '📖 Reader'}
-                      </span>
-                    </div>
                   </div>
                   <button
                     onClick={() => {
