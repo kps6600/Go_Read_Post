@@ -560,15 +560,7 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
             </span>
           )}
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
-            <span>
-              {activeTab === 'draft' && 'Drafts: '}
-              {activeTab === 'published' && 'Published: '}
-              {activeTab === 'all' && 'All Videos: '}
-              <strong style={{ color: '#0f172a' }}>{filteredVideos.length}</strong> {filteredVideos.length === 1 ? 'episode' : 'episodes'}
-              {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
-            </span>
-          </div>
+          
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
