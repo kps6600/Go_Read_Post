@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle2 } from 'lucide-react';
 import { NewsletterService } from '../services/newsletterService';
+import './ModernHomepage.css';
 
 export default function NewsletterBanner({
   data = {},
@@ -66,18 +67,9 @@ export default function NewsletterBanner({
 
   return (
     <section className="mhp-newsletter-section" style={{ margin: '2.5rem 0 1rem' }}>
-      <div 
-        className="mhp-newsletter-card" 
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)', 
-          border: '1.5px solid rgba(234, 88, 12, 0.35)', 
-          borderRadius: '16px', 
-          padding: '2.5rem',
-          position: 'relative'
-        }}
-      >
+      <div className="mhp-newsletter-card">
         <div className="mhp-newsletter-left">
-          <div className="mhp-newsletter-icon-wrap" style={{ background: 'rgba(234, 88, 12, 0.2)', color: '#fb923c' }}>
+          <div className="mhp-newsletter-icon-wrap">
             <Mail size={32} />
           </div>
           <div style={{ flex: 1 }}>
@@ -93,14 +85,14 @@ export default function NewsletterBanner({
                 }
               }}
               title={isAdmin ? "Click directly to edit headline" : undefined}
-              style={{ color: '#ffffff', margin: '0 0 6px', outline: 'none', cursor: isAdmin ? 'text' : 'default' }}
+              style={{ margin: subtitle ? "0 0 6px" : 0, outline: "none", cursor: isAdmin ? "text" : "default" }}
             >
               {headline}
             </h2>
             <p 
               contentEditable={isAdmin}
               suppressContentEditableWarning={true}
-              className={isAdmin ? "lse-direct-editable" : ""} 
+              className={isAdmin ? "mhp-newsletter-subtitle lse-direct-editable" : "mhp-newsletter-subtitle"} 
               onBlur={handleSubtitleBlur}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -109,7 +101,7 @@ export default function NewsletterBanner({
                 }
               }}
               title={isAdmin ? "Click directly to edit subtitle" : undefined}
-              style={{ margin: 0, fontSize: '0.95rem', color: '#94a3b8', outline: 'none', cursor: isAdmin ? 'text' : 'default' }}
+              style={{ outline: "none", cursor: isAdmin ? "text" : "default" }}
             >
               {subtitle}
             </p>
@@ -117,7 +109,7 @@ export default function NewsletterBanner({
         </div>
 
         {subscribed ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: "#16a34a", fontWeight: 700 }}>
             <CheckCircle2 size={20} />
             <span>Thank you for subscribing! Check your inbox for dispatches.</span>
           </div>
