@@ -300,27 +300,6 @@ export default function PitchesPage({
             <span>Pitch a Story</span>
           </button>
         </div>
-
-        {/* Optional Active Filters Strip & Results Count */}
-        {(activeFiltersCount > 0 || searchQuery.trim()) && (
-          <div className="pp-active-filter-tags">
-            {formatFilter !== 'all' && (
-              <span className="pp-active-tag">
-                <span>{formatFilter === 'article' ? 'Article Pitches' : 'Video Shows'}</span>
-                <button type="button" onClick={() => setFormatFilter('all')} title="Remove filter"><X size={12} /></button>
-              </span>
-            )}
-            {statusFilter !== 'all' && (
-              <span className="pp-active-tag">
-                <span style={{ textTransform: 'capitalize' }}>Status: {statusFilter}</span>
-                <button type="button" onClick={() => setStatusFilter('all')} title="Remove filter"><X size={12} /></button>
-              </span>
-            )}
-            <span className="pp-search-count-pill">
-              Showing <strong>{filteredPitches.length}</strong> {filteredPitches.length === 1 ? 'pitch' : 'pitches'}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Grid of Pitches */}
