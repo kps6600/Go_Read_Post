@@ -1387,3 +1387,25 @@
     justify-content: center;
   }
 }
+
+
+@media (max-width: 768px) {
+  .amv-media-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .amv-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .amv-search-box {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+@media (max-width: 360px) {
+  .amv-media-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

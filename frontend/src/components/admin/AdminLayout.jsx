@@ -81,9 +81,12 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     return false;
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      return false; // Default closed on mobile screens
+    }
     const saved = localStorage.getItem('admin_sidebar_open');
     if (saved !== null) return saved === 'true';
-    return true; // Default open
+    return true; // Default open on desktop
   });
 
   const handleToggleSidebar = () => {

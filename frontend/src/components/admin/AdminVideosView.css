@@ -930,3 +930,14 @@
 [data-theme='dark'] .abv-video-table tr.selected-row {
   background: rgba(220, 38, 38, 0.15) !important;
 }
+
+
+@media (max-width: 768px) {
+  .abv-video-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .abv-video-card-media {
+    height: 180px !important;
+  }
+}

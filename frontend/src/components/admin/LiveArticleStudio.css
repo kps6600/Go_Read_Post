@@ -2213,3 +2213,31 @@
   color: #94a3b8;
   font-style: italic;
 }
+
+
+@media (max-width: 768px) {
+  .las-studio-header {
+    height: auto !important;
+    padding: 0.65rem 0.85rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+  }
+  .las-header-left {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  .las-header-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .las-workspace {
+    flex-direction: column !important;
+  }
+  .las-sidebar-pane {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

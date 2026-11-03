@@ -10600,3 +10600,249 @@ table input[type="checkbox"]:checked::after {
   outline-offset: 3px;
   background: rgba(234, 88, 12, 0.12) !important;
 }
+
+
+
+/* ==========================================================================
+   COMPREHENSIVE ADMIN PANEL RESPONSIVENESS (MOBILE S 320px - 768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Layout & Viewport */
+  .admin-main-stage {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .admin-content-viewport {
+    padding: 0.85rem 0.65rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Sticky Console Topbar */
+  .admin-console-topbar {
+    padding: 0 0.65rem !important;
+    height: 54px !important;
+  }
+
+  .topbar-left {
+    padding-left: 2.25rem !important;
+  }
+
+  .crumb-root,
+  .crumb-sep {
+    display: none !important;
+  }
+
+  .crumb-active {
+    max-width: 140px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.82rem !important;
+  }
+
+  .topbar-user-meta {
+    display: none !important;
+  }
+
+  .topbar-sync-btn span {
+    display: none !important;
+  }
+
+  .admin-sidebar-line-toggle-btn {
+    left: 10px !important;
+    top: 13px !important;
+    width: 28px !important;
+    height: 28px !important;
+    transform: none !important;
+  }
+
+  /* Slide-over Mobile Sidebar */
+  .admin-cms-sidebar {
+    width: 270px !important;
+    max-width: 85vw !important;
+  }
+
+  /* Dashboard View (.adv-) */
+  .adv-welcome-banner {
+    padding: 1rem 0.85rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .adv-welcome-title {
+    font-size: 1.15rem !important;
+  }
+
+  .adv-stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .adv-stat-card {
+    padding: 10px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .adv-stat-number {
+    font-size: 1.35rem !important;
+  }
+
+  .adv-stat-label {
+    font-size: 0.64rem !important;
+  }
+
+  .adv-section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  .adv-desks-grid-modern {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .adv-desk-card-modern {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .adv-desk-title-compact {
+    font-size: 0.78rem !important;
+  }
+
+  .adv-desk-count-compact {
+    font-size: 0.68rem !important;
+  }
+
+  /* Articles View Toolbar & KPI (.abv-) */
+  .abv-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .abv-filter-bar,
+  .abv-controls-panel {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+  }
+
+  .abv-search-box {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .abv-filter-group {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .abv-create-article-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+
+  .abv-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .abv-card-media {
+    height: 180px !important;
+  }
+
+  /* Scrollable Data Tables */
+  .abv-table-card,
+  .abv-table-wrapper,
+  .table-responsive,
+  [class*="table-card"],
+  [class*="table-wrapper"] {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  table,
+  .abv-table,
+  .acv-table,
+  .aav-table {
+    min-width: 600px !important;
+    table-layout: auto !important;
+  }
+
+  /* General Admin Modals */
+  .modal-dialog,
+  [class*="modal-dialog"] {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    margin: 8px auto !important;
+    border-radius: 12px !important;
+    max-height: 94vh !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-content-viewport {
+    padding: 0.5rem 0.35rem !important;
+  }
+
+  .adv-stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .adv-stat-card {
+    padding: 8px 8px !important;
+    border-radius: 8px !important;
+  }
+
+  .adv-stat-number {
+    font-size: 1.18rem !important;
+  }
+
+  .adv-stat-label {
+    font-size: 0.58rem !important;
+  }
+
+  .adv-desks-grid-modern {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .adv-desk-card-modern {
+    padding: 8px 6px !important;
+  }
+
+  .adv-desk-title-compact {
+    font-size: 0.72rem !important;
+  }
+
+  .adv-desk-count-compact {
+    font-size: 0.62rem !important;
+  }
+
+  .abv-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .abv-kpi-card {
+    padding: 8px 6px !important;
+  }
+
+  .crumb-active {
+    max-width: 110px !important;
+  }
+}
