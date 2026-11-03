@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Save, 
   Image as ImageIcon, CheckCircle, AlertCircle, RefreshCw,
-  Sparkles, Upload, Trash2, Type
+  Sparkles, Upload, Trash2, Sliders, Globe
 } from 'lucide-react';
 import { SettingService } from '../../services/settingService';
 import { MediaService } from '../../services/mediaService';
+import { AuthService } from '../../services/authService';
+import './AdminSettingsView.css';
 
 export default function AdminSettingsView({ onShowToast, onNavigate }) {
   const [settings, setSettings] = useState({
@@ -84,6 +86,15 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
     }));
   };
 
+  // Tagline change handler
+  const handleTaglineChange = (val) => {
+    setSettings(prev => ({
+      ...prev,
+      tagline: val,
+      siteTagline: val
+    }));
+  };
+
   // Logo file upload handler
   const handleLogoFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -112,7 +123,12 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
     }
   };
 
-
+  const handleRemoveLogo = () => {
+    setSettings(prev => ({ ...prev, logo: '', logoUrl: '' }));
+    if (fileInputLogoRef.current) {
+      fileInputLogoRef.current.value = '';
+    }
+  };
 
   const [reauthenticating, setReauthenticating] = useState(false);
 
@@ -151,7 +167,8 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
     } catch (err) {
       const isAuthErr = (err.message || '').toLowerCase().includes('token') ||
                         (err.message || '').toLowerCase().includes('session') ||
-                        (err.message || '').toLowerCase().includes('access denied');
+                        (err.message || '').toLowerCase().includes('access denied') ||
+                        (err.message || '').toLowerCase().includes('unauthorized');
 
       if (isAuthErr) {
         try {
@@ -177,19 +194,35 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
 
   if (loading) {
     return (
-      <div className="asv-loading-box" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-        <RefreshCw className="animate-spin" size={28} style={{ margin: '0 auto 14px', color: 'var(--brand-primary, #ea580c)' }} />
-        <span style={{ fontSize: '1rem', fontWeight: 600 }}>Loading brand &amp; publication settings...</span>
+      <div className="ast-container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+        <RefreshCw className="animate-spin" size={28} style={{ margin: '0 auto 12px', color: 'var(--brand-primary, #ea580c)' }} />
+        <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+          Loading brand &amp; publication settings...
+        </div>
       </div>
     );
   }
 
-  const isUsingGraphicLogo = Boolean(settings.logoUrl || settings.logo);
+  const activeLogo = settings.logoUrl || settings.logo || '';
 
   return (
-    <div className="asv-container" style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '3.5rem' }}>
-      
-
+    <div className="ast-container">
+      {/* Header Banner */}
+      <div className="ast-header-card">
+        <div className="ast-header-left">
+          <div className="ast-header-icon-box">
+            <Sliders size={20} />
+          </div>
+          <div className="ast-header-titles">
+            <h1 className="ast-header-title">Website Settings</h1>
+            <p className="ast-header-subtitle">Configure your publication name, brand logo, and public identity.</p>
+          </div>
+        </div>
+        <div className="ast-header-badge">
+          <Sparkles size={13} style={{ color: 'var(--brand-primary, #ea580c)' }} />
+          <span>Brand Assets</span>
+        </div>
+      </div>
 
       {error && (
         <div style={{
@@ -197,16 +230,16 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '12px',
-          padding: '12px 16px',
+          gap: '10px',
+          padding: '12px 14px',
           background: '#fee2e2',
           color: '#991b1b',
-          borderRadius: '8px',
-          marginBottom: '1.25rem',
-          fontSize: '0.9rem',
+          borderRadius: '10px',
+          marginBottom: '14px',
+          fontSize: '0.86rem',
           border: '1px solid #fecaca'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <AlertCircle size={18} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
@@ -214,19 +247,18 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
             <button
               type="button"
               onClick={() => {
-                AuthService.logoutAdmin();
+                AuthService.logoutAdmin?.();
                 window.location.reload();
               }}
               style={{
-                padding: '6px 14px',
+                padding: '5px 12px',
                 background: '#991b1b',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '6px',
                 fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                fontSize: '0.8rem',
+                cursor: 'pointer'
               }}
             >
               Log In Again
@@ -235,180 +267,154 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="asv-form">
-        
-        {/* ONLY ONE SECTION: ADD LOGO & EDIT NAME */}
-        <div className="asv-card" style={{ 
-          background: 'var(--card-bg, #ffffff)', 
-          border: '1px solid var(--border-color, #e5e7eb)', 
-          borderRadius: '12px', 
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          overflow: 'hidden' 
-        }}>
-
-
-          <div className="asv-card-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <form onSubmit={handleSave}>
+        <div className="ast-card">
+          <div className="ast-card-body">
             
-            {/* 1. BRAND LOGO SECTION */}
-
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '1rem',
-                alignItems: 'start'
-              }}>
-                {/* Local File Upload Button */}
-                <div style={{
-                  padding: '1.25rem',
-                  background: '#f8fafc',
-                  borderRadius: '10px',
-                  border: '1px dashed #cbd5e1',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  gap: '10px'
-                }}>
-                  <input 
-                    ref={fileInputLogoRef}
-                    type="file" 
-                    accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif"
-                    style={{ display: 'none' }}
-                    onChange={handleLogoFileUpload}
-                  />
-                  <div style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '50%',
-                    background: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-                    color: 'var(--brand-primary, #ea580c)'
-                  }}>
-                    <Upload size={20} />
-                  </div>
-                  <button
-                    type="button"
-                    disabled={uploadingLogo}
-                    onClick={() => fileInputLogoRef.current?.click()}
-                    style={{
-                      padding: '8px 18px',
-                      background: 'var(--brand-primary, #ea580c)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '0.84rem',
-                      fontWeight: 700,
-                      cursor: uploadingLogo ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {uploadingLogo ? 'Reading & Uploading...' : 'Browse & Upload Logo'}
-                  </button>
-                </div>
-
-                {/* Image URL Input */}
-                <div style={{
-                  padding: '1.25rem',
-                  background: '#f8fafc',
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                  justifyContent: 'center'
-                }}>
-                  <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', display: 'block' }}>
-                    Or Logo Image Web URL
-                  </label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input 
-                      type="url" 
-                      value={settings.logoUrl || settings.logo || ''} 
-                      onChange={e => {
-                        const val = e.target.value;
-                        setSettings({ ...settings, logoUrl: val, logo: val });
-                      }}
-                      placeholder="https://example.com/brand-logo.svg or .png"
-                      style={{
-                        flex: 1,
-                        padding: '9px 12px',
-                        border: '1px solid var(--border-color, #d1d5db)',
-                        borderRadius: '6px',
-                        fontSize: '0.86rem'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-
-            {/* SEPARATOR */}
-            <div style={{ height: '1px', background: 'var(--border-color, #e5e7eb)' }} />
-
+            {/* BRAND LOGO SECTION */}
             <div>
-
-              {/* Brand Name Textarea */}
-              <div className="asv-field">
-                <label style={{ display: 'block', fontSize: '0.86rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                  Brand Name *
-                </label>
-                <textarea 
-                  rows={2}
-                  value={settings.siteName ?? ''} 
-                  onChange={e => handleSiteNameChange(e.target.value)}
-                  placeholder="Enter brand name (e.g. GoReadPost, Blogger)..."
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    border: '1px solid var(--border-color, #d1d5db)',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    lineHeight: '1.5',
-                    fontFamily: 'inherit',
-                    resize: 'vertical',
-                    boxSizing: 'border-box'
-                  }}
-                  required
-                />
+              <div className="ast-section-header">
+                <h3 className="ast-section-title">
+                  <ImageIcon size={18} />
+                  <span>Publication Logo</span>
+                </h3>
               </div>
+              <p className="ast-section-hint">
+                Upload a brand image or provide a hosted URL. Transparent PNG or SVG recommended.
+              </p>
+            </div>
+
+            {/* Active Logo Preview (if set) */}
+            {activeLogo ? (
+              <div className="ast-active-logo-preview">
+                <div className="ast-active-logo-img-wrapper">
+                  <img 
+                    src={activeLogo} 
+                    alt="Current Brand Logo" 
+                    className="ast-active-logo-thumb"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <div className="ast-active-logo-info">
+                    <span className="ast-active-logo-title">Current Active Logo</span>
+                    <span className="ast-active-logo-sub" title={activeLogo}>
+                      {activeLogo.startsWith('data:') ? 'Custom uploaded image asset' : activeLogo}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="ast-remove-logo-btn"
+                  onClick={handleRemoveLogo}
+                  title="Remove logo and use typography mark"
+                >
+                  <Trash2 size={13} />
+                  <span>Remove</span>
+                </button>
+              </div>
+            ) : null}
+
+            {/* Upload or Web URL Grid */}
+            <div className="ast-logo-grid">
+              {/* Local File Upload Box */}
+              <div className="ast-upload-box">
+                <input 
+                  ref={fileInputLogoRef}
+                  type="file" 
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif"
+                  style={{ display: 'none' }}
+                  onChange={handleLogoFileUpload}
+                />
+                <div className="ast-upload-icon-bubble">
+                  <Upload size={18} />
+                </div>
+                <button
+                  type="button"
+                  className="ast-btn-upload"
+                  disabled={uploadingLogo}
+                  onClick={() => fileInputLogoRef.current?.click()}
+                >
+                  {uploadingLogo ? (
+                    <>
+                      <RefreshCw className="animate-spin" size={14} />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={14} />
+                      <span>Browse &amp; Upload Logo</span>
+                    </>
+                  )}
+                </button>
+                <p className="ast-upload-hint">PNG, JPG, SVG, WebP (Max 5MB)</p>
+              </div>
+
+              {/* Web URL Box */}
+              <div className="ast-url-box">
+                <label className="ast-url-label">Or Logo Image Web URL</label>
+                <div className="ast-url-input-wrap">
+                  <input 
+                    type="url" 
+                    className="ast-input"
+                    value={settings.logoUrl || settings.logo || ''} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSettings(prev => ({ ...prev, logoUrl: val, logo: val }));
+                    }}
+                    placeholder="https://example.com/brand-logo.svg"
+                  />
+                </div>
+                <p className="ast-upload-hint">Direct link to hosted image</p>
+              </div>
+            </div>
+
+            {/* Separator */}
+            <div className="ast-separator" />
+
+            {/* BRAND DETAILS SECTION */}
+            <div className="ast-field">
+              <label className="ast-label">
+                <span>Brand Name</span>
+                <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input 
+                type="text"
+                className="ast-input"
+                value={settings.siteName ?? ''} 
+                onChange={e => handleSiteNameChange(e.target.value)}
+                placeholder="e.g. GoReadPost, TechChronicle..."
+                required
+              />
+              <p className="ast-field-helper">
+                Primary name shown across the header navbar, footer, email templates, and browser tab.
+              </p>
+            </div>
+
+            {/* TAGLINE SECTION */}
+            <div className="ast-field">
+              <label className="ast-label">
+                <span>Publication Tagline</span>
+                <span className="ast-label-hint">(Optional)</span>
+              </label>
+              <input 
+                type="text"
+                className="ast-input"
+                value={settings.tagline ?? ''} 
+                onChange={e => handleTaglineChange(e.target.value)}
+                placeholder="Stories of Founders, Technology, & Capital"
+              />
+              <p className="ast-field-helper">
+                Brand subtitle displayed in metadata, social preview cards, and search engine snippets.
+              </p>
             </div>
 
           </div>
 
           {/* CARD FOOTER WITH SAVE BUTTON */}
-          <div style={{
-            padding: '1.2rem 1.5rem',
-            background: 'var(--bg-secondary, #fafafa)',
-            borderTop: '1px solid var(--border-color, #e5e7eb)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}>
+          <div className="ast-card-footer">
             <button 
               type="submit" 
+              className={`ast-btn-save ${savedSuccess ? 'success' : ''}`}
               disabled={saving}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '11px 30px',
-                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '0.94rem',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 2px 10px rgba(234, 88, 12, 0.25)',
-                transition: 'all 0.2s ease'
-              }}
             >
               {saving ? (
                 <>
@@ -430,7 +436,6 @@ export default function AdminSettingsView({ onShowToast, onNavigate }) {
           </div>
 
         </div>
-
       </form>
     </div>
   );
