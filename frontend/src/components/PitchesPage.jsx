@@ -84,29 +84,7 @@ export default function PitchesPage({
         <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
       </div>
 
-      {/* Hero Banner */}
-      <div className="pp-hero">
-        <div className="pp-hero-content">
-          <div className="pp-eyebrow">
-            <Send size={13} />
-            <span>Author Studio &amp; Startup Pipeline</span>
-          </div>
-          <h1 className="pp-hero-title">Story &amp; Startup Pitches</h1>
-          <p className="pp-hero-desc">
-            Explore submitted founder narratives, author story pitches, and video show concepts across deep tech, enterprise AI, venture capital, and grassroots innovators.
-          </p>
-        </div>
 
-        <button 
-          type="button" 
-          className="pp-hero-action-btn"
-          onClick={onOpenPitchModal}
-          title="Submit a new story pitch"
-        >
-          <Plus size={18} />
-          <span>Pitch a Story</span>
-        </button>
-      </div>
 
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
@@ -217,6 +195,17 @@ export default function PitchesPage({
             <option value="reviewing">In Review</option>
             <option value="approved">Approved</option>
           </select>
+
+          <button 
+            type="button" 
+            className="pp-hero-action-btn"
+            style={{ padding: '7px 14px', fontSize: '0.82rem', borderRadius: '8px' }}
+            onClick={onOpenPitchModal}
+            title="Submit a new story pitch"
+          >
+            <Plus size={15} />
+            <span>Pitch a Story</span>
+          </button>
         </div>
       </div>
 
@@ -428,3 +417,4 @@ export default function PitchesPage({
     </div>
   );
 }
+
