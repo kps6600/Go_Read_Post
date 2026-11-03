@@ -50,6 +50,16 @@ export default function AdminTopNavbar({
   return (
     <header className="admin-console-topbar">
       <div className="topbar-left">
+        <button
+          type="button"
+          className="topbar-sidebar-toggle-btn"
+          onClick={onToggleSidebar || onOpenMobileSidebar}
+          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+          title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+        </button>
+
         <div className="topbar-breadcrumbs">
           <span className="crumb-root">CMS</span>
           <span className="crumb-sep">/</span>
