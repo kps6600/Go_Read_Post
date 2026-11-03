@@ -18,6 +18,27 @@ export const SubmissionService = {
     return json;
   },
 
+  // Public: Get pitches content
+  async getPublicPitches(params = {}) {
+    const query = new URLSearchParams();
+    if (params.type && params.type !== 'all') query.append('type', params.type);
+    if (params.status && params.status !== 'all') query.append('status', params.status);
+    if (params.search && params.search.trim()) query.append('search', params.search.trim());
+    if (params.limit) query.append('limit', params.limit);
+
+    try {
+      const res = await fetch(`${API_BASE}?${query.toString()}`);
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Failed to fetch pitches');
+      }
+      return json;
+    } catch (err) {
+      console.warn('Error fetching public pitches, trying admin fallback:', err);
+      return this.getAdminSubmissions(params);
+    }
+  },
+
   // Admin: Get all submissions with filters
   async getAdminSubmissions(params = {}) {
     const token = AuthService.getToken();

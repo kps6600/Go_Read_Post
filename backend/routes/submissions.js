@@ -239,6 +239,51 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUBLIC: GET /api/submissions (List of Pitches Content)
+router.get('/', async (req, res) => {
+  try {
+    const { type, status, search, limit = 100 } = req.query;
+
+    if (isDbConnected()) {
+      await syncAuthorDraftPitchesToSubmissions();
+
+      const filter = {};
+      if (type && type !== 'all') {
+        filter.type = type;
+      }
+      if (status && status !== 'all') {
+        filter.status = status;
+      }
+      if (search && search.trim()) {
+        const regex = new RegExp(search.trim(), 'i');
+        filter.$or = [
+          { startupName: regex },
+          { founderName: regex },
+          { name: regex },
+          { headline: regex },
+          { subject: regex },
+          { sector: regex },
+          { category: regex }
+        ];
+      }
+
+      const items = await Submission.find(filter).sort({ createdAt: -1 }).limit(Number(limit));
+      return res.json({
+        success: true,
+        count: items.length,
+        data: items
+      });
+    } else {
+      let list = readFallbackSubmissions();
+      if (type && type !== 'all') list = list.filter(s => s.type === type);
+      if (status && status !== 'all') list = list.filter(s => s.status === status);
+      return res.json({ success: true, count: list.length, data: list });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // ADMIN: GET /api/admin/submissions
 adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
   try {

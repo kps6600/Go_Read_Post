@@ -37,6 +37,7 @@ import AboutSection from './components/AboutSection';
 import ContactPage from './components/ContactPage';
 import AdvertisePage from './components/AdvertisePage';
 import TopicsPage from './components/TopicsPage';
+import PitchesPage from './components/PitchesPage';
 import DynamicPageRenderer from './components/DynamicPageRenderer';
 import NotFoundPage from './components/NotFoundPage';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -118,6 +119,9 @@ export const parseCurrentRoute = () => {
     if (pathname === '/techsparks' || pathname.startsWith('/techsparks')) {
       try { window.history.replaceState(null, '', '/'); } catch (e) {}
       return { route: 'home' };
+    }
+    if (pathname === '/pitches' || pathname.startsWith('/pitches') || pathname === '/pitch-stories' || pathname === '/author-pitches') {
+      return { route: 'pitches' };
     }
     if (pathname === '/founder-first' || pathname.startsWith('/founder-first')) {
       return { route: 'founder-first' };
@@ -776,7 +780,17 @@ useEffect(() => {
   };
 
   const handleOpenPitches = () => {
-    handleOpenAdmin('/admin/submissions');
+    setIsAdminView(false);
+    setSelectedStory(null);
+    setActiveArticleSlug(null);
+    setIsSideDrawerOpen(false);
+    setActiveCategory('all');
+    setSearchQuery('');
+    setCurrentRoute({ route: 'pitches' });
+    try {
+      window.history.pushState(null, '', '/pitches');
+    } catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromAdmin = () => {
@@ -914,6 +928,8 @@ useEffect(() => {
           setActiveCategory(route.slug);
         } else if (route.route === 'dynamic-page') {
           setActiveCategory(route.slug);
+        } else if (route.route === 'pitches') {
+          setActiveCategory('all');
         } else if (route.route === 'videos') {
           setActiveCategory('videos');
         } else if (route.route === 'techsparks') {
@@ -1347,6 +1363,13 @@ useEffect(() => {
         ) : (currentRoute.route === 'contact' || activeCategory === 'contact') && !searchQuery.trim() ? (
           <ContactPage 
             onBackToHome={handleBackToHome}
+            onShowToast={showToast}
+          />
+        ) : currentRoute.route === 'pitches' && !searchQuery.trim() ? (
+          <PitchesPage 
+            onBack={handleBackToHome}
+            onOpenPitchModal={() => setIsPitchModalOpen(true)}
+            currentUser={currentUser}
             onShowToast={showToast}
           />
         ) : (currentRoute.route === 'founder-first' || activeCategory === 'founder-first') && !searchQuery.trim() ? (

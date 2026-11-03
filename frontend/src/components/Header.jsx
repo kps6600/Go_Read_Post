@@ -1127,8 +1127,9 @@ export default function Header({
                           setUserDropdownOpen(false);
                           if (onOpenPitchStory) {
                             onOpenPitchStory();
-                          } else if (onOpenAdmin) {
-                            onOpenAdmin('/admin/submissions');
+                          } else {
+                            window.history.pushState(null, '', '/pitches');
+                            window.dispatchEvent(new Event('popstate'));
                           }
                         }}
                         style={{
