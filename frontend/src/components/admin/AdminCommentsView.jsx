@@ -717,20 +717,23 @@ export default function AdminCommentsView({ onShowToast }) {
                       </span>
                     </button>
 
-                    {/* Pinned Badge */}
-                    {isPinned && (
-                      <span className="acv-pinned-badge" title="Pinned to top">
-                        Pinned
-                      </span>
-                    )}
+                    {/* Badges Subrow: Pinned & Status */}
+                    <div className="acv-badges-subrow">
+                      {/* Pinned Badge */}
+                      {isPinned && (
+                        <span className="acv-pinned-badge" title="Pinned to top">
+                          Pinned
+                        </span>
+                      )}
 
-                    {/* Status Pill */}
-                    <span className={`acv-status-badge ${isApproved ? 'status-approved approved' : ''} ${isPending ? 'status-pending pending' : ''} ${isRejected ? 'status-rejected rejected' : ''} ${isHidden ? 'status-hidden hidden' : ''}`}>
-                      {isApproved && 'APPROVED'}
-                      {isPending && 'PENDING'}
-                      {isRejected && 'REJECTED'}
-                      {isHidden && 'HIDDEN'}
-                    </span>
+                      {/* Status Pill */}
+                      <span className={`acv-status-badge ${isApproved ? 'status-approved approved' : ''} ${isPending ? 'status-pending pending' : ''} ${isRejected ? 'status-rejected rejected' : ''} ${isHidden ? 'status-hidden hidden' : ''}`}>
+                        {isApproved && 'APPROVED'}
+                        {isPending && 'PENDING'}
+                        {isRejected && 'REJECTED'}
+                        {isHidden && 'HIDDEN'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -755,12 +758,14 @@ export default function AdminCommentsView({ onShowToast }) {
                   <div className="acv-editorial-reply-box">
                     <div className="acv-erb-header">
                       <div className="acv-erb-badge">
-                        <img 
-                          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&auto=format&fit=crop&q=80" 
-                          alt="Editorial Desk" 
-                          className="acv-erb-avatar" 
-                        />
-                        <span className="acv-erb-title">{comment.adminReply.author || 'Editorial Desk'}</span>
+                        <div className="acv-erb-author-box">
+                          <img 
+                            src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&auto=format&fit=crop&q=80" 
+                            alt="Editorial Desk" 
+                            className="acv-erb-avatar" 
+                          />
+                          <span className="acv-erb-title">{comment.adminReply.author || 'Editorial Desk'}</span>
+                        </div>
                         <span className="acv-erb-tag">OFFICIAL STAFF RESPONSE</span>
                       </div>
                       <div className="acv-erb-actions">
