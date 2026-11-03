@@ -182,8 +182,15 @@ export const AuthService = {
     return role === 'SUPER_ADMIN';
   },
 
+  canAccessAdmin(user = null) {
+    const u = user || this.getAdminUser() || this.getUser();
+    if (!u || !u.role) return false;
+    const role = (u.role || '').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
+    return ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'].includes(role);
+  },
+
   isStaff(user = null) {
-    return this.isAdmin(user);
+    return this.canAccessAdmin(user);
   },
 
   getAuthHeaders() {

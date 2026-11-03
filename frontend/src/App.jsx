@@ -759,16 +759,24 @@ useEffect(() => {
     }
   }, [siteSettings]);
 
-  const handleOpenAdmin = () => {
+  const [adminPath, setAdminPath] = useState('/admin/dashboard');
+
+  const handleOpenAdmin = (targetPath = '/admin/dashboard') => {
+    const pathStr = typeof targetPath === 'string' && targetPath.startsWith('/admin') ? targetPath : '/admin/dashboard';
+    setAdminPath(pathStr);
     setIsAdminView(true);
     setCurrentRoute({ route: 'admin' });
     setActiveArticleSlug(null);
     setSelectedStory(null);
     setIsSideDrawerOpen(false);
     try {
-      window.history.pushState(null, '', '/admin/dashboard');
+      window.history.pushState(null, '', pathStr);
     } catch (e) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenPitches = () => {
+    handleOpenAdmin('/admin/submissions');
   };
 
   const handleBackFromAdmin = () => {
@@ -1141,6 +1149,7 @@ useEffect(() => {
     return (
       <div className="admin-app-root">
         <AdminLayout 
+          initialPath={adminPath}
           onBackToSite={handleBackFromAdmin}
           onShowToast={showToast}
           siteSettings={siteSettings}
@@ -1229,6 +1238,7 @@ useEffect(() => {
         onOpenAuthModal={(mode = 'login') => setAuthModal({ isOpen: true, mode })}
         onOpenProModal={() => setProModalOpen(true)}
         onOpenAdmin={handleOpenAdmin}
+        onOpenPitchStory={handleOpenPitches}
         navLinks={navLinks}
         onSearchSubmit={handleNavigateSearch}
         onGoHome={handleBackToHome}

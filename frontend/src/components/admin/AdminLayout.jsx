@@ -31,12 +31,19 @@ import AdminCategoryStudioView from './AdminCategoryStudioView';
 import AdminTopicStudioView from './AdminTopicStudioView';
 import AdminFounderView from './AdminFounderView';
 
-export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: propSettings }) {
+export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: propSettings, initialPath }) {
   const [currentPath, setCurrentPath] = useState(() => {
+    if (initialPath && initialPath.startsWith('/admin')) return initialPath;
     const p = window.location.pathname;
     if (p === '/admin' || p === '/admin/') return '/admin/dashboard';
     return p.startsWith('/admin') ? p : '/admin/dashboard';
   });
+
+  useEffect(() => {
+    if (initialPath && initialPath.startsWith('/admin')) {
+      setCurrentPath(initialPath);
+    }
+  }, [initialPath]);
 
   const [siteSettings, setSiteSettings] = useState(() => propSettings || SettingService.getLocalSettings());
 
@@ -57,8 +64,21 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     return () => window.removeEventListener('settings:change', handleSettingsChange);
   }, []);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => AuthService.isAdminAuthenticated());
-  const [adminUser, setAdminUser] = useState(() => AuthService.getAdminUser());
+  const [adminUser, setAdminUser] = useState(() => {
+    const admin = AuthService.getAdminUser();
+    if (admin) return admin;
+    const user = AuthService.getUser();
+    if (user && AuthService.canAccessAdmin(user)) return user;
+    return null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (AuthService.isAdminAuthenticated()) return true;
+    const user = AuthService.getUser();
+    if (user && AuthService.canAccessAdmin(user) && (AuthService.getToken() || AuthService.getUserToken())) {
+      return true;
+    }
+    return false;
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('admin_sidebar_open');
     if (saved !== null) return saved === 'true';
@@ -94,13 +114,14 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     window.addEventListener('auth:change', handleAuthChange);
 
     // Verify token validity against backend to prevent stale session lockouts
-    if (AuthService.isAdminAuthenticated()) {
+    if (AuthService.isAdminAuthenticated() || (AuthService.getUser() && AuthService.canAccessAdmin(AuthService.getUser()))) {
       AuthService.checkAuth().then(verifiedUser => {
-        if (!verifiedUser || !AuthService.isAdmin(verifiedUser)) {
+        if (!verifiedUser || !AuthService.canAccessAdmin(verifiedUser)) {
           setIsAuthenticated(false);
           setAdminUser(null);
         } else {
           setAdminUser(verifiedUser);
+          setIsAuthenticated(true);
         }
       }).catch(() => {});
     }
@@ -146,7 +167,8 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     if (onShowToast) onShowToast('You have been logged out.');
   };
 
-  const isAdminAuthenticated = isAuthenticated && AuthService.isAdmin(adminUser);
+  const effectiveUser = adminUser || (AuthService.canAccessAdmin(AuthService.getUser()) ? AuthService.getUser() : null);
+  const isAdminAuthenticated = Boolean(isAuthenticated && AuthService.canAccessAdmin(effectiveUser));
 
   // If user is accessing /admin/login specifically or is not an assigned admin
   if (!isAdminAuthenticated || currentPath === '/admin/login') {
@@ -154,7 +176,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       <AdminLogin 
         onLoginSuccess={handleLoginSuccess}
         onBackToSite={() => handleNavigate('/')}
-        unauthorizedUser={isAuthenticated && !AuthService.isAdmin(adminUser) ? adminUser : null}
+        unauthorizedUser={isAuthenticated && !AuthService.canAccessAdmin(adminUser) ? adminUser : null}
         siteSettings={siteSettings}
       />
     );

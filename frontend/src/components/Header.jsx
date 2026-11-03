@@ -17,6 +17,7 @@ export default function Header({
   savedCount,
   onOpenBookmarks,
   onOpenPitchModal,
+  onOpenPitchStory,
   onOpenSideDrawer,
   onShowToast,
   onOpenAuthModal,
@@ -1119,12 +1120,16 @@ export default function Header({
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
                     </div>
 
-                    {Boolean(currentUser && AuthService.isAuthor(currentUser)) && (
+                    {Boolean(currentUser && (AuthService.isAuthor(currentUser) || AuthService.isStaff(currentUser))) && (
                       <button
                         type="button"
                         onClick={() => {
                           setUserDropdownOpen(false);
-                          if (onOpenPitchStory) onOpenPitchStory();
+                          if (onOpenPitchStory) {
+                            onOpenPitchStory();
+                          } else if (onOpenAdmin) {
+                            onOpenAdmin('/admin/submissions');
+                          }
                         }}
                         style={{
                           width: '100%',
