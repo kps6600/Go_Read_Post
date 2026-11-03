@@ -2,7 +2,7 @@
 import { 
   Layers, Save, RefreshCw, AlertCircle, Plus, Trash2, Globe, Shield, 
   Share2, MessageSquare, Send, CheckCircle, ArrowUpRight,
-  ExternalLink, Sparkles, MoveUp, MoveDown, Compass, HeartHandshake, MapPin,
+  ExternalLink, Sparkles, MoveUp, MoveDown, Compass, HeartHandshake, 
   ArrowLeft, ArrowRight, Tag, Rss
 } from 'lucide-react';
 import { FooterService } from '../../services/footerService';
@@ -388,7 +388,6 @@ export default function AdminFooterView({ onShowToast }) {
         {[
           { id: 'columns', label: 'Navigation Columns', icon: Globe },
           { id: 'brand', label: 'Brand & Mission Manifesto', icon: Layers },
-          { id: 'livedesk', label: 'Live Desk & Bureaus', icon: MapPin },
           { id: 'social', label: 'Social Networks', icon: Share2 },
           { id: 'bottom', label: 'Bottom Bar & Meta', icon: Shield }
         ].map(tab => {
@@ -897,65 +896,6 @@ export default function AdminFooterView({ onShowToast }) {
           </div>
         </div>
       )}
-
-      {/* TAB 3: LIVE DESK & BUREAUS */}
-      {activeTab === 'livedesk' && (
-        <div style={{ background: 'var(--card-bg, #ffffff)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>Live Desk &amp; Bureaus</h3>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 16px',
-                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: 700,
-                fontSize: '0.82rem',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 1px 4px rgba(234, 88, 12, 0.25)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {saving ? <RefreshCw className="animate-spin" size={13} /> : savedSuccess ? <CheckCircle size={13} /> : <Save size={13} />}
-              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer Configuration'}</span>
-            </button>
-          </div>
-          <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '6px', color: 'var(--text-primary)' }}>
-              Live Desk Status Label *
-            </label>
-            <input
-              type="text"
-              value={footer.liveDeskText || ''}
-              onChange={e => setFooter({ ...footer, liveDeskText: e.target.value })}
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontWeight: 750 }}
-              placeholder="LIVE DESK"
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '6px', color: 'var(--text-primary)' }}>
-              Bureau Locations String (Separated by • bullet) *
-            </label>
-            <input
-              type="text"
-              value={footer.liveDeskLocations || ''}
-              onChange={e => setFooter({ ...footer, liveDeskLocations: e.target.value })}
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontWeight: 600 }}
-              placeholder="Bengaluru • New Delhi • San Francisco • Singapore"
-            />
-          </div>
-        </div>
-      )}
-
-
 
       {/* TAB 5: SOCIAL NETWORKS */}
       {activeTab === 'social' && (
