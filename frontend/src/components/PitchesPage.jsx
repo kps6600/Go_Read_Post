@@ -174,50 +174,6 @@ export default function PitchesPage({
         <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
       </div>
 
-      {/* Author Persona / Desk Banner */}
-      <div className="pp-author-persona-bar">
-        <div className="pp-author-pills">
-          <button
-            type="button"
-            className={`pp-author-pill ${statusFilter === 'all' && formatFilter === 'all' ? 'active' : ''}`}
-            onClick={() => { setStatusFilter('all'); setFormatFilter('all'); }}
-          >
-            <span>My Stories &amp; Pitches</span>
-            <span className="pp-author-badge">{totalCount}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`pp-author-pill ${statusFilter === 'published' ? 'active' : ''}`}
-            onClick={() => { setStatusFilter('published'); setFormatFilter('all'); }}
-          >
-            <CheckCircle2 size={13} />
-            <span>Published ({publishedCount})</span>
-            <span className="pp-author-badge pp-badge-green">{publishedCount}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`pp-author-pill ${statusFilter === 'pending' || statusFilter === 'reviewing' ? 'active' : ''}`}
-            onClick={() => { setStatusFilter('pending'); setFormatFilter('all'); }}
-          >
-            <Clock size={13} />
-            <span>In Review ({pendingCount})</span>
-            <span className="pp-author-badge pp-badge-amber">{pendingCount}</span>
-          </button>
-        </div>
-
-        <div className="pp-author-desk-info">
-          <span className="pp-author-desk-label">Author Desk:</span>
-          <strong className="pp-author-desk-name">
-            {activeAuthor.name || activeAuthor.username || 'Aditi Shrivastava'}
-          </strong>
-          <span className="pp-author-desk-email">
-            ({activeAuthor.email || 'aditi-shrivastava@goreadpost.com'})
-          </span>
-        </div>
-      </div>
-
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
         <div 
