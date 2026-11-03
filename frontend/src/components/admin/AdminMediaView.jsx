@@ -492,43 +492,65 @@ export default function AdminMediaView({ onShowToast }) {
         </div>
       )}
 
-      {/* ── Assets Count Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, color: '#475569', border: '1px solid #e2e8f0' }}>
-          <span>
-            {typeFilter === 'image' && 'Images: '}
-            {typeFilter === 'video' && 'Videos: '}
-            {typeFilter === 'all' && 'All Assets: '}
-            <strong style={{ color: '#0f172a' }}>{filteredFiles.length}</strong> {filteredFiles.length === 1 ? 'file' : 'files'}
-            {totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
-          </span>
+      {/* ── Cards Header: Select All & Bulk Actions (Matching other pages) ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <label title="Select assets on this page" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none', fontWeight: 600, fontSize: '0.84rem', color: '#475569' }}>
+            <input 
+              type="checkbox" 
+              className="admin-table-checkbox"
+              style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#dc2626' }}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    paginatedFiles.forEach((f, idx) => next.add(f._id || f.filename || f.url || `media-${idx}`));
+                    return next;
+                  });
+                } else {
+                  setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    paginatedFiles.forEach((f, idx) => next.delete(f._id || f.filename || f.url || `media-${idx}`));
+                    return next;
+                  });
+                }
+              }}
+              checked={paginatedFiles.length > 0 && paginatedFiles.every((f, idx) => selectedIds.has(f._id || f.filename || f.url || `media-${idx}`))}
+            />
+            <span>Select Page</span>
+          </label>
+
+          {selectedIds.size > 0 && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '999px', background: '#fee2e2', color: '#dc2626', fontSize: '0.78rem', fontWeight: 700, border: '1px solid #fecaca' }}>
+              {selectedIds.size} of {filteredFiles.length} selected
+            </span>
+          )}
         </div>
 
         {selectedIds.size > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#dc2626', background: '#fef2f2', padding: '4px 10px', borderRadius: '6px', border: '1px solid #fecaca' }}>
-              {selectedIds.size} selected
-            </span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
               onClick={handleBulkDelete}
               disabled={bulkDeleting}
+              title="Delete selected file(s)"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                background: '#dc2626',
-                color: '#fff',
-                border: 'none',
+                gap: '6px',
+                padding: '5px 12px',
                 borderRadius: '6px',
+                background: '#dc2626',
+                color: '#ffffff',
+                border: 'none',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: bulkDeleting ? 'not-allowed' : 'pointer',
+                boxShadow: '0 1px 3px rgba(220, 38, 38, 0.25)'
               }}
             >
-              <Trash2 size={13} />
-              <span>{bulkDeleting ? 'Deleting...' : 'Delete Selected'}</span>
+              <Trash2 size={14} />
+              <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
             </button>
             <button
               type="button"
