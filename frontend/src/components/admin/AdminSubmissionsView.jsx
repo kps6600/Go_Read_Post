@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
   Trash2, Search, Filter, RefreshCw, BookOpen, 
-  ArrowUpRight, AlertCircle, FileText, Phone, User, Film
+  ArrowUpRight, AlertCircle, Phone, User
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
 import './AdminSubmissionsView.css';
@@ -221,12 +221,6 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                       }}
                     />
                     <div className="asv-card-overlay" />
-
-                    {/* Top-Left Format Badge */}
-                    <span className={`asv-format-badge ${isVideo ? 'pitch-video' : 'pitch-article'}`}>
-                      {isVideo ? <Film size={12} /> : <FileText size={12} />}
-                      <span>{isVideo ? 'Video Pitch' : 'Article Pitch'}</span>
-                    </span>
 
                     {/* Top-Right Status Pill */}
                     <span className={`asv-status-pill ${sub.status === 'reviewing' ? 'reviewing' : 'pending'}`}>
