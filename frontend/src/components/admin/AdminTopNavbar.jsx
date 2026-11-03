@@ -57,7 +57,7 @@ export default function AdminTopNavbar({
           aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
         >
-          {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+          {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
         </button>
 
         <div className="topbar-breadcrumbs">
