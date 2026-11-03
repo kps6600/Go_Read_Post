@@ -20227,21 +20227,21 @@ main {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--admin-bg-topbar, #ffffff);
-  border: 1px solid var(--admin-border, #e2e8f0);
-  color: var(--admin-text-primary, #0f172a);
+  background: #ef4444;
+  border: 1px solid #dc2626;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.32), 0 1px 3px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
 
 .topbar-sidebar-toggle-btn:hover {
-  background: var(--admin-bg-hover, #f8fafc);
-  border-color: var(--brand-primary, #ea580c);
-  color: var(--brand-primary, #ea580c);
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
   transform: translateX(-50%) scale(1.08);
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.18);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
 }
 
 .admin-cms-wrapper.sidebar-collapsed .topbar-sidebar-toggle-btn {
