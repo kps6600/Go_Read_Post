@@ -2495,15 +2495,17 @@ export default function LiveArticleStudio({
                           <UploadCloud size={13} />
                           <span>{uploadingCover ? 'Uploading...' : 'Replace (PC)'}</span>
                         </button>
-                        <button
-                          type="button"
-                          className="las-block-action-btn"
-                          onClick={() => openMediaPicker({ type: 'featured' })}
-                          title="Select an image from Media Library"
-                        >
-                          <FolderOpen size={13} />
-                          <span>Media Library</span>
-                        </button>
+                        {!isPitchMode && (
+                          <button
+                            type="button"
+                            className="las-block-action-btn"
+                            onClick={() => openMediaPicker({ type: 'featured' })}
+                            title="Select an image from Media Library"
+                          >
+                            <FolderOpen size={13} />
+                            <span>Media Library</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="las-block-action-btn delete"
@@ -2596,15 +2598,17 @@ export default function LiveArticleStudio({
                           <UploadCloud size={14} />
                           <span>{uploadingCover ? 'Uploading...' : 'Upload Cover (PC)'}</span>
                         </button>
-                        <button
-                          type="button"
-                          className="las-btn"
-                          style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
-                          onClick={() => openMediaPicker({ type: 'featured' })}
-                        >
-                          <FolderOpen size={14} />
-                          <span>Browse Media Library</span>
-                        </button>
+                        {!isPitchMode && (
+                          <button
+                            type="button"
+                            className="las-btn"
+                            style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                            onClick={() => openMediaPicker({ type: 'featured' })}
+                          >
+                            <FolderOpen size={14} />
+                            <span>Browse Media Library</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2982,15 +2986,17 @@ export default function LiveArticleStudio({
                                           <UploadCloud size={14} />
                                           <span>{uploadingSectionImage && targetSectionId === block.id ? 'Uploading...' : 'Add Image (PC)'}</span>
                                         </button>
-                                        <button
-                                          type="button"
-                                          className="las-section-media-btn library"
-                                          onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
-                                          title="Select image from Media Library"
-                                        >
-                                          <FolderOpen size={14} />
-                                          <span>Media Library</span>
-                                        </button>
+                                        {!isPitchMode && (
+                                          <button
+                                            type="button"
+                                            className="las-section-media-btn library"
+                                            onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                            title="Select image from Media Library"
+                                          >
+                                            <FolderOpen size={14} />
+                                            <span>Media Library</span>
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                   ) : (
@@ -3012,15 +3018,17 @@ export default function LiveArticleStudio({
                                             <UploadCloud size={13} />
                                             <span>Replace (PC)</span>
                                           </button>
-                                          <button
-                                            type="button"
-                                            className="las-section-add-more-btn"
-                                            onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
-                                            title="Replace section image from Media Library"
-                                          >
-                                            <FolderOpen size={13} />
-                                            <span>Media Library</span>
-                                          </button>
+                                          {!isPitchMode && (
+                                            <button
+                                              type="button"
+                                              className="las-section-add-more-btn"
+                                              onClick={() => openMediaPicker({ type: 'sectionImage', blockId: block.id })}
+                                              title="Replace section image from Media Library"
+                                            >
+                                              <FolderOpen size={13} />
+                                              <span>Media Library</span>
+                                            </button>
+                                          )}
                                           <button
                                             type="button"
                                             className="las-section-add-more-btn"
@@ -3093,13 +3101,15 @@ export default function LiveArticleStudio({
                                     >
                                       {uploadingBlockImage ? 'Uploading...' : 'Change Image (PC)'}
                                     </button>
-                                    <button
-                                      type="button"
-                                      className="las-btn las-btn-draft"
-                                      onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
-                                    >
-                                      Media Library
-                                    </button>
+                                    {!isPitchMode && (
+                                      <button
+                                        type="button"
+                                        className="las-btn las-btn-draft"
+                                        onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
+                                      >
+                                        Media Library
+                                      </button>
+                                    )}
                                   </div>
                                   <input 
                                     type="text" 
@@ -3121,14 +3131,16 @@ export default function LiveArticleStudio({
                                   <UploadCloud size={15} />
                                   <span>{uploadingBlockImage ? 'Uploading...' : 'Upload Image from Computer'}</span>
                                 </button>
-                                <button
-                                  type="button"
-                                  className="las-card-btn-secondary"
-                                  onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
-                                >
-                                  <FolderOpen size={15} />
-                                  <span>Browse Media Library</span>
-                                </button>
+                                {!isPitchMode && (
+                                  <button
+                                    type="button"
+                                    className="las-card-btn-secondary"
+                                    onClick={() => openMediaPicker({ type: 'blockImage', blockId: block.id })}
+                                  >
+                                    <FolderOpen size={15} />
+                                    <span>Browse Media Library</span>
+                                  </button>
+                                )}
                               </div>
                             )}
 
