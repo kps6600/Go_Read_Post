@@ -2596,7 +2596,7 @@ export default function LiveArticleStudio({
                           disabled={uploadingCover}
                         >
                           <UploadCloud size={14} />
-                          <span>{uploadingCover ? 'Uploading...' : 'Upload Cover (PC)'}</span>
+                          <span>{uploadingCover ? 'Uploading...' : 'Upload from PC'}</span>
                         </button>
                         {!isPitchMode && (
                           <button
