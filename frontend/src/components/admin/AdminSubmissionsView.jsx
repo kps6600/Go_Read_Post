@@ -148,40 +148,8 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       </div>
 
       {/* Filter Tabs & Search */}
-      <div className="adv-filter-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {[
-            { id: 'all', label: 'All Submissions' },
-            { id: 'pitch', label: 'Startup & Story Pitches' },
-            { id: 'contact', label: 'Contact Messages' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              className={`adv-tab-btn ${typeFilter === tab.id ? 'active' : ''}`}
-              onClick={() => setTypeFilter(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-
-          <span style={{ borderRight: '1px solid var(--border-light)', margin: '0 4px' }} />
-
-          {[
-            { id: 'all', label: 'All Status' },
-            { id: 'pending', label: 'Pending' },
-            { id: 'reviewing', label: 'Reviewing' },
-            { id: 'published', label: 'Published' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              className={`adv-tab-btn ${statusFilter === tab.id ? 'active' : ''}`}
-              onClick={() => setStatusFilter(tab.id)}
-              style={{ fontSize: '0.8rem' }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <div className="adv-filter-bar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+        
 
         <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', minWidth: '260px' }}>
           <div className="adv-search-box" style={{ flex: 1, position: 'relative' }}>
