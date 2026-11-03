@@ -1,3 +1,4 @@
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { AuthService } from '../../services/authService';
 import { SettingService } from '../../services/settingService';
@@ -490,6 +491,16 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
         onToggle={handleToggleSidebar}
         siteSettings={siteSettings}
       />
+
+      <button
+        type="button"
+        className="admin-sidebar-line-toggle-btn"
+        onClick={handleToggleSidebar}
+        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+        title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+      >
+        {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+      </button>
 
       <div className="admin-main-stage">
         <AdminTopNavbar 

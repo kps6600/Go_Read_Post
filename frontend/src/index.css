@@ -20215,7 +20215,13 @@ main {
   gap: 1rem;
 }
 
-.topbar-sidebar-toggle-btn {
+/* Sidebar Line Toggle Button - Centered Directly on Dividing Line */
+.admin-sidebar-line-toggle-btn {
+  position: fixed;
+  top: 16px;
+  left: 270px;
+  transform: translateX(-50%);
+  z-index: 1002;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20226,25 +20232,45 @@ main {
   border: 1px solid #dc2626;
   color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.32), 0 1px 3px rgba(0, 0, 0, 0.08);
-  flex-shrink: 0;
+  transition: left 0.22s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35), 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.topbar-sidebar-toggle-btn:hover {
+.admin-sidebar-line-toggle-btn:hover {
   background: #dc2626;
   border-color: #b91c1c;
   color: #ffffff;
-  transform: scale(1.06);
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+  transform: translateX(-50%) scale(1.08);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.5);
+}
+
+.admin-cms-wrapper.sidebar-collapsed .admin-sidebar-line-toggle-btn {
+  left: 16px;
+  transform: none;
+}
+
+.admin-cms-wrapper.sidebar-collapsed .admin-sidebar-line-toggle-btn:hover {
+  transform: scale(1.08);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1.5rem;
+  transition: padding-left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-cms-wrapper.sidebar-collapsed .topbar-left {
+  padding-left: 3.5rem;
 }
 
 @media (max-width: 768px) {
-  .topbar-sidebar-toggle-btn {
+  .admin-sidebar-line-toggle-btn {
     left: 14px !important;
     transform: none !important;
   }
-  .topbar-sidebar-toggle-btn:hover {
+  .admin-sidebar-line-toggle-btn:hover {
     transform: scale(1.08) !important;
   }
   .topbar-left {
