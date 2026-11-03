@@ -265,6 +265,19 @@ router.get('/', async (req, res) => {
   try {
     const { type, status, search, author, email, limit = 100 } = req.query;
 
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace(/^Bearer\s+/i, '');
+    const isAuthenticated = Boolean(token && token !== 'null' && token !== 'undefined');
+
+    // 🔒 Protect author pitches: Unauthenticated callers cannot fetch author pitches
+    if (!isAuthenticated) {
+      return res.json({
+        success: true,
+        count: 0,
+        data: []
+      });
+    }
+
     if (isDbConnected()) {
       await syncAuthorDraftPitchesToSubmissions();
 

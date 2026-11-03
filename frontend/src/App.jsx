@@ -1026,6 +1026,7 @@ useEffect(() => {
         }).catch(() => {});
       } else {
         setSavedStories([]);
+        setIsPitchModalOpen(false);
       }
     };
 
@@ -1368,8 +1369,16 @@ useEffect(() => {
         ) : currentRoute.route === 'pitches' && !searchQuery.trim() ? (
           <PitchesPage 
             onBack={handleBackToHome}
-            onOpenPitchModal={() => setIsPitchModalOpen(true)}
+            onOpenPitchModal={() => {
+              if (!currentUser && !AuthService.isAuthenticated()) {
+                showToast('Please sign in as an author to pitch a story.');
+                setAuthModal({ isOpen: true, mode: 'login' });
+                return;
+              }
+              setIsPitchModalOpen(true);
+            }}
             currentUser={currentUser}
+            onOpenAuthModal={(mode = 'login') => setAuthModal({ isOpen: true, mode })}
             onShowToast={showToast}
           />
         ) : (currentRoute.route === 'founder-first' || activeCategory === 'founder-first') && !searchQuery.trim() ? (

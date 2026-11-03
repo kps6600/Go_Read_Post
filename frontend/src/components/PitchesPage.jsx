@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
-  Send, Search, Filter, Sparkles, Plus, ExternalLink, Calendar, 
+  Lock, LogIn, Send, Search, Filter, Sparkles, Plus, ExternalLink, Calendar, 
   User, CheckCircle2, Clock, FileText, Tv, X, ChevronRight, ArrowLeft,
   TrendingUp, Globe, Building, AlertCircle, ChevronDown
 } from 'lucide-react';
@@ -12,6 +12,7 @@ export default function PitchesPage({
   onBack, 
   onOpenPitchModal, 
   currentUser, 
+  onOpenAuthModal,
   onShowToast 
 }) {
   const [pitches, setPitches] = useState([]);
@@ -25,12 +26,13 @@ export default function PitchesPage({
 
   // Determine active logged-in author
   const activeAuthor = useMemo(() => {
-    return currentUser || AuthService.getUser() || {
-      name: 'Aditi Shrivastava',
-      email: 'aditi-shrivastava@goreadpost.com',
-      role: 'AUTHOR'
-    };
+    return currentUser || AuthService.getUser() || null;
   }, [currentUser]);
+
+  const isAuthorLoggedIn = Boolean(
+    activeAuthor && 
+    (AuthService.isAuthenticated() || activeAuthor.token || activeAuthor.role || activeAuthor.email)
+  );
 
   // Close filter popover on outside click
   useEffect(() => {
@@ -46,6 +48,12 @@ export default function PitchesPage({
   }, [filterMenuOpen]);
 
   const fetchPitches = () => {
+    if (!isAuthorLoggedIn || !activeAuthor) {
+      setPitches([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     SubmissionService.getPublicPitches({ 
       type: 'pitch', 
@@ -65,11 +73,16 @@ export default function PitchesPage({
   };
 
   useEffect(() => {
+    if (!isAuthorLoggedIn) {
+      setPitches([]);
+      setLoading(false);
+      return;
+    }
     fetchPitches();
     const handleSubmissionsChange = () => fetchPitches();
     window.addEventListener('submissions:change', handleSubmissionsChange);
     return () => window.removeEventListener('submissions:change', handleSubmissionsChange);
-  }, [activeAuthor]);
+  }, [isAuthorLoggedIn, activeAuthor]);
 
   // Check if a pitch/story belongs strictly to this logged-in author
   const isPitchMine = (p) => {
@@ -161,6 +174,54 @@ export default function PitchesPage({
       return true;
     });
   }, [authorPitches, formatFilter, statusFilter, searchQuery]);
+
+  // 🔒 Route Protection: If author is logged out, restrict access and show sign-in gate
+  if (!isAuthorLoggedIn) {
+    return (
+      <div className="pitches-page-root">
+        {/* Breadcrumb Navigation */}
+        <div className="pp-breadcrumb">
+          <button type="button" onClick={onBack}>
+            <ArrowLeft size={14} />
+            <span>Home</span>
+          </button>
+          <ChevronRight size={12} />
+          <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
+        </div>
+
+        <div className="pp-protected-gate-card">
+          <div className="pp-protected-icon-wrap">
+            <Lock size={36} color="#dc2626" />
+          </div>
+          <h2 className="pp-protected-title">Author Studio Access Restricted</h2>
+          <p className="pp-protected-desc">
+            You are currently logged out. To view your submitted pitches, track review status, or access author story drafts, please sign in with your author credentials.
+          </p>
+          <div className="pp-protected-actions">
+            <button
+              type="button"
+              className="pp-primary-cta"
+              onClick={() => {
+                if (onOpenAuthModal) onOpenAuthModal('login');
+              }}
+            >
+              <LogIn size={16} />
+              <span>Sign In as Author</span>
+            </button>
+
+            <button
+              type="button"
+              className="pp-secondary-btn"
+              onClick={onBack}
+            >
+              <ArrowLeft size={15} />
+              <span>Return to Home</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pitches-page-root">

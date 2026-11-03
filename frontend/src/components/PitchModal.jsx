@@ -16,13 +16,12 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
 
   if (!isOpen) return null;
 
-  const authorUser = propUser || AuthService.getUser() || { 
-    name: 'Aditi Shrivastava', 
-    email: 'aditi-shrivastava@goreadpost.com', 
-    role: 'AUTHOR',
-    title: 'Staff Reporter',
-    designation: 'Staff Reporter'
-  };
+  const authorUser = propUser || AuthService.getUser();
+  if (!authorUser) {
+    if (onShowToast) onShowToast('Please sign in to access Pitch Studio.');
+    if (onClose) onClose();
+    return null;
+  }
 
   // If user selected Article format
   if (pitchFormat === 'article') {
