@@ -230,13 +230,15 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
                     {/* Top-Right Status Pill */}
                     <span className={`asv-status-pill ${sub.status === 'reviewing' ? 'reviewing' : 'pending'}`}>
-                      {sub.status || 'pending'}
+                      <span className="asv-status-dot" />
+                      <span>{sub.status === 'reviewing' ? 'In Review' : 'Pending'}</span>
                     </span>
 
                     {/* Bottom-Left Startup / Sector Pill */}
                     {(sub.startupName || sub.sector) && (
                       <span className="asv-media-meta-pill">
-                        {sub.startupName || sub.sector}
+                        <Building size={11} style={{ flexShrink: 0 }} />
+                        <span>{sub.startupName || sub.sector}</span>
                       </span>
                     )}
                   </div>
