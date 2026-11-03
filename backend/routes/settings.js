@@ -1,7 +1,7 @@
 import express from 'express';
 import Setting from '../models/Setting.js';
 import { isDbConnected } from '../db.js';
-import { protectAdmin } from '../middleware/auth.js';
+import { protectAdmin, requireRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
 });
 
 // 2. PUT /api/settings (Protected: update global site settings)
-router.put('/', protectAdmin, async (req, res) => {
+router.put('/', protectAdmin, requireRoles('SUPER_ADMIN', 'ADMIN'), async (req, res) => {
   try {
     const raw = req.body || {};
     const updates = {

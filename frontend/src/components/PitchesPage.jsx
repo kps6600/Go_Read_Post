@@ -31,7 +31,12 @@ export default function PitchesPage({
 
   const isAuthorLoggedIn = Boolean(
     activeAuthor && 
-    (AuthService.isAuthenticated() || activeAuthor.token || activeAuthor.role || activeAuthor.email)
+    (AuthService.isAuthenticated() || activeAuthor.token) &&
+    (
+      AuthService.isAuthor(activeAuthor) || 
+      AuthService.isAdmin(activeAuthor) || 
+      ['AUTHOR', 'EDITOR', 'ADMIN', 'SUPER_ADMIN'].includes((activeAuthor.role || '').toUpperCase())
+    )
   );
 
   // Close filter popover on outside click

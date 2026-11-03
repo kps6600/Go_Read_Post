@@ -5,7 +5,7 @@ import Article from '../models/Article.js';
 import Video from '../models/Video.js';
 import Story from '../models/Story.js';
 import { isDbConnected } from '../db.js';
-import { protectAdmin } from '../middleware/auth.js';
+import { protectAdmin, protectAuthor } from '../middleware/auth.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -203,7 +203,13 @@ async function syncAuthorDraftPitchesToSubmissions() {
 }
 
 // PUBLIC / AUTHOR: POST /api/submissions (submit pitch or contact lead)
-router.post('/', async (req, res) => {
+router.post('/', (req, res, next) => {
+  const type = req.body?.type || 'pitch';
+  if (type === 'pitch') {
+    return protectAuthor(req, res, next);
+  }
+  next();
+}, async (req, res) => {
   try {
     const payload = req.body;
     const type = payload.type || 'pitch';

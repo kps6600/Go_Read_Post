@@ -192,3 +192,19 @@ export const requireRoles = (...roles) => {
     next();
   };
 };
+
+// Middleware: Protect Author Endpoints (Only AUTHOR, EDITOR, ADMIN, SUPER_ADMIN)
+export const protectAuthor = async (req, res, next) => {
+  await protectAuth(req, res, () => {
+    const role = (req.user?.role || req.admin?.role || '').toUpperCase().replace('SUPERADMIN', 'SUPER_ADMIN');
+    const authorRoles = ['AUTHOR', 'EDITOR', 'ADMIN', 'SUPER_ADMIN'];
+    
+    if (!authorRoles.includes(role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: Accredited Author or Editor privileges required.'
+      });
+    }
+    next();
+  });
+};

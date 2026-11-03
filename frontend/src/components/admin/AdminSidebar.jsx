@@ -102,6 +102,23 @@ export default function AdminSidebar({
     return () => window.removeEventListener('settings:change', handleSettingsChange);
   }, []);
 
+  // Role-based navigation restriction: Authors only see workspace, editorial, and multimedia
+  const userRole = (adminUser?.role || '').toUpperCase();
+  const isAuthorRole = userRole === 'AUTHOR';
+
+  const visibleNavGroups = ADMIN_NAV_GROUPS.map(g => {
+    if (isAuthorRole) {
+      if (g.group === 'SITE ARCHITECTURE & CMS' || g.group === 'ACCESS & SETTINGS') {
+        return null;
+      }
+      return {
+        ...g,
+        items: g.items.filter(item => !['users', 'settings', 'seo', 'navigation', 'footer'].includes(item.id))
+      };
+    }
+    return g;
+  }).filter(Boolean);
+
   return (
     <>
       {(isOpenMobile || (isOpen && typeof window !== 'undefined' && window.innerWidth <= 768)) && (
@@ -157,7 +174,7 @@ export default function AdminSidebar({
 
         {/* Navigation Items Grouped */}
         <nav className="sidebar-nav-menu">
-          {ADMIN_NAV_GROUPS.map((group) => (
+          {visibleNavGroups.map((group) => (
             <div key={group.group} className="sidebar-nav-group-section">
               <div className="sidebar-section-label">{group.group}</div>
               {group.items.map((item) => {
