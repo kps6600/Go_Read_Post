@@ -8,6 +8,9 @@ import { ArticleService } from '../../services/articleService';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { MediaService } from '../../services/mediaService';
 import TipTapEditor from './TipTapEditor';
+import confetti from 'canvas-confetti';
+import { SubmissionService } from '../../services/submissionService';
+import { AuthService } from '../../services/authService';
 import './LiveArticleStudio.css';
 import '../ArticlePage.css';
 
@@ -770,6 +773,8 @@ export default function LiveArticleStudio({
   onClose,
   onSaveSuccess,
   onShowToast,
+  isPitchMode = false,
+  currentUser = null,
   categories: propCategories = [],
   authors: propAuthors = [],
   topics: propTopics = [],
@@ -795,6 +800,52 @@ export default function LiveArticleStudio({
   const [uploadingMultipleImages, setUploadingMultipleImages] = useState(false);
   const [uploadingSectionImage, setUploadingSectionImage] = useState(false);
   const [selectedMediaItems, setSelectedMediaItems] = useState([]);
+
+  // Derive logged-in author identity
+  const activeUser = currentUser || (typeof AuthService !== 'undefined' ? AuthService.getUser() : null) || (isPitchMode ? { name: 'Aditi Shrivastava', title: 'Staff Reporter' } : null);
+  const activeAuthorName = (isPitchMode || (activeUser && activeUser.role === 'AUTHOR')) && activeUser?.name
+    ? activeUser.name
+    : null;
+  const activeAuthorTitle = activeUser?.title || activeUser?.designation || (isPitchMode ? 'Staff Reporter' : 'Senior Tech Reporter');
+
+  // Register current author into authors dropdown and set by default
+  useEffect(() => {
+    const authorName = activeAuthorName || currentUser?.name || (typeof AuthService !== 'undefined' ? AuthService.getUser()?.name : null) || (isPitchMode ? 'Aditi Shrivastava' : null);
+    if (authorName) {
+      setAuthors(prev => {
+        const hasAuthor = prev.some(a => (a.name || a.authorName || '').toLowerCase() === authorName.toLowerCase());
+        if (!hasAuthor) {
+          return [
+            { 
+              _id: 'author_active', 
+              name: authorName, 
+              title: activeAuthorTitle, 
+              designation: activeAuthorTitle,
+              profileImage: activeUser?.avatar || activeUser?.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80' 
+            },
+            ...prev
+          ];
+        }
+        return prev;
+      });
+
+      if (!article || isPitchMode) {
+        setFormData(prev => {
+          if (!prev.authorName || prev.authorName === 'Editorial Desk') {
+            const authObj = authors.find(a => (a.name || a.authorName || '').toLowerCase() === authorName.toLowerCase());
+            return {
+              ...prev,
+              authorName: authorName,
+              authorId: authObj?._id || prev.authorId || null,
+              authorTitle: authObj?.designation || authObj?.title || activeAuthorTitle,
+              authorAvatar: authObj?.profileImage || authObj?.avatar || prev.authorAvatar
+            };
+          }
+          return prev;
+        });
+      }
+    }
+  }, [isPitchMode, currentUser, activeAuthorName, activeAuthorTitle, article]);
 
   // Categories, Authors, Topics & Tags
   const [categories, setCategories] = useState(propCategories);
@@ -1225,6 +1276,13 @@ export default function LiveArticleStudio({
     }
 
     // Brand new clean story for easy editing
+    const initAuthor = currentUser || (typeof AuthService !== 'undefined' ? AuthService.getUser() : null) || (isPitchMode ? { name: 'Aditi Shrivastava', title: 'Staff Reporter' } : null);
+    const defaultAuthorName = (isPitchMode || (initAuthor && initAuthor.role === 'AUTHOR')) && initAuthor?.name
+      ? initAuthor.name
+      : 'Editorial Desk';
+    const defaultAuthorTitle = initAuthor?.title || initAuthor?.designation || (isPitchMode ? 'Staff Reporter' : 'Senior Tech Reporter');
+    const defaultAuthorAvatar = initAuthor?.avatar || initAuthor?.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80';
+
     return {
       _id: null,
       title: '',
@@ -1236,9 +1294,9 @@ export default function LiveArticleStudio({
       categoryId: '',
       categoryName: 'Startups',
       authorId: '',
-      authorName: 'Editorial Desk',
-      authorTitle: 'Senior Tech Reporter',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+      authorName: defaultAuthorName,
+      authorTitle: defaultAuthorTitle,
+      authorAvatar: defaultAuthorAvatar,
       featuredImage: {
         url: '',
         alt: '',
@@ -2103,6 +2161,14 @@ export default function LiveArticleStudio({
         }
       };
 
+      if (isPitchMode) {
+        payload.isPitch = true;
+        payload.pitchedBy = currentUser?.name || formData.authorName || 'Contributing Author';
+        payload.pitchedByEmail = currentUser?.email || '';
+        payload.pitchedAt = new Date().toISOString();
+        payload.status = 'draft';
+      }
+
       let result = null;
       if (formData._id) {
         result = await ArticleService.updateArticle(formData._id, payload);
@@ -2124,6 +2190,44 @@ export default function LiveArticleStudio({
             onShowToast(`Successfully published "${formData.title}" to database!`);
           }
         }
+      }
+
+      if (isPitchMode) {
+        try {
+          const draftId = result?._id || result?.id || null;
+          await SubmissionService.createSubmission({
+            type: 'pitch',
+            pitchFormat: 'article',
+            draftArticleId: draftId ? String(draftId) : null,
+            startupName: payload.categoryName || 'Author Story Pitch',
+            founderName: payload.pitchedBy,
+            founderRole: payload.authorTitle || 'Contributing Author',
+            sector: payload.categoryName || 'Startups',
+            stage: 'Authored Story Draft',
+            headline: payload.title.replace(/<[^>]*>/g, '').trim(),
+            summary: payload.excerpt || payload.subtitle || 'Authored story pitch submitted for editorial review.',
+            details: payload.content ? payload.content.replace(/<[^>]*>/g, ' ').slice(0, 500) : '',
+            coverImage: payload.featuredImage?.url || '',
+            name: payload.pitchedBy,
+            email: payload.pitchedByEmail,
+            authorEmail: payload.pitchedByEmail,
+            category: payload.categoryName || 'Startups',
+            status: 'pending'
+          });
+        } catch (submErr) {
+          console.warn('Submission registration warning:', submErr);
+        }
+
+        try {
+          confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+        } catch (cErr) {}
+
+        if (onShowToast) {
+          onShowToast(`🎉 Story Pitched Successfully! "${formData.title}" submitted to Admin for review.`);
+        }
+        if (onSaveSuccess) onSaveSuccess(result);
+        if (onClose) onClose();
+        return;
       }
 
       if (onSaveSuccess) onSaveSuccess(result);
@@ -2322,38 +2426,6 @@ export default function LiveArticleStudio({
           </div>
         </div>
 
-        {/* Center: View Switcher */}
-        <div className="las-header-center">
-          <div className="las-view-toggle-group">
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'edit' ? 'active' : ''}`}
-              onClick={() => setViewMode('edit')}
-              title="Main Page Article Editor"
-            >
-              <span>Main Page</span>
-            </button>
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'seo' ? 'active' : ''}`}
-              onClick={() => setViewMode('seo')}
-              title="SEO & Social Metadata"
-            >
-              <Globe size={13} style={{ marginRight: '4px' }} />
-              <span>SEO</span>
-            </button>
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'preview' ? 'active' : ''}`}
-              onClick={() => setViewMode('preview')}
-              title="Full Live View"
-            >
-              <Eye size={13} style={{ marginRight: '4px' }} />
-              <span>Live View</span>
-            </button>
-          </div>
-        </div>
-
         {/* Right: Actions */}
         <div className="las-header-right">
           {formData._id && (
@@ -2367,31 +2439,6 @@ export default function LiveArticleStudio({
               <span>Delete</span>
             </button>
           )}
-
-          <button 
-            type="button" 
-            className="las-btn las-btn-draft"
-            onClick={() => handleSaveArticle('draft')}
-            disabled={saving}
-            title="Save as Draft (Ctrl+S)"
-          >
-            <span>Save Draft</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`las-btn las-btn-schedule ${formData.status === 'scheduled' ? 'active' : ''}`}
-            onClick={handleOpenScheduleModal}
-            disabled={saving}
-            title="Schedule Story to publish automatically at a future time"
-          >
-            <Clock size={14} />
-            <span>
-              {formData.status === 'scheduled' && formData.scheduledAt
-                ? 'Scheduled'
-                : 'Schedule'}
-            </span>
-          </button>
 
           <button 
             type="button" 
@@ -2711,26 +2758,30 @@ export default function LiveArticleStudio({
                     <label className="las-label">Author Byline</label>
                     <select 
                       className="las-select"
-                      value={formData.authorName}
+                      value={formData.authorName || activeAuthorName || 'Aditi Shrivastava'}
                       onChange={(e) => {
-                        const auth = authors.find(a => a.name === e.target.value);
+                        const auth = authors.find(a => (a.name || a.authorName) === e.target.value);
                         setFormData(prev => ({
                           ...prev,
                           authorName: e.target.value,
                           authorId: auth ? auth._id : prev.authorId,
-                          authorTitle: auth ? (auth.designation || prev.authorTitle) : prev.authorTitle,
-                          authorAvatar: auth ? (auth.profileImage || prev.authorAvatar) : prev.authorAvatar
+                          authorTitle: auth ? (auth.designation || auth.title || prev.authorTitle) : prev.authorTitle,
+                          authorAvatar: auth ? (auth.profileImage || auth.avatar || prev.authorAvatar) : prev.authorAvatar
                         }));
                       }}
                     >
+                      {activeAuthorName && !authors.some(a => (a.name || a.authorName) === activeAuthorName) && (
+                        <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>
+                      )}
                       {authors.map(a => (
-                        <option key={a._id || a.name} value={a.name}>{a.name} ({a.designation || 'Staff'})</option>
+                        <option key={a._id || a.name} value={a.name}>{a.name} ({a.designation || a.title || 'Staff Reporter'})</option>
                       ))}
                       {authors.length === 0 && (
                         <>
-                          <option value="Editorial Desk">Editorial Desk</option>
-                          <option value="Priya Sharma">Priya Sharma</option>
-                          <option value="Vikram Malhotra">Vikram Malhotra</option>
+                          {activeAuthorName && <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>}
+                          <option value="Editorial Desk">Editorial Desk (Senior Tech Reporter)</option>
+                          <option value="Priya Sharma">Priya Sharma (Tech Reporter)</option>
+                          <option value="Vikram Malhotra">Vikram Malhotra (Lead Reporter)</option>
                         </>
                       )}
                     </select>
