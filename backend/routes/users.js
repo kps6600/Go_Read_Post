@@ -3,9 +3,13 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import Role, { DEFAULT_ROLES } from '../models/Role.js';
 import { isDbConnected } from '../db.js';
-import { protectAdmin, requireSuperAdmin } from '../middleware/auth.js';
+import { protectAdmin, requireSuperAdmin, requireRoles } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// 🔒 Strict RBAC: User management is restricted strictly to Admins and Super Admins
+router.use(protectAdmin);
+router.use(requireRoles('SUPER_ADMIN', 'ADMIN'));
 
 // Fallback in-memory users for offline mode
 let fallbackUsers = [

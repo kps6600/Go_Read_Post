@@ -604,7 +604,7 @@ router.get('/me', protectAuth, async (req, res) => {
 });
 
 // 4. PUT /api/auth/profile (Update Profile)
-router.put('/profile', protectAdmin, async (req, res) => {
+router.put('/profile', protectAuth, async (req, res) => {
   try {
     const { name, bio, avatar, phone } = req.body;
     if (isDbConnected()) {
@@ -641,7 +641,7 @@ router.put('/profile', protectAdmin, async (req, res) => {
 });
 
 // 5. PUT /api/auth/change-password (Change Password)
-router.put('/change-password', protectAdmin, async (req, res) => {
+router.put('/change-password', protectAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
