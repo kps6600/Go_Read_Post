@@ -577,17 +577,7 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
                   <span>Publish</span>
                 </button>
               )}
-              {showBulkDraft && (
-                <button
-                  type="button"
-                  onClick={() => handleBulkStatusChange('draft')}
-                  className="abv-bulk-btn abv-bulk-btn-draft"
-                  title="Send selected video(s) to draft"
-                >
-                  <Clock size={14} />
-                  <span>Send Draft</span>
-                </button>
-              )}
+
               {showBulkDelete && (
                 <button
                   type="button"
