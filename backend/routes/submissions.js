@@ -89,12 +89,13 @@ export async function ensureSubmissionsSeeded() {
 async function syncAuthorDraftPitchesToSubmissions() {
   if (!isDbConnected()) return;
   try {
-    // 1. Sync Draft Articles
+    // Clean up any previously published submissions so they do not show in the submissions queue
+    await Submission.deleteMany({ status: 'published' });
+
+    // 1. Sync Draft Articles (only unpublished drafts flagged as pitches)
     const draftArticles = await Article.find({
-      $or: [
-        { isPitch: true },
-        { status: 'draft' }
-      ]
+      isPitch: true,
+      status: 'draft'
     }).sort({ createdAt: -1 }).limit(30);
 
     for (const draft of draftArticles) {
@@ -126,19 +127,17 @@ async function syncAuthorDraftPitchesToSubmissions() {
           email: draft.pitchedByEmail || '',
           authorEmail: draft.pitchedByEmail || '',
           category: draft.categoryName || 'Startups',
-          status: draft.status === 'published' ? 'published' : 'pending',
+          status: 'pending',
           createdAt: draft.createdAt || new Date()
         });
       }
     }
 
-    // 2. Sync Draft Videos
+    // 2. Sync Draft Videos (only unpublished drafts flagged as pitches)
     if (mongoose.models.Video) {
       const draftVideos = await Video.find({
-        $or: [
-          { isPitch: true },
-          { status: 'draft' }
-        ]
+        isPitch: true,
+        status: 'draft'
       }).sort({ createdAt: -1 }).limit(30);
 
       for (const vid of draftVideos) {
@@ -171,7 +170,7 @@ async function syncAuthorDraftPitchesToSubmissions() {
             email: vid.pitchedByEmail || '',
             authorEmail: vid.pitchedByEmail || '',
             category: vid.categoryLabel || vid.category || 'Interviews',
-            status: vid.status === 'published' ? 'published' : 'pending',
+            status: 'pending',
             createdAt: vid.createdAt || new Date()
           });
         }
@@ -248,9 +247,11 @@ adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
     if (isDbConnected()) {
       await syncAuthorDraftPitchesToSubmissions();
 
-      const filter = {};
+      const filter = { status: { $ne: 'published' } };
       if (type && type !== 'all') filter.type = type;
-      if (status && status !== 'all') filter.status = status;
+      if (status && status !== 'all') {
+        filter.status = status;
+      }
       if (search && search.trim()) {
         const regex = new RegExp(search.trim(), 'i');
         filter.$or = [
@@ -278,6 +279,7 @@ adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
     }
 
     let items = readFallbackSubmissions();
+    items = items.filter(i => i.status !== 'published');
     if (type && type !== 'all') items = items.filter(i => i.type === type);
     if (status && status !== 'all') items = items.filter(i => i.status === status);
     res.json({ success: true, count: items.length, data: items });
@@ -327,12 +329,11 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
 
         if (existingArticle) {
           existingArticle.status = 'published';
+          existingArticle.isPitch = false;
           existingArticle.publishedAt = new Date();
           await existingArticle.save();
 
-          subm.status = 'published';
-          subm.convertedArticleId = existingArticle._id;
-          await subm.save();
+          await Submission.findByIdAndDelete(id);
 
           return res.json({
             success: true,
@@ -351,10 +352,10 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
 
         if (existingVideo) {
           existingVideo.status = 'published';
+          existingVideo.isPitch = false;
           await existingVideo.save();
 
-          subm.status = 'published';
-          await subm.save();
+          await Submission.findByIdAndDelete(id);
 
           return res.json({
             success: true,
@@ -391,9 +392,7 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
         }
       });
 
-      subm.status = 'published';
-      subm.convertedArticleId = newArticle._id;
-      await subm.save();
+      await Submission.findByIdAndDelete(id);
 
       return res.json({
         success: true,
@@ -406,7 +405,7 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
     const list = readFallbackSubmissions();
     const idx = list.findIndex(i => String(i._id || i.id) === String(id));
     if (idx !== -1) {
-      list[idx].status = 'published';
+      list.splice(idx, 1);
       writeFallbackSubmissions(list);
     }
     res.status(200).json({ success: true, message: 'Story pitch approved & published live!' });

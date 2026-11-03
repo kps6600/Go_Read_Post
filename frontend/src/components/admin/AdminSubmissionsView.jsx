@@ -28,7 +28,8 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         search: searchQuery
       });
       if (res && res.data) {
-        setSubmissions(res.data);
+        const activeSubmissions = res.data.filter(s => s.status !== 'published');
+        setSubmissions(activeSubmissions);
         if (res.metrics) setMetrics(res.metrics);
       }
     } catch (err) {
@@ -60,6 +61,16 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
   const handleConvertToArticle = async (id, pitchFormat) => {
     setActionId(id);
     try {
+      const targetSub = submissions.find(s => String(s._id || s.id) === String(id));
+      setSubmissions(prev => prev.filter(s => String(s._id || s.id) !== String(id)));
+      if (targetSub) {
+        setMetrics(prev => ({
+          ...prev,
+          totalPitches: Math.max(0, (prev.totalPitches || 0) - 1),
+          pendingCount: targetSub.status === 'pending' ? Math.max(0, (prev.pendingCount || 0) - 1) : (prev.pendingCount || 0)
+        }));
+      }
+
       const res = await SubmissionService.convertToArticle(id);
       const isVideo = pitchFormat === 'video';
       onShowToast?.(res.message || (isVideo ? 'Video Story approved & published live!' : 'Pitch successfully published as article!'));
@@ -176,7 +187,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {submissions.map((sub) => {
+          {submissions.filter(s => s.status !== 'published').map((sub) => {
             const subId = sub._id || sub.id;
             const isPitch = sub.type === 'pitch';
             const isVideo = sub.pitchFormat === 'video';
@@ -357,12 +368,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
                 {/* Actions Bar */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', borderTop: '1px solid var(--border-light, #f1f5f9)', paddingTop: '0.75rem' }}>
-                  {isPitch && sub.status === 'published' && (
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '5px', marginRight: 'auto' }}>
-                      <CheckCircle size={15} /> Published Live on GoReadPost
-                    </span>
-                  )}
-
+                  
                   {isPitch && sub.status !== 'published' && (
                     <button
                       className="admin-btn-primary"
