@@ -3153,7 +3153,8 @@ export default function LiveArticleStudio({
               </div>
 
 {/* CARD: STORY PLACEMENTS & DISTRIBUTION */}
-              <div className="las-card las-placements-card">
+              {!isPitchMode && (
+                <div className="las-card las-placements-card">
                 <div className="las-card-title-row">
                   <h3 className="las-card-title">
                     <span>Story Placement & Distribution</span>
@@ -3311,6 +3312,7 @@ export default function LiveArticleStudio({
                   </div>
                 </div>
               </div>
+            )}
 
             </div>
           </div>
