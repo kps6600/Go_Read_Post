@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, 
   Trash2, Search, Filter, RefreshCw, BookOpen, 
-  ArrowUpRight, AlertCircle, Phone, User
+  ArrowUpRight, AlertCircle, Phone, User, X
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
 import './AdminSubmissionsView.css';
@@ -97,6 +97,33 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
   };
 
   
+  const filteredSubmissions = useMemo(() => {
+    let list = submissions.filter(s => s.status !== 'published');
+    if (typeFilter !== 'all') {
+      list = list.filter(s => s.type === typeFilter);
+    }
+    if (statusFilter !== 'all') {
+      list = list.filter(s => s.status === statusFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(s => {
+        const title = (s.headline || s.title || s.startupName || s.subject || '').toLowerCase();
+        const author = (s.founderName || s.authorName || s.name || '').toLowerCase();
+        const sector = (s.sector || s.category || '').toLowerCase();
+        const summary = (s.summary || s.details || '').toLowerCase();
+        const email = (s.email || '').toLowerCase();
+        return title.includes(q) || author.includes(q) || sector.includes(q) || summary.includes(q) || email.includes(q);
+      });
+    }
+    return list;
+  }, [submissions, typeFilter, statusFilter, searchQuery]);
+
+  const totalCount = submissions.filter(s => s.status !== 'published').length;
+  const pitchesCount = submissions.filter(s => s.status !== 'published' && s.type === 'pitch').length;
+  const contactsCount = submissions.filter(s => s.status !== 'published' && s.type === 'contact').length;
+  const pendingCount = submissions.filter(s => s.status === 'pending').length;
+
   const [submissionToDelete, setSubmissionToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -134,46 +161,100 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       
 
       {/* KPI Stats */}
-      <div className="adv-stats-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '1.5rem' }}>
-        <div className="adv-stat-card">
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Story &amp; Startup Pitches</span>
-            <div className="adv-stat-number">{metrics.totalPitches}</div>
-          </div>
+      <div className="asv-stats-row">
+        <div 
+          className={`asv-stat-card ${typeFilter === 'pitch' ? 'is-active' : ''}`}
+          onClick={() => { setTypeFilter(typeFilter === 'pitch' ? 'all' : 'pitch'); setStatusFilter('all'); }}
+          role="button"
+          tabIndex={0}
+          title="Click to filter Story & Startup Pitches"
+        >
+          <span className="asv-stat-label">Story &amp; Startup Pitches</span>
+          <div className="asv-stat-number">{metrics.totalPitches}</div>
         </div>
 
-        <div className="adv-stat-card">
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Contact Inquiries</span>
-            <div className="adv-stat-number">{metrics.totalContacts}</div>
-          </div>
+        <div 
+          className={`asv-stat-card ${typeFilter === 'contact' ? 'is-active' : ''}`}
+          onClick={() => { setTypeFilter(typeFilter === 'contact' ? 'all' : 'contact'); setStatusFilter('all'); }}
+          role="button"
+          tabIndex={0}
+          title="Click to filter Contact Inquiries"
+        >
+          <span className="asv-stat-label">Contact Inquiries</span>
+          <div className="asv-stat-number">{metrics.totalContacts}</div>
         </div>
 
-        <div className="adv-stat-card">
-          <div className="adv-stat-content">
-            <span className="adv-stat-label">Pending Action</span>
-            <div className="adv-stat-number">{metrics.pendingCount}</div>
-          </div>
+        <div 
+          className={`asv-stat-card ${statusFilter === 'pending' ? 'is-active' : ''}`}
+          onClick={() => { setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending'); }}
+          role="button"
+          tabIndex={0}
+          title="Click to filter Pending Action"
+        >
+          <span className="asv-stat-label">Pending Action</span>
+          <div className="asv-stat-number">{metrics.pendingCount}</div>
         </div>
       </div>
 
-      {/* Filter Tabs & Search */}
-      <div className="adv-filter-bar" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-        
+      {/* Modern Controls Omnibar */}
+      <div className="asv-controls-bar">
+        <div className="asv-filter-pills">
+          <button
+            type="button"
+            className={`asv-pill-btn ${typeFilter === 'all' && statusFilter === 'all' ? 'is-active' : ''}`}
+            onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
+          >
+            <span>All</span>
+            <span className="asv-pill-count">{totalCount}</span>
+          </button>
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', minWidth: '260px' }}>
-          <div className="adv-search-box" style={{ flex: 1, position: 'relative' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input 
-              type="text" 
-              placeholder="Search startup, author, headline..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="form-input"
-              style={{ paddingLeft: '36px', height: '38px' }}
-            />
-          </div>
-          <button type="submit" className="admin-btn-secondary" style={{ height: '38px' }}>Search</button>
+          <button
+            type="button"
+            className={`asv-pill-btn ${typeFilter === 'pitch' && statusFilter !== 'pending' ? 'is-active' : ''}`}
+            onClick={() => { setTypeFilter('pitch'); setStatusFilter('all'); }}
+          >
+            <span>Startup Pitches</span>
+            <span className="asv-pill-count">{pitchesCount}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`asv-pill-btn ${typeFilter === 'contact' ? 'is-active' : ''}`}
+            onClick={() => { setTypeFilter('contact'); setStatusFilter('all'); }}
+          >
+            <span>Contact Leads</span>
+            <span className="asv-pill-count">{contactsCount}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`asv-pill-btn ${statusFilter === 'pending' ? 'is-active' : ''}`}
+            onClick={() => { setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending'); }}
+          >
+            <span>Pending</span>
+            <span className="asv-pill-count">{pendingCount}</span>
+          </button>
+        </div>
+
+        <form onSubmit={handleSearch} className="asv-search-box">
+          <Search size={15} className="asv-search-icon" />
+          <input 
+            type="text" 
+            placeholder="Search startup, author, headline..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="asv-search-input"
+          />
+          {searchQuery && (
+            <button 
+              type="button" 
+              className="asv-search-clear"
+              onClick={() => { setSearchQuery(''); }}
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
         </form>
       </div>
 
@@ -183,15 +264,38 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
           <RefreshCw size={24} className="spin-anim" style={{ margin: '0 auto 12px' }} />
           <p>Loading submissions from database...</p>
         </div>
-      ) : submissions.length === 0 ? (
-        <div className="admin-empty-card" style={{ padding: '3.5rem 1rem', textAlign: 'center', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-light)', borderRadius: '10px' }}>
+      ) : filteredSubmissions.length === 0 ? (
+        <div className="admin-empty-card" style={{ padding: '3.5rem 1rem', textAlign: 'center', background: 'var(--bg-card, #fff)', border: '1px solid var(--border-light)', borderRadius: '12px' }}>
           <Send size={36} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
-          <h4 style={{ margin: 0, fontWeight: 700 }}>No submissions found</h4>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>No story pitches or contact leads matched your criteria.</p>
+          <h4 style={{ margin: '0 0 6px', fontWeight: 750, fontSize: '1.05rem', color: '#0f172a' }}>No submissions found</h4>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', maxWidth: '420px', margin: '0 auto 1rem' }}>
+            {searchQuery ? `No story pitches or leads match "${searchQuery}".` : 'No submissions found under the selected filter criteria.'}
+          </p>
+          {(searchQuery || typeFilter !== 'all' || statusFilter !== 'all') && (
+            <button
+              type="button"
+              onClick={() => { setSearchQuery(''); setTypeFilter('all'); setStatusFilter('all'); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 16px',
+                background: '#0f172a',
+                color: '#fff',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '0.82rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+            >
+              Clear All Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="asv-cards-grid">
-          {submissions.filter(s => s.status !== 'published').map((sub) => {
+          {filteredSubmissions.map((sub) => {
             const subId = sub._id || sub.id;
             const isPitch = sub.type === 'pitch';
             const isVideo = sub.pitchFormat === 'video';
