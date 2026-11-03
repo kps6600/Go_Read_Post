@@ -727,38 +727,50 @@ export default function LiveVideoStudio({
     }
   };
 
-  // Cover / Media PC File Upload
+  // Direct PC Video File Upload (Videos only)
   const handleCoverFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|mkv|m4v)$/i.test(file.name);
+    if (!isVideo) {
+      if (onShowToast) onShowToast('Please select a video file (.mp4, .webm, .mov, etc.)');
+      else alert('Please select a valid video file (.mp4, .webm, .mov).');
+      if (coverFileInputRef.current) coverFileInputRef.current.value = '';
+      return;
+    }
+
     setUploadingCover(true);
     try {
-      const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|mkv)$/i.test(file.name);
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (!isVideo) {
-          setFormData(prev => ({ ...prev, image: reader.result }));
-        }
-      };
-      reader.readAsDataURL(file);
-
       const uploaded = await MediaService.uploadFile(file);
       if (uploaded && (uploaded.url || uploaded.path)) {
         const finalUrl = uploaded.url || uploaded.path;
-        if (isVideo) {
-          setFormData(prev => ({
-            ...prev,
-            videoUrl: finalUrl,
-            youtubeEmbedUrl: finalUrl
-          }));
-          if (onShowToast) onShowToast('Video stream attached from PC');
-        } else {
-          setFormData(prev => ({ ...prev, image: finalUrl }));
-          if (onShowToast) onShowToast('Cover thumbnail updated from PC');
-        }
+        setFormData(prev => ({
+          ...prev,
+          videoUrl: finalUrl,
+          youtubeEmbedUrl: finalUrl
+        }));
+        if (onShowToast) onShowToast('Video stream attached from PC');
+      } else {
+        const localBlob = URL.createObjectURL(file);
+        setFormData(prev => ({
+          ...prev,
+          videoUrl: localBlob,
+          youtubeEmbedUrl: localBlob
+        }));
+        if (onShowToast) onShowToast('Video stream loaded from PC');
       }
     } catch (err) {
       console.warn('Cover upload fallback:', err);
+      try {
+        const localBlob = URL.createObjectURL(file);
+        setFormData(prev => ({
+          ...prev,
+          videoUrl: localBlob,
+          youtubeEmbedUrl: localBlob
+        }));
+        if (onShowToast) onShowToast('Video stream loaded from PC');
+      } catch (e2) {}
     } finally {
       setUploadingCover(false);
       if (coverFileInputRef.current) coverFileInputRef.current.value = '';
@@ -1132,7 +1144,7 @@ export default function LiveVideoStudio({
         <input
           ref={coverFileInputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="video/*,.mp4,.webm,.mov,.mkv,.m4v"
           style={{ display: 'none' }}
           onChange={handleCoverFileUpload}
         />
