@@ -279,23 +279,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
           </button>
         </form>
 
-        {/* Quick Admin Access Hint */}
-        <div style={{
-          marginTop: '1.25rem',
-          padding: '10px 12px',
-          background: 'var(--bg-card-hover, rgba(0,0,0,0.03))',
-          borderRadius: '8px',
-          fontSize: '0.78rem',
-          color: 'var(--text-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <ShieldCheck size={16} color="#ea580c" style={{ flexShrink: 0 }} />
-          <span>
-            Editorial Staff &amp; Admins: Log in with your admin credentials to unlock console access.
-          </span>
-        </div>
 
         <div className="auth-footer-terms">
           By continuing, you agree to GoReadPost Terms of Service &amp; Privacy Policy.
