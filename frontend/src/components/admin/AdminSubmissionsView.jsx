@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
-  Trash2, Search, Filter, RefreshCw, ExternalLink, Sparkles, BookOpen, 
-  ArrowUpRight, AlertCircle, FileText, Phone, User, Film, Play
+  Trash2, Search, Filter, RefreshCw, Sparkles, BookOpen, 
+  ArrowUpRight, AlertCircle, FileText, Phone, User, Film
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
 import './AdminSubmissionsView.css';
@@ -264,36 +264,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
                 {/* Card Body */}
                 <div className="asv-card-body">
-                  {/* Category & Stage Tags */}
-                  <div className="asv-tag-row">
-                    <span className="asv-category-badge">
-                      {isPitch ? (sub.category || sub.sector || 'Startups') : 'Inbound Lead'}
-                    </span>
-                    <span className="asv-stage-badge">
-                      {isPitch ? (sub.stage || 'Authored Pitch') : 'Contact Inquiry'}
-                    </span>
-                    {sub.videoUrl && (
-                      <a 
-                        href={sub.videoUrl} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#9333ea', fontSize: '0.72rem', fontWeight: 700, marginLeft: 'auto' }}
-                      >
-                        <Play size={11} /> <span>Watch URL</span> <ExternalLink size={10} />
-                      </a>
-                    )}
-                    {sub.website && (
-                      <a 
-                        href={sub.website} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 700, marginLeft: 'auto' }}
-                      >
-                        <span>Website</span> <ExternalLink size={10} />
-                      </a>
-                    )}
-                  </div>
-
+                  
                   {/* Title */}
                   <h3 className="asv-card-title" title={headlineTitle}>
                     {headlineTitle}
