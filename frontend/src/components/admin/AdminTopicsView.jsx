@@ -1156,57 +1156,7 @@ export default function AdminTopicsView({ onShowToast }) {
                 </label>
               </div>
 
-              {/* Row 5: SEO Meta */}
-              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.75rem' }}>
-                  <Globe size={16} color="var(--brand-primary)" />
-                  <span>Topic Search Engine Metadata (SEO)</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '3px' }}>
-                      SEO Meta Title ({formData.seoTitle.length}/60 chars)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Stories & News about Artificial Intelligence | GoReadPost"
-                      value={formData.seoTitle}
-                      onChange={(e) => setFormData(prev => ({ ...prev, seoTitle: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '0.55rem 0.85rem',
-                        borderRadius: '7px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.86rem',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '3px' }}>
-                      SEO Meta Description ({formData.seoDescription.length}/160 chars)
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="Search engine summary snippet for this topic..."
-                      value={formData.seoDescription}
-                      onChange={(e) => setFormData(prev => ({ ...prev, seoDescription: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '0.55rem 0.85rem',
-                        borderRadius: '7px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.86rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        fontFamily: 'inherit'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
+              
               {/* Modal Footer */}
               <div style={{
                 display: 'flex',
