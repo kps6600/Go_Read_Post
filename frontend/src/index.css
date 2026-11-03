@@ -20266,8 +20266,18 @@ main {
 }
 
 @media (max-width: 768px) {
-  .admin-sidebar-line-toggle-btn {
-    left: 14px !important;
+  .admin-cms-wrapper.sidebar-collapsed .admin-sidebar-line-toggle-btn {
+    left: 10px !important;
+    top: 18px !important;
+    width: 28px !important;
+    height: 28px !important;
+    transform: none !important;
+  }
+  .admin-cms-wrapper:not(.sidebar-collapsed) .admin-sidebar-line-toggle-btn {
+    left: calc(min(270px, 85vw) - 38px) !important;
+    top: 18px !important;
+    width: 28px !important;
+    height: 28px !important;
     transform: none !important;
   }
   .admin-sidebar-line-toggle-btn:hover {

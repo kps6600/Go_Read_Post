@@ -10731,12 +10731,25 @@ table input[type="checkbox"]:checked::after {
     display: none !important;
   }
 
-  .admin-sidebar-line-toggle-btn {
+  /* Sidebar Toggle Button on Mobile */
+  .admin-cms-wrapper.sidebar-collapsed .admin-sidebar-line-toggle-btn {
     left: 10px !important;
-    top: 13px !important;
+    top: 18px !important;
     width: 28px !important;
     height: 28px !important;
     transform: none !important;
+  }
+
+  .admin-cms-wrapper:not(.sidebar-collapsed) .admin-sidebar-line-toggle-btn {
+    left: calc(min(270px, 85vw) - 38px) !important;
+    top: 18px !important;
+    width: 28px !important;
+    height: 28px !important;
+    transform: none !important;
+  }
+
+  .sidebar-brand-header {
+    padding-right: 40px !important;
   }
 
   /* Slide-over Mobile Sidebar */
