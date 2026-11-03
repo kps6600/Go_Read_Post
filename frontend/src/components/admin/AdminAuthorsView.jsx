@@ -1579,12 +1579,11 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 </p>
 
                 {/* List Author Credentials */}
-                <div style={{
+                <div className="aav-list-credentials" style={{
                   fontSize: '0.72rem',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '3px',
-                  minWidth: '170px',
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
                   padding: '6px 8px',
