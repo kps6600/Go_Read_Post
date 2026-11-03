@@ -20216,11 +20216,11 @@ main {
 }
 
 .topbar-sidebar-toggle-btn {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
+  position: fixed;
+  top: 17px;
+  left: 270px;
+  transform: translateX(-50%);
+  z-index: 1002;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20231,8 +20231,8 @@ main {
   border: 1px solid var(--admin-border, #e2e8f0);
   color: var(--admin-text-primary, #0f172a);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
 }
 
@@ -20240,17 +20240,25 @@ main {
   background: var(--admin-bg-hover, #f8fafc);
   border-color: var(--brand-primary, #ea580c);
   color: var(--brand-primary, #ea580c);
-  transform: translate(-50%, -50%) scale(1.08);
+  transform: translateX(-50%) scale(1.08);
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.18);
 }
 
 .admin-cms-wrapper.sidebar-collapsed .topbar-sidebar-toggle-btn {
   left: 14px;
-  transform: translate(0, -50%);
+  transform: none;
 }
 
 .admin-cms-wrapper.sidebar-collapsed .topbar-sidebar-toggle-btn:hover {
-  transform: translate(0, -50%) scale(1.08);
+  transform: scale(1.08);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1.25rem;
+  transition: padding-left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .admin-cms-wrapper.sidebar-collapsed .topbar-left {
@@ -20260,10 +20268,10 @@ main {
 @media (max-width: 768px) {
   .topbar-sidebar-toggle-btn {
     left: 14px !important;
-    transform: translate(0, -50%) !important;
+    transform: none !important;
   }
   .topbar-sidebar-toggle-btn:hover {
-    transform: translate(0, -50%) scale(1.08) !important;
+    transform: scale(1.08) !important;
   }
   .topbar-left {
     padding-left: 2.75rem !important;
