@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, FolderTree, AlertCircle, ArrowUpRight, Flame, Sparkles, Layers
+  BarChart3, Eye, FolderTree, AlertCircle, ArrowUpRight, Sparkles, Layers
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
 
@@ -120,14 +120,9 @@ export default function AdminAnalyticsView() {
         {/* Top Articles by Real Views */}
         <div style={{ background: 'var(--bg-card, #fff)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Flame size={17} />
-              </div>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
-                Most Read Articles
-              </h3>
-            </div>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
+              Most Read Articles
+            </h3>
             <span style={{ fontSize: '0.74rem', fontWeight: '600', color: 'var(--text-muted, #64748b)' }}>
               Top 10 by Readership
             </span>
@@ -196,17 +191,23 @@ export default function AdminAnalyticsView() {
                         {art.claps > 0 && (
                           <>
                             <span>•</span>
-                            <span style={{ color: '#dc2626', fontWeight: '600' }}>👏 {art.claps}</span>
+                            <span style={{ color: '#64748b', fontWeight: '600' }}>{art.claps} claps</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span style={{ fontWeight: '800', fontSize: '14px', color: '#dc2626' }}>
-                      {(art.views || 0).toLocaleString()}
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)', display: 'block' }}>views</span>
+                  <div style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontWeight: '750', 
+                    fontSize: '13px', 
+                    color: '#dc2626',
+                    flexShrink: 0
+                  }}>
+                    <Eye size={13} style={{ flexShrink: 0 }} />
+                    <span>{(art.views || 0).toLocaleString()}</span>
                   </div>
                 </div>
               ))}
@@ -217,14 +218,9 @@ export default function AdminAnalyticsView() {
         {/* Real Category Volume Breakdown */}
         <div style={{ background: 'var(--bg-card, #fff)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FolderTree size={17} />
-              </div>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
-                Category Volume Breakdown
-              </h3>
-            </div>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
+              Category Volume Breakdown
+            </h3>
             <span style={{ fontSize: '0.74rem', fontWeight: '600', color: 'var(--text-muted, #64748b)' }}>
               All 9 Taxonomy Verticals
             </span>
