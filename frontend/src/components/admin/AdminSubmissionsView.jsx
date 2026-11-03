@@ -304,13 +304,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                     {sub.summary || sub.message}
                   </p>
 
-                  {/* Traction Moat Badge if applicable */}
-                  {sub.metricMoat && (
-                    <div className="asv-traction-pill">
-                      <Sparkles size={12} />
-                      <span>{sub.metricMoat}</span>
-                    </div>
-                  )}
+
 
                   {/* Submitter Meta Row */}
                   <div className="asv-author-row">
