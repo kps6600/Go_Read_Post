@@ -86,28 +86,56 @@ export default function PitchesPage({
 
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
-        <div className="pp-kpi-card pp-kpi-total">
+        <div 
+          className={`pp-kpi-card pp-kpi-total ${formatFilter === 'all' && statusFilter === 'all' ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => { setFormatFilter('all'); setStatusFilter('all'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setFormatFilter('all'); setStatusFilter('all'); } }}
+          title="Click to view all story pitches"
+        >
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{totalCount}</span>
             <span className="pp-kpi-label">Total Story Pitches</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card pp-kpi-video">
+        <div 
+          className={`pp-kpi-card pp-kpi-video ${formatFilter === 'video' ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => { setFormatFilter('video'); if (statusFilter !== 'all') setStatusFilter('all'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setFormatFilter('video'); if (statusFilter !== 'all') setStatusFilter('all'); } }}
+          title="Click to filter video productions"
+        >
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{videoPitchesCount}</span>
             <span className="pp-kpi-label">Video Productions</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card pp-kpi-article">
+        <div 
+          className={`pp-kpi-card pp-kpi-article ${formatFilter === 'article' ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => { setFormatFilter('article'); if (statusFilter !== 'all') setStatusFilter('all'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setFormatFilter('article'); if (statusFilter !== 'all') setStatusFilter('all'); } }}
+          title="Click to filter article story briefs"
+        >
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{articlePitchesCount}</span>
             <span className="pp-kpi-label">Article Story Briefs</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card pp-kpi-pending">
+        <div 
+          className={`pp-kpi-card pp-kpi-pending ${statusFilter === 'pending' || statusFilter === 'reviewing' ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => { setFormatFilter('all'); setStatusFilter('pending'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setFormatFilter('all'); setStatusFilter('pending'); } }}
+          title="Click to filter pitches in review"
+        >
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{pendingCount}</span>
             <span className="pp-kpi-label">In Review Desk</span>
