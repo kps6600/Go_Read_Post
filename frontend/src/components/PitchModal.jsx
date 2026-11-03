@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Video, Sparkles, ArrowRight, X, CheckCircle2 } from 'lucide-react';
+import { FileText, Video, ArrowRight, X, CheckCircle2 } from 'lucide-react';
 import LiveArticleStudio from './admin/LiveArticleStudio';
 import LiveVideoStudio from './admin/LiveVideoStudio';
 import { AuthService } from '../services/authService';
@@ -129,42 +129,15 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
             <X size={18} />
           </button>
 
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '9999px',
-            background: '#fef2f2',
-            border: '1px solid #fee2e2',
-            color: '#dc2626',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '0.75rem'
-          }}>
-            <Sparkles size={12} />
-            <span>Editorial Submission</span>
-          </div>
-
           <h2 style={{
             fontSize: '1.65rem',
             fontWeight: 800,
             color: '#0f172a',
-            margin: '0 0 0.4rem 0',
+            margin: 0,
             letterSpacing: '-0.02em'
           }}>
             What would you like to pitch?
           </h2>
-          <p style={{
-            margin: 0,
-            color: '#64748b',
-            fontSize: '0.95rem',
-            lineHeight: 1.5
-          }}>
-            Choose your story format below to open the dedicated pitch studio for editorial review.
-          </p>
         </div>
 
         {/* Format Selection Cards */}
