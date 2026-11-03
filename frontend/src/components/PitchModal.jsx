@@ -82,6 +82,7 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
       }}
     >
       <div 
+        className="pitch-modal-card"
         style={{
           background: '#ffffff',
           borderRadius: '1.25rem',
@@ -97,11 +98,14 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div style={{
-          padding: '2rem 2rem 1.25rem',
-          borderBottom: '1px solid #f1f5f9',
-          position: 'relative'
-        }}>
+        <div 
+          className="pitch-modal-header"
+          style={{
+            padding: '2rem 2rem 1.25rem',
+            borderBottom: '1px solid #f1f5f9',
+            position: 'relative'
+          }}
+        >
           <button
             type="button"
             onClick={onClose}
@@ -140,13 +144,16 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
         </div>
 
         {/* Format Selection Cards */}
-        <div style={{
-          padding: '1.75rem 2rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.25rem',
-          background: '#f8fafc'
-        }}>
+        <div 
+          className="pitch-modal-grid"
+          style={{
+            padding: '1.75rem 2rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '1.25rem',
+            background: '#f8fafc'
+          }}
+        >
           {/* Option 1: Article */}
           <div
             onClick={() => setPitchFormat('article')}
@@ -325,16 +332,19 @@ export default function PitchModal({ isOpen, onClose, onAddStory, onShowToast, c
         </div>
 
         {/* Footer info note */}
-        <div style={{
-          padding: '1rem 2rem',
-          borderTop: '1px solid #e2e8f0',
-          background: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '0.85rem',
-          color: '#64748b'
-        }}>
+        <div 
+          className="pitch-modal-footer"
+          style={{
+            padding: '1rem 2rem',
+            borderTop: '1px solid #e2e8f0',
+            background: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.85rem',
+            color: '#64748b'
+          }}
+        >
           <span>
             Logged in as <strong>{authorUser?.name || 'Contributing Author'}</strong>
           </span>

@@ -611,3 +611,28 @@
   transform: translateY(-3px) scale(1.04);
   box-shadow: 0 12px 36px rgba(234, 88, 12, 0.6);
 }
+
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE ADAPTATIONS FOR LIVE HOMEPAGE STUDIO
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .lhs-floating-frontend-trigger {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+
+  .lhs-sec-tools {
+    top: -34px;
+    right: 8px;
+  }
+
+  .lhs-sec-tool-btn {
+    padding: 3px 6px;
+    font-size: 0.68rem;
+  }
+}

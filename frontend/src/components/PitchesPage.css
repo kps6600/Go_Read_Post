@@ -828,3 +828,237 @@
 .pp-secondary-btn:hover {
   background: var(--border-color, #e2e8f0);
 }
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE ADAPTATIONS FOR PITCHES & AUTHOR STUDIO
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .pp-kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .pitches-page-root {
+    padding: 16px 12px 60px;
+  }
+
+  .pp-breadcrumb {
+    margin-bottom: 16px;
+    font-size: 0.78rem;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* 2-Column Balanced KPI Grid on Mobile */
+  .pp-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .pp-kpi-card {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  .pp-kpi-num {
+    font-size: 1.35rem;
+  }
+
+  .pp-kpi-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* Omnibar & Toolbar Mobile Stacking */
+  .pp-toolbar-container {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+
+  .pp-toolbar-single-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .pp-search-input-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .pp-filter-dropdown-container {
+    width: 100%;
+  }
+
+  .pp-filter-toggle-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+  }
+
+  .pp-primary-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+  }
+
+  /* Filter Popover Floating Bottom Sheet on Mobile */
+  .pp-filter-popover {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 75px;
+    top: auto;
+    width: auto;
+    max-width: 420px;
+    margin: 0 auto;
+    z-index: 1050;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .pp-active-filter-tags {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pp-search-count-pill {
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  /* Single Column Pitch Cards on Mobile */
+  .pp-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .pp-card-media {
+    height: 185px;
+  }
+
+  .pp-card-body {
+    padding: 16px 14px;
+  }
+
+  .pp-card-title {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .pp-card-summary {
+    font-size: 0.85rem;
+  }
+
+  .pp-card-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Detail Preview Modal */
+  .pp-modal-backdrop {
+    padding: 12px;
+  }
+
+  .pp-modal-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .pp-modal-header {
+    padding: 14px 16px;
+  }
+
+  .pp-modal-body {
+    padding: 16px 14px;
+  }
+
+  .pp-meta-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* Protected Access Gate Card on Mobile */
+  .pp-protected-gate-card {
+    margin: 20px auto 50px;
+    padding: 24px 16px;
+    border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pp-protected-title {
+    font-size: 1.25rem;
+  }
+
+  .pp-protected-desc {
+    font-size: 0.88rem;
+    margin: 0 0 20px;
+  }
+
+  .pp-protected-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .pp-protected-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Pitch Modal Selector on Mobile */
+  .pitch-modal-card {
+    max-width: 100% !important;
+    border-radius: 14px !important;
+  }
+
+  .pitch-modal-header {
+    padding: 1.25rem 1.25rem 1rem !important;
+  }
+
+  .pitch-modal-header h2 {
+    font-size: 1.3rem !important;
+  }
+
+  .pitch-modal-grid {
+    padding: 1.25rem 1rem !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .pitch-modal-footer {
+    padding: 0.85rem 1rem !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .pp-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .pp-kpi-card {
+    padding: 10px 10px;
+  }
+
+  .pp-kpi-num {
+    font-size: 1.2rem;
+  }
+
+  .pp-kpi-label {
+    font-size: 0.62rem;
+  }
+}
