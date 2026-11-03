@@ -4036,16 +4036,7 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                 </div>
               )}
 
-              <div className="abv-cards-count-badge">
-                <span>
-                  {activeTab === 'draft' && 'Drafts: '}
-                  {activeTab === 'published' && 'Published: '}
-                  {activeTab === 'scheduled' && 'Scheduled: '}
-                  {activeTab === 'views' && 'Most Viewed: '}
-                  {activeTab === 'all' && 'All Posts: '}
-                  {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'}{totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}
-                </span>
-              </div>
+              
             </div>
           </div>
 
