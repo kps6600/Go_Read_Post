@@ -6,6 +6,7 @@ import {
   RefreshCw, Eye, ThumbsUp, Tag, Star, Bookmark, Search, ChevronDown
 } from 'lucide-react';
 import { VideoService } from '../../services/videoService';
+import { SubmissionService } from '../../services/submissionService';
 import { MediaService } from '../../services/mediaService';
 import './LiveArticleStudio.css';
 import './LiveVideoStudio.css';
@@ -533,9 +534,12 @@ function MultiSelectField({
 export default function LiveVideoStudio({ 
   video = null, 
   onClose, 
+  onBack = null,
   onSaveSuccess, 
   onShowToast, 
-  categories = [] 
+  categories = [],
+  isPitchMode = false,
+  currentUser = null
 }) {
   // Master View Mode: 'edit' | 'preview'
   const [viewMode, setViewMode] = useState('edit');
@@ -610,7 +614,7 @@ export default function LiveVideoStudio({
       series: 'Founders Unfiltered',
       category: 'interviews',
       categoryLabel: 'Founder Interview',
-      status: 'published',
+      status: isPitchMode ? 'draft' : 'published',
       isFeatured: false,
       views: 1200,
       likes: 85,
@@ -621,7 +625,7 @@ export default function LiveVideoStudio({
       guestCompany: '',
       guestAvatar: '',
       guestBio: '',
-      host: 'Shradha Sharma',
+      host: isPitchMode ? (currentUser?.name || 'Contributing Creator') : 'Shradha Sharma',
       highlights: [],
       chapters: [],
       transcript: [],
@@ -897,7 +901,7 @@ export default function LiveVideoStudio({
     const parsed = parseVideoUrl(finalVideoUrl);
     const finalEmbedUrl = formData.youtubeEmbedUrl || (parsed ? parsed.embedUrl : finalVideoUrl);
     const finalCover = formData.image || (parsed ? (parsed.maxResThumb || parsed.hqThumb) : '') || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1200&auto=format&fit=crop&q=80';
-    const statusToSave = targetStatus || formData.status || 'published';
+    const statusToSave = isPitchMode ? 'draft' : (targetStatus || formData.status || 'published');
 
     const payload = {
       title: cleanTitle,
@@ -916,13 +920,12 @@ export default function LiveVideoStudio({
       views: formData.views || 100,
       likes: formData.likes || 10,
       order: formData.order || 0,
-      // Preserve any existing fields
       guest: formData.guest || '',
       guestRole: formData.guestRole || '',
       guestCompany: formData.guestCompany || '',
       guestAvatar: formData.guestAvatar || '',
       guestBio: formData.guestBio || '',
-      host: formData.host || 'Shradha Sharma',
+      host: formData.host || currentUser?.name || 'Contributing Creator',
       highlights: formData.highlights || [],
       chapters: formData.chapters || [],
       transcript: formData.transcript || [],
@@ -930,16 +933,56 @@ export default function LiveVideoStudio({
       topics: formData.topics || []
     };
 
+    if (isPitchMode) {
+      payload.isPitch = true;
+      payload.status = 'draft';
+      payload.pitchedBy = currentUser?.name || 'Contributing Creator';
+      payload.pitchedByEmail = currentUser?.email || '';
+      payload.pitchedAt = new Date().toISOString();
+      payload.author = currentUser?.name || 'Contributing Creator';
+      payload.authorEmail = currentUser?.email || '';
+    }
+
     setSaving(true);
     try {
+      let result = null;
       if (formData._id) {
-        await VideoService.updateVideo(formData._id, payload);
-        if (onShowToast) onShowToast(`Video "${payload.title}" updated successfully!`);
+        result = await VideoService.updateVideo(formData._id, payload);
+        if (onShowToast) onShowToast(isPitchMode ? 'Video pitch updated!' : `Video "${payload.title}" updated successfully!`);
       } else {
-        await VideoService.createVideo(payload);
-        if (onShowToast) onShowToast(`Video "${payload.title}" published successfully!`);
+        result = await VideoService.createVideo(payload);
+        if (onShowToast) onShowToast(isPitchMode ? 'Video pitch submitted for review!' : `Video "${payload.title}" published successfully!`);
       }
-      if (onSaveSuccess) await onSaveSuccess();
+
+      if (isPitchMode) {
+        try {
+          const draftId = result?._id || result?.id || null;
+          await SubmissionService.createSubmission({
+            type: 'pitch',
+            pitchFormat: 'video',
+            draftVideoId: draftId ? String(draftId) : null,
+            startupName: payload.series || payload.categoryLabel || 'Video Pitch',
+            founderName: payload.pitchedBy || payload.guest || 'Contributing Creator',
+            founderRole: payload.guestRole || 'Video Creator',
+            sector: payload.categoryLabel || payload.category || 'Interviews',
+            stage: 'Authored Video Draft',
+            headline: payload.title.replace(/<[^>]*>/g, '').trim(),
+            summary: payload.description ? payload.description.slice(0, 300) : 'Pitched video story awaiting editorial review.',
+            details: `YouTube URL: ${payload.videoUrl || payload.youtubeEmbedUrl}\nDuration: ${payload.duration || '20:00'}\nSeries: ${payload.series || 'Spotlight'}`,
+            coverImage: payload.image || '',
+            videoUrl: payload.videoUrl || payload.youtubeEmbedUrl || '',
+            name: payload.pitchedBy,
+            email: payload.pitchedByEmail,
+            authorEmail: payload.pitchedByEmail,
+            category: payload.categoryLabel || payload.category || 'Interviews',
+            status: 'pending'
+          });
+        } catch (submErr) {
+          console.warn('Submission registration warning for video pitch:', submErr);
+        }
+      }
+
+      if (onSaveSuccess) await onSaveSuccess(result);
     } catch (err) {
       console.error('Failed to save video:', err);
       alert('Save failed: ' + err.message);
@@ -978,11 +1021,11 @@ export default function LiveVideoStudio({
           <button 
             type="button" 
             className="las-back-btn" 
-            onClick={onClose}
-            title="Return to videos table"
+            onClick={onBack || onClose}
+            title={isPitchMode && onBack ? "Back to format selection" : "Return to videos table"}
           >
             <ArrowLeft size={16} />
-            <span>Videos</span>
+            <span>{isPitchMode && onBack ? "Back" : "Videos"}</span>
           </button>
           
           <div className="las-title-meta">
@@ -990,18 +1033,18 @@ export default function LiveVideoStudio({
               <span 
                 className="las-studio-status-badge"
                 style={{
-                  background: formData.status === 'published' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                  color: formData.status === 'published' ? '#10b981' : '#f59e0b',
-                  borderColor: formData.status === 'published' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)',
-                  cursor: 'pointer'
+                  background: isPitchMode ? 'rgba(59, 130, 246, 0.15)' : (formData.status === 'published' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'),
+                  color: isPitchMode ? '#2563eb' : (formData.status === 'published' ? '#10b981' : '#f59e0b'),
+                  borderColor: isPitchMode ? 'rgba(59, 130, 246, 0.3)' : (formData.status === 'published' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'),
+                  cursor: isPitchMode ? 'default' : 'pointer'
                 }}
-                onClick={() => setFormData(p => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
-                title="Click to toggle Published vs Draft"
+                onClick={isPitchMode ? undefined : () => setFormData(p => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
+                title={isPitchMode ? "Pitch Mode (Saved as editorial draft)" : "Click to toggle Published vs Draft"}
               >
-                ● {formData.status.toUpperCase()}
+                ● {isPitchMode ? 'PITCH MODE (DRAFT)' : formData.status.toUpperCase()}
               </span>
               <span className="las-studio-title">
-                {formData._id ? `Edit: ${plainTitle || 'Video Episode'}` : 'New Video Episode'}
+                {isPitchMode ? (formData._id ? `Edit Pitch: ${plainTitle || 'Video'}` : 'Pitch Video Show / Episode') : (formData._id ? `Edit: ${plainTitle || 'Video Episode'}` : 'New Video Episode')}
               </span>
             </div>
           </div>
@@ -1046,31 +1089,33 @@ export default function LiveVideoStudio({
             </button>
           )}
 
-          <button 
-            type="button" 
-            className="las-btn las-btn-draft"
-            onClick={() => handleSaveVideo('draft')}
-            disabled={saving}
-            title="Save as Draft (Ctrl+S)"
-          >
-            <span>Save Draft</span>
-          </button>
+          {!isPitchMode && (
+            <button 
+              type="button" 
+              className="las-btn las-btn-draft"
+              onClick={() => handleSaveVideo('draft')}
+              disabled={saving}
+              title="Save as Draft (Ctrl+S)"
+            >
+              <span>Save Draft</span>
+            </button>
+          )}
 
           <button 
             type="button" 
             className="las-btn las-btn-publish"
-            onClick={() => handleSaveVideo('published')}
+            onClick={() => handleSaveVideo(isPitchMode ? 'draft' : 'published')}
             disabled={saving}
           >
             {saving ? (
               <>
                 <RefreshCw size={14} className="animate-spin" />
-                <span>Publishing...</span>
+                <span>{isPitchMode ? 'Submitting Pitch...' : 'Publishing...'}</span>
               </>
             ) : (
               <>
                 <Play size={14} fill="currentColor" />
-                <span>{formData._id ? 'Update Video' : 'Publish Video'}</span>
+                <span>{isPitchMode ? 'Submit Video Pitch' : (formData._id ? 'Update Video' : 'Publish Video')}</span>
               </>
             )}
           </button>
@@ -1128,15 +1173,17 @@ export default function LiveVideoStudio({
                           <UploadCloud size={13} />
                           <span>{uploadingCover ? 'Uploading...' : 'Replace Video (PC)'}</span>
                         </button>
-                        <button
-                          type="button"
-                          className="las-block-action-btn"
-                          onClick={openMediaPicker}
-                          title="Select another video from Media Library"
-                        >
-                          <FolderOpen size={13} />
-                          <span>Media Library</span>
-                        </button>
+                        {!isPitchMode && (
+                          <button
+                            type="button"
+                            className="las-block-action-btn"
+                            onClick={openMediaPicker}
+                            title="Select another video from Media Library"
+                          >
+                            <FolderOpen size={13} />
+                            <span>Media Library</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="las-block-action-btn delete"
@@ -1181,15 +1228,17 @@ export default function LiveVideoStudio({
                           <UploadCloud size={13} />
                           <span>{uploadingCover ? 'Uploading...' : 'Replace Thumbnail (PC)'}</span>
                         </button>
-                        <button
-                          type="button"
-                          className="las-block-action-btn"
-                          onClick={openMediaPicker}
-                          title="Select an image from Media Library"
-                        >
-                          <FolderOpen size={13} />
-                          <span>Media Library</span>
-                        </button>
+                        {!isPitchMode && (
+                          <button
+                            type="button"
+                            className="las-block-action-btn"
+                            onClick={openMediaPicker}
+                            title="Select an image from Media Library"
+                          >
+                            <FolderOpen size={13} />
+                            <span>Media Library</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="las-block-action-btn delete"
@@ -1235,17 +1284,19 @@ export default function LiveVideoStudio({
                           disabled={uploadingCover}
                         >
                           <UploadCloud size={14} />
-                          <span>{uploadingCover ? 'Uploading...' : 'Upload Video (PC)'}</span>
+                          <span>{uploadingCover ? 'Uploading...' : 'Upload from PC'}</span>
                         </button>
-                        <button
-                          type="button"
-                          className="las-btn"
-                          style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
-                          onClick={openMediaPicker}
-                        >
-                          <FolderOpen size={14} />
-                          <span>Browse Media Library</span>
-                        </button>
+                        {!isPitchMode && (
+                          <button
+                            type="button"
+                            className="las-btn"
+                            style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                            onClick={openMediaPicker}
+                          >
+                            <FolderOpen size={14} />
+                            <span>Browse Media Library</span>
+                          </button>
+                        )}
                         {detectedVideo?.provider === 'YouTube' && (
                           <button
                             type="button"

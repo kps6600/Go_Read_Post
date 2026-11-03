@@ -771,6 +771,7 @@ export const deriveArticlePlacements = (article = {}) => {
 export default function LiveArticleStudio({
   article = null,
   onClose,
+  onBack = null,
   onSaveSuccess,
   onShowToast,
   isPitchMode = false,
@@ -2412,15 +2413,15 @@ export default function LiveArticleStudio({
           <button 
             type="button" 
             className="las-back-btn" 
-            onClick={onClose}
-            title="Return to articles table"
+            onClick={onBack || onClose}
+            title={isPitchMode && onBack ? "Back to format selection" : "Return to articles table"}
           >
-            ← Articles
+            {isPitchMode && onBack ? "← Back" : "← Articles"}
           </button>
           <div className="las-title-meta">
             <div className="las-studio-badge-row">
               <span className="las-studio-title">
-                {formData._id ? `Edit: ${formData.title}` : 'Add New Article'}
+                {isPitchMode ? (formData._id ? `Edit Pitch: ${plainTitle || 'Story'}` : 'Pitch New Story') : (formData._id ? `Edit: ${formData.title}` : 'Add New Article')}
               </span>
             </div>
           </div>
@@ -2446,7 +2447,7 @@ export default function LiveArticleStudio({
             onClick={() => handleSaveArticle('published')}
             disabled={saving}
           >
-            <span>{saving ? 'Publishing...' : formData._id ? 'Update Story' : 'Publish Story'}</span>
+            <span>{saving ? (isPitchMode ? 'Submitting Pitch...' : 'Publishing...') : (isPitchMode ? 'Submit Story Pitch' : (formData._id ? 'Update Story' : 'Publish Story'))}</span>
           </button>
         </div>
       </header>
