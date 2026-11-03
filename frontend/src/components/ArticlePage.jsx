@@ -510,7 +510,7 @@ export default function ArticlePage({
     if (s === 'startup' || s === 'startups' || s === 'founder-first' || s === 'funding' || s === 'venture-capital') {
       return 'startups';
     }
-    if (s === 'tech' || s === 'technology' || s === 'big-tech' || s === 'cloud' || s === 'software') {
+    if (s.includes('techsparks') || s === 'tech' || s === 'technology' || s === 'big-tech' || s === 'cloud' || s === 'software') {
       return 'technology';
     }
     if (s === 'enterprise' || s === 'saas' || s === 'b2b') {
@@ -598,6 +598,9 @@ export default function ArticlePage({
       // Exact category match gets high priority
       if (currentCatNorm && sCatNorm && sCatNorm === currentCatNorm) {
         score += 100;
+      }
+      if (current.language && s.language && String(current.language).toLowerCase() === String(s.language).toLowerCase()) {
+        score += 30;
       }
 
       // Matching topics or tags
@@ -1740,25 +1743,21 @@ export default function ArticlePage({
         </div>
 
         {/* ── 5. Bottom "More in [Category]" Section ── */}
-        {bottomArticles.length > 0 && (
+        {(relatedArticles.length > 0 || bottomArticles.length > 0) && (
           <section className="map-bottom-section">
             <div className="map-bottom-header-row">
-              <h2 className="map-bottom-title">More in {current.categoryName}</h2>
+              <h2 className="map-bottom-title">Related Articles</h2>
               <button 
                 type="button" 
                 className="map-bottom-view-all"
-                onClick={() => {
-                  window.history.pushState(null, '', `/category/${current.categorySlug}`);
-                  window.dispatchEvent(new Event('popstate'));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onClick={handleNavigateRelated}
               >
                 View All
               </button>
             </div>
 
             <div className="map-bottom-cards-grid">
-              {bottomArticles.map((bItem) => {
+              {(relatedArticles.length > 0 ? relatedArticles : bottomArticles).map((bItem) => {
                 const isBottomSaved = isSaved ? Boolean(isSaved(bItem.id || bItem._id || bItem.slug)) : false;
                 return (
                   <article 
