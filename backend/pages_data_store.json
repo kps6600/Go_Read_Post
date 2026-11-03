@@ -3300,7 +3300,7 @@
     "title": "Latest Articles",
     "slug": "latest",
     "brand": "GoReadPost",
-    "description": "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
+    "description": "",
     "heroHeadline": "Latest Articles & Dispatches",
     "heroSubhead": "Unfiltered founder reporting, deep tech breakthroughs, and market movements updated continuously.",
     "heroBanner": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&auto=format&fit=crop&q=80",
@@ -3316,10 +3316,12 @@
         "startups",
         "technology",
         "venture capital"
-      ]
+      ],
+      "ogImage": ""
     },
     "sections": [
       {
+        "subtitle": "",
         "id": "latest_feed",
         "sectionKey": "latest_feed",
         "type": "stories_feed",
@@ -3331,13 +3333,22 @@
           "heading": "Latest Articles",
           "subtitle": "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
           "category": "",
-          "limit": 20,
+          "limit": 16,
           "viewAllText": "Load More Stories",
-          "viewAllUrl": "/latest",
-          "cardsPerPage": 20
+          "viewAllUrl": "/latest"
+        },
+        "customConfig": {
+          "title": "Latest Articles",
+          "heading": "Latest Articles",
+          "subtitle": "Chronological reporting, breaking investigations, venture intelligence, and real-time newsroom dispatches.",
+          "category": "",
+          "limit": 16,
+          "viewAllText": "Load More Stories",
+          "viewAllUrl": "/latest"
         }
       },
       {
+        "subtitle": "",
         "id": "newsletter",
         "sectionKey": "newsletter",
         "type": "newsletter",
@@ -3345,6 +3356,14 @@
         "enabled": true,
         "title": "Newsletter Subscription Banner",
         "data": {
+          "title": "Newsletter Subscription Banner",
+          "heading": "Newsletter Subscription Banner",
+          "headline": "Get the Latest Blogs Delivered to Your Inbox",
+          "subtitle": "Unfiltered insights on venture capital, frontier tech, and high-growth leadership directly in your inbox.",
+          "placeholder": "Enter your email address",
+          "buttonText": "Subscribe"
+        },
+        "customConfig": {
           "title": "Newsletter Subscription Banner",
           "heading": "Newsletter Subscription Banner",
           "headline": "Get the Latest Blogs Delivered to Your Inbox",

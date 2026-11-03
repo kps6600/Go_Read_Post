@@ -763,7 +763,7 @@ useEffect(() => {
     }
   }, [siteSettings]);
 
-  const [adminPath, setAdminPath] = useState('/admin/dashboard');
+  const [adminPath, setAdminPath] = useState(() => (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) ? window.location.pathname : '/admin/dashboard');
 
   const handleOpenAdmin = (targetPath = '/admin/dashboard') => {
     const pathStr = typeof targetPath === 'string' && targetPath.startsWith('/admin') ? targetPath : '/admin/dashboard';

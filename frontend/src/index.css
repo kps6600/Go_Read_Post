@@ -28401,3 +28401,63 @@ body::-webkit-scrollbar:horizontal,
     height: 60px !important;
   }
 }
+
+/* Public Pagination Mobile Responsiveness */
+@media (max-width: 768px) {
+  .just-in-pagination-bar,
+  .ai-pagination-container {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 0.35rem !important;
+    justify-content: center !important;
+    padding: 1.25rem 0.25rem !important;
+    margin-top: 1.5rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .pagination-step-btn {
+    padding: 6px 10px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    font-size: 0.78rem !important;
+    flex-shrink: 0 !important;
+    justify-content: center !important;
+  }
+  .pagination-step-btn span {
+    display: none !important;
+  }
+  .pagination-numbers-list {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .pagination-numbers-list::-webkit-scrollbar {
+    display: none !important;
+  }
+  .pagination-number-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    font-size: 0.8rem !important;
+    flex-shrink: 0 !important;
+  }
+}
+@media (max-width: 360px) {
+  .pagination-step-btn {
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0 6px !important;
+  }
+  .pagination-number-btn {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    font-size: 0.75rem !important;
+  }
+}
