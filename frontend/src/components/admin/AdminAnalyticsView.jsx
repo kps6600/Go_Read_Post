@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, Eye, BookOpen, Users, FolderTree, TrendingUp, RefreshCw, AlertCircle, ArrowUpRight, Flame, Heart, Sparkles, Layers
+  BarChart3, Eye, BookOpen, Users, FolderTree, TrendingUp, AlertCircle, ArrowUpRight, Flame, Heart, Sparkles, Layers
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
 
@@ -53,29 +53,7 @@ export default function AdminAnalyticsView() {
 
   return (
     <div className="admin-page-container">
-      {/* Top Action Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary, #0f172a)', margin: 0 }}>
-            Editorial Analytics & Readership
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted, #64748b)', margin: '4px 0 0 0' }}>
-            Live audience impressions, taxonomy volume distribution, and engagement metrics.
-          </p>
-        </div>
-        <button
-          onClick={loadAnalytics}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
-            background: 'var(--bg-card, #fff)', border: '1px solid var(--border-medium, #cbd5e1)', borderRadius: '8px',
-            fontWeight: '600', cursor: 'pointer', color: 'var(--text-primary, #334155)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.04)', fontSize: '0.84rem'
-          }}
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          <span>Refresh Live Data</span>
-        </button>
-      </div>
+      
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', color: '#dc2626', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
