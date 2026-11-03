@@ -84,32 +84,30 @@ export default function PitchesPage({
         <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
       </div>
 
-
-
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
-        <div className="pp-kpi-card">
+        <div className="pp-kpi-card pp-kpi-total">
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{totalCount}</span>
             <span className="pp-kpi-label">Total Story Pitches</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card">
+        <div className="pp-kpi-card pp-kpi-video">
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{videoPitchesCount}</span>
             <span className="pp-kpi-label">Video Productions</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card">
+        <div className="pp-kpi-card pp-kpi-article">
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{articlePitchesCount}</span>
             <span className="pp-kpi-label">Article Story Briefs</span>
           </div>
         </div>
 
-        <div className="pp-kpi-card">
+        <div className="pp-kpi-card pp-kpi-pending">
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{pendingCount}</span>
             <span className="pp-kpi-label">In Review Desk</span>
@@ -117,83 +115,91 @@ export default function PitchesPage({
         </div>
       </div>
 
-      {/* Interactive Search & Filter Toolbar */}
-      <div className="pp-toolbar">
-        <div className="pp-search-box">
-          <Search size={16} color="#94a3b8" />
-          <input 
-            type="text"
-            className="pp-search-input"
-            placeholder="Search pitches by headline, founder, author, or sector..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
+      {/* Modern High-End Toolbar */}
+      <div className="pp-toolbar-container">
+        {/* Tier 1: Segmented Format Controls + Filter / Action CTAs */}
+        <div className="pp-toolbar-top-row">
+          {/* Segmented Capsule Tabs */}
+          <div className="pp-segmented-group" role="tablist">
+            <button 
+              type="button"
+              className={`pp-seg-btn ${formatFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setFormatFilter('all')}
+            >
+              <span>All Pitches</span>
+              <span className="pp-seg-badge">{totalCount}</span>
+            </button>
+            <button 
+              type="button"
+              className={`pp-seg-btn ${formatFilter === 'article' ? 'active' : ''}`}
+              onClick={() => setFormatFilter('article')}
+            >
+              <span>Article Pitches</span>
+              <span className="pp-seg-badge">{articlePitchesCount}</span>
+            </button>
+            <button 
+              type="button"
+              className={`pp-seg-btn ${formatFilter === 'video' ? 'active' : ''}`}
+              onClick={() => setFormatFilter('video')}
+            >
+              <span>Video Shows</span>
+              <span className="pp-seg-badge">{videoPitchesCount}</span>
+            </button>
+          </div>
+
+          {/* Right Action Cluster */}
+          <div className="pp-toolbar-actions">
+            <div className="pp-status-select-wrap">
+              <Filter size={14} className="pp-status-icon" />
+              <select
+                className="pp-status-select"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending Review</option>
+                <option value="reviewing">In Review</option>
+                <option value="approved">Approved &amp; Ready</option>
+              </select>
+            </div>
+
             <button 
               type="button" 
-              className="pp-search-clear" 
-              onClick={() => setSearchQuery('')}
-              title="Clear search"
+              className="pp-primary-cta"
+              onClick={onOpenPitchModal}
+              title="Submit a new story pitch"
             >
-              <X size={15} />
+              <Plus size={16} />
+              <span>Pitch a Story</span>
             </button>
-          )}
+          </div>
         </div>
 
-        <div className="pp-filters-right">
-          <button 
-            type="button"
-            className={`pp-filter-pill ${formatFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setFormatFilter('all')}
-          >
-            All Formats ({totalCount})
-          </button>
-          <button 
-            type="button"
-            className={`pp-filter-pill ${formatFilter === 'article' ? 'active' : ''}`}
-            onClick={() => setFormatFilter('article')}
-          >
-            Article Pitches ({articlePitchesCount})
-          </button>
-          <button 
-            type="button"
-            className={`pp-filter-pill ${formatFilter === 'video' ? 'active' : ''}`}
-            onClick={() => setFormatFilter('video')}
-          >
-            Video Shows ({videoPitchesCount})
-          </button>
-
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            style={{
-              padding: '7px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, #cbd5e1)',
-              background: 'var(--bg-card, #ffffff)',
-              color: 'var(--text-primary, #0f172a)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
-          >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="reviewing">In Review</option>
-            <option value="approved">Approved</option>
-          </select>
-
-          <button 
-            type="button" 
-            className="pp-hero-action-btn"
-            style={{ padding: '7px 14px', fontSize: '0.82rem', borderRadius: '8px' }}
-            onClick={onOpenPitchModal}
-            title="Submit a new story pitch"
-          >
-            <Plus size={15} />
-            <span>Pitch a Story</span>
-          </button>
+        {/* Tier 2: Sleek Omnisearch Bar with Live Metrics */}
+        <div className="pp-search-row">
+          <div className="pp-search-input-wrap">
+            <Search size={18} className="pp-search-icon" />
+            <input 
+              type="text"
+              className="pp-search-input-field"
+              placeholder="Search pitches by headline, founder, author, or sector..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                type="button" 
+                className="pp-search-clear-btn" 
+                onClick={() => setSearchQuery('')}
+                title="Clear search query"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+          <div className="pp-search-count-pill">
+            <span>Showing <strong>{filteredPitches.length}</strong> {filteredPitches.length === 1 ? 'pitch' : 'pitches'}</span>
+          </div>
         </div>
       </div>
 
@@ -213,8 +219,8 @@ export default function PitchesPage({
           </p>
           <button 
             type="button"
-            className="pp-hero-action-btn"
-            style={{ margin: '0 auto', fontSize: '0.84rem', padding: '8px 18px' }}
+            className="pp-primary-cta"
+            style={{ margin: '0 auto' }}
             onClick={onOpenPitchModal}
           >
             <Plus size={16} />
@@ -405,4 +411,3 @@ export default function PitchesPage({
     </div>
   );
 }
-
