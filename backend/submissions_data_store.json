@@ -14,12 +14,13 @@
     "details": "<p>Scaling zero-waste bio-composting and organic farm inputs with smart microbial fermentation across 500+ agrarian districts.</p>",
     "coverImage": "https://images.unsplash.com/photo-1592417817098-8f3d6ef23a27?w=800&auto=format&fit=crop&q=80",
     "name": "Aditi Shrivastava",
-    "email": "aditi.shrivastava@goreadpost.com",
-    "authorEmail": "aditi.shrivastava@goreadpost.com",
+    "email": "aditi-shrivastava@goreadpost.com",
+    "authorEmail": "aditi-shrivastava@goreadpost.com",
     "category": "Startups",
     "status": "published",
     "createdAt": "2026-11-03T10:43:04.823Z",
-    "__v": 0
+    "__v": 0,
+    "authorName": "Aditi Shrivastava"
   },
   {
     "_id": "6ae9bdceeb40e85ae61859d5",
@@ -80,12 +81,13 @@
     "details": "<p>dsffaaaaaaaaaaaaaaaaaaaaaaaaaaaaavdsf</p>\n\n\n<figure class=\"map-inline-figure standard left\"><img src=\"/uploads/kisol_png_1793690043131.png\" alt=\"kisol\" /><figcaption class=\"map-inline-caption\"> (Photo: GoReadPost Media)</figcaption></figure>\n<p>dsfdsfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>\n",
     "coverImage": "/uploads/kisol_png_1793690021439.png",
     "name": "Aditi Shrivastava",
-    "email": "aditi.shrivastava@goreadpost.com",
-    "authorEmail": "aditi.shrivastava@goreadpost.com",
+    "email": "aditi-shrivastava@goreadpost.com",
+    "authorEmail": "aditi-shrivastava@goreadpost.com",
     "category": "Startups",
     "status": "published",
     "createdAt": "2026-11-03T07:14:36.412Z",
-    "__v": 0
+    "__v": 0,
+    "authorName": "Aditi Shrivastava"
   },
   {
     "_id": "6ae9bdceeb40e85ae61859d7",
@@ -1303,7 +1305,8 @@
     "category": "Startups",
     "status": "published",
     "createdAt": "2026-10-07T12:23:20.780Z",
-    "__v": 0
+    "__v": 0,
+    "authorName": "Aditi Shrivastava"
   },
   {
     "_id": "6ae9bdceeb40e85ae61859e4",

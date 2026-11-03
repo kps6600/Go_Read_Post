@@ -732,3 +732,33 @@
   background: #16a34a !important;
   color: #ffffff !important;
 }
+
+.pp-author-badge.pp-badge-amber {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+.pp-author-pill.active .pp-author-badge.pp-badge-amber {
+  background: #d97706 !important;
+  color: #ffffff !important;
+}
+.pp-author-desk-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+  flex-wrap: wrap;
+}
+.pp-author-desk-label {
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+.pp-author-desk-name {
+  color: var(--text-primary, #0f172a);
+  font-weight: 700;
+}
+.pp-author-desk-email {
+  color: var(--brand-primary, #dc2626);
+  font-size: 0.78rem;
+  font-weight: 500;
+}

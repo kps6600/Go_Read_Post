@@ -263,7 +263,7 @@ router.post('/', async (req, res) => {
 // PUBLIC: GET /api/submissions (List of Pitches Content)
 router.get('/', async (req, res) => {
   try {
-    const { type, status, search, limit = 100 } = req.query;
+    const { type, status, search, author, email, limit = 100 } = req.query;
 
     if (isDbConnected()) {
       await syncAuthorDraftPitchesToSubmissions();
@@ -275,17 +275,53 @@ router.get('/', async (req, res) => {
       if (status && status !== 'all') {
         filter.status = status;
       }
+
+      const andClauses = [];
+
+      if (email || author) {
+        const authorConds = [];
+        if (email && email.trim()) {
+          const em = email.trim();
+          const emAlt = em.includes('-') ? em.replace(/-/g, '.') : em.replace(/\./g, '-');
+          const emReg = new RegExp(em, 'i');
+          const emAltReg = new RegExp(emAlt, 'i');
+          authorConds.push(
+            { email: { $in: [emReg, emAltReg] } },
+            { authorEmail: { $in: [emReg, emAltReg] } }
+          );
+        }
+        if (author && author.trim()) {
+          const aReg = new RegExp(author.trim(), 'i');
+          authorConds.push(
+            { founderName: aReg },
+            { name: aReg },
+            { authorName: aReg }
+          );
+        }
+        if (authorConds.length > 0) {
+          andClauses.push({ $or: authorConds });
+        }
+      }
+
       if (search && search.trim()) {
         const regex = new RegExp(search.trim(), 'i');
-        filter.$or = [
-          { startupName: regex },
-          { founderName: regex },
-          { name: regex },
-          { headline: regex },
-          { subject: regex },
-          { sector: regex },
-          { category: regex }
-        ];
+        andClauses.push({
+          $or: [
+            { startupName: regex },
+            { founderName: regex },
+            { name: regex },
+            { headline: regex },
+            { subject: regex },
+            { sector: regex },
+            { category: regex }
+          ]
+        });
+      }
+
+      if (andClauses.length === 1) {
+        Object.assign(filter, andClauses[0]);
+      } else if (andClauses.length > 1) {
+        filter.$and = andClauses;
       }
 
       const items = await Submission.find(filter).sort({ createdAt: -1 }).limit(Number(limit));
@@ -298,6 +334,18 @@ router.get('/', async (req, res) => {
       let list = readFallbackSubmissions();
       if (type && type !== 'all') list = list.filter(s => s.type === type);
       if (status && status !== 'all') list = list.filter(s => s.status === status);
+      if (email || author) {
+        const em = (email || '').toLowerCase().trim();
+        const emAlt = em.includes('-') ? em.replace(/-/g, '.') : em.replace(/\./g, '-');
+        const an = (author || '').toLowerCase().trim();
+        list = list.filter(s => {
+          const sEm = (s.email || s.authorEmail || '').toLowerCase();
+          const sName = (s.founderName || s.name || s.authorName || '').toLowerCase();
+          const emMatch = em && (sEm.includes(em) || sEm.includes(emAlt));
+          const nameMatch = an && (sName.includes(an) || an.includes(sName));
+          return emMatch || nameMatch;
+        });
+      }
       return res.json({ success: true, count: list.length, data: list });
     }
   } catch (err) {

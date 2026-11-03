@@ -24,6 +24,8 @@ export const SubmissionService = {
     if (params.type && params.type !== 'all') query.append('type', params.type);
     if (params.status && params.status !== 'all') query.append('status', params.status);
     if (params.search && params.search.trim()) query.append('search', params.search.trim());
+    if (params.author && params.author.trim()) query.append('author', params.author.trim());
+    if (params.email && params.email.trim()) query.append('email', params.email.trim());
     if (params.limit) query.append('limit', params.limit);
 
     try {

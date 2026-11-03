@@ -5,6 +5,7 @@ import {
   TrendingUp, Globe, Building, AlertCircle, ChevronDown
 } from 'lucide-react';
 import { SubmissionService } from '../services/submissionService';
+import { AuthService } from '../services/authService';
 import './PitchesPage.css';
 
 export default function PitchesPage({ 
@@ -18,10 +19,18 @@ export default function PitchesPage({
   const [searchQuery, setSearchQuery] = useState('');
   const [formatFilter, setFormatFilter] = useState('all'); // 'all' | 'article' | 'video'
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'reviewing' | 'published'
-  const [authorScope, setAuthorScope] = useState('all'); // 'all' | 'mine'
   const [selectedPitch, setSelectedPitch] = useState(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterMenuRef = useRef(null);
+
+  // Determine active logged-in author
+  const activeAuthor = useMemo(() => {
+    return currentUser || AuthService.getUser() || {
+      name: 'Aditi Shrivastava',
+      email: 'aditi-shrivastava@goreadpost.com',
+      role: 'AUTHOR'
+    };
+  }, [currentUser]);
 
   // Close filter popover on outside click
   useEffect(() => {
@@ -36,29 +45,92 @@ export default function PitchesPage({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [filterMenuOpen]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchPitches = () => {
     setLoading(true);
-
-    SubmissionService.getPublicPitches({ type: 'pitch', limit: 100 })
+    SubmissionService.getPublicPitches({ 
+      type: 'pitch', 
+      email: activeAuthor.email,
+      author: activeAuthor.name,
+      limit: 100 
+    })
       .then(res => {
-        if (!isMounted) return;
         const items = res?.data || [];
         setPitches(items);
         setLoading(false);
       })
       .catch(err => {
-        if (!isMounted) return;
         console.warn('Failed to load pitches:', err);
         setLoading(false);
       });
+  };
 
-    return () => { isMounted = false; };
-  }, []);
+  useEffect(() => {
+    fetchPitches();
+    const handleSubmissionsChange = () => fetchPitches();
+    window.addEventListener('submissions:change', handleSubmissionsChange);
+    return () => window.removeEventListener('submissions:change', handleSubmissionsChange);
+  }, [activeAuthor]);
+
+  // Check if a pitch/story belongs strictly to this logged-in author
+  const isPitchMine = (p) => {
+    if (!p) return false;
+    const authorEmail = (activeAuthor?.email || 'aditi-shrivastava@goreadpost.com').trim().toLowerCase();
+    const authorName = (activeAuthor?.name || activeAuthor?.username || 'Aditi Shrivastava').trim().toLowerCase();
+
+    // Check emails
+    const emailsToCheck = [p.email, p.authorEmail, p.founderEmail, p.contactEmail]
+      .filter(Boolean)
+      .map(e => e.trim().toLowerCase());
+
+    for (const em of emailsToCheck) {
+      if (em === authorEmail) return true;
+      const normEm = em.replace(/-/g, '.');
+      const normTarget = authorEmail.replace(/-/g, '.');
+      if (normEm === normTarget) return true;
+      const userPrefix = normTarget.split('@')[0];
+      if (userPrefix && normEm.startsWith(userPrefix)) return true;
+    }
+
+    // Check names
+    const namesToCheck = [p.founderName, p.authorName, p.name, p.author]
+      .filter(Boolean)
+      .map(n => n.trim().toLowerCase());
+
+    for (const nm of namesToCheck) {
+      if (nm === authorName) return true;
+      if (nm.includes(authorName) || authorName.includes(nm)) return true;
+      const tFirst = authorName.split(' ')[0];
+      const nmFirst = nm.split(' ')[0];
+      if (tFirst && nmFirst && tFirst === nmFirst && tFirst.length >= 3) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Strictly filter pitches to ONLY the logged-in author's content
+  const authorPitches = useMemo(() => {
+    return pitches.filter(p => isPitchMine(p));
+  }, [pitches, activeAuthor]);
+
+  // Statistics scoped solely to the logged-in author
+  const totalCount = authorPitches.length;
+  const articlePitchesCount = authorPitches.filter(p => p.pitchFormat !== 'video').length;
+  const videoPitchesCount = authorPitches.filter(p => p.pitchFormat === 'video').length;
+  const pendingCount = authorPitches.filter(p => {
+    const st = (p.status || 'pending').toLowerCase();
+    return st === 'pending' || st === 'reviewing';
+  }).length;
+  const publishedCount = authorPitches.filter(p => {
+    const st = (p.status || '').toLowerCase();
+    return st === 'published' || st === 'approved';
+  }).length;
+  const activeFiltersCount = (formatFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0);
 
   // Filtered list
   const filteredPitches = useMemo(() => {
-    return pitches.filter(p => {
+    return authorPitches.filter(p => {
       // 1. Format filter
       if (formatFilter === 'article' && p.pitchFormat === 'video') return false;
       if (formatFilter === 'video' && p.pitchFormat !== 'video') return false;
@@ -77,47 +149,18 @@ export default function PitchesPage({
         }
       }
 
-      // 2b. Author Scope
-      if (authorScope === 'mine') {
-        if (!isPitchMine(p)) return false;
-      }
-
       // 3. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         const headline = (p.headline || p.title || p.startupName || '').toLowerCase();
         const summary = (p.summary || p.details || '').toLowerCase();
-        const founder = (p.founderName || p.name || p.authorName || '').toLowerCase();
         const sector = (p.sector || p.category || '').toLowerCase();
-        return headline.includes(q) || summary.includes(q) || founder.includes(q) || sector.includes(q);
+        return headline.includes(q) || summary.includes(q) || sector.includes(q);
       }
 
       return true;
     });
-  }, [pitches, formatFilter, statusFilter, authorScope, searchQuery, currentUser]);
-
-  const currentAuthorName = currentUser?.name || currentUser?.username || '';
-  const currentAuthorEmail = currentUser?.email || '';
-
-  const isPitchMine = (p) => {
-    if (!currentAuthorName && !currentAuthorEmail) return false;
-    const cName = currentAuthorName.toLowerCase();
-    const cEmail = currentAuthorEmail.toLowerCase();
-    const fName = (p.founderName || p.authorName || p.name || '').toLowerCase();
-    const fEmail = (p.authorEmail || p.email || '').toLowerCase();
-    return (cName && (fName.includes(cName) || cName.includes(fName))) || (cEmail && fEmail === cEmail);
-  };
-
-  const myPublishedCount = pitches.filter(p => isPitchMine(p) && ((p.status || '').toLowerCase() === 'published' || (p.status || '').toLowerCase() === 'approved')).length;
-  const myTotalCount = pitches.filter(p => isPitchMine(p)).length;
-
-  // Statistics
-  const totalCount = pitches.length;
-  const articlePitchesCount = pitches.filter(p => p.pitchFormat !== 'video').length;
-  const videoPitchesCount = pitches.filter(p => p.pitchFormat === 'video').length;
-  const pendingCount = pitches.filter(p => (p.status || 'pending') === 'pending').length;
-  const publishedCount = pitches.filter(p => (p.status || '').toLowerCase() === 'published' || (p.status || '').toLowerCase() === 'approved').length;
-  const activeFiltersCount = (formatFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0);
+  }, [authorPitches, formatFilter, statusFilter, searchQuery]);
 
   return (
     <div className="pitches-page-root">
@@ -131,38 +174,49 @@ export default function PitchesPage({
         <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
       </div>
 
-      {/* Author Switcher Bar */}
-      {currentUser && (
-        <div className="pp-author-persona-bar">
-          <div className="pp-author-pills">
-            <button
-              type="button"
-              className={`pp-author-pill ${authorScope === 'all' ? 'active' : ''}`}
-              onClick={() => setAuthorScope('all')}
-            >
-              <span>All Stories &amp; Pitches</span>
-              <span className="pp-author-badge">{totalCount}</span>
-            </button>
+      {/* Author Persona / Desk Banner */}
+      <div className="pp-author-persona-bar">
+        <div className="pp-author-pills">
+          <button
+            type="button"
+            className={`pp-author-pill ${statusFilter === 'all' && formatFilter === 'all' ? 'active' : ''}`}
+            onClick={() => { setStatusFilter('all'); setFormatFilter('all'); }}
+          >
+            <span>My Stories &amp; Pitches</span>
+            <span className="pp-author-badge">{totalCount}</span>
+          </button>
 
-            <button
-              type="button"
-              className={`pp-author-pill ${authorScope === 'mine' ? 'active' : ''}`}
-              onClick={() => {
-                setAuthorScope('mine');
-                setStatusFilter('published');
-              }}
-            >
-              <CheckCircle2 size={13} />
-              <span>Published by {currentUser.name ? currentUser.name.split(' ')[0] : 'Author'}</span>
-              <span className="pp-author-badge pp-badge-green">{myPublishedCount}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className={`pp-author-pill ${statusFilter === 'published' ? 'active' : ''}`}
+            onClick={() => { setStatusFilter('published'); setFormatFilter('all'); }}
+          >
+            <CheckCircle2 size={13} />
+            <span>Published ({publishedCount})</span>
+            <span className="pp-author-badge pp-badge-green">{publishedCount}</span>
+          </button>
 
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #64748b)' }}>
-            Author Desk: <strong>{currentUser.name || currentUser.username}</strong>
-          </div>
+          <button
+            type="button"
+            className={`pp-author-pill ${statusFilter === 'pending' || statusFilter === 'reviewing' ? 'active' : ''}`}
+            onClick={() => { setStatusFilter('pending'); setFormatFilter('all'); }}
+          >
+            <Clock size={13} />
+            <span>In Review ({pendingCount})</span>
+            <span className="pp-author-badge pp-badge-amber">{pendingCount}</span>
+          </button>
         </div>
-      )}
+
+        <div className="pp-author-desk-info">
+          <span className="pp-author-desk-label">Author Desk:</span>
+          <strong className="pp-author-desk-name">
+            {activeAuthor.name || activeAuthor.username || 'Aditi Shrivastava'}
+          </strong>
+          <span className="pp-author-desk-email">
+            ({activeAuthor.email || 'aditi-shrivastava@goreadpost.com'})
+          </span>
+        </div>
+      </div>
 
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
