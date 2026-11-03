@@ -237,7 +237,7 @@
 }
 
 .asv-card:hover .asv-card-title {
-  color: #2563eb;
+  color: #dc2626;
 }
 
 .asv-card-summary {
@@ -383,6 +383,12 @@
 
 .asv-btn-review svg {
   flex-shrink: 0;
+}
+
+.asv-btn-review.is-reviewing {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
 }
 
 .asv-btn-review:hover:not(:disabled) {

@@ -310,28 +310,16 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                       </button>
                     )}
 
-                    {sub.status !== 'reviewing' ? (
-                      <button
-                        type="button"
-                        className="asv-btn-review"
-                        disabled={isBusy}
-                        onClick={() => handleUpdateStatus(subId, 'reviewing')}
-                      >
-                        <Clock size={13} style={{ flexShrink: 0 }} />
-                        <span>Mark In Review</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="asv-btn-review"
-                        disabled={isBusy}
-                        onClick={() => handleUpdateStatus(subId, 'pending')}
-                        title="Move back to pending queue"
-                      >
-                        <Clock size={13} style={{ flexShrink: 0 }} />
-                        <span>Set Pending</span>
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className={`asv-btn-review ${sub.status === 'reviewing' ? 'is-reviewing' : ''}`}
+                      disabled={isBusy}
+                      onClick={() => handleUpdateStatus(subId, sub.status === 'reviewing' ? 'pending' : 'reviewing')}
+                      title={sub.status === 'reviewing' ? 'Move back to pending queue' : 'Mark in editorial review'}
+                    >
+                      <Clock size={13} style={{ flexShrink: 0 }} />
+                      <span className="asv-review-text">{sub.status === 'reviewing' ? 'In Review' : 'Review'}</span>
+                    </button>
                   </div>
 
                   <button
