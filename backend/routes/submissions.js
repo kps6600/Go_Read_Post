@@ -21,6 +21,26 @@ const INITIAL_SUBMISSIONS = [
   {
     type: 'pitch',
     pitchFormat: 'article',
+    startupName: 'Cynlr Robotics',
+    founderName: 'Gokul N A & N A Nikhil',
+    founderRole: 'Co-Founders',
+    sector: 'DeepTech & Robotics',
+    stage: 'Series A',
+    website: 'https://cynlr.com',
+    metricMoat: '$14.5M Raised, 24 Global Deployments',
+    headline: 'How Cynlr is teaching robotic arms to see, understand and manipulate objects like human hands',
+    summary: 'Bengaluru-based deeptech robotics pioneer Cynlr develops neuro-inspired vision hardware and software pipelines enabling robots to handle dynamic unstructured manufacturing environments.',
+    details: 'With proprietary visual intelligence, Cynlr enables universal manipulation across high-speed industrial assembly lines.',
+    name: 'Gokul N A',
+    email: 'founders@cynlr.com',
+    phone: '+91 98450 77112',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 72)
+  },
+
+  {
+    type: 'pitch',
+    pitchFormat: 'article',
     startupName: 'Neuraflow AI',
     founderName: 'Aditya Kulkarni',
     founderRole: 'Founder & CEO',
@@ -90,7 +110,7 @@ async function syncAuthorDraftPitchesToSubmissions() {
   if (!isDbConnected()) return;
   try {
     // Clean up any previously published submissions so they do not show in the submissions queue
-    await Submission.deleteMany({ status: 'published' });
+    // Keep published submissions intact so they appear in published view
 
     // 1. Sync Draft Articles (only unpublished drafts flagged as pitches)
     const draftArticles = await Article.find({

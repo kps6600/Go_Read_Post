@@ -63,8 +63,17 @@ export default function PitchesPage({
       if (formatFilter === 'video' && p.pitchFormat !== 'video') return false;
 
       // 2. Status filter
-      if (statusFilter !== 'all' && (p.status || 'pending').toLowerCase() !== statusFilter.toLowerCase()) {
-        return false;
+      if (statusFilter !== 'all') {
+        const pStatus = (p.status || 'pending').toLowerCase();
+        if (statusFilter === 'published') {
+          if (pStatus !== 'published' && pStatus !== 'approved') return false;
+        } else if (statusFilter === 'pending') {
+          if (pStatus !== 'pending') return false;
+        } else if (statusFilter === 'reviewing') {
+          if (pStatus !== 'reviewing' && pStatus !== 'pending') return false;
+        } else if (pStatus !== statusFilter.toLowerCase()) {
+          return false;
+        }
       }
 
       // 3. Search query
@@ -86,6 +95,7 @@ export default function PitchesPage({
   const articlePitchesCount = pitches.filter(p => p.pitchFormat !== 'video').length;
   const videoPitchesCount = pitches.filter(p => p.pitchFormat === 'video').length;
   const pendingCount = pitches.filter(p => (p.status || 'pending') === 'pending').length;
+  const publishedCount = pitches.filter(p => (p.status || '').toLowerCase() === 'published' || (p.status || '').toLowerCase() === 'approved').length;
   const activeFiltersCount = (formatFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0);
 
   return (
@@ -155,6 +165,20 @@ export default function PitchesPage({
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{pendingCount}</span>
             <span className="pp-kpi-label">In Review Desk</span>
+          </div>
+        </div>
+
+        <div 
+          className={`pp-kpi-card pp-kpi-published ${statusFilter === 'published' ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => { setFormatFilter('all'); setStatusFilter('published'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setFormatFilter('all'); setStatusFilter('published'); } }}
+          title="Click to view published stories"
+        >
+          <div className="pp-kpi-info">
+            <span className="pp-kpi-num">{publishedCount}</span>
+            <span className="pp-kpi-label">Published Stories</span>
           </div>
         </div>
       </div>
@@ -283,6 +307,14 @@ export default function PitchesPage({
                     >
                       <span>Approved</span>
                     </button>
+                    <button
+                      type="button"
+                      className={`pp-popover-option ${statusFilter === 'published' ? 'active' : ''}`}
+                      onClick={() => { setStatusFilter('published'); setFilterMenuOpen(false); }}
+                    >
+                      <span>Published Stories</span>
+                      <span className="pp-option-badge">{publishedCount}</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -341,8 +373,10 @@ export default function PitchesPage({
               : 'Recent';
 
             const status = (pitch.status || 'pending').toLowerCase();
-            const statusBg = status === 'approved' ? '#dcfce7' : status === 'reviewing' ? '#e0e7ff' : '#fef3c7';
-            const statusColor = status === 'approved' ? '#166534' : status === 'reviewing' ? '#3730a3' : '#92400e';
+            const isPublished = status === 'published' || status === 'approved';
+            const statusBg = isPublished ? '#dcfce7' : status === 'reviewing' ? '#e0e7ff' : '#fef3c7';
+            const statusColor = isPublished ? '#166534' : status === 'reviewing' ? '#3730a3' : '#92400e';
+            const statusLabel = isPublished ? 'Published' : status === 'reviewing' ? 'In Review' : 'Pending';
 
             return (
               <div key={pitch._id || pitch.id} className="pp-card">
@@ -368,7 +402,7 @@ export default function PitchesPage({
                       className="pp-status-badge"
                       style={{ background: statusBg, color: statusColor }}
                     >
-                      {pitch.status || 'Pending'}
+                      {statusLabel}
                     </span>
                   </div>
                 </div>

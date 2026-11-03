@@ -83,6 +83,7 @@
 .pp-kpi-video::before { background: #7c3aed; }
 .pp-kpi-article::before { background: #0284c7; }
 .pp-kpi-pending::before { background: #d97706; }
+.pp-kpi-published::before { background: #16a34a; }
 
 .pp-kpi-card.active {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
@@ -102,6 +103,10 @@
 .pp-kpi-pending.active {
   border-color: #fcd34d;
   background: rgba(217, 119, 6, 0.04);
+}
+.pp-kpi-published.active {
+  border-color: #86efac;
+  background: rgba(22, 163, 74, 0.04);
 }
 
 .pp-kpi-info {
