@@ -99,24 +99,10 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
   return (
     <div className="admin-posts-container">
       {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-            Startup Pitches &amp; Inbound Leads
-          </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
-            Review authored story pitches, pitch deck submissions from tech founders, and partner inquiries.
-          </p>
-        </div>
-        <button 
-          className="admin-btn-secondary" 
-          onClick={loadSubmissions} 
-          disabled={loading}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          <RefreshCw size={15} className={loading ? 'spin-anim' : ''} />
-          <span>Refresh Submissions</span>
-        </button>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          Startup Pitches &amp; Inbound Leads
+        </h2>
       </div>
 
       {/* KPI Stats */}
