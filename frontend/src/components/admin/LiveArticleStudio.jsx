@@ -831,7 +831,7 @@ export default function LiveArticleStudio({
 
       if (!article || isPitchMode) {
         setFormData(prev => {
-          if (!prev.authorName || prev.authorName === 'Editorial Desk') {
+          if (!prev.authorName || prev.authorName === 'Editorial Desk' || isPitchMode) {
             const authObj = authors.find(a => (a.name || a.authorName || '').toLowerCase() === authorName.toLowerCase());
             return {
               ...prev,
@@ -2762,8 +2762,11 @@ export default function LiveArticleStudio({
                     <label className="las-label">Author Byline</label>
                     <select 
                       className="las-select"
-                      value={formData.authorName || activeAuthorName || 'Aditi Shrivastava'}
+                      value={isPitchMode ? (activeAuthorName || formData.authorName || 'Aditi Shrivastava') : (formData.authorName || activeAuthorName || 'Aditi Shrivastava')}
+                      disabled={isPitchMode}
+                      style={isPitchMode ? { background: '#f8fafc', color: '#1e293b', fontWeight: 600, cursor: 'not-allowed' } : {}}
                       onChange={(e) => {
+                        if (isPitchMode) return;
                         const auth = authors.find(a => (a.name || a.authorName) === e.target.value);
                         setFormData(prev => ({
                           ...prev,
@@ -2774,18 +2777,26 @@ export default function LiveArticleStudio({
                         }));
                       }}
                     >
-                      {activeAuthorName && !authors.some(a => (a.name || a.authorName) === activeAuthorName) && (
-                        <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>
-                      )}
-                      {authors.map(a => (
-                        <option key={a._id || a.name} value={a.name}>{a.name} ({a.designation || a.title || 'Staff Reporter'})</option>
-                      ))}
-                      {authors.length === 0 && (
+                      {isPitchMode ? (
+                        <option value={activeAuthorName || formData.authorName || 'Aditi Shrivastava'}>
+                          {activeAuthorName || formData.authorName || 'Aditi Shrivastava'} ({formData.authorTitle || activeAuthorTitle || 'Contributing Writer'})
+                        </option>
+                      ) : (
                         <>
-                          {activeAuthorName && <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>}
-                          <option value="Editorial Desk">Editorial Desk (Senior Tech Reporter)</option>
-                          <option value="Priya Sharma">Priya Sharma (Tech Reporter)</option>
-                          <option value="Vikram Malhotra">Vikram Malhotra (Lead Reporter)</option>
+                          {activeAuthorName && !authors.some(a => (a.name || a.authorName) === activeAuthorName) && (
+                            <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>
+                          )}
+                          {authors.map(a => (
+                            <option key={a._id || a.name} value={a.name}>{a.name} ({a.designation || a.title || 'Staff Reporter'})</option>
+                          ))}
+                          {authors.length === 0 && (
+                            <>
+                              {activeAuthorName && <option value={activeAuthorName}>{activeAuthorName} ({activeAuthorTitle})</option>}
+                              <option value="Editorial Desk">Editorial Desk (Senior Tech Reporter)</option>
+                              <option value="Priya Sharma">Priya Sharma (Tech Reporter)</option>
+                              <option value="Vikram Malhotra">Vikram Malhotra (Lead Reporter)</option>
+                            </>
+                          )}
                         </>
                       )}
                     </select>
