@@ -672,3 +672,63 @@
   margin: 0 auto 12px;
   opacity: 0.4;
 }
+
+/* Author Persona Switcher Bar */
+.pp-author-persona-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+.pp-author-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pp-author-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  background: var(--bg-hover, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.pp-author-pill:hover {
+  background: var(--border-color, #e2e8f0);
+  color: var(--text-primary, #0f172a);
+}
+.pp-author-pill.active {
+  background: var(--text-primary, #0f172a);
+  color: #ffffff;
+}
+.pp-author-badge {
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+}
+.pp-author-pill:not(.active) .pp-author-badge {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-secondary, #64748b);
+}
+.pp-author-badge.pp-badge-green {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+.pp-author-pill.active .pp-author-badge.pp-badge-green {
+  background: #16a34a !important;
+  color: #ffffff !important;
+}

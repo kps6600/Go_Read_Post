@@ -17,7 +17,8 @@ export default function PitchesPage({
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [formatFilter, setFormatFilter] = useState('all'); // 'all' | 'article' | 'video'
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'reviewing' | 'approved'
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'reviewing' | 'published'
+  const [authorScope, setAuthorScope] = useState('all'); // 'all' | 'mine'
   const [selectedPitch, setSelectedPitch] = useState(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterMenuRef = useRef(null);
@@ -76,6 +77,11 @@ export default function PitchesPage({
         }
       }
 
+      // 2b. Author Scope
+      if (authorScope === 'mine') {
+        if (!isPitchMine(p)) return false;
+      }
+
       // 3. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
@@ -88,7 +94,22 @@ export default function PitchesPage({
 
       return true;
     });
-  }, [pitches, formatFilter, statusFilter, searchQuery]);
+  }, [pitches, formatFilter, statusFilter, authorScope, searchQuery, currentUser]);
+
+  const currentAuthorName = currentUser?.name || currentUser?.username || '';
+  const currentAuthorEmail = currentUser?.email || '';
+
+  const isPitchMine = (p) => {
+    if (!currentAuthorName && !currentAuthorEmail) return false;
+    const cName = currentAuthorName.toLowerCase();
+    const cEmail = currentAuthorEmail.toLowerCase();
+    const fName = (p.founderName || p.authorName || p.name || '').toLowerCase();
+    const fEmail = (p.authorEmail || p.email || '').toLowerCase();
+    return (cName && (fName.includes(cName) || cName.includes(fName))) || (cEmail && fEmail === cEmail);
+  };
+
+  const myPublishedCount = pitches.filter(p => isPitchMine(p) && ((p.status || '').toLowerCase() === 'published' || (p.status || '').toLowerCase() === 'approved')).length;
+  const myTotalCount = pitches.filter(p => isPitchMine(p)).length;
 
   // Statistics
   const totalCount = pitches.length;
@@ -109,6 +130,39 @@ export default function PitchesPage({
         <ChevronRight size={12} />
         <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>Pitches &amp; Author Studio</span>
       </div>
+
+      {/* Author Switcher Bar */}
+      {currentUser && (
+        <div className="pp-author-persona-bar">
+          <div className="pp-author-pills">
+            <button
+              type="button"
+              className={`pp-author-pill ${authorScope === 'all' ? 'active' : ''}`}
+              onClick={() => setAuthorScope('all')}
+            >
+              <span>All Stories &amp; Pitches</span>
+              <span className="pp-author-badge">{totalCount}</span>
+            </button>
+
+            <button
+              type="button"
+              className={`pp-author-pill ${authorScope === 'mine' ? 'active' : ''}`}
+              onClick={() => {
+                setAuthorScope('mine');
+                setStatusFilter('published');
+              }}
+            >
+              <CheckCircle2 size={13} />
+              <span>Published by {currentUser.name ? currentUser.name.split(' ')[0] : 'Author'}</span>
+              <span className="pp-author-badge pp-badge-green">{myPublishedCount}</span>
+            </button>
+          </div>
+
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #64748b)' }}>
+            Author Desk: <strong>{currentUser.name || currentUser.username}</strong>
+          </div>
+        </div>
+      )}
 
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">

@@ -112,13 +112,15 @@ async function syncAuthorDraftPitchesToSubmissions() {
     // Clean up any previously published submissions so they do not show in the submissions queue
     // Keep published submissions intact so they appear in published view
 
-    // 1. Sync Draft Articles (only unpublished drafts flagged as pitches)
-    const draftArticles = await Article.find({
-      isPitch: true,
-      status: 'draft'
-    }).sort({ createdAt: -1 }).limit(30);
+    // 1. Sync Author Articles (drafts, pending pitches, and published stories)
+    const authorArticles = await Article.find({
+      $or: [
+        { isPitch: true },
+        { authorName: { $exists: true, $ne: '' } }
+      ]
+    }).sort({ createdAt: -1 }).limit(100);
 
-    for (const draft of draftArticles) {
+    for (const draft of authorArticles) {
       const headline = draft.title || '';
       if (!headline) continue;
 
@@ -138,29 +140,29 @@ async function syncAuthorDraftPitchesToSubmissions() {
           founderName: draft.authorName || 'Contributing Author',
           founderRole: draft.authorTitle || 'Contributing Author',
           sector: draft.categoryName || 'Startups',
-          stage: 'Authored Story Draft',
+          stage: draft.status === 'published' ? 'Published Story' : 'Story Draft',
           headline: headline,
-          summary: draft.subtitle || draft.excerpt || 'Authored article story awaiting editorial approval.',
-          details: draft.content ? draft.content.replace(/<[^>]*>/g, '').slice(0, 400) : '',
+          summary: draft.subtitle || draft.excerpt || (draft.content ? draft.content.replace(/<[^>]*>/g, '').slice(0, 180) : 'Author story submission.'),
+          details: draft.content ? draft.content.replace(/<[^>]*>/g, '').slice(0, 800) : '',
           coverImage: draft.featuredImage?.url || draft.image || '',
           name: draft.authorName || 'Contributing Author',
-          email: draft.pitchedByEmail || '',
-          authorEmail: draft.pitchedByEmail || '',
+          email: draft.pitchedByEmail || (draft.authorName ? `${draft.authorName.toLowerCase().replace(/\s+/g, '.')}@goreadpost.com` : ''),
+          authorEmail: draft.pitchedByEmail || (draft.authorName ? `${draft.authorName.toLowerCase().replace(/\s+/g, '.')}@goreadpost.com` : ''),
           category: draft.categoryName || 'Startups',
-          status: 'pending',
-          createdAt: draft.createdAt || new Date()
+          status: draft.status === 'published' ? 'published' : (draft.status || 'pending'),
+          createdAt: draft.publishedAt || draft.createdAt || new Date()
         });
+      } else if (draft.status === 'published' && exists.status !== 'published') {
+        exists.status = 'published';
+        await exists.save();
       }
     }
 
-    // 2. Sync Draft Videos (only unpublished drafts flagged as pitches)
+    // 2. Sync Videos (shows and pitch concepts)
     if (mongoose.models.Video) {
-      const draftVideos = await Video.find({
-        isPitch: true,
-        status: 'draft'
-      }).sort({ createdAt: -1 }).limit(30);
+      const authorVideos = await Video.find({}).sort({ createdAt: -1 }).limit(30);
 
-      for (const vid of draftVideos) {
+      for (const vid of authorVideos) {
         const headline = vid.title || '';
         if (!headline) continue;
 
@@ -176,21 +178,20 @@ async function syncAuthorDraftPitchesToSubmissions() {
             type: 'pitch',
             pitchFormat: 'video',
             draftVideoId: String(vid._id),
-            startupName: vid.series || vid.categoryLabel || 'Video Story Pitch',
-            founderName: vid.author || vid.guestName || 'Contributing Creator',
-            founderRole: vid.guestRole || 'Video Creator',
-            sector: vid.categoryLabel || vid.category || 'Interviews',
-            stage: 'Authored Video Draft',
+            startupName: vid.series || vid.categoryLabel || vid.category || 'Video Production',
+            founderName: vid.author || vid.authorName || vid.guestName || 'Contributing Creator',
+            founderRole: 'Video Creator',
+            sector: vid.category || 'Media & Tech',
+            stage: vid.status === 'published' ? 'Live Video' : 'Video Production Draft',
             headline: headline,
-            summary: vid.description ? vid.description.slice(0, 300) : 'Pitched video story awaiting editorial review.',
-            details: `YouTube URL: ${vid.videoUrl || vid.youtubeEmbedUrl}\nDuration: ${vid.duration || '20:00'}\nSeries: ${vid.series || 'Spotlight'}`,
-            coverImage: vid.image || '',
-            videoUrl: vid.videoUrl || vid.youtubeEmbedUrl || '',
-            name: vid.author || 'Contributing Creator',
-            email: vid.pitchedByEmail || '',
-            authorEmail: vid.pitchedByEmail || '',
-            category: vid.categoryLabel || vid.category || 'Interviews',
-            status: 'pending',
+            summary: vid.excerpt || vid.description || 'Video show pitch submitted for broadcast.',
+            details: vid.description || '',
+            coverImage: vid.thumbnail || '',
+            name: vid.author || vid.authorName || vid.guestName || 'Contributing Creator',
+            email: 'creator@goreadpost.com',
+            authorEmail: 'creator@goreadpost.com',
+            category: vid.category || 'Videos',
+            status: vid.status === 'published' ? 'published' : (vid.status || 'pending'),
             createdAt: vid.createdAt || new Date()
           });
         }
