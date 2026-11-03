@@ -66,16 +66,24 @@ function writeFallbackSubmissions(data) {
   } catch (e) {}
 }
 
+
+const seedLockPath = path.join(__dirname, '..', '.submissions_seeded');
+
 export async function ensureSubmissionsSeeded() {
   if (!isDbConnected()) return;
   try {
+    if (fs.existsSync(seedLockPath)) {
+      return; // Already seeded once. Respect user deletions permanently!
+    }
     const count = await Submission.countDocuments();
     if (count === 0) {
       await Submission.insertMany(INITIAL_SUBMISSIONS);
       console.log('✅ Seeded starter Submissions into MongoDB');
     }
+    fs.writeFileSync(seedLockPath, new Date().toISOString(), 'utf-8');
   } catch (e) {}
 }
+
 
 // Sync any authored draft pitches (articles or videos) into the submissions collection
 async function syncAuthorDraftPitchesToSubmissions() {
@@ -238,7 +246,6 @@ adminSubmissionsRouter.get('/', protectAdmin, async (req, res) => {
     const { type, status, search, limit = 100 } = req.query;
 
     if (isDbConnected()) {
-      await ensureSubmissionsSeeded();
       await syncAuthorDraftPitchesToSubmissions();
 
       const filter = {};
@@ -413,8 +420,19 @@ adminSubmissionsRouter.delete('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     if (isDbConnected()) {
-      await Submission.findByIdAndDelete(id);
-      return res.json({ success: true, message: 'Submission deleted' });
+      let deleted = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        deleted = await Submission.findByIdAndDelete(id);
+      }
+      if (!deleted) {
+        deleted = await Submission.findOneAndDelete({ $or: [{ _id: id }, { id: id }, { draftArticleId: id }] });
+      }
+      if (deleted && deleted.draftArticleId) {
+        try {
+          await Article.findByIdAndUpdate(deleted.draftArticleId, { isPitch: false });
+        } catch (e) {}
+      }
+      return res.json({ success: true, message: 'Submission deleted from database' });
     }
     let list = readFallbackSubmissions();
     list = list.filter(i => String(i._id || i.id) !== String(id));

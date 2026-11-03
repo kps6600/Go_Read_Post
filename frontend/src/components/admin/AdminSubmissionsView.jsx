@@ -81,20 +81,38 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this submission permanently from database?')) return;
+  
+  const [submissionToDelete, setSubmissionToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!submissionToDelete) return;
+    const id = String(submissionToDelete._id || submissionToDelete.id || '');
+    setDeleting(true);
     setActionId(id);
     try {
+      // Optimistic instant removal
+      setSubmissions(prev => prev.filter(s => String(s._id || s.id) !== id));
+      setMetrics(prev => ({
+        ...prev,
+        totalPitches: submissionToDelete.type === 'pitch' ? Math.max(0, (prev.totalPitches || 0) - 1) : (prev.totalPitches || 0),
+        totalContacts: submissionToDelete.type === 'contact' ? Math.max(0, (prev.totalContacts || 0) - 1) : (prev.totalContacts || 0),
+        pendingCount: submissionToDelete.status === 'pending' ? Math.max(0, (prev.pendingCount || 0) - 1) : (prev.pendingCount || 0)
+      }));
+
       await SubmissionService.deleteSubmission(id);
-      setSubmissions(prev => prev.filter(s => s._id !== id && s.id !== id));
-      onShowToast?.('Submission deleted from database.');
-      loadSubmissions();
+      onShowToast?.('Submission deleted successfully.');
+      setSubmissionToDelete(null);
     } catch (err) {
-      onShowToast?.(err.message || 'Failed to delete');
+      console.error('Delete failed:', err);
+      onShowToast?.(err.message || 'Failed to delete submission');
+      loadSubmissions();
     } finally {
+      setDeleting(false);
       setActionId(null);
     }
   };
+
 
   return (
     <div className="admin-posts-container">
@@ -406,18 +424,123 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                   )}
 
                   <button
+                    type="button"
                     className="admin-btn-secondary"
-                    style={{ height: '32px', fontSize: '0.8rem', color: '#64748b' }}
+                    style={{
+                      height: '32px',
+                      fontSize: '0.8rem',
+                      color: '#dc2626',
+                      borderColor: '#fecaca',
+                      background: '#fef2f2',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      cursor: 'pointer',
+                      borderRadius: '6px',
+                      padding: '0 10px',
+                      fontWeight: 600,
+                      transition: 'all 0.15s ease'
+                    }}
                     disabled={isBusy}
-                    onClick={() => handleDelete(subId)}
+                    onClick={() => setSubmissionToDelete(sub)}
+                    title="Delete this submission"
                   >
-                    <Trash2 size={14} style={{ marginRight: '4px' }} />
-                    Delete
+                    <Trash2 size={14} />
+                    <span>Delete</span>
                   </button>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+      {/* ── Delete Confirmation Modal ── */}
+      {submissionToDelete && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem'
+          }}
+          onClick={() => !deleting && setSubmissionToDelete(null)}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              padding: '1.75rem',
+              maxWidth: '460px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #e2e8f0'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircle size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>Delete Submission?</h3>
+                <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.82rem' }}>This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 1.5rem', fontSize: '0.9rem', color: '#334155', lineHeight: 1.5 }}>
+              Are you sure you want to permanently delete <strong>"{submissionToDelete.startupName || submissionToDelete.headline || submissionToDelete.subject || 'this submission'}"</strong>? It will be removed from database.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setSubmissionToDelete(null)}
+                disabled={deleting}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.35)'
+                }}
+              >
+                <Trash2 size={15} />
+                <span>{deleting ? 'Deleting...' : 'Delete Permanently'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
