@@ -209,15 +209,6 @@ export default function AdminSidebar({
 
         {/* Bottom User & Actions */}
         <div className="sidebar-footer">
-          <button
-            type="button"
-            className="sidebar-view-site-btn"
-            onClick={onViewSite}
-            title="Open Live Public Website"
-          >
-            <ExternalLink size={15} />
-            <span>View Live Website</span>
-          </button>
 
           <div className="sidebar-user-card">
             <div className="sidebar-user-avatar">
