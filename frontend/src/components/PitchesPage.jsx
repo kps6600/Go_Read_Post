@@ -89,9 +89,6 @@ export default function PitchesPage({
       {/* Metric KPI Row */}
       <div className="pp-kpi-row">
         <div className="pp-kpi-card">
-          <div className="pp-kpi-icon" style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626' }}>
-            <FileText size={20} />
-          </div>
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{totalCount}</span>
             <span className="pp-kpi-label">Total Story Pitches</span>
@@ -99,9 +96,6 @@ export default function PitchesPage({
         </div>
 
         <div className="pp-kpi-card">
-          <div className="pp-kpi-icon" style={{ background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed' }}>
-            <Tv size={20} />
-          </div>
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{videoPitchesCount}</span>
             <span className="pp-kpi-label">Video Productions</span>
@@ -109,9 +103,6 @@ export default function PitchesPage({
         </div>
 
         <div className="pp-kpi-card">
-          <div className="pp-kpi-icon" style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7' }}>
-            <Sparkles size={20} />
-          </div>
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{articlePitchesCount}</span>
             <span className="pp-kpi-label">Article Story Briefs</span>
@@ -119,9 +110,6 @@ export default function PitchesPage({
         </div>
 
         <div className="pp-kpi-card">
-          <div className="pp-kpi-icon" style={{ background: 'rgba(217, 119, 6, 0.1)', color: '#d97706' }}>
-            <Clock size={20} />
-          </div>
           <div className="pp-kpi-info">
             <span className="pp-kpi-num">{pendingCount}</span>
             <span className="pp-kpi-label">In Review Desk</span>
