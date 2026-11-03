@@ -116,12 +116,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
   return (
     <div className="admin-posts-container">
-      {/* Top Header */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-          Startup Pitches &amp; Inbound Leads
-        </h2>
-      </div>
+      
 
       {/* KPI Stats */}
       <div className="adv-stats-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '1.5rem' }}>
