@@ -5,6 +5,7 @@ import {
   ArrowUpRight, AlertCircle, FileText, Phone, User, Film, Play
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
+import './AdminSubmissionsView.css';
 
 export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
   const [submissions, setSubmissions] = useState([]);
@@ -186,236 +187,194 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>No story pitches or contact leads matched your criteria.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="asv-cards-grid">
           {submissions.filter(s => s.status !== 'published').map((sub) => {
             const subId = sub._id || sub.id;
             const isPitch = sub.type === 'pitch';
             const isVideo = sub.pitchFormat === 'video';
-            const isArticlePitch = sub.pitchFormat === 'article';
             const isBusy = actionId === subId;
 
-            // Icon & Badges
-            let iconBox = <Building size={18} />;
-            let iconBg = 'rgba(220, 38, 38, 0.1)';
-            let iconColor = '#dc2626';
-            let badgeText = 'Startup Pitch';
-            let badgeBg = '#fff1f2';
-            let badgeColor = '#dc2626';
-
-            if (!isPitch) {
-              iconBox = <Mail size={18} />;
-              iconBg = 'rgba(14, 165, 233, 0.1)';
-              iconColor = '#0284c7';
-              badgeText = 'Contact Lead';
-              badgeBg = '#f0f9ff';
-              badgeColor = '#0284c7';
-            } else if (isVideo) {
-              iconBox = <Film size={18} />;
-              iconBg = 'rgba(147, 51, 234, 0.1)';
-              iconColor = '#9333ea';
-              badgeText = '🎬 Video Story Pitch';
-              badgeBg = '#faf5ff';
-              badgeColor = '#9333ea';
-            } else if (isArticlePitch) {
-              iconBox = <FileText size={18} />;
-              iconBg = 'rgba(220, 38, 38, 0.1)';
-              iconColor = '#dc2626';
-              badgeText = '✍️ Article Story Pitch';
-              badgeBg = '#fff1f2';
-              badgeColor = '#dc2626';
-            }
-
             const authorOrFounder = sub.founderName || sub.authorName || sub.name || 'Contributing Author';
-            const role = sub.founderRole || (isVideo ? 'Video Creator' : 'Author / Contributor');
-            const headlineTitle = sub.headline || sub.title || sub.startupName || 'Untitled Pitch';
+            const role = sub.founderRole || (isVideo ? 'Video Creator' : (isPitch ? 'Author / Contributor' : 'Inbound Inquirer'));
+            const headlineTitle = isPitch ? (sub.headline || sub.title || sub.startupName || 'Untitled Story Pitch') : (sub.subject || 'Direct Inbound Inquiry');
+            
+            // Thumbnail selection
+            const defaultCover = isVideo 
+              ? 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&auto=format&fit=crop&q=80'
+              : 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80';
+            const thumbUrl = sub.coverImage || sub.image || (isPitch ? defaultCover : null);
+            const authorInitial = (authorOrFounder.charAt(0) || 'A').toUpperCase();
 
             return (
-              <div 
-                key={subId}
-                style={{
-                  background: 'var(--bg-card, #fff)',
-                  border: '1px solid var(--border-light, #e2e8f0)',
-                  borderRadius: '10px',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.85rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}
-              >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div 
-                      style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: '8px',
-                        background: iconBg,
-                        color: iconColor,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
+              <div key={subId} className="asv-card">
+                {/* 16:9 Media Header */}
+                {thumbUrl ? (
+                  <div className="asv-card-media">
+                    <img 
+                      src={thumbUrl} 
+                      alt={headlineTitle} 
+                      className="asv-card-img" 
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultCover;
                       }}
-                    >
-                      {iconBox}
-                    </div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
-                          {isPitch ? (sub.startupName || headlineTitle) : (sub.subject || 'Inquiry')}
-                        </h4>
-                        <span 
-                          style={{
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase',
-                            background: badgeBg,
-                            color: badgeColor
-                          }}
-                        >
-                          {badgeText}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <span>From: <strong>{authorOrFounder}</strong> ({role})</span>
-                        {(sub.email || sub.authorEmail || sub.phone) && (
-                          <span>Contact: {[sub.email || sub.authorEmail, sub.phone].filter(Boolean).join(' · ')}</span>
-                        )}
-                        <span>Received {new Date(sub.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
+                    />
+                    <div className="asv-card-overlay" />
 
-                  {/* Status Tag */}
-                  <div>
-                    <span 
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '20px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        background: sub.status === 'published' ? 'rgba(16, 185, 129, 0.12)' : (sub.status === 'reviewing' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(245, 158, 11, 0.12)'),
-                        color: sub.status === 'published' ? '#059669' : (sub.status === 'reviewing' ? '#2563eb' : '#d97706')
-                      }}
-                    >
+                    {/* Top-Left Format Badge */}
+                    <span className={`asv-format-badge ${isVideo ? 'pitch-video' : 'pitch-article'}`}>
+                      {isVideo ? <Film size={12} /> : <FileText size={12} />}
+                      <span>{isVideo ? 'Video Pitch' : 'Article Pitch'}</span>
+                    </span>
+
+                    {/* Top-Right Status Pill */}
+                    <span className={`asv-status-pill ${sub.status === 'reviewing' ? 'reviewing' : 'pending'}`}>
                       {sub.status || 'pending'}
                     </span>
-                  </div>
-                </div>
 
-                {/* Details Body */}
-                {isPitch ? (
-                  <div style={{ 
-                    background: '#f8fafc', 
-                    padding: '1rem', 
-                    borderRadius: '8px', 
-                    border: '1px solid #edf2f7', 
-                    display: 'flex', 
-                    gap: '14px', 
-                    alignItems: 'flex-start',
-                    flexWrap: 'wrap'
-                  }}>
-                    {/* Optional Thumbnail */}
-                    {(sub.coverImage || sub.image) && (
-                      <div style={{ width: '120px', height: '75px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e2e8f0', background: '#000' }}>
-                        <img 
-                          src={sub.coverImage || sub.image} 
-                          alt="Pitch Cover" 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                      </div>
+                    {/* Bottom-Left Startup / Sector Pill */}
+                    {(sub.startupName || sub.sector) && (
+                      <span className="asv-media-meta-pill">
+                        {sub.startupName || sub.sector}
+                      </span>
                     )}
-
-                    <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        "{sub.headline || headlineTitle}"
-                      </div>
-                      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                        {sub.summary}
-                      </div>
-                      {sub.details && (
-                        <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '4px', whiteSpace: 'pre-line' }}>
-                          {sub.details}
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
-                        {sub.sector && <span>Category / Sector: <strong>{sub.sector}</strong></span>}
-                        {sub.stage && <span>Status: <strong>{sub.stage}</strong></span>}
-                        {sub.metricMoat && <span>Traction: <strong style={{ color: '#059669' }}>{sub.metricMoat}</strong></span>}
-                        {sub.videoUrl && (
-                          <a href={sub.videoUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#9333ea', fontWeight: 600 }}>
-                            <Play size={12} /> <span>Watch Video</span> <ExternalLink size={12} />
-                          </a>
-                        )}
-                        {sub.website && (
-                          <a href={sub.website} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--brand-primary)' }}>
-                            <span>Website</span> <ExternalLink size={12} />
-                          </a>
-                        )}
-                      </div>
-                    </div>
                   </div>
                 ) : (
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #edf2f7', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                    "{sub.message}"
+                  <div className="asv-card-media-contact">
+                    {/* Top-Left Format Badge */}
+                    <span className="asv-format-badge contact">
+                      <Mail size={12} />
+                      <span>Contact Inbound</span>
+                    </span>
+
+                    {/* Top-Right Status Pill */}
+                    <span className={`asv-status-pill ${sub.status === 'reviewing' ? 'reviewing' : 'pending'}`}>
+                      {sub.status || 'pending'}
+                    </span>
+
+                    <div className="asv-contact-icon-bubble">
+                      <Mail size={24} />
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.02em' }}>
+                      DIRECT INQUIRY LEAD
+                    </div>
                   </div>
                 )}
 
-                {/* Actions Bar */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', borderTop: '1px solid var(--border-light, #f1f5f9)', paddingTop: '0.75rem' }}>
-                  
-                  {isPitch && sub.status !== 'published' && (
-                    <button
-                      className="admin-btn-primary"
-                      style={{ height: '32px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}
-                      disabled={isBusy}
-                      onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
-                    >
-                      <Sparkles size={14} />
-                      {isVideo ? 'Approve & Publish Video' : 'Approve & Publish Article'}
-                    </button>
+                {/* Card Body */}
+                <div className="asv-card-body">
+                  {/* Category & Stage Tags */}
+                  <div className="asv-tag-row">
+                    <span className="asv-category-badge">
+                      {isPitch ? (sub.category || sub.sector || 'Startups') : 'Inbound Lead'}
+                    </span>
+                    <span className="asv-stage-badge">
+                      {isPitch ? (sub.stage || 'Authored Pitch') : 'Contact Inquiry'}
+                    </span>
+                    {sub.videoUrl && (
+                      <a 
+                        href={sub.videoUrl} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#9333ea', fontSize: '0.72rem', fontWeight: 700, marginLeft: 'auto' }}
+                      >
+                        <Play size={11} /> <span>Watch URL</span> <ExternalLink size={10} />
+                      </a>
+                    )}
+                    {sub.website && (
+                      <a 
+                        href={sub.website} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 700, marginLeft: 'auto' }}
+                      >
+                        <span>Website</span> <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="asv-card-title" title={headlineTitle}>
+                    {headlineTitle}
+                  </h3>
+
+                  {/* Summary / Excerpt */}
+                  <p className="asv-card-summary" title={sub.summary || sub.message}>
+                    {sub.summary || sub.message}
+                  </p>
+
+                  {/* Traction Moat Badge if applicable */}
+                  {sub.metricMoat && (
+                    <div className="asv-traction-pill">
+                      <Sparkles size={12} />
+                      <span>{sub.metricMoat}</span>
+                    </div>
                   )}
 
-                  {sub.status !== 'reviewing' && sub.status !== 'published' && (
-                    <button
-                      className="admin-btn-secondary"
-                      style={{ height: '32px', fontSize: '0.8rem' }}
-                      disabled={isBusy}
-                      onClick={() => handleUpdateStatus(subId, 'reviewing')}
-                    >
-                      Mark In Review
-                    </button>
-                  )}
+                  {/* Submitter Meta Row */}
+                  <div className="asv-author-row">
+                    <div className="asv-author-avatar">
+                      {authorInitial}
+                    </div>
+                    <div className="asv-author-info">
+                      <div className="asv-author-name">{authorOrFounder}</div>
+                      <div className="asv-author-meta-sub">
+                        <span>{role}</span>
+                        <span>•</span>
+                        <span>{new Date(sub.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions Footer */}
+                <div className="asv-card-footer">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                    {isPitch && (
+                      <button
+                        type="button"
+                        className="asv-btn-approve"
+                        disabled={isBusy}
+                        onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
+                      >
+                        <Sparkles size={14} />
+                        <span>{isVideo ? 'Approve & Publish Video' : 'Approve & Publish Article'}</span>
+                      </button>
+                    )}
+
+                    {sub.status !== 'reviewing' ? (
+                      <button
+                        type="button"
+                        className="asv-btn-review"
+                        disabled={isBusy}
+                        onClick={() => handleUpdateStatus(subId, 'reviewing')}
+                      >
+                        <Clock size={13} />
+                        <span>Mark In Review</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="asv-btn-review"
+                        disabled={isBusy}
+                        onClick={() => handleUpdateStatus(subId, 'pending')}
+                        title="Move back to pending queue"
+                      >
+                        <Clock size={13} />
+                        <span>Set Pending</span>
+                      </button>
+                    )}
+                  </div>
 
                   <button
                     type="button"
-                    className="admin-btn-secondary"
-                    style={{
-                      height: '32px',
-                      fontSize: '0.8rem',
-                      color: '#dc2626',
-                      borderColor: '#fecaca',
-                      background: '#fef2f2',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      cursor: 'pointer',
-                      borderRadius: '6px',
-                      padding: '0 10px',
-                      fontWeight: 600,
-                      transition: 'all 0.15s ease'
-                    }}
+                    className="asv-btn-delete"
                     disabled={isBusy}
                     onClick={() => setSubmissionToDelete(sub)}
-                    title="Delete this submission"
+                    title="Delete submission"
                   >
-                    <Trash2 size={14} />
-                    <span>Delete</span>
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
