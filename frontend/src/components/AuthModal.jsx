@@ -264,20 +264,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
             </div>
           </div>
 
-          {mode === 'login' && (
-            <div style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary, #64748b)',
-              backgroundColor: 'var(--bg-secondary, #f8fafc)',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, #e2e8f0)',
-              marginBottom: '1rem',
-              lineHeight: 1.45
-            }}>
-              💡 <strong>Author login:</strong> Sign in with an author account (e.g. <code>author@goreadpost.com</code> or <code>priya@goreadpost.com</code> / <code>Author@12345</code>) to enable the <strong>Pitch Story</strong> button.
-            </div>
-          )}
 
           <button 
             type="submit" 
