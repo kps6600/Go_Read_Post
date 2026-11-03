@@ -6,7 +6,8 @@ import {
   ChevronDown, Sparkles,
   ArrowLeft
 } from 'lucide-react';
-import { PageService } from '../../services/pageService';
+import { PageService } from '../../services/pageService';
+import './AdminPagesView.css';
 
 export const identifyEditablePage = (page) => {
   const id = (page?.id || '').toLowerCase();
@@ -408,261 +409,160 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
         return page ? <DeleteModal page={page} /> : null;
       })()}
 
-      {/* ── Summary Stats Strip (Responsive Full Width Grid) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
-        marginBottom: '1.25rem'
-      }}>
-        {/* Total Pages */}
-        <div 
-          onClick={() => setStatusFilter('all')}
-          style={{ 
-            background: '#ffffff', 
-            padding: '1rem 1.25rem', 
-            borderRadius: '12px', 
-            border: statusFilter === 'all' ? '1.5px solid #0f172a' : '1px solid #e2e8f0', 
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}
-          title="Filter by all pages"
-        >
-          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{pages.length}</div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Pages</div>
-        </div>
-
-        {/* Published */}
-        <div 
-          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}
-          style={{ 
-            background: '#ffffff', 
-            padding: '1rem 1.25rem', 
-            borderRadius: '12px', 
-            border: statusFilter === 'published' ? '1.5px solid #059669' : '1px solid #e2e8f0', 
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}
-          title="Filter by published pages"
-        >
-          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#059669', lineHeight: 1 }}>{publishedCount}</div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Published / Live</div>
-        </div>
-
-        {/* Drafts */}
-        <div 
-          onClick={() => setStatusFilter(statusFilter === 'draft' ? 'all' : 'draft')}
-          style={{ 
-            background: '#ffffff', 
-            padding: '1rem 1.25rem', 
-            borderRadius: '12px', 
-            border: statusFilter === 'draft' ? '1.5px solid #dc2626' : '1px solid #e2e8f0', 
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}
-          title="Filter by draft pages"
-        >
-          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{draftCount}</div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Drafts</div>
-        </div>
-
-        {/* Total Sections */}
-        <div 
-          style={{ 
-            background: '#ffffff', 
-            padding: '1rem 1.25rem', 
-            borderRadius: '12px', 
-            border: '1px solid #e2e8f0', 
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}
-          title="Total configured sections across all pages"
-        >
-          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#2563eb', lineHeight: 1 }}>{totalSections}</div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginTop: '4px' }}>Total Sections</div>
-        </div>
-      </div>
-
+      {/* ── Summary Stats Strip (Responsive Full Width Grid) ── */}
+      <div className="apv-kpi-grid">
+        {/* Total Pages */}
+        <div 
+          onClick={() => setStatusFilter('all')}
+          className={`apv-kpi-card ${statusFilter === 'all' ? 'active' : ''}`}
+          title="Filter by all pages"
+        >
+          <div className="apv-kpi-val" style={{ color: '#0f172a' }}>{pages.length}</div>
+          <div className="apv-kpi-lbl">Total Pages</div>
+        </div>
+
+        {/* Published */}
+        <div 
+          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}
+          className={`apv-kpi-card ${statusFilter === 'published' ? 'active' : ''}`}
+          title="Filter by published pages"
+        >
+          <div className="apv-kpi-val" style={{ color: '#059669' }}>{publishedCount}</div>
+          <div className="apv-kpi-lbl">Published / Live</div>
+        </div>
+
+        {/* Drafts */}
+        <div 
+          onClick={() => setStatusFilter(statusFilter === 'draft' ? 'all' : 'draft')}
+          className={`apv-kpi-card ${statusFilter === 'draft' ? 'active' : ''}`}
+          title="Filter by draft pages"
+        >
+          <div className="apv-kpi-val" style={{ color: '#dc2626' }}>{draftCount}</div>
+          <div className="apv-kpi-lbl">Drafts</div>
+        </div>
+
+        {/* Total Sections */}
+        <div 
+          className="apv-kpi-card"
+          title="Total configured sections across all pages"
+        >
+          <div className="apv-kpi-val" style={{ color: '#2563eb' }}>{totalSections}</div>
+          <div className="apv-kpi-lbl">Total Sections</div>
+        </div>
+      </div>
+
       {/* ── Search, Filters & Controls Bar ── */}
-      <div style={{
-        background: '#ffffff',
-        padding: '0.85rem 1.15rem',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '0.85rem',
-        marginBottom: '0.75rem',
-        flexWrap: 'wrap'
-      }}>
-        {/* Search */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: '#f8fafc',
-          padding: '0.55rem 0.95rem',
-          borderRadius: '9px',
-          border: '1px solid #e2e8f0',
-          flex: 1,
-          minWidth: '240px'
-        }}>
-          <Search size={16} style={{ color: '#94a3b8' }} />
-          <input
-            type="text"
-            placeholder="Search by title, description, or slug…"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              outline: 'none',
-              fontSize: '0.88rem',
-              color: '#0f172a',
-              width: '100%',
-              fontWeight: 500
-            }}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
-            >
-              <X size={15} />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Dropdown */}
-        <div style={{ position: 'relative' }} ref={filterRef}>
-          <button
-            type="button"
-            onClick={() => setFilterDropdownOpen(prev => !prev)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.55rem 1rem',
-              background: statusFilter !== 'all' ? '#fff1f2' : '#ffffff',
-              border: statusFilter !== 'all' ? '1px solid #fecaca' : '1px solid #e2e8f0',
-              borderRadius: '9px',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              color: statusFilter !== 'all' ? '#dc2626' : '#334155',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <Filter size={15} />
-            <span>
-              {statusFilter === 'all'
-                ? 'All Status'
-                : statusFilter === 'published'
-                ? 'Live Only'
-                : 'Draft Only'}
-            </span>
-            <span style={{
-              background: statusFilter !== 'all' ? '#dc2626' : '#f1f5f9',
-              color: statusFilter !== 'all' ? '#ffffff' : '#64748b',
-              padding: '1px 6px',
-              borderRadius: '10px',
-              fontSize: '0.74rem',
-              fontWeight: 700
-            }}>
-              {filteredPages.length}
-            </span>
-            <ChevronDown size={13} style={{ transform: filterDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} />
-          </button>
-
-          {filterDropdownOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              right: 0,
-              zIndex: 50,
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
-              padding: '6px',
-              minWidth: '200px'
-            }}>
-              <div style={{ padding: '6px 10px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.04em' }}>
-                Filter Status
-              </div>
-              {[
-                { key: 'all', label: 'All Pages', count: pages.length },
-                { key: 'published', label: 'Published / Live', count: publishedCount, dot: '#10b981' },
-                { key: 'draft', label: 'Draft', count: draftCount, dot: '#f59e0b' }
-              ].map(opt => {
-                const isSelected = statusFilter === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    onClick={() => { setStatusFilter(opt.key); setFilterDropdownOpen(false); }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      padding: '8px 10px',
-                      background: isSelected ? '#f8fafc' : 'transparent',
-                      border: 'none',
-                      borderRadius: '7px',
-                      fontSize: '0.84rem',
-                      fontWeight: isSelected ? 700 : 500,
-                      color: isSelected ? '#0f172a' : '#475569',
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {opt.dot ? (
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: opt.dot }} />
-                      ) : (
-                        <span style={{ width: '8px' }} />
-                      )}
-                      <span>{opt.label}</span>
-                    </div>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{opt.count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* + Create Page Button */}
-        <button
-          type="button"
-          onClick={() => onNavigate('/admin/pages/create')}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0.55rem 1.25rem',
-            backgroundColor: 'var(--brand-primary, #dc2626)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '9px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
-            transition: 'transform 0.15s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Plus size={16} />
-          <span>Create Page</span>
-        </button>
-      </div>
-
+      <div className="apv-toolbar-wrap">
+        {/* Search Box */}
+        <div className="apv-search-box">
+          <Search size={16} style={{ color: '#94a3b8', flexShrink: 0 }} />
+          <input
+            type="text"
+            className="apv-search-input-field"
+            placeholder="Search by title, description, or slug…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* Actions Row (Filter Dropdown & Create Page Button side-by-side) */}
+        <div className="apv-toolbar-actions">
+          {/* Filter Dropdown */}
+          <div className="apv-filter-wrap" ref={filterRef}>
+            <button
+              type="button"
+              onClick={() => setFilterDropdownOpen(prev => !prev)}
+              className={`apv-filter-dropdown-btn ${statusFilter !== 'all' ? 'active' : ''}`}
+            >
+              <Filter size={15} />
+              <span>
+                {statusFilter === 'all'
+                  ? 'All Status'
+                  : statusFilter === 'published'
+                  ? 'Live Only'
+                  : 'Draft Only'}
+              </span>
+              <span 
+                className="apv-filter-count-chip"
+                style={{
+                  background: statusFilter !== 'all' ? '#dc2626' : '#f1f5f9',
+                  color: statusFilter !== 'all' ? '#ffffff' : '#64748b'
+                }}
+              >
+                {filteredPages.length}
+              </span>
+              <ChevronDown size={13} style={{ transform: filterDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} />
+            </button>
+
+            {filterDropdownOpen && (
+              <div className="apv-filter-popover-menu">
+                <div style={{ padding: '6px 10px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.04em' }}>
+                  Filter Status
+                </div>
+                {[
+                  { key: 'all', label: 'All Pages', count: pages.length },
+                  { key: 'published', label: 'Published / Live', count: publishedCount, dot: '#10b981' },
+                  { key: 'draft', label: 'Draft', count: draftCount, dot: '#f59e0b' }
+                ].map(opt => {
+                  const isSelected = statusFilter === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => { setStatusFilter(opt.key); setFilterDropdownOpen(false); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        padding: '8px 10px',
+                        background: isSelected ? '#f8fafc' : 'transparent',
+                        border: 'none',
+                        borderRadius: '7px',
+                        fontSize: '0.84rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        color: isSelected ? '#0f172a' : '#475569',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {opt.dot ? (
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: opt.dot }} />
+                        ) : (
+                          <span style={{ width: '8px' }} />
+                        )}
+                        <span>{opt.label}</span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{opt.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* + Create Page Button */}
+          <button
+            type="button"
+            className="apv-create-page-btn"
+            onClick={() => onNavigate('/admin/pages/create')}
+          >
+            <Plus size={16} />
+            <span>Create Page</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── Table Card ── */}
       <div style={{
         background: '#ffffff',
@@ -699,7 +599,7 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
           </div>
         ) : (
           /* TABLE VIEW */
-          <div style={{ overflowX: 'auto' }}>
+          <div className="apv-table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '820px' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
