@@ -126,7 +126,8 @@ export default function Header({
             setIsNavHidden(false);
           } else if (diff > scrollThreshold) {
             // Scrolling DOWN -> hide navbar
-            setIsNavHidden(true);
+            // Keep navbar visible
+            setIsNavHidden(false);
             setActiveDropdown(null);
             setUserDropdownOpen(false);
           } else if (diff < -scrollThreshold) {
@@ -925,13 +926,14 @@ export default function Header({
   const isMoreDropdownOpen = activeDropdown === 'more';
 
   return (
-    <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''} ${isNavHidden ? 'header-hidden' : ''}`}>
-
-      {/* Top Reading Progress Bar */}
+    <>
+      {/* Top Reading Progress Bar - Always fixed at top of screen, never hidden */}
       <div 
         className="navbar-reading-bar" 
         style={{ width: `${scrollProgress}%` }} 
       />
+
+      <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''}`}>
 
       <div className="container">
         {/* 2. Main Tier Navbar: Original Logo + Search + Actions */}
@@ -1701,5 +1703,6 @@ export default function Header({
 
       </div>
     </header>
+    </>
   );
 }
