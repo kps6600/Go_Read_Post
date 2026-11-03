@@ -1174,30 +1174,7 @@ export default function Header({
                       </button>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        if (onOpenBookmarks) onOpenBookmarks();
-                      }}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 10px',
-                        background: 'none',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        color: 'inherit',
-                        fontSize: '0.85rem',
-                        textAlign: 'left'
-                      }}
-                    >
-                      <Bookmark size={15} />
-                      <span>Saved Stories ({savedCount || 0})</span>
-                    </button>
+
 
                     <button
                       type="button"
