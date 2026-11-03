@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Send, Mail, Building, Link, DollarSign, CheckCircle, Clock, 
+  Send, Mail, Building, Link, DollarSign, CheckCircle, 
   Trash2, Search, Filter, RefreshCw, BookOpen, 
   ArrowUpRight, AlertCircle, Phone, User
 } from 'lucide-react';
@@ -59,7 +59,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
     }
   };
 
-  const handleConvertToArticle = async (id, pitchFormat) => {
+  const handleConvertToArticle = async (id, pitchFormat, targetStatus = 'published') => {
     setActionId(id);
     try {
       const targetSub = submissions.find(s => String(s._id || s.id) === String(id));
@@ -72,9 +72,12 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         }));
       }
 
-      const res = await SubmissionService.convertToArticle(id);
+      const res = await SubmissionService.convertToArticle(id, targetStatus);
       const isVideo = pitchFormat === 'video';
-      onShowToast?.(res.message || (isVideo ? 'Video Story approved & published live!' : 'Pitch successfully published as article!'));
+      const defaultMsg = targetStatus === 'draft'
+        ? (isVideo ? 'Video Story saved to Drafts!' : 'Pitch successfully saved as draft article!')
+        : (isVideo ? 'Video Story approved & published live!' : 'Pitch successfully published as article!');
+      onShowToast?.(res.message || defaultMsg);
       await loadSubmissions();
 
       if (res.article?._id && onNavigate) {
@@ -87,7 +90,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
         }, 1200);
       }
     } catch (err) {
-      onShowToast?.(err.message || 'Failed to publish story');
+      onShowToast?.(err.message || 'Failed to process story');
     } finally {
       setActionId(null);
     }
@@ -292,28 +295,38 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                 {/* Card Actions Footer */}
                 <div className="asv-card-footer">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-                    {isPitch && (
+                    {isPitch ? (
+                      <>
+                        <button
+                          type="button"
+                          className="asv-btn-approve"
+                          disabled={isBusy}
+                          onClick={() => handleConvertToArticle(subId, sub.pitchFormat, 'published')}
+                          title="Approve and make public"
+                        >
+                          <span>Public</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="asv-btn-review"
+                          disabled={isBusy}
+                          onClick={() => handleConvertToArticle(subId, sub.pitchFormat, 'draft')}
+                          title="Convert and save to Drafts"
+                        >
+                          <span>Draft</span>
+                        </button>
+                      </>
+                    ) : (
                       <button
                         type="button"
-                        className="asv-btn-approve"
+                        className="asv-btn-review"
                         disabled={isBusy}
-                        onClick={() => handleConvertToArticle(subId, sub.pitchFormat)}
-                        title="Approve and make public"
+                        onClick={() => handleUpdateStatus(subId, sub.status === 'reviewing' ? 'pending' : 'reviewing')}
+                        title={sub.status === 'reviewing' ? 'Move back to pending queue' : 'Mark in editorial review'}
                       >
-                        <span>Public</span>
+                        <span>Draft</span>
                       </button>
                     )}
-
-                    <button
-                      type="button"
-                      className={`asv-btn-review ${sub.status === 'reviewing' ? 'is-reviewing' : ''}`}
-                      disabled={isBusy}
-                      onClick={() => handleUpdateStatus(subId, sub.status === 'reviewing' ? 'pending' : 'reviewing')}
-                      title={sub.status === 'reviewing' ? 'Move back to pending queue' : 'Mark in editorial review'}
-                    >
-                      <Clock size={13} style={{ flexShrink: 0 }} />
-                      <span className="asv-review-text">{sub.status === 'reviewing' ? 'In Review' : 'Review'}</span>
-                    </button>
                   </div>
 
                   <button

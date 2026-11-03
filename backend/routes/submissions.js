@@ -315,12 +315,13 @@ adminSubmissionsRouter.put('/:id', protectAdmin, async (req, res) => {
 adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
+    const targetStatus = req.body?.status === 'draft' || req.query?.status === 'draft' ? 'draft' : 'published';
 
     if (isDbConnected()) {
       const subm = await Submission.findById(id);
       if (!subm) return res.status(404).json({ success: false, message: 'Submission not found' });
 
-      // 1. If linked to an existing draft Article, publish it!
+      // 1. If linked to an existing draft Article, publish or keep as draft
       if (subm.draftArticleId) {
         let existingArticle = null;
         try {
@@ -328,22 +329,26 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
         } catch (e) {}
 
         if (existingArticle) {
-          existingArticle.status = 'published';
+          existingArticle.status = targetStatus;
           existingArticle.isPitch = false;
-          existingArticle.publishedAt = new Date();
+          if (targetStatus === 'published') {
+            existingArticle.publishedAt = new Date();
+          }
           await existingArticle.save();
 
           await Submission.findByIdAndDelete(id);
 
           return res.json({
             success: true,
-            message: `Successfully approved & published article "${existingArticle.title}" live to GoReadPost!`,
+            message: targetStatus === 'draft'
+              ? `Saved article "${existingArticle.title}" to Drafts!`
+              : `Successfully approved & published article "${existingArticle.title}" live to GoReadPost!`,
             article: existingArticle
           });
         }
       }
 
-      // 2. If linked to an existing draft Video, publish it!
+      // 2. If linked to an existing draft Video, publish or keep as draft
       if (subm.draftVideoId) {
         let existingVideo = null;
         try {
@@ -351,7 +356,7 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
         } catch (e) {}
 
         if (existingVideo) {
-          existingVideo.status = 'published';
+          existingVideo.status = targetStatus;
           existingVideo.isPitch = false;
           await existingVideo.save();
 
@@ -359,13 +364,15 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
 
           return res.json({
             success: true,
-            message: `Successfully approved & published video "${existingVideo.title}" live to GoReadPost!`,
+            message: targetStatus === 'draft'
+              ? `Saved video "${existingVideo.title}" to Drafts!`
+              : `Successfully approved & published video "${existingVideo.title}" live to GoReadPost!`,
             video: existingVideo
           });
         }
       }
 
-      // 3. Inbound Startup Pitch without pre-existing draft: create new published Article
+      // 3. Inbound Startup Pitch without pre-existing draft: create new published or draft Article
       const slug = (subm.startupName || subm.headline || 'pitch')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -381,10 +388,10 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
         authorTitle: `${subm.founderRole || 'Founder'}, ${subm.startupName}`,
         categoryName: subm.category || (subm.sector?.includes('AI') ? 'AI & DeepTech' : 'Startups'),
         tags: [subm.startupName, subm.sector, subm.stage].filter(Boolean),
-        status: 'published',
-        publishedAt: new Date(),
-        views: 120,
-        claps: 25,
+        status: targetStatus,
+        publishedAt: targetStatus === 'published' ? new Date() : null,
+        views: targetStatus === 'published' ? 120 : 0,
+        claps: 0,
         featuredImage: {
           url: subm.coverImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80',
           caption: `${subm.startupName} founders`,
@@ -396,7 +403,9 @@ adminSubmissionsRouter.post('/:id/convert-to-article', protectAdmin, async (req,
 
       return res.json({
         success: true,
-        message: `Successfully approved & published pitch as article "${newArticle.title}"!`,
+        message: targetStatus === 'draft'
+          ? `Successfully saved pitch as draft article "${newArticle.title}"!`
+          : `Successfully approved & published pitch as article "${newArticle.title}"!`,
         article: newArticle
       });
     }

@@ -60,14 +60,16 @@ export const SubmissionService = {
     return json;
   },
 
-  // Admin: Convert pitch into published article
-  async convertToArticle(id) {
+  // Admin: Convert pitch into published or draft article
+  async convertToArticle(id, status = 'published') {
     const token = AuthService.getToken();
     const res = await fetch(`${ADMIN_API_BASE}/${encodeURIComponent(id)}/convert-to-article`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify({ status })
     });
     const json = await res.json();
     if (!res.ok || !json.success) {
