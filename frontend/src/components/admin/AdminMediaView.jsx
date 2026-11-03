@@ -608,20 +608,7 @@ export default function AdminMediaView({ onShowToast }) {
               <Trash2 size={14} />
               <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#64748b',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
-            >
-              Clear
-            </button>
+
           </div>
         )}
       </div>
