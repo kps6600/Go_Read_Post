@@ -6,6 +6,7 @@ import Topic from '../models/Topic.js';
 import Tag from '../models/Tag.js';
 import Article from '../models/Article.js';
 import Video from '../models/Video.js';
+import Submission from '../models/Submission.js';
 import { isDbConnected } from '../db.js';
 import { protectAdmin, requireRoles } from '../middleware/auth.js';
 import fs from 'fs';
@@ -776,30 +777,23 @@ router.get('/admin/authors', protectAdmin, async (req, res) => {
 // Single author + related stories for /author/:slug with pagination and auto-calculated count
 router.get('/authors/:slug', async (req, res) => {
   try {
-    const { slug } = req.params;
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
-    const sort = req.query.sort || 'latest';
-
-    let sortObj = { publishedAt: -1 };
-    if (sort === 'popular' || sort === 'views') {
-      sortObj = { views: -1, publishedAt: -1 };
-    } else if (sort === 'claps') {
-      sortObj = { claps: -1, publishedAt: -1 };
-    } else if (sort === 'oldest') {
-      sortObj = { publishedAt: 1 };
-    }
-
-    const rawSlug = String(slug || '').trim();
+    const rawSlug = req.params.slug;
     const decodedSlug = decodeURIComponent(rawSlug).trim();
     const slugHyphenated = decodedSlug.toLowerCase().replace(/[\s_]+/g, '-');
     const slugUnderscored = decodedSlug.toLowerCase().replace(/[\s-]+/g, '_');
-    const escapedText = decodedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const nameRegex = new RegExp(`^${escapedText}$`, 'i');
-    const slugRegex = new RegExp(`^(${slugHyphenated}|${slugUnderscored}|${escapedText})$`, 'i');
+    const slugRegex = new RegExp(`^${decodedSlug.replace(/[-_]+/g, '[-_ ]')}$`, 'i');
+    const nameRegex = new RegExp(`^${decodedSlug.replace(/[-_]+/g, ' ')}$`, 'i');
+
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 10));
+    const sortBy = req.query.sortBy || 'publishedAt';
+    const order = req.query.order === 'asc' ? 1 : -1;
+    const sortObj = { [sortBy]: order };
 
     let author = null;
     let articles = [];
+    let authorVideos = [];
+    let authorPitches = [];
     let total = 0;
 
     if (isDbConnected()) {
@@ -843,19 +837,128 @@ router.get('/authors/:slug', async (req, res) => {
       }
 
       if (author) {
-        const filter = {
-          status: 'published',
+        const escapedName = (author.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const authorNameRegex = escapedName ? new RegExp(`^${escapedName}$`, 'i') : null;
+        const escapedEmail = author.email ? author.email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : null;
+        const authorEmailRegex = escapedEmail ? new RegExp(`^${escapedEmail}$`, 'i') : null;
+
+        const articleFilter = {
           $or: [
             { authorId: author._id },
-            { authorName: new RegExp(`^${author.name}$`, 'i') }
+            ...(authorNameRegex ? [{ authorName: authorNameRegex }] : [])
           ]
         };
 
-        total = await Article.countDocuments(filter);
-        articles = await Article.find(filter)
+        total = await Article.countDocuments({ ...articleFilter, status: 'published', isPitch: { $ne: true } });
+        articles = await Article.find({ ...articleFilter, status: 'published', isPitch: { $ne: true } })
           .sort(sortObj)
           .skip((page - 1) * limit)
           .limit(limit);
+
+        // 2. Videos hosted/authored by this author
+        try {
+          const videoOr = [
+            { authorId: author._id },
+            ...(authorNameRegex ? [{ authorName: authorNameRegex }, { host: authorNameRegex }] : []),
+            ...(authorEmailRegex ? [{ pitchedByEmail: authorEmailRegex }] : [])
+          ];
+          authorVideos = await Video.find({ $or: videoOr, status: 'published', isPitch: { $ne: true } })
+            .sort({ createdAt: -1 });
+        } catch (vErr) {
+          console.warn('Error fetching author videos:', vErr.message);
+        }
+
+        // 3. Story & Video Pitches submitted by this author
+        try {
+          const draftArticles = await Article.find({
+            ...articleFilter,
+            $or: [{ isPitch: true }, { status: 'draft' }]
+          }).sort({ createdAt: -1 });
+
+          let draftVideos = [];
+          try {
+            const videoOr = [
+              { authorId: author._id },
+              ...(authorNameRegex ? [{ authorName: authorNameRegex }, { host: authorNameRegex }] : []),
+              ...(authorEmailRegex ? [{ pitchedByEmail: authorEmailRegex }] : [])
+            ];
+            draftVideos = await Video.find({
+              $or: videoOr,
+              $or: [{ isPitch: true }, { status: 'draft' }]
+            }).sort({ createdAt: -1 });
+          } catch (e) {}
+
+          const subOr = [
+            ...(authorNameRegex ? [{ name: authorNameRegex }, { founderName: authorNameRegex }, { authorName: authorNameRegex }] : [])
+          ];
+          if (authorEmailRegex) {
+            subOr.push({ email: authorEmailRegex });
+            subOr.push({ authorEmail: authorEmailRegex });
+          }
+          let inboundSubs = [];
+          if (subOr.length > 0) {
+            inboundSubs = await Submission.find({ $or: subOr }).sort({ createdAt: -1 });
+          }
+
+          const rawPitches = [
+            ...inboundSubs.map(s => {
+              const o = s.toObject ? s.toObject() : s;
+              return {
+                _id: o._id,
+                id: o._id,
+                headline: o.headline || o.startupName || o.subject || 'Story Pitch',
+                title: o.headline || o.startupName || o.subject || 'Story Pitch',
+                summary: o.summary || o.details || '',
+                category: o.category || o.sector || 'Pitch',
+                pitchFormat: o.pitchFormat || (o.draftVideoId ? 'video' : 'article'),
+                status: o.status || 'pending',
+                coverImage: o.coverImage || '',
+                createdAt: o.createdAt
+              };
+            }),
+            ...draftArticles.map(a => {
+              const o = a.toObject ? a.toObject() : a;
+              return {
+                _id: o._id,
+                id: o._id,
+                headline: o.title,
+                title: o.title,
+                summary: o.excerpt || o.subtitle || '',
+                category: o.categoryName || 'Article',
+                pitchFormat: 'article',
+                status: o.status || 'draft',
+                coverImage: o.featuredImage?.url || o.image || '',
+                createdAt: o.createdAt || o.publishedAt
+              };
+            }),
+            ...draftVideos.map(v => {
+              const o = v.toObject ? v.toObject() : v;
+              return {
+                _id: o._id,
+                id: o._id,
+                headline: o.title,
+                title: o.title,
+                summary: o.description || '',
+                category: o.category || 'Video',
+                pitchFormat: 'video',
+                status: o.status || 'draft',
+                coverImage: o.image || '',
+                createdAt: o.createdAt
+              };
+            })
+          ];
+
+          const seen = new Set();
+          for (const p of rawPitches) {
+            const pid = String(p._id || p.id || p.headline);
+            if (!seen.has(pid)) {
+              seen.add(pid);
+              authorPitches.push(p);
+            }
+          }
+        } catch (pErr) {
+          console.warn('Error fetching author pitches:', pErr.message);
+        }
       }
     } else {
       const store = readFallbackTaxonomy();
@@ -909,13 +1012,32 @@ router.get('/authors/:slug', async (req, res) => {
         const aId = String(author._id || '');
         const aName = (author.name || '').trim().toLowerCase();
         const matched = fallbackArticles.filter(art => {
-          if (art.status !== 'published') return false;
+          if (art.status !== 'published' || art.isPitch === true) return false;
           if (art.authorId && String(art.authorId) === aId) return true;
           if (art.authorName && art.authorName.trim().toLowerCase() === aName) return true;
           return false;
         });
         total = matched.length;
         articles = matched.slice((page - 1) * limit, page * limit);
+
+        const draftMatched = fallbackArticles.filter(art => {
+          if (art.status !== 'draft' && art.isPitch !== true) return false;
+          if (art.authorId && String(art.authorId) === aId) return true;
+          if (art.authorName && art.authorName.trim().toLowerCase() === aName) return true;
+          return false;
+        });
+        authorPitches = draftMatched.map(a => ({
+          _id: a._id || a.id,
+          id: a._id || a.id,
+          headline: a.title,
+          title: a.title,
+          summary: a.excerpt || a.subtitle || '',
+          category: a.categoryName || 'Article',
+          pitchFormat: 'article',
+          status: a.status || 'draft',
+          coverImage: a.featuredImage?.url || a.image || '',
+          createdAt: a.createdAt || a.publishedAt
+        }));
       }
     }
 
@@ -932,6 +1054,14 @@ router.get('/authors/:slug', async (req, res) => {
       data: {
         author: authorObj,
         articles,
+        videos: authorVideos,
+        pitches: authorPitches,
+        counts: {
+          articles: total,
+          videos: authorVideos.length,
+          pitches: authorPitches.length,
+          total: total + authorVideos.length + authorPitches.length
+        },
         pagination: {
           page,
           limit,

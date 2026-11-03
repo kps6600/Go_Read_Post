@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Users, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, AlertCircle, X,
   CheckSquare, Upload, Globe, BookOpen, Lock, Camera, Check, Eye, EyeOff, Copy, ArrowLeft, 
-  Calendar, FileText, User, LayoutGrid, List, SlidersHorizontal, Filter, ChevronDown, ChevronLeft, ChevronRight
+  Calendar, FileText, User, LayoutGrid, List, Tv, Send, Play, SlidersHorizontal, Filter, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 import { AuthService } from '../../services/authService';
@@ -82,6 +82,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
 
   // Single Author Details Page state (/admin/authors/:author_name)
   const [singleAuthorData, setSingleAuthorData] = useState(null);
+  const [authorContentTab, setAuthorContentTab] = useState('articles'); // 'articles' | 'videos' | 'pitches'
   const [singleAuthorLoading, setSingleAuthorLoading] = useState(false);
   const [singleAuthorError, setSingleAuthorError] = useState(null);
 
@@ -797,6 +798,8 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
   if (authorSlug) {
     const author = singleAuthorData?.author;
     const articles = singleAuthorData?.articles || [];
+    const videos = singleAuthorData?.videos || [];
+    const pitches = singleAuthorData?.pitches || [];
     const publishedCount = author?.publishedArticlesCount ?? author?.totalPublishedArticles ?? articles.length;
     const socials = author?.socialLinks || {};
 
@@ -860,11 +863,18 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                 </div>
 
                 <div className="aav-detail-hero-actions">
-                  <div className="aav-detail-badges-row">
-                    <div className="aav-detail-badge-metric" title="Auto-calculated published articles count">
+                  <div className="aav-detail-badges-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div className="aav-detail-badge-metric" title="Published articles by author">
                       <BookOpen size={13} />
-                      <span>{publishedCount} Published {publishedCount === 1 ? 'Article' : 'Articles'}</span>
-                      <Lock size={11} style={{ opacity: 0.7 }} />
+                      <span>{articles.length} {articles.length === 1 ? 'Article' : 'Articles'}</span>
+                    </div>
+                    <div className="aav-detail-badge-metric" style={{ background: '#f5f3ff', color: '#6d28d9', borderColor: '#ddd6fe' }} title="Video productions by author">
+                      <Tv size={13} />
+                      <span>{videos.length} {videos.length === 1 ? 'Video' : 'Videos'}</span>
+                    </div>
+                    <div className="aav-detail-badge-metric" style={{ background: '#fef2f2', color: '#dc2626', borderColor: '#fecaca' }} title="Pitches submitted by author">
+                      <Send size={13} />
+                      <span>{pitches.length} {pitches.length === 1 ? 'Pitch' : 'Pitches'}</span>
                     </div>
                   </div>
 
@@ -897,72 +907,311 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
                   </p>
                 </div>
 
-                {/* Published Articles Card */}
+                {/* Content Showcase Card: Articles, Videos, and Pitches */}
                 <div className="aav-detail-card">
-                  <div className="aav-detail-card-header">
-                    <h3 className="aav-detail-card-title">
-                      <BookOpen size={16} color="#dc2626" />
-                      <span>Published Articles ({articles.length})</span>
-                    </h3>
+                  <div className="aav-detail-card-header" style={{ flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => setAuthorContentTab('articles')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: authorContentTab === 'articles' ? '1px solid #dc2626' : '1px solid #e2e8f0',
+                          background: authorContentTab === 'articles' ? '#dc2626' : '#f8fafc',
+                          color: authorContentTab === 'articles' ? '#ffffff' : '#475569',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <BookOpen size={13} />
+                        <span>Articles ({articles.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setAuthorContentTab('videos')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: authorContentTab === 'videos' ? '1px solid #7c3aed' : '1px solid #e2e8f0',
+                          background: authorContentTab === 'videos' ? '#7c3aed' : '#f8fafc',
+                          color: authorContentTab === 'videos' ? '#ffffff' : '#475569',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Tv size={13} />
+                        <span>Videos ({videos.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setAuthorContentTab('pitches')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: authorContentTab === 'pitches' ? '1px solid #0f172a' : '1px solid #e2e8f0',
+                          background: authorContentTab === 'pitches' ? '#0f172a' : '#f8fafc',
+                          color: authorContentTab === 'pitches' ? '#ffffff' : '#475569',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Send size={13} />
+                        <span>Pitches ({pitches.length})</span>
+                      </button>
+                    </div>
+
                     <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-                      Live Attribution
+                      {authorContentTab === 'articles' ? 'Published Articles' : authorContentTab === 'videos' ? 'Video Shows & Productions' : 'Author Studio Submissions'}
                     </span>
                   </div>
 
-                  {articles.length === 0 ? (
-                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
-                      <p style={{ margin: 0, fontSize: '0.88rem' }}>
-                        No published articles currently assigned to this author.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="aav-detail-articles-list">
-                      {articles.map((art) => {
-                        const img = art.image || art.featuredImage?.url || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80';
-                        return (
-                          <div key={art._id || art.slug} className="aav-detail-article-card">
-                            <div className="aav-detail-article-left">
-                              <img
-                                src={img}
-                                alt={art.title}
-                                className="aav-detail-article-thumb"
-                                onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80'; }}
-                              />
-                              <div className="aav-detail-article-info">
-                                <h4 className="aav-detail-article-title" title={art.title}>
-                                  {art.title}
-                                </h4>
-                                <div className="aav-detail-article-meta">
-                                  <span className="aav-detail-article-cat">
-                                    {art.categoryName || 'Article'}
-                                  </span>
-                                  {art.publishedAt && (
-                                    <span>
-                                      {new Date(art.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {/* 1. ARTICLES LIST */}
+                  {authorContentTab === 'articles' && (
+                    articles.length === 0 ? (
+                      <div style={{ padding: '36px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <BookOpen size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                        <p style={{ margin: '0 0 10px', fontSize: '0.88rem' }}>No published articles currently assigned to this author.</p>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate?.('/admin/posts/create')}
+                          className="aav-btn-primary"
+                          style={{ margin: '0 auto', fontSize: '0.8rem', padding: '6px 14px' }}
+                        >
+                          <Plus size={13} /> Create Article
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="aav-detail-articles-list">
+                        {articles.map((art) => {
+                          const img = art.image || art.featuredImage?.url || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80';
+                          return (
+                            <div key={art._id || art.slug} className="aav-detail-article-card">
+                              <div className="aav-detail-article-left">
+                                <img
+                                  src={img}
+                                  alt={art.title}
+                                  className="aav-detail-article-thumb"
+                                  onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&auto=format&fit=crop&q=80'; }}
+                                />
+                                <div className="aav-detail-article-info">
+                                  <h4 
+                                    className="aav-detail-article-title" 
+                                    title={art.title}
+                                    onClick={() => onNavigate?.(`/admin/posts/${art._id || art.id}/edit`)}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {art.title}
+                                  </h4>
+                                  <div className="aav-detail-article-meta">
+                                    <span className="aav-detail-article-cat">
+                                      {art.categoryName || 'Article'}
                                     </span>
-                                  )}
-                                  {typeof art.views === 'number' && (
-                                    <span>• {art.views} views</span>
-                                  )}
+                                    {art.publishedAt && (
+                                      <span>
+                                        {new Date(art.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      </span>
+                                    )}
+                                    {typeof art.views === 'number' && (
+                                      <span>• {art.views.toLocaleString()} views</span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="aav-detail-article-actions">
-                              <a
-                                href={`/article/${art.slug}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="aav-btn-action"
-                                title="View public article"
-                              >
-                                <ExternalLink size={13} />
-                              </a>
+                              <div className="aav-detail-article-actions">
+                                <button
+                                  type="button"
+                                  onClick={() => onNavigate?.(`/admin/posts/${art._id || art.id}/edit`)}
+                                  className="aav-btn-action"
+                                  title="Edit article"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <a
+                                  href={`/article/${art.slug}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="aav-btn-action"
+                                  title="View public article"
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
+                    )
+                  )}
+
+                  {/* 2. VIDEOS LIST */}
+                  {authorContentTab === 'videos' && (
+                    videos.length === 0 ? (
+                      <div style={{ padding: '36px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <Tv size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                        <p style={{ margin: '0 0 10px', fontSize: '0.88rem' }}>No video shows or productions hosted by this author yet.</p>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate?.('/admin/videos-studio')}
+                          className="aav-btn-primary"
+                          style={{ margin: '0 auto', fontSize: '0.8rem', padding: '6px 14px' }}
+                        >
+                          <Plus size={13} /> Create Video Show
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="aav-detail-articles-list">
+                        {videos.map((vid) => {
+                          const vImg = vid.image || vid.fallbackImage || 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=600&auto=format&fit=crop&q=80';
+                          return (
+                            <div key={vid._id || vid.id} className="aav-detail-article-card">
+                              <div className="aav-detail-article-left">
+                                <div style={{ position: 'relative', width: '64px', height: '52px', flexShrink: 0, borderRadius: '6px', overflow: 'hidden' }}>
+                                  <img
+                                    src={vImg}
+                                    alt={vid.title}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=600&auto=format&fit=crop&q=80'; }}
+                                  />
+                                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Play size={14} color="#fff" fill="#fff" />
+                                  </div>
+                                </div>
+                                <div className="aav-detail-article-info">
+                                  <h4 
+                                    className="aav-detail-article-title" 
+                                    title={vid.title}
+                                    onClick={() => onNavigate?.(`/admin/videos-studio?id=${vid._id || vid.id}`)}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {vid.title}
+                                  </h4>
+                                  <div className="aav-detail-article-meta">
+                                    <span className="aav-detail-article-cat" style={{ background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed' }}>
+                                      {vid.category || 'Video Show'}
+                                    </span>
+                                    {vid.duration && <span>{vid.duration}</span>}
+                                    {typeof vid.views === 'number' && <span>• {vid.views.toLocaleString()} views</span>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="aav-detail-article-actions">
+                                <button
+                                  type="button"
+                                  onClick={() => onNavigate?.(`/admin/videos-studio?id=${vid._id || vid.id}`)}
+                                  className="aav-btn-action"
+                                  title="Edit video in studio"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <a
+                                  href="/videos"
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="aav-btn-action"
+                                  title="View videos player"
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )
+                  )}
+
+                  {/* 3. PITCHES LIST */}
+                  {authorContentTab === 'pitches' && (
+                    pitches.length === 0 ? (
+                      <div style={{ padding: '36px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <Send size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                        <p style={{ margin: '0 0 10px', fontSize: '0.88rem' }}>No story pitches or leads submitted by this author yet.</p>
+                        <button
+                          type="button"
+                          onClick={() => onNavigate?.('/admin/submissions')}
+                          className="aav-btn-primary"
+                          style={{ margin: '0 auto', fontSize: '0.8rem', padding: '6px 14px' }}
+                        >
+                          View Submissions Queue
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="aav-detail-articles-list">
+                        {pitches.map((p) => {
+                          const pImg = p.coverImage || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&auto=format&fit=crop&q=80';
+                          const isVideoPitch = p.pitchFormat === 'video';
+                          const statusBg = p.status === 'approved' ? '#dcfce7' : p.status === 'reviewing' ? '#e0e7ff' : '#fef3c7';
+                          const statusColor = p.status === 'approved' ? '#166534' : p.status === 'reviewing' ? '#3730a3' : '#92400e';
+
+                          return (
+                            <div key={p._id || p.id} className="aav-detail-article-card">
+                              <div className="aav-detail-article-left">
+                                <img
+                                  src={pImg}
+                                  alt={p.headline || p.title}
+                                  className="aav-detail-article-thumb"
+                                  onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&auto=format&fit=crop&q=80'; }}
+                                />
+                                <div className="aav-detail-article-info">
+                                  <h4 className="aav-detail-article-title" title={p.headline || p.title}>
+                                    {p.headline || p.title}
+                                  </h4>
+                                  <div className="aav-detail-article-meta">
+                                    <span 
+                                      className="aav-detail-article-cat"
+                                      style={{ 
+                                        background: isVideoPitch ? 'rgba(124, 58, 237, 0.1)' : 'rgba(220, 38, 38, 0.08)',
+                                        color: isVideoPitch ? '#7c3aed' : '#dc2626'
+                                      }}
+                                    >
+                                      {isVideoPitch ? 'Video Pitch' : 'Article Pitch'}
+                                    </span>
+                                    <span style={{ background: statusBg, color: statusColor, padding: '2px 7px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, textTransform: 'capitalize' }}>
+                                      {p.status || 'Pending'}
+                                    </span>
+                                    {p.createdAt && (
+                                      <span>
+                                        {new Date(p.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="aav-detail-article-actions">
+                                <button
+                                  type="button"
+                                  onClick={() => onNavigate?.('/admin/submissions')}
+                                  className="aav-btn-action"
+                                  title="Manage in Submissions queue"
+                                  style={{ padding: '0 10px', fontSize: '0.76rem', fontWeight: 700, gap: '4px', display: 'inline-flex', alignItems: 'center' }}
+                                >
+                                  <span>Review Pitch</span>
+                                  <ExternalLink size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )
                   )}
                 </div>
               </div>
