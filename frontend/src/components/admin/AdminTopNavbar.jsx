@@ -16,10 +16,18 @@ export default function AdminTopNavbar({
     if (currentPath === '/admin/dashboard') return 'Dashboard';
     if (currentPath === '/admin/posts/create' || currentPath === '/admin/blogs/create') return 'Articles / Create Article';
     if ((currentPath.startsWith('/admin/posts') || currentPath.startsWith('/admin/blogs')) && currentPath.includes('/edit')) return 'Articles / Edit Story';
-    if (currentPath === '/admin/posts' || currentPath === '/admin/blogs') return 'Editorial Articles & Posts';
+    if (currentPath === '/admin/posts' || currentPath === '/admin/blogs' || currentPath === '/admin/articles') return 'All Articles';
+    if (currentPath === '/admin/videos') return 'All Videos';
+    if (currentPath === '/admin/comments') return 'Comments';
+    if (currentPath === '/admin/authors' || currentPath.startsWith('/admin/authors/')) return 'Authors';
+    if (currentPath === '/admin/submissions' || currentPath === '/admin/pitches') return 'Startup Pitches & Leads';
+    if (currentPath === '/admin/categories') return 'Categories';
+    if (currentPath === '/admin/topics') return 'Topics';
+    if (currentPath === '/admin/tags') return 'Tags';
+    if (currentPath === '/admin/analytics') return 'Analytics';
     if (currentPath === '/admin/homepage' || currentPath.startsWith('/admin/homepage')) return 'Homepage Live Studio & CMS';
-    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic')) return 'Pages / Topic Page Studio';
-    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) return 'Pages / Category Page Studio';
+    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic/')) return 'Pages / Topic Page Studio';
+    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category/')) return 'Pages / Category Page Studio';
     if (currentPath === '/admin/pages/create') return 'Pages / Create Page';
     if (currentPath.startsWith('/admin/pages') && currentPath.includes('/edit')) {
       if (currentPath.includes('/home/')) return 'Pages / Edit Homepage';

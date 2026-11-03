@@ -256,7 +256,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     }
 
     // 6c-1. Topic Page Live Studio: /admin/topic or /admin/topic/:slug
-    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic')) {
+    if (currentPath === '/admin/topic' || currentPath.startsWith('/admin/topic/')) {
       const topicSlug = currentPath.replace('/admin/topic', '').replace(/^\/+/, '').split('/')[0].split('?')[0];
       return (
         <AdminTopicStudioView
@@ -269,7 +269,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     }
 
     // 6c. Category Page Live Studio: /admin/category or /admin/category-studio
-    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category')) {
+    if (currentPath === '/admin/category' || currentPath.startsWith('/admin/category/')) {
       const catSlug = currentPath.replace('/admin/category', '').replace(/^\/+/, '').split('/')[0].split('?')[0];
       return (
         <AdminPageEditor 
@@ -429,7 +429,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
     currentPath === '/admin/trending' ||
     currentPath.startsWith('/admin/trending') ||
     currentPath === '/admin/topic' ||
-    currentPath.startsWith('/admin/topic') ||
+    currentPath.startsWith('/admin/topic/') ||
     currentPath === '/admin/about' ||
     currentPath.startsWith('/admin/about') ||
     currentPath === '/admin/homepage' ||
