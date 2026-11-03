@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, Eye, FolderTree, AlertCircle, ArrowUpRight, Sparkles, Layers
+  BarChart3, Eye, AlertCircle, Sparkles, Layers, FileText, Users, Heart, RefreshCw, TrendingUp
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
+import './AdminAnalyticsView.css';
 
 const CATEGORY_ACCENTS = {
   'Startups': '#dc2626',
@@ -52,212 +53,239 @@ export default function AdminAnalyticsView() {
   const totalCatArticles = (data?.categoryBreakdown || []).reduce((sum, c) => sum + (c.articlesCount || 0), 0) || Math.max(1, metrics.totalArticles);
 
   return (
-    <div className="admin-page-container">
-      
+    <div className="aav-container">
+      {/* Overview Header Card */}
+      <div className="aav-header-card">
+        <div className="aav-header-left">
+          <h2 className="aav-page-title">
+            <BarChart3 size={20} color="#dc2626" />
+            <span>Readership & Analytics</span>
+          </h2>
+          <p className="aav-page-subtitle">Real-time reader volume, catalog distribution, and content engagement.</p>
+        </div>
+        <div className="aav-header-actions">
+          <div className="aav-live-badge">
+            <span className="aav-pulse-dot" />
+            <span>Live Data</span>
+          </div>
+          <button 
+            type="button" 
+            className="aav-refresh-btn" 
+            onClick={loadAnalytics}
+            disabled={loading}
+            title="Refresh Analytics"
+          >
+            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
 
       {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', color: '#dc2626', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Primary KPI Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      {/* Primary KPI Cards Grid (Balanced 2-col on Mobile, 5-col on Desktop) */}
+      <div className="aav-kpi-grid">
         {/* 1. Total Views */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            TOTAL VIEWS
+        <div className="aav-kpi-card">
+          <div className="aav-kpi-top">
+            <span className="aav-kpi-label">TOTAL READS</span>
+            <div className="aav-kpi-icon-pill aav-kpi-icon-blue">
+              <Eye size={15} />
+            </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div className="aav-kpi-value">
             {(metrics.totalViews || 0).toLocaleString()}
+          </div>
+          <div className="aav-kpi-footer">
+            <span>avg ~{metrics.avgViewsPerArticle || 0} / story</span>
           </div>
         </div>
 
-        {/* 2. Total Published Articles */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            ARTICLES
+        {/* 2. Total Articles */}
+        <div className="aav-kpi-card">
+          <div className="aav-kpi-top">
+            <span className="aav-kpi-label">ARTICLES</span>
+            <div className="aav-kpi-icon-pill aav-kpi-icon-emerald">
+              <FileText size={15} />
+            </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div className="aav-kpi-value">
             {metrics.totalArticles || 0}
+          </div>
+          <div className="aav-kpi-footer">
+            <span>{metrics.publishedCount || 0} published stories</span>
           </div>
         </div>
 
         {/* 3. Authors */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            AUTHORS
+        <div className="aav-kpi-card">
+          <div className="aav-kpi-top">
+            <span className="aav-kpi-label">AUTHORS</span>
+            <div className="aav-kpi-icon-pill aav-kpi-icon-purple">
+              <Users size={15} />
+            </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div className="aav-kpi-value">
             {metrics.totalAuthors || 0}
+          </div>
+          <div className="aav-kpi-footer">
+            <span>verified contributors</span>
           </div>
         </div>
 
         {/* 4. Real Categories */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            CATEGORIES
+        <div className="aav-kpi-card">
+          <div className="aav-kpi-top">
+            <span className="aav-kpi-label">CATEGORIES</span>
+            <div className="aav-kpi-icon-pill aav-kpi-icon-amber">
+              <Layers size={15} />
+            </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div className="aav-kpi-value">
             {metrics.totalCategories || 0}
+          </div>
+          <div className="aav-kpi-footer">
+            <span>editorial verticals</span>
           </div>
         </div>
 
         {/* 5. Reader Claps / Engagement */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '18px 20px', borderRadius: '14px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '11px', fontWeight: '750', color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-            ENGAGEMENT
+        <div className="aav-kpi-card">
+          <div className="aav-kpi-top">
+            <span className="aav-kpi-label">TOTAL ENGAGEMENT</span>
+            <div className="aav-kpi-icon-pill aav-kpi-icon-rose">
+              <Heart size={15} />
+            </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: '850', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.02em' }}>
+          <div className="aav-kpi-value">
             {(metrics.totalClaps || 0).toLocaleString()}
+          </div>
+          <div className="aav-kpi-footer">
+            <span>reader claps & reactions</span>
           </div>
         </div>
       </div>
 
       {/* Grid: Top Articles & Categories Breakdown */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' }}>
+      <div className="aav-details-grid">
         {/* Top Articles by Real Views */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
-              Most Read Articles
+        <div className="aav-card">
+          <div className="aav-card-header">
+            <h3 className="aav-card-title">
+              <TrendingUp size={18} color="#dc2626" />
+              <span>Most Read Articles</span>
             </h3>
-            <span style={{ fontSize: '0.74rem', fontWeight: '600', color: 'var(--text-muted, #64748b)' }}>
-              Top 10 by Readership
+            <span className="aav-card-badge">
+              Top 10 Readership
             </span>
           </div>
 
           {(data?.topArticles || []).length === 0 ? (
-            <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '14px' }}>No readership data accumulated yet.</p>
+            <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '13px', margin: '16px 0' }}>No readership data accumulated yet.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {(data?.topArticles || []).map((art, idx) => (
-                <div 
-                  key={art._id || idx} 
-                  style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    paddingBottom: '12px', 
-                    borderBottom: '1px solid var(--border-light, #f1f5f9)',
-                    gap: '12px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', minWidth: 0 }}>
-                    <span style={{ 
-                      fontSize: '12px', 
-                      fontWeight: '800', 
-                      color: idx < 3 ? '#dc2626' : 'var(--text-muted, #94a3b8)', 
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '6px',
-                      background: idx < 3 ? 'rgba(220, 38, 38, 0.08)' : 'var(--bg-tertiary, #f1f5f9)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      #{idx + 1}
-                    </span>
-                    <div style={{ minWidth: 0 }}>
-                      <a 
-                        href={`/article/${art.slug}`} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        style={{ 
-                          fontSize: '13.5px', 
-                          fontWeight: '700', 
-                          color: 'var(--text-primary, #0f172a)', 
-                          textDecoration: 'none',
-                          display: 'block',
-                          lineHeight: 1.4,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
+            <div className="aav-articles-list">
+              {(data?.topArticles || []).map((art, idx) => {
+                const catColor = CATEGORY_ACCENTS[art.categoryName] || '#dc2626';
+                const rankClass = idx === 0 ? 'aav-rank-top1' : idx === 1 ? 'aav-rank-top2' : idx === 2 ? 'aav-rank-top3' : 'aav-rank-other';
+                
+                return (
+                  <div key={art._id || idx} className="aav-article-row">
+                    <div className="aav-article-top-row">
+                      <span className={`aav-rank-badge ${rankClass}`}>#{idx + 1}</span>
+                      <span className="aav-views-chip">
+                        <Eye size={12} />
+                        {(art.views || 0).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <a 
+                      href={`/article/${art.slug}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="aav-article-title-link"
+                      title={art.title}
+                    >
+                      {art.title}
+                    </a>
+
+                    <div className="aav-article-meta-row">
+                      <span 
+                        className="aav-cat-chip"
+                        style={{
+                          color: catColor,
+                          background: `${catColor}14`,
+                          border: `1px solid ${catColor}30`
                         }}
                       >
-                        {art.title}
-                      </a>
-                      <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ 
-                          color: CATEGORY_ACCENTS[art.categoryName] || '#dc2626',
-                          fontWeight: '700'
-                        }}>
-                          {art.categoryName || 'Startups'}
-                        </span>
-                        <span>•</span>
-                        <span>{art.authorName || 'Editorial Desk'}</span>
-                        {art.claps > 0 && (
-                          <>
-                            <span>•</span>
-                            <span style={{ color: '#64748b', fontWeight: '600' }}>{art.claps} claps</span>
-                          </>
-                        )}
-                      </div>
+                        {art.categoryName || 'Startups'}
+                      </span>
+                      <span className="aav-dot-sep">•</span>
+                      <span>{art.authorName || 'Editorial Desk'}</span>
+                      {art.claps > 0 && (
+                        <>
+                          <span className="aav-dot-sep">•</span>
+                          <span className="aav-claps-chip">
+                            <Heart size={10} color="#e11d48" fill="#e11d48" />
+                            <span>{art.claps}</span>
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    gap: '4px', 
-                    fontWeight: '750', 
-                    fontSize: '13px', 
-                    color: '#dc2626',
-                    flexShrink: 0
-                  }}>
-                    <Eye size={13} style={{ flexShrink: 0 }} />
-                    <span>{(art.views || 0).toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* Real Category Volume Breakdown */}
-        <div style={{ background: 'var(--bg-card, #fff)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-light, #e2e8f0)', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary, #0f172a)' }}>
-              Category Volume Breakdown
+        <div className="aav-card">
+          <div className="aav-card-header">
+            <h3 className="aav-card-title">
+              <Layers size={18} color="#0284c7" />
+              <span>Category Volume</span>
             </h3>
-            <span style={{ fontSize: '0.74rem', fontWeight: '600', color: 'var(--text-muted, #64748b)' }}>
-              All 9 Taxonomy Verticals
+            <span className="aav-card-badge">
+              Vertical Distribution
             </span>
           </div>
 
           {(data?.categoryBreakdown || []).length === 0 ? (
-            <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '14px' }}>No categories available.</p>
+            <p style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '13px', margin: '16px 0' }}>No categories available.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="aav-cats-list">
               {(data?.categoryBreakdown || []).map((cat, idx) => {
                 const color = CATEGORY_ACCENTS[cat.name] || '#0284c7';
                 const sharePercent = Math.round((cat.articlesCount / totalCatArticles) * 100);
 
                 return (
-                  <div key={idx}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', fontWeight: '650', marginBottom: '6px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: color, flexShrink: 0 }}></span>
-                        <span style={{ color: 'var(--text-primary, #0f172a)' }}>{cat.name}</span>
+                  <div key={idx} className="aav-cat-item">
+                    <div className="aav-cat-item-top">
+                      <div className="aav-cat-name-box">
+                        <span className="aav-cat-bullet" style={{ background: color }} />
+                        <span>{cat.name}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-                        <span style={{ color: 'var(--text-muted, #64748b)' }}>
-                          <strong>{cat.articlesCount}</strong> articles ({sharePercent}%)
-                        </span>
-                        <span style={{ color: color, fontWeight: '750' }}>
-                          {(cat.views || 0).toLocaleString()} views
-                        </span>
-                      </div>
+                      <span className="aav-cat-views-badge" style={{ color: color }}>
+                        {(cat.views || 0).toLocaleString()} reads
+                      </span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', background: 'var(--bg-tertiary, #f1f5f9)', borderRadius: '4px', overflow: 'hidden' }}>
+
+                    <div className="aav-cat-item-sub">
+                      <span>{cat.articlesCount} articles</span>
+                      <span>{sharePercent}% volume</span>
+                    </div>
+
+                    <div className="aav-progress-track">
                       <div
+                        className="aav-progress-bar"
                         style={{
-                          width: `${Math.min(100, Math.max(4, sharePercent))}%`,
-                          height: '100%',
-                          background: color,
-                          borderRadius: '4px',
-                          transition: 'width 0.4s ease'
+                          width: `${Math.min(100, Math.max(5, sharePercent))}%`,
+                          background: color
                         }}
                       />
                     </div>
@@ -271,4 +299,3 @@ export default function AdminAnalyticsView() {
     </div>
   );
 }
-
