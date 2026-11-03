@@ -1,3 +1,4 @@
+import { protectAdmin } from '../middleware/auth.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import Story from '../models/Story.js';
@@ -324,7 +325,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // 4. POST /api/stories
-router.post('/', async (req, res) => {
+router.post('/', protectAdmin, async (req, res) => {
   try {
     const payload = req.body;
     if (!payload.title || !payload.image) {
@@ -370,7 +371,7 @@ router.post('/', async (req, res) => {
 });
 
 // 5. PUT /api/stories/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -405,7 +406,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // 6. DELETE /api/stories/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -465,7 +466,7 @@ router.patch('/:id/clap', async (req, res) => {
 });
 
 // 8. POST /api/stories/seed
-router.post('/seed', async (req, res) => {
+router.post('/seed', protectAdmin, async (req, res) => {
   try {
     const initialStories = req.body.stories || [];
     if (!Array.isArray(initialStories) || initialStories.length === 0) {

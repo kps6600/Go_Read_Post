@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 
 const router = express.Router();
 export const adminVideosRouter = express.Router();
+adminVideosRouter.use(protectAdmin);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

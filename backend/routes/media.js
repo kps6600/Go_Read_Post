@@ -268,7 +268,7 @@ router.post('/sync', protectAdmin, async (req, res) => {
 });
 
 // 2. POST /api/media/upload-raw (High-Performance Raw Stream Upload for Large Video & Audio Files)
-router.post('/upload-raw', async (req, res) => {
+router.post('/upload-raw', protectAdmin, async (req, res) => {
   try {
     const rawFilename = req.query.filename || `video_${Date.now()}.mp4`;
     const cleanExt = path.extname(rawFilename) || '.mp4';

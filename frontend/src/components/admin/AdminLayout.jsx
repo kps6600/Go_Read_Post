@@ -108,8 +108,12 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
       setAdminUser(AuthService.getAdminUser());
     };
     const handleAuthChange = () => {
-      setIsAuthenticated(AuthService.isAdminAuthenticated());
-      setAdminUser(AuthService.getAdminUser());
+      const isAdm = AuthService.isAdminAuthenticated();
+      const u = AuthService.getUser();
+      const canAccess = Boolean(u && AuthService.canAccessAdmin(u) && (AuthService.getToken() || AuthService.getUserToken()));
+      const authed = isAdm || canAccess;
+      setIsAuthenticated(authed);
+      setAdminUser(AuthService.getAdminUser() || (canAccess ? u : null));
     };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('auth:change', handleAuthChange);

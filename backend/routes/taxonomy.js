@@ -350,7 +350,7 @@ router.get('/categories/:slug', async (req, res) => {
 });
 
 // Get all categories for Admin with article counts and populated parents
-router.get('/admin/categories', async (req, res) => {
+router.get('/admin/categories', protectAdmin, async (req, res) => {
   try {
     if (isDbConnected()) {
       let cats = await Category.find().populate('parentId', 'name slug').sort({ order: 1 }).lean();
@@ -1295,7 +1295,7 @@ router.get('/topics', async (req, res) => {
 });
 
 // Admin Topics list with article counts and populated category associations
-router.get('/admin/topics', async (req, res) => {
+router.get('/admin/topics', protectAdmin, async (req, res) => {
   try {
     if (isDbConnected()) {
       let topics = await Topic.find().populate('categoryIds', 'name slug').sort({ name: 1 }).lean();
@@ -1658,7 +1658,7 @@ router.get('/tags', async (req, res) => {
 });
 
 // Admin Tags list with accurate article usage counts
-router.get('/admin/tags', async (req, res) => {
+router.get('/admin/tags', protectAdmin, async (req, res) => {
   try {
     if (isDbConnected()) {
       let tags = await Tag.find().sort({ count: -1, name: 1 }).lean();

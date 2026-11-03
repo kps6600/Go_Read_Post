@@ -403,20 +403,12 @@ export const AuthService = {
     } catch (e) {}
   },
 
-  logout(scope = 'current') {
+  logout(scope = 'all') {
     try {
-      if (scope === 'admin') {
-        this.logoutAdmin();
-      } else if (scope === 'user') {
-        this.logoutUser();
-      } else {
-        const inAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
-        if (inAdmin) {
-          this.logoutAdmin();
-        } else {
-          this.logoutUser();
-        }
-      }
+      // 🔒 Complete Security: Clear both admin and user tokens so every route is protected
+      this.logoutAdmin();
+      this.logoutUser();
+      this.notifyAuthChange();
     } catch (e) {}
   }
 };

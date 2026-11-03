@@ -1,3 +1,4 @@
+import { protectAdmin } from '../middleware/auth.js';
 import express from 'express';
 import MenuItem from '../models/MenuItem.js';
 import { isDbConnected } from '../db.js';
@@ -162,7 +163,7 @@ router.get('/', async (req, res) => {
 });
 
 // 2. POST /api/menu (Create item)
-router.post('/', async (req, res) => {
+router.post('/', protectAdmin, async (req, res) => {
   try {
     const { label, id, type = 'category', target = '', hasDropdown = false, isBadge = false, badgeText = '', visible = true, dropdownColumns = [] } = req.body;
     if (!label) return res.status(400).json({ success: false, message: 'Label is required' });
@@ -206,7 +207,7 @@ router.post('/', async (req, res) => {
 });
 
 // 3. PUT /api/menu/:id (Update item)
-router.put('/:id', async (req, res) => {
+router.put('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -231,7 +232,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // 4. DELETE /api/menu/:id (Delete item)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -254,7 +255,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // 5. POST /api/menu/reset (Reset to default)
-router.post('/reset', async (req, res) => {
+router.post('/reset', protectAdmin, async (req, res) => {
   try {
     if (isDbConnected()) {
       await MenuItem.deleteMany({});

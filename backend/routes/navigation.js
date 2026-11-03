@@ -421,12 +421,7 @@ adminNavigationRouter.use((req, res, next) => {
     } catch (e) {}
   }
 
-  // Allow read operations (GET) so CMS view doesn't block on expired/absent session token
-  if (req.method === 'GET') {
-    return next();
-  }
-
-  // Enforce strict admin privileges for all writes / mutations (POST, PUT, DELETE, PATCH)
+  // Enforce strict admin privileges for all admin navigation routes
   return protectAdmin(req, res, next);
 });
 

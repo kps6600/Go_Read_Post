@@ -1,3 +1,4 @@
+import { protectAdmin } from '../middleware/auth.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import Article from '../models/Article.js';
@@ -269,6 +270,7 @@ router.get('/:slug', async (req, res) => {
 // 3. ADMIN APIS: /api/admin/articles
 // --------------------------------------------------------------------------
 export const adminArticlesRouter = express.Router();
+adminArticlesRouter.use(protectAdmin);
 
 // List all posts (draft, scheduled, published, archived)
 adminArticlesRouter.get('/', async (req, res) => {
