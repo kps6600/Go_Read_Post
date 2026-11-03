@@ -122,23 +122,6 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
           </h2>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="auth-tab-switch">
-          <button 
-            type="button"
-            className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
-            onClick={() => { setMode('login'); setErrorMessage(''); }}
-          >
-            Log In
-          </button>
-          <button 
-            type="button"
-            className={`auth-tab ${mode === 'signup' ? 'active' : ''}`}
-            onClick={() => { setMode('signup'); setErrorMessage(''); }}
-          >
-            Sign Up
-          </button>
-        </div>
 
         {/* Error Alert */}
         {errorMessage && (
@@ -279,6 +262,21 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onSh
           </button>
         </form>
 
+        <div className="auth-mode-switch">
+          <span className="auth-mode-switch-text">
+            {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
+          </span>
+          <button 
+            type="button"
+            className="auth-mode-switch-btn"
+            onClick={() => {
+              setMode(mode === 'login' ? 'signup' : 'login');
+              setErrorMessage('');
+            }}
+          >
+            {mode === 'login' ? 'Sign Up' : 'Log In'}
+          </button>
+        </div>
 
         <div className="auth-footer-terms">
           By continuing, you agree to GoReadPost Terms of Service &amp; Privacy Policy.
