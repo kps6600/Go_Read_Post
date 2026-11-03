@@ -1030,19 +1030,21 @@ export default function LiveVideoStudio({
           
           <div className="las-title-meta">
             <div className="las-studio-badge-row">
-              <span 
-                className="las-studio-status-badge"
-                style={{
-                  background: isPitchMode ? 'rgba(59, 130, 246, 0.15)' : (formData.status === 'published' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'),
-                  color: isPitchMode ? '#2563eb' : (formData.status === 'published' ? '#10b981' : '#f59e0b'),
-                  borderColor: isPitchMode ? 'rgba(59, 130, 246, 0.3)' : (formData.status === 'published' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'),
-                  cursor: isPitchMode ? 'default' : 'pointer'
-                }}
-                onClick={isPitchMode ? undefined : () => setFormData(p => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
-                title={isPitchMode ? "Pitch Mode (Saved as editorial draft)" : "Click to toggle Published vs Draft"}
-              >
-                ● {isPitchMode ? 'PITCH MODE (DRAFT)' : formData.status.toUpperCase()}
-              </span>
+              {!isPitchMode && (
+                <span 
+                  className="las-studio-status-badge"
+                  style={{
+                    background: formData.status === 'published' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                    color: formData.status === 'published' ? '#10b981' : '#f59e0b',
+                    borderColor: formData.status === 'published' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setFormData(p => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
+                  title="Click to toggle Published vs Draft"
+                >
+                  ● {formData.status.toUpperCase()}
+                </span>
+              )}
               <span className="las-studio-title">
                 {isPitchMode ? (formData._id ? `Edit Pitch: ${plainTitle || 'Video'}` : 'Pitch Video Show / Episode') : (formData._id ? `Edit: ${plainTitle || 'Video Episode'}` : 'New Video Episode')}
               </span>
@@ -1051,28 +1053,30 @@ export default function LiveVideoStudio({
         </div>
 
         {/* Center: View Switcher (Editor & Live Preview) */}
-        <div className="las-header-center">
-          <div className="las-view-toggle-group">
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'edit' ? 'active' : ''}`}
-              onClick={() => setViewMode('edit')}
-              title="Video Editor"
-            >
-              <Film size={13} style={{ marginRight: '5px' }} />
-              <span>Editor</span>
-            </button>
-            <button 
-              type="button" 
-              className={`las-view-btn ${viewMode === 'preview' ? 'active' : ''}`}
-              onClick={() => setViewMode('preview')}
-              title="Full Public Video Preview"
-            >
-              <Eye size={13} style={{ marginRight: '5px' }} />
-              <span>Live View</span>
-            </button>
+        {!isPitchMode && (
+          <div className="las-header-center">
+            <div className="las-view-toggle-group">
+              <button 
+                type="button" 
+                className={`las-view-btn ${viewMode === 'edit' ? 'active' : ''}`}
+                onClick={() => setViewMode('edit')}
+                title="Video Editor"
+              >
+                <Film size={13} style={{ marginRight: '5px' }} />
+                <span>Editor</span>
+              </button>
+              <button 
+                type="button" 
+                className={`las-view-btn ${viewMode === 'preview' ? 'active' : ''}`}
+                onClick={() => setViewMode('preview')}
+                title="Full Public Video Preview"
+              >
+                <Eye size={13} style={{ marginRight: '5px' }} />
+                <span>Live View</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Right: Actions */}
         <div className="las-header-right">
