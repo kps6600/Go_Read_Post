@@ -671,31 +671,52 @@ export default function ArticlePage({
     }));
   }, [current, allStoriesPool]);
 
-  // 6. Bottom "You May Also Like" (Articles with graceful fallback)
+  // 6. Bottom "More in [Category]" (Articles with intelligent matching)
   const bottomArticles = useMemo(() => {
     if (!current) return [];
     const currentCatNorm = getCanonicalCat(current);
     const relatedIds = new Set(relatedArticles.map(r => String(r.id || r._id || r.slug || '')));
 
-    const candidates = allStoriesPool.filter(s => !isCurrentArticle(s) && !relatedIds.has(String(s.id || s._id || s.slug || '')));
+    // 1. Prefer candidates in the same canonical category
+    const exactCatCandidates = allStoriesPool.filter(s => 
+      !isCurrentArticle(s) && 
+      !relatedIds.has(String(s.id || s._id || s.slug || '')) &&
+      getCanonicalCat(s) === currentCatNorm
+    );
 
-    const scored = candidates.map(s => {
-      let score = 0;
-      const sCatNorm = getCanonicalCat(s);
-      if (currentCatNorm && sCatNorm && sCatNorm === currentCatNorm) score += 50;
-      if (s.isTrending || s.trending) score += 10;
-      const dateVal = s.publishedAt ? new Date(s.publishedAt).getTime() : 0;
-      return { item: s, score, dateVal };
-    });
+    let chosen = [...exactCatCandidates];
 
-    scored.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return b.dateVal - a.dateVal;
-    });
+    // 2. If fewer than 4, pull from relatedArticles (the most relevant articles of this category)
+    if (chosen.length < 4) {
+      for (const rel of relatedArticles) {
+        if (!chosen.some(c => String(c.id || c._id || c.slug) === String(rel.id || rel._id || rel.slug))) {
+          chosen.push(rel);
+          if (chosen.length >= 4) break;
+        }
+      }
+    }
 
-    const poolToUse = scored.length >= 4 ? scored.map(x => x.item) : candidates;
+    // 3. If still fewer than 4, pull other candidates scored by topic/tag relevance
+    if (chosen.length < 4) {
+      const currentTopics = (current.topics || []).map(t => String(typeof t === 'object' && t ? t.name : t).toLowerCase().trim()).filter(Boolean);
+      const remaining = allStoriesPool.filter(s => 
+        !isCurrentArticle(s) && 
+        !chosen.some(c => String(c.id || c._id || c.slug) === String(s.id || s._id || s.slug))
+      );
+      remaining.sort((a, b) => {
+        const aTopics = (a.topics || []).map(t => String(typeof t === 'object' && t ? t.name : t).toLowerCase().trim());
+        const bTopics = (b.topics || []).map(t => String(typeof t === 'object' && t ? t.name : t).toLowerCase().trim());
+        const aMatch = aTopics.filter(t => currentTopics.includes(t)).length;
+        const bMatch = bTopics.filter(t => currentTopics.includes(t)).length;
+        return bMatch - aMatch;
+      });
+      for (const r of remaining) {
+        chosen.push(r);
+        if (chosen.length >= 4) break;
+      }
+    }
 
-    return poolToUse.slice(0, 4).map(s => ({
+    return chosen.slice(0, 4).map(s => ({
       ...s,
       id: s.id || s._id || s.slug,
       slug: s.slug || s.id || s._id,
@@ -1614,50 +1635,6 @@ export default function ArticlePage({
               </div>
             </div>
 
-            {/* 2. Trending Now Widget */}
-            <div className="sidebar-widget">
-              <div className="sidebar-widget-header">
-                <h3 className="sidebar-widget-title">Trending Now</h3>
-                <button
-                  type="button"
-                  className="sidebar-widget-view-all"
-                  onClick={handleNavigateTrending}
-                  title="View all trending stories"
-                >
-                  <span>View All</span>
-                  <ArrowRight size={13} />
-                </button>
-              </div>
-
-              <div className="sidebar-trending-list">
-                {trendingArticles.map((tr, index) => {
-                  const isTrSaved = isSaved ? Boolean(isSaved(tr.id || tr._id || tr.slug)) : false;
-                  return (
-                    <div 
-                      key={tr.id || index} 
-                      className="sidebar-trending-item"
-                      onClick={() => handleArticleClick(tr)}
-                    >
-                      <div className="sidebar-trending-badge">{index + 1}</div>
-                      <p className="sidebar-trending-title">{tr.title}</p>
-                      <button
-                        type="button"
-                        className={`sidebar-related-save-btn ${isTrSaved ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onToggleSave) onToggleSave(tr);
-                        }}
-                        title={isTrSaved ? 'Remove from reading list' : 'Save to read later'}
-                        aria-label="Save story"
-                      >
-                        <Bookmark size={13} fill={isTrSaved ? 'currentColor' : 'none'} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* 3. Related Articles Widget */}
             <div className="sidebar-widget">
               <div className="sidebar-widget-header">
@@ -1714,8 +1691,49 @@ export default function ArticlePage({
               </div>
             </div>
 
+            {/* 2. Trending Now Widget */}
+            <div className="sidebar-widget">
+              <div className="sidebar-widget-header">
+                <h3 className="sidebar-widget-title">Trending Now</h3>
+                <button
+                  type="button"
+                  className="sidebar-widget-view-all"
+                  onClick={handleNavigateTrending}
+                  title="View all trending stories"
+                >
+                  <span>View All</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
 
-
+              <div className="sidebar-trending-list">
+                {trendingArticles.map((tr, index) => {
+                  const isTrSaved = isSaved ? Boolean(isSaved(tr.id || tr._id || tr.slug)) : false;
+                  return (
+                    <div 
+                      key={tr.id || index} 
+                      className="sidebar-trending-item"
+                      onClick={() => handleArticleClick(tr)}
+                    >
+                      <div className="sidebar-trending-badge">{index + 1}</div>
+                      <p className="sidebar-trending-title">{tr.title}</p>
+                      <button
+                        type="button"
+                        className={`sidebar-related-save-btn ${isTrSaved ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSave) onToggleSave(tr);
+                        }}
+                        title={isTrSaved ? 'Remove from reading list' : 'Save to read later'}
+                        aria-label="Save story"
+                      >
+                        <Bookmark size={13} fill={isTrSaved ? 'currentColor' : 'none'} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
           </aside>
 

@@ -4132,7 +4132,7 @@
     "authorTitle": "Staff Reporter",
     "authorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
     "categoryId": "6ac7356dcb836f17b0f09ef6",
-    "categoryName": "AI & DeepTech",
+    "categoryName": "SMBStory",
     "subCategoryId": null,
     "topicIds": [],
     "tagIds": [],
@@ -4168,7 +4168,9 @@
     "claps": 129,
     "createdAt": "2026-10-19T07:11:16.451Z",
     "updatedAt": "2026-10-19T07:17:17.062Z",
-    "__v": 0
+    "__v": 0,
+    "category": "SMBStory",
+    "categorySlug": "smbstory"
   },
   {
     "_id": "6ad5c294a4876bace95a2412",
@@ -4417,7 +4419,7 @@
     "authorTitle": "Staff Reporter",
     "authorAvatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80",
     "categoryId": "6ac7356dcb836f17b0f09ef6",
-    "categoryName": "AI & DeepTech",
+    "categoryName": "SMBStory",
     "subCategoryId": null,
     "topicIds": [],
     "tagIds": [],
@@ -4453,7 +4455,9 @@
     "claps": 514,
     "createdAt": "2026-10-19T07:11:16.491Z",
     "updatedAt": "2026-10-19T07:17:17.140Z",
-    "__v": 0
+    "__v": 0,
+    "category": "SMBStory",
+    "categorySlug": "smbstory"
   },
   {
     "_id": "6ad5c294a4876bace95a2417",
@@ -5987,7 +5991,7 @@
     "authorTitle": "Correspondent, SocialStory",
     "authorAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80",
     "categoryId": "6ac7356dcb836f17b0f09ef6",
-    "categoryName": "AI & DeepTech",
+    "categoryName": "SocialStory",
     "subCategoryId": null,
     "topicIds": [],
     "tagIds": [],
@@ -6022,7 +6026,9 @@
     "claps": 322,
     "createdAt": "2026-10-19T07:11:16.722Z",
     "updatedAt": "2026-10-19T07:17:18.083Z",
-    "__v": 0
+    "__v": 0,
+    "category": "SocialStory",
+    "categorySlug": "social-story"
   },
   {
     "_id": "6ad5c3febb37b499a59f41d0",
