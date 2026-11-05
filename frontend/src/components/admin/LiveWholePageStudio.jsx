@@ -915,12 +915,8 @@ export default function LiveWholePageStudio({
   // ADD NEW SECTION DIRECTLY
   // ─────────────────────────────────────────────────────────
   const availableSectionDefinitions = useMemo(() => {
-    const existingTypes = new Set(sections.map(s => (s.type || s.id || '').toLowerCase()));
-    return SECTION_DEFINITIONS.filter(def => {
-      const t = def.type.toLowerCase();
-      return !existingTypes.has(t);
-    });
-  }, [sections]);
+    return SECTION_DEFINITIONS;
+  }, []);
 
   const handleAddSectionDirectly = (sectionType) => {
     const def = SECTION_DEFINITIONS.find(d => d.type === sectionType) || { label: sectionType };
@@ -932,7 +928,58 @@ export default function LiveWholePageStudio({
       limit: 4
     };
 
-    if (sectionType === 'newsletter') {
+    if (sectionType === 'hero') {
+      initialData = {
+        title: 'Lead Stories & Editorial Hero Banner',
+        heading: 'Lead Stories & Editorial Hero Banner',
+        headline: 'Stories That Matter in Startups, Technology & Capital',
+        subheadline: 'Unfiltered founder playbooks, deep tech breakthroughs, and market movements.',
+        badge: 'HEADLINE DISPATCHES',
+        primaryBtnText: 'Read Latest',
+        primaryBtnUrl: '/latest',
+        popularTitle: 'Popular Posts'
+      };
+    } else if (sectionType === 'stories_feed') {
+      initialData = {
+        title: 'Latest from the Blog',
+        heading: 'Latest from the Blog',
+        subtitle: 'Real-time reporting and latest editorial dispatches across the ecosystem.',
+        category: '',
+        limit: 8,
+        viewAllText: 'View All Articles',
+        viewAllUrl: '/latest'
+      };
+    } else if (sectionType === 'trending') {
+      initialData = {
+        title: 'Trending Now',
+        heading: 'Trending Now',
+        subtitle: 'High-velocity stories capturing builder attention and social virality.',
+        limit: 8,
+        viewAllText: 'View All Trending',
+        viewAllUrl: '/trending'
+      };
+    } else if (sectionType === 'popular_editors') {
+      initialData = {
+        title: "Most Popular & Editor's Picks",
+        heading: "Most Popular & Editor's Picks",
+        subtitle: 'Essential reads handpicked by newsroom editors with Editor Choice badges.',
+        badgeText: "Editor's Choice",
+        limit: 8,
+        viewAllText: 'Explore Popular',
+        viewAllUrl: '/category/startups'
+      };
+    } else if (sectionType === 'spotlight') {
+      initialData = {
+        title: 'Tech & Startup Spotlight',
+        heading: 'Tech & Startup Spotlight',
+        subtitle: 'Deep tech breakthroughs, generative AI, and emerging ventures.',
+        category: 'Technology',
+        badgeText: 'DEEPTECH FOCUS',
+        limit: 8,
+        viewAllText: 'Explore Spotlight',
+        viewAllUrl: '/category/technology'
+      };
+    } else if (sectionType === 'newsletter') {
       initialData = {
         title: 'Newsletter Subscription Banner',
         headline: 'Get the Latest Blogs Delivered to Your Inbox',
@@ -1777,18 +1824,25 @@ export default function LiveWholePageStudio({
                   </p>
                 </div>
               ) : (
-                availableSectionDefinitions.map((item) => (
-                  <div
-                    key={item.type}
-                    className="section-type-card"
-                    onClick={() => handleAddSectionDirectly(item.type)}
-                  >
-                    <div className="type-badge-icon">
-                      <Plus size={20} />
+                availableSectionDefinitions.map((item) => {
+                  const alreadyOnPage = sections.some(s => (s.type || s.id || '').toLowerCase().includes(item.type.toLowerCase()));
+                  return (
+                    <div
+                      key={item.type}
+                      className={`section-type-card ${alreadyOnPage ? 'already-added' : ''}`}
+                      onClick={() => handleAddSectionDirectly(item.type)}
+                      title={alreadyOnPage ? `${item.label} (Active on this page - Click to add another)` : `Add ${item.label}`}
+                    >
+                      <div className="type-badge-icon">
+                        <Plus size={20} />
+                      </div>
+                      <h4>{item.label}</h4>
+                      {alreadyOnPage && (
+                        <span className="already-added-pill">Active on Page</span>
+                      )}
                     </div>
-                    <h4>{item.label}</h4>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

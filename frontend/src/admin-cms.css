@@ -4907,6 +4907,22 @@ table input[type="checkbox"]:checked::after {
   line-height: 1.35;
 }
 
+.already-added-pill {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.section-type-card.already-added {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
 /* ══════════════════════════════════════════════════════════════════
    10. SECTION CONTENT EDITOR MODAL
    ══════════════════════════════════════════════════════════════════ */

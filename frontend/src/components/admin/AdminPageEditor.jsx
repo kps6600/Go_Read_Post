@@ -197,10 +197,10 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
   });
   const [sections, setSections] = useState([]);
 
-  // Filter out sections that are already added to this page so they are not shown in the Add Page Section modal
+  // Show all available section definitions in the Add Page Section modal so Hero and all editorial feeds are always visible
   const availableSectionDefinitions = useMemo(() => {
-    return SECTION_DEFINITIONS.filter(item => !isSectionAlreadyOnPage(item.type, sections));
-  }, [sections]);
+    return SECTION_DEFINITIONS;
+  }, []);
   const [allStories, setAllStories] = useState(() => getDefaultSeedStories());
 
   useEffect(() => {
@@ -1443,18 +1443,25 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
                   </p>
                 </div>
               ) : (
-                availableSectionDefinitions.map((item) => (
-                  <div
-                    key={item.type}
-                    className="section-type-card"
-                    onClick={() => handleCreateSection(item.type)}
-                  >
-                    <div className="type-badge-icon">
-                      <Plus size={20} />
+                availableSectionDefinitions.map((item) => {
+                  const alreadyOnPage = isSectionAlreadyOnPage(item.type, sections);
+                  return (
+                    <div
+                      key={item.type}
+                      className={`section-type-card ${alreadyOnPage ? 'already-added' : ''}`}
+                      onClick={() => handleCreateSection(item.type)}
+                      title={alreadyOnPage ? `${item.label} (Active on this page - Click to add another)` : `Add ${item.label}`}
+                    >
+                      <div className="type-badge-icon">
+                        <Plus size={20} />
+                      </div>
+                      <h4>{item.label}</h4>
+                      {alreadyOnPage && (
+                        <span className="already-added-pill">Active on Page</span>
+                      )}
                     </div>
-                    <h4>{item.label}</h4>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
