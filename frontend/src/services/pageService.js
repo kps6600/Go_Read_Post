@@ -66,6 +66,34 @@ export const PageService = {
   async getPageById(id) {
     const cleanId = (id || '').toLowerCase().trim();
     if (cleanId === 'home' || cleanId === '' || cleanId === '/') {
+      // 1. First fetch full authoritative Page document from /api/pages/home
+      try {
+        const res = await fetch(`${API_BASE}/home?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: AuthService.getAuthHeaders()
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data && Array.isArray(json.data.sections) && json.data.sections.length > 0) {
+            const sanitized = json.data.sections.map((s, idx) => {
+              const isHero = s.type === 'hero' || s.sectionKey === 'hero_popular' || s.id === 'hero_popular' || (s.title && s.title.toLowerCase().includes('hero'));
+              const resolvedType = s.type || (isHero ? 'hero' : (s.sectionKey && !s.sectionKey.startsWith('sec_') ? s.sectionKey : 'stories_feed'));
+              return {
+                ...s,
+                id: s.id || s.sectionKey || `sec_${resolvedType}_${idx + 1}`,
+                type: resolvedType,
+                sectionKey: s.sectionKey || s.id || resolvedType,
+                title: s.title || (isHero ? 'Lead Stories & Popular Posts' : `Section ${idx + 1}`)
+              };
+            });
+            return {
+              ...json.data,
+              sections: sanitized
+            };
+          }
+        }
+      } catch (e) {}
+
       let homeSections = [];
       try {
         homeSections = await HomepageService.getAdminSections();

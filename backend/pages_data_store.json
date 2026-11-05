@@ -4,7 +4,7 @@
     "title": "Homepage",
     "slug": "",
     "brand": "GoReadPost",
-    "description": "Comprehensive reporting on technology, startups, AI, and business.",
+    "description": "GoReadPost Main Editorial Homepage & Lead Portals",
     "heroHeadline": "Stories That Matter in Indian & Global Startups",
     "heroSubhead": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
     "heroBanner": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
@@ -24,8 +24,11 @@
     },
     "sections": [
       {
-        "id": "sec_1793861447826",
+        "id": "hero_popular",
+        "sectionKey": "hero_popular",
         "type": "hero",
+        "title": "Lead Stories & Popular Posts",
+        "subtitle": "",
         "order": 1,
         "enabled": true,
         "data": {
@@ -36,57 +39,8 @@
           "badge": "HEADLINE DISPATCHES",
           "primaryBtnText": "Read Latest",
           "primaryBtnUrl": "/latest",
-          "popularTitle": "Popular Posts",
-          "popularArticles": [
-            {
-              "id": "6ac74207caca5851772df7bd",
-              "_id": "6ac74207caca5851772df7bd",
-              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
-              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
-              "coverImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
-              "isCustom": true,
-              "readTime": "5 min read",
-              "category": "Startups",
-              "slug": "sim-5",
-              "link": "/stories/sim-5",
-              "author": "Rashi Goel",
-              "date": "Oct 7, 2026"
-            },
-            {
-              "id": "6aec229ffa12bd736ebca1ed",
-              "_id": "6aec229ffa12bd736ebca1ed",
-              "title": "Hanuman jii",
-              "image": "/uploads/01e3958788d49b68812ceca899d4808d_jpg_1793860126678.jpg",
-              "coverImage": "/uploads/01e3958788d49b68812ceca899d4808d_jpg_1793860126678.jpg",
-              "isCustom": true,
-              "readTime": "~1 min read",
-              "category": "YS हिंदी",
-              "slug": "hanuman-jii",
-              "link": "/stories/hanuman-jii",
-              "author": "Author Name",
-              "date": "Nov 5, 2026"
-            }
-          ],
-          "hasCustomPopular": true
-        },
-        "sectionKey": "sec_1793861447826",
-        "customConfig": {
-          "title": "Lead Stories & Editorial Hero Banner",
-          "heading": "Lead Stories & Editorial Hero Banner",
-          "headline": "Stories That Matter in Startups, Technology & Capital",
-          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
-          "badge": "HEADLINE DISPATCHES",
-          "primaryBtnText": "Read Latest",
-          "primaryBtnUrl": "/latest",
           "popularTitle": "Popular Posts"
-        }
-      },
-      {
-        "_id": "6aec2695973feb0d311c53ad",
-        "sectionKey": "sec_1793861269024",
-        "__v": 0,
-        "articleIds": [],
-        "createdAt": "2026-11-05T06:47:49.106Z",
+        },
         "customConfig": {
           "title": "Lead Stories & Editorial Hero Banner",
           "heading": "Lead Stories & Editorial Hero Banner",
@@ -97,194 +51,145 @@
           "primaryBtnUrl": "/latest",
           "popularTitle": "Popular Posts"
         },
-        "data": {
-          "title": "Lead Stories & Editorial Hero Banner",
-          "heading": "Lead Stories & Editorial Hero Banner",
-          "headline": "Stories That Matter in Startups, Technology & Capital",
-          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
-          "badge": "HEADLINE DISPATCHES",
-          "primaryBtnText": "Read Latest",
-          "primaryBtnUrl": "/latest",
-          "popularTitle": "Popular Posts"
-        },
-        "enabled": true,
-        "filterCategory": "",
-        "filterTag": "",
-        "limit": 6,
-        "order": 2,
-        "subtitle": "",
-        "title": "Lead Stories & Editorial Hero Banner",
-        "updatedAt": "2026-11-05T06:48:03.037Z",
-        "id": "sec_1793861269024",
-        "type": "sec_1793861269024"
-      },
-      {
         "_id": "6aec233c973feb0d311c53ac",
-        "sectionKey": "sec_1793860412515",
         "__v": 0,
         "articleIds": [],
         "createdAt": "2026-11-05T06:33:32.543Z",
-        "customConfig": {
-          "title": "Lead Stories & Editorial Hero Banner",
-          "heading": "Lead Stories & Editorial Hero Banner",
-          "headline": "Stories That Matter in Startups, Technology & Capital",
-          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
-          "badge": "HEADLINE DISPATCHES",
-          "primaryBtnText": "Read Latest",
-          "primaryBtnUrl": "/latest",
-          "popularTitle": "Popular Posts"
-        },
-        "data": {
-          "title": "Lead Stories & Editorial Hero Banner",
-          "heading": "Lead Stories & Editorial Hero Banner",
-          "headline": "Stories That Matter in Startups, Technology & Capital",
-          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
-          "badge": "HEADLINE DISPATCHES",
-          "primaryBtnText": "Read Latest",
-          "primaryBtnUrl": "/latest",
-          "popularTitle": "Popular Posts"
-        },
-        "enabled": true,
         "filterCategory": "",
         "filterTag": "",
         "limit": 6,
-        "order": 3,
-        "subtitle": "",
-        "title": "Lead Stories & Editorial Hero Banner",
-        "updatedAt": "2026-11-05T06:48:03.053Z",
-        "id": "sec_1793860412515",
-        "type": "sec_1793860412515"
+        "updatedAt": "2026-11-05T07:01:41.159Z"
       },
       {
-        "_id": "6ad18bdcf6ab00136ef47267",
-        "sectionKey": "trending",
-        "title": "Trending Now",
-        "subtitle": "High-velocity stories capturing builder attention",
-        "enabled": true,
-        "order": 4,
-        "limit": 10,
-        "articleIds": [],
-        "filterCategory": "",
-        "filterTag": "",
-        "customConfig": {
-          "viewAllText": "View All Trending",
-          "viewAllUrl": "/trending"
-        },
-        "__v": 0,
-        "createdAt": "2026-10-16T02:28:44.520Z",
-        "updatedAt": "2026-11-05T06:48:03.072Z",
-        "data": {
-          "viewAllText": "View All Trending",
-          "viewAllUrl": "/trending"
-        },
-        "id": "trending",
-        "type": "trending"
-      },
-      {
-        "_id": "6ad18bdcf6ab00136ef47266",
-        "sectionKey": "latest_blogs",
-        "title": "Latest from the Blog",
-        "subtitle": "Real-time reporting and latest editorial dispatches",
-        "enabled": true,
-        "order": 5,
-        "limit": 10,
-        "articleIds": [],
-        "filterCategory": "",
-        "filterTag": "",
-        "customConfig": {
-          "viewAllText": "View All Articles",
-          "viewAllUrl": "/latest"
-        },
-        "__v": 0,
-        "createdAt": "2026-10-16T02:28:44.520Z",
-        "updatedAt": "2026-11-05T06:48:03.088Z",
-        "data": {
-          "viewAllText": "View All Articles",
-          "viewAllUrl": "/latest"
-        },
-        "id": "latest_blogs",
-        "type": "latest_blogs"
-      },
-      {
-        "_id": "6ad18bdcf6ab00136ef47268",
+        "id": "popular_editors",
         "sectionKey": "popular_editors",
+        "type": "popular_editors",
         "title": "Most Popular & Editor's Picks",
         "subtitle": "Essential reads handpicked by newsroom editors",
+        "order": 2,
         "enabled": true,
-        "order": 6,
-        "limit": 10,
-        "articleIds": [],
-        "filterCategory": "",
-        "filterTag": "",
-        "customConfig": {
-          "badgeText": "Editor's Choice",
-          "viewAllText": "Explore Popular",
-          "viewAllUrl": "/category/startups"
-        },
-        "__v": 0,
-        "createdAt": "2026-10-16T02:28:44.520Z",
-        "updatedAt": "2026-11-05T06:48:03.110Z",
         "data": {
           "badgeText": "Editor's Choice",
           "viewAllText": "Explore Popular",
           "viewAllUrl": "/category/startups"
         },
-        "id": "popular_editors",
-        "type": "popular_editors"
+        "customConfig": {
+          "badgeText": "Editor's Choice",
+          "viewAllText": "Explore Popular",
+          "viewAllUrl": "/category/startups"
+        },
+        "_id": "6ad18bdcf6ab00136ef47268",
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "__v": 0,
+        "createdAt": "2026-10-16T02:28:44.520Z",
+        "updatedAt": "2026-11-05T07:01:41.225Z"
       },
       {
-        "_id": "6ad18bdcf6ab00136ef47269",
+        "id": "trending",
+        "sectionKey": "trending",
+        "type": "trending",
+        "title": "Trending Now",
+        "subtitle": "High-velocity stories capturing builder attention",
+        "order": 3,
+        "enabled": true,
+        "data": {
+          "viewAllText": "View All Trending",
+          "viewAllUrl": "/trending"
+        },
+        "customConfig": {
+          "viewAllText": "View All Trending",
+          "viewAllUrl": "/trending"
+        },
+        "_id": "6ad18bdcf6ab00136ef47267",
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "__v": 0,
+        "createdAt": "2026-10-16T02:28:44.520Z",
+        "updatedAt": "2026-11-05T07:01:41.168Z"
+      },
+      {
+        "id": "latest_blogs",
+        "sectionKey": "latest_blogs",
+        "type": "stories_feed",
+        "title": "Latest from the Blog",
+        "subtitle": "Real-time reporting and latest editorial dispatches",
+        "order": 4,
+        "enabled": true,
+        "data": {
+          "viewAllText": "View All Articles",
+          "viewAllUrl": "/latest"
+        },
+        "customConfig": {
+          "viewAllText": "View All Articles",
+          "viewAllUrl": "/latest"
+        },
+        "_id": "6ad18bdcf6ab00136ef47266",
+        "limit": 10,
+        "articleIds": [],
+        "filterCategory": "",
+        "filterTag": "",
+        "__v": 0,
+        "createdAt": "2026-10-16T02:28:44.520Z",
+        "updatedAt": "2026-11-05T07:01:41.184Z"
+      },
+      {
+        "id": "spotlight",
         "sectionKey": "spotlight",
+        "type": "spotlight",
         "title": "Tech & Startup Spotlight",
         "subtitle": "Deep tech, generative AI, and emerging ventures",
+        "order": 5,
         "enabled": true,
-        "order": 7,
+        "data": {
+          "badgeText": "Spotlight",
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/technology"
+        },
+        "customConfig": {
+          "badgeText": "Spotlight",
+          "viewAllText": "Explore Startups",
+          "viewAllUrl": "/category/technology"
+        },
+        "_id": "6ad18bdcf6ab00136ef47269",
         "limit": 10,
         "articleIds": [],
         "filterCategory": "Technology",
         "filterTag": "",
-        "customConfig": {
-          "badgeText": "Spotlight",
-          "viewAllText": "Explore Startups",
-          "viewAllUrl": "/category/technology"
-        },
         "__v": 0,
         "createdAt": "2026-10-16T02:28:44.521Z",
-        "updatedAt": "2026-11-05T06:48:03.154Z",
-        "data": {
-          "badgeText": "Spotlight",
-          "viewAllText": "Explore Startups",
-          "viewAllUrl": "/category/technology"
-        },
-        "id": "spotlight",
-        "type": "spotlight"
+        "updatedAt": "2026-11-05T07:01:41.238Z"
       },
       {
-        "_id": "6ad18bdcf6ab00136ef4726a",
+        "id": "newsletter",
         "sectionKey": "newsletter",
+        "type": "newsletter",
         "title": "Newsletter Subscription Banner",
         "subtitle": "Get the Latest Blogs Delivered to Your Inbox",
+        "order": 6,
         "enabled": true,
-        "order": 8,
+        "data": {
+          "headline": "Get the Latest Blogs Delivered to Your Inbox",
+          "buttonText": "Subscribe",
+          "badgeText": "DAILY BRIEF"
+        },
+        "customConfig": {
+          "headline": "Get the Latest Blogs Delivered to Your Inbox",
+          "buttonText": "Subscribe",
+          "badgeText": "DAILY BRIEF"
+        },
+        "_id": "6ad18bdcf6ab00136ef4726a",
         "limit": 10,
         "articleIds": [],
         "filterCategory": "",
         "filterTag": "",
-        "customConfig": {
-          "headline": "Get the Latest Blogs Delivered to Your Inbox",
-          "buttonText": "Subscribe",
-          "badgeText": "DAILY BRIEF"
-        },
         "__v": 0,
         "createdAt": "2026-10-16T02:28:44.522Z",
-        "updatedAt": "2026-11-05T06:48:03.166Z",
-        "data": {
-          "headline": "Get the Latest Blogs Delivered to Your Inbox",
-          "buttonText": "Subscribe",
-          "badgeText": "DAILY BRIEF"
-        },
-        "id": "newsletter",
-        "type": "newsletter"
+        "updatedAt": "2026-11-05T07:01:41.245Z"
       }
     ]
   },

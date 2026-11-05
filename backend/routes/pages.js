@@ -719,6 +719,29 @@ router.put('/:id', protectAdmin, async (req, res) => {
       const query = buildPageQuery(id);
 
       let updateSections = updates.sections;
+      if (Array.isArray(updateSections)) {
+        updateSections = updateSections.map((s, idx) => {
+          const isHero = s.type === 'hero' || s.sectionKey === 'hero_popular' || s.id === 'hero_popular' || (s.title && s.title.toLowerCase().includes('hero'));
+          const resolvedType = s.type || (isHero ? 'hero' : (s.sectionKey && !s.sectionKey.startsWith('sec_') ? s.sectionKey : 'stories_feed'));
+          const resolvedKey = s.sectionKey || (isHero ? 'hero_popular' : (s.id || `sec_${resolvedType}_${idx + 1}`));
+          const resolvedId = s.id || resolvedKey;
+          const sData = s.data !== undefined ? s.data : (s.customConfig || {});
+          const sCustom = s.customConfig !== undefined ? s.customConfig : (s.data || {});
+
+          return {
+            ...s,
+            id: resolvedId,
+            type: resolvedType,
+            sectionKey: resolvedKey,
+            order: Number(s.order || idx + 1),
+            title: s.title || (sData && (sData.heading || sData.title)) || resolvedKey,
+            subtitle: s.subtitle || (sData && sData.subtitle) || '',
+            enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
+            data: sData,
+            customConfig: sCustom
+          };
+        });
+      }
       
       const updateDoc = {
         ...updates,
@@ -750,12 +773,15 @@ router.put('/:id', protectAdmin, async (req, res) => {
             await HomepageSection.findOneAndUpdate(
               { sectionKey: key },
               {
+                id: s.id,
+                type: s.type,
                 sectionKey: key,
                 title: s.title || (sData && (sData.heading || sData.title)) || key,
                 subtitle: s.subtitle || (sData && sData.subtitle) || '',
                 enabled: s.enabled !== undefined ? Boolean(s.enabled) : true,
                 order: Number(s.order || 0),
                 articleIds: artIds,
+                articles: Array.isArray(sData?.articles) ? sData.articles : [],
                 customConfig: sCustom,
                 data: sData
               },

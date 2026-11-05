@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 
 const homepageSectionSchema = new mongoose.Schema(
   {
+    id: { type: String, trim: true },
+    type: { type: String, default: 'stories_feed', trim: true },
     sectionKey: {
       type: String,
       required: true,
@@ -14,6 +16,7 @@ const homepageSectionSchema = new mongoose.Schema(
     order: { type: Number, default: 0 },
     limit: { type: Number, default: 10 },
     articleIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
+    articles: { type: Array, default: [] },
     filterCategory: { type: String, default: '' },
     filterTag: { type: String, default: '' },
     customConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
@@ -26,6 +29,8 @@ homepageSectionSchema.index({ order: 1 });
 
 export const DEFAULT_HOMEPAGE_SECTIONS = [
   {
+    id: 'hero_popular',
+    type: 'hero',
     sectionKey: 'hero_popular',
     title: 'Hero Section - Lead Stories & Popular Posts',
     subtitle: 'Primary hero editorial slider & top 5 ranked sidebar',
@@ -39,6 +44,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     }
   },
   {
+    id: 'latest_blogs',
+    type: 'stories_feed',
     sectionKey: 'latest_blogs',
     title: 'Latest from the Blog',
     subtitle: '',
@@ -51,6 +58,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     }
   },
   {
+    id: 'trending',
+    type: 'trending',
     sectionKey: 'trending',
     title: 'Trending Now',
     subtitle: 'High-velocity stories capturing builder attention',
@@ -63,6 +72,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     }
   },
   {
+    id: 'popular_editors',
+    type: 'popular_editors',
     sectionKey: 'popular_editors',
     title: "Most Popular & Editor's Picks",
     subtitle: 'Essential reads handpicked by newsroom editors',
@@ -76,6 +87,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     }
   },
   {
+    id: 'spotlight',
+    type: 'spotlight',
     sectionKey: 'spotlight',
     title: 'Tech & Startup Spotlight',
     subtitle: 'Deep tech, generative AI, and emerging ventures',
@@ -90,6 +103,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS = [
     }
   },
   {
+    id: 'newsletter',
+    type: 'newsletter',
     sectionKey: 'newsletter',
     title: 'Newsletter Subscription Banner',
     subtitle: 'Get the Latest Blogs Delivered to Your Inbox',

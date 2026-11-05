@@ -670,10 +670,14 @@ export default function AdminPageEditor({ pageId, onNavigate, onShowToast, initi
 
     const newSec = {
       id: 'sec_' + Date.now(),
+      sectionKey: sectionType + '_' + Date.now(),
       type: sectionType,
+      title: initialData.title || def?.label || sectionType,
+      subtitle: initialData.subtitle || def?.desc || '',
       order: sections.length + 1,
       enabled: true,
-      data: initialData
+      data: initialData,
+      customConfig: initialData
     };
     const nextSections = [...sections, newSec];
     setSections(nextSections);

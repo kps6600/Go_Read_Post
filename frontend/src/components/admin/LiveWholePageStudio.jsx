@@ -536,17 +536,36 @@ export default function LiveWholePageStudio({
         sections: sectionsToSave
       };
 
+      // Sanitize sections to guarantee type and key are strictly preserved
+      const sanitizedSections = sectionsToSave.map((s, idx) => {
+        const isHero = s.type === 'hero' || s.sectionKey === 'hero_popular' || s.id === 'hero_popular' || (s.title && s.title.toLowerCase().includes('hero'));
+        const resolvedType = s.type || (isHero ? 'hero' : (s.sectionKey && !s.sectionKey.startsWith('sec_') ? s.sectionKey : 'stories_feed'));
+        return {
+          ...s,
+          id: s.id || s.sectionKey || `sec_${resolvedType}_${idx + 1}`,
+          type: resolvedType,
+          sectionKey: s.sectionKey || (isHero ? 'hero_popular' : (s.id || `sec_${resolvedType}_${idx + 1}`)),
+          order: idx + 1,
+          data: s.data || s.customConfig || {},
+          customConfig: s.customConfig || s.data || {}
+        };
+      });
+
+      payload.sections = sanitizedSections;
+
       await PageService.updatePage(pageId, payload);
       if (isHome) {
         try {
-          await HomepageService.updateSections(sectionsToSave);
+          await HomepageService.updateSections(sanitizedSections);
         } catch (e) {}
       }
 
-      // Notify any active views across open windows
+      // Notify any active views across open windows & storage
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('page:change', { detail: { pageId, sections: sectionsToSave } }));
-        if (isHome) window.dispatchEvent(new CustomEvent('homepage:change', { detail: sectionsToSave }));
+        localStorage.setItem('pages_last_updated', Date.now().toString());
+        localStorage.setItem('homepage_last_updated', Date.now().toString());
+        window.dispatchEvent(new CustomEvent('page:change', { detail: { pageId, sections: sanitizedSections } }));
+        if (isHome) window.dispatchEvent(new CustomEvent('homepage:change', { detail: sanitizedSections }));
       }
 
       setSaveStatus('saved');
@@ -1012,10 +1031,14 @@ export default function LiveWholePageStudio({
 
     const newSec = {
       id: 'sec_' + Date.now(),
+      sectionKey: sectionType + '_' + Date.now(),
       type: sectionType,
+      title: initialData.title || def.label,
+      subtitle: initialData.subtitle || def.desc || '',
       order: sections.length + 1,
       enabled: true,
-      data: initialData
+      data: initialData,
+      customConfig: initialData
     };
 
     let next;

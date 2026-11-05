@@ -552,49 +552,51 @@ export default function App() {
     const pageSecs = homePage && Array.isArray(homePage.sections) && homePage.sections.length > 0 ? homePage.sections : [];
     const cmsSecs = Array.isArray(homepageSections) && homepageSections.length > 0 ? homepageSections : [];
 
-    // Prioritize sections from whichever source has the latest curated content
-    // Build a unified list preserving order and merging all section data (articles, slides, popular, config)
-    const baseList = cmsSecs.length > 0 ? cmsSecs : pageSecs;
-    const secondaryList = cmsSecs.length > 0 ? pageSecs : cmsSecs;
+    // The authoritative sections structure and order is homePage.sections from database
+    const authoritative = pageSecs.length > 0 ? pageSecs : cmsSecs;
+    const secondary = pageSecs.length > 0 ? cmsSecs : pageSecs;
 
-    const merged = baseList.map(item => {
-      const match = secondaryList.find(s => (s.sectionKey || s.id || s.type) === (item.sectionKey || item.id || item.type));
+    return authoritative.map((item, idx) => {
+      const match = secondary.find(s => 
+        (s.id && item.id && s.id === item.id) ||
+        (s.sectionKey && item.sectionKey && s.sectionKey === item.sectionKey) ||
+        (s.type && item.type && s.type === item.type)
+      );
+
       const itemData = item.data || item.customConfig || {};
       const matchData = match ? (match.data || match.customConfig || {}) : {};
-      
+
       const combinedData = {
         ...matchData,
         ...itemData,
-        articles: (Array.isArray(itemData.articles) && itemData.articles.length > 0) 
-          ? itemData.articles 
-          : ((Array.isArray(matchData.articles) && matchData.articles.length > 0) ? matchData.articles : item.articles),
+        articles: (Array.isArray(itemData.articles) && itemData.articles.length > 0)
+          ? itemData.articles
+          : ((Array.isArray(matchData.articles) && matchData.articles.length > 0) ? matchData.articles : (item.articles || match?.articles || [])),
         slides: (Array.isArray(itemData.slides) && itemData.slides.length > 0)
           ? itemData.slides
-          : matchData.slides,
+          : (matchData.slides || item.slides || []),
         popularArticles: (Array.isArray(itemData.popularArticles) && itemData.popularArticles.length > 0)
           ? itemData.popularArticles
-          : matchData.popularArticles
+          : (matchData.popularArticles || item.popularArticles || [])
       };
+
+      const isHero = item.type === 'hero' || item.sectionKey === 'hero_popular' || item.id === 'hero_popular' || (item.title && item.title.toLowerCase().includes('hero'));
+      const resolvedType = item.type || (isHero ? 'hero' : (item.sectionKey && !item.sectionKey.startsWith('sec_') ? item.sectionKey : (match?.type || 'stories_feed')));
 
       return {
         ...item,
         ...(match || {}),
         ...item,
+        id: item.id || item.sectionKey || `sec_${resolvedType}_${idx + 1}`,
+        type: resolvedType,
+        sectionKey: item.sectionKey || item.id || resolvedType,
         enabled: item.enabled !== undefined ? item.enabled : (match?.enabled !== undefined ? match.enabled : true),
+        order: item.order || idx + 1,
         data: combinedData,
         customConfig: combinedData,
-        articles: combinedData.articles || item.articles || match?.articles
+        articles: combinedData.articles
       };
-    });
-
-    for (const sec of secondaryList) {
-      const key = sec.sectionKey || sec.id || sec.type;
-      if (!merged.some(m => (m.sectionKey || m.id || m.type) === key)) {
-        merged.push(sec);
-      }
-    }
-
-    return merged.sort((a, b) => (a.order || 0) - (b.order || 0));
+    }).sort((a, b) => (a.order || 0) - (b.order || 0));
   }, [sitePages, homepageSections]);
 
   // Load live stories, navigation tree, pages, and homepage layout from Express / MongoDB API on mount
