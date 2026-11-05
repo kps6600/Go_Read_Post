@@ -267,27 +267,44 @@ export default function ArticlePage({
     }
   };
 
-  // 1. Load article by slug if not provided or if slug changed
+  const viewCountedSlugRef = useRef(null);
+
+  // 1. Load article by slug if not provided or if slug changed (deduplicated per view session)
+  const storyId = story?._id || story?.id || story?.slug;
   useEffect(() => {
     if (!slug) {
       if (story) setArticle(story);
       return;
     }
+
+    let alreadyViewed = false;
+    try {
+      alreadyViewed = Boolean(sessionStorage.getItem('grp_viewed_' + slug));
+    } catch (e) {}
+
+    const isFirstView = !alreadyViewed && viewCountedSlugRef.current !== slug;
+    if (isFirstView) {
+      viewCountedSlugRef.current = slug;
+      try {
+        sessionStorage.setItem('grp_viewed_' + slug, '1');
+      } catch (e) {}
+    }
+
     // If story already matches slug, display it immediately and sync latest from database in background
     if (story && (story.slug === slug || story.id === slug || story._id === slug)) {
       setArticle(story);
       setLoading(false);
-      loadArticle(slug, true);
+      loadArticle(slug, true, isFirstView);
       return;
     }
-    loadArticle(slug, false);
-  }, [slug, story]);
+    loadArticle(slug, false, isFirstView);
+  }, [slug, storyId]);
 
   // Live article updates listener: automatically refreshes when article is edited in Admin
   useEffect(() => {
     const handleArticleUpdate = () => {
       if (activeSlug) {
-        loadArticle(activeSlug, true);
+        loadArticle(activeSlug, true, false);
       }
     };
     window.addEventListener('article:change', handleArticleUpdate);
@@ -368,13 +385,13 @@ export default function ArticlePage({
     };
   }, [article]);
 
-  const loadArticle = async (targetSlug, isBackground = false) => {
+  const loadArticle = async (targetSlug, isBackground = false, shouldCountView = false) => {
     if (!isBackground) {
       setLoading(true);
       setError(null);
     }
     try {
-      const data = await ArticleService.getArticleBySlug(targetSlug);
+      const data = await ArticleService.getArticleBySlug(targetSlug, { countView: shouldCountView });
       if (data) {
         setArticle(data);
       } else if (!isBackground) {

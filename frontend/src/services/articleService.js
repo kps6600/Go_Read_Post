@@ -29,13 +29,28 @@ export const ArticleService = {
   },
 
   // Public: get single article by slug
-  async getArticleBySlug(slug) {
-    const res = await fetch(`${API_BASE}/${slug}`);
+  async getArticleBySlug(slug, options = {}) {
+    const params = new URLSearchParams();
+    if (options.countView === false) {
+      params.set('countView', 'false');
+    }
+    const query = params.toString();
+    const res = await fetch(`${API_BASE}/${slug}${query ? '?' + query : ''}`);
     const json = await res.json();
     if (!res.ok || !json.success) {
       throw new Error(json.message || 'Article not found');
     }
     return json.data;
+  },
+
+  // Record single view
+  async recordArticleView(slug) {
+    try {
+      const res = await fetch(`${API_BASE}/${slug}/view`, { method: 'POST' });
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
   },
 
   // Admin: get all articles with all statuses

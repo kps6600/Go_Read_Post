@@ -232,19 +232,54 @@ router.get('/', async (req, res) => {
   }
 });
 
+// In-memory view deduplication to prevent double-counting on quick re-renders / StrictMode
+const recentViewsMap = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of recentViewsMap.entries()) {
+    if (now - timestamp > 60000) {
+      recentViewsMap.delete(key);
+    }
+  }
+}, 300000);
+
 // --------------------------------------------------------------------------
 // 2. PUBLIC API: GET /api/articles/:slug (Fetch single post by unique slug)
 // --------------------------------------------------------------------------
 router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'client';
+    const viewKey = `${clientIp}_${slug}`;
+    const now = Date.now();
+    const lastViewTime = recentViewsMap.get(viewKey) || 0;
+    const isRecentView = (now - lastViewTime) < 15000; // 15-second cooldown per client & article
+
+    // Only count view if explicitly not disabled, not a preview, and not an instant duplicate
+    const shouldCount = req.query.countView !== 'false' && 
+                        req.query.preview !== 'true' && 
+                        !isRecentView;
+
+    if (shouldCount) {
+      recentViewsMap.set(viewKey, now);
+    }
 
     if (isDbConnected()) {
-      const article = await Article.findOneAndUpdate(
-        { slug, status: 'published' },
-        { $inc: { views: 1 } },
-        { new: true }
-      );
+      let article = null;
+      const query = { slug, status: 'published' };
+
+      if (shouldCount) {
+        article = await Article.findOneAndUpdate(
+          query,
+          { $inc: { views: 1 } },
+          { new: true }
+        );
+        if (article) {
+          await Story.findOneAndUpdate({ slug }, { $inc: { views: 1 } }).catch(() => null);
+        }
+      } else {
+        article = await Article.findOne(query);
+      }
 
       if (!article) {
         return res.status(404).json({ success: false, message: 'Article not found or not yet published.' });
@@ -258,9 +293,50 @@ router.get('/:slug', async (req, res) => {
     if (!article) {
       return res.status(404).json({ success: false, message: 'Article not found or not yet published.' });
     }
-    article.views = (article.views || 0) + 1;
-    writeFallbackArticles(fallback);
+    if (shouldCount) {
+      article.views = (article.views || 0) + 1;
+      writeFallbackArticles(fallback);
+    }
     res.json({ success: true, data: article });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Dedicated POST /api/articles/:slug/view (Record single view with deduplication)
+router.post('/:slug/view', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'client';
+    const viewKey = `${clientIp}_${slug}`;
+    const now = Date.now();
+    const lastViewTime = recentViewsMap.get(viewKey) || 0;
+    if ((now - lastViewTime) < 15000) {
+      return res.json({ success: true, message: 'View already counted recently' });
+    }
+    recentViewsMap.set(viewKey, now);
+
+    if (isDbConnected()) {
+      const art = await Article.findOneAndUpdate(
+        { $or: [{ slug }, { _id: mongoose.Types.ObjectId.isValid(slug) ? slug : undefined }].filter(Boolean) },
+        { $inc: { views: 1 } },
+        { new: true }
+      );
+      if (art) {
+        await Story.findOneAndUpdate({ $or: [{ slug }, { id: slug }] }, { $inc: { views: 1 } }).catch(() => null);
+        return res.json({ success: true, views: art.views });
+      }
+    }
+
+    const fallback = readFallbackArticles();
+    const article = fallback.find(a => a.slug === slug || a._id === slug || a.id === slug);
+    if (article) {
+      article.views = (article.views || 0) + 1;
+      writeFallbackArticles(fallback);
+      return res.json({ success: true, views: article.views });
+    }
+
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
