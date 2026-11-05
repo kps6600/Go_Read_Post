@@ -418,13 +418,7 @@ export default function AdminAuthorsView({ authorSlug, onNavigate, onShowToast }
             <h3 className="aav-modal-title">
               {editingAuthor ? `Edit Author: ${editingAuthor.name}` : 'Create Author Profile'}
             </h3>
-            <button 
-              type="button" 
-              onClick={() => setIsModalOpen(false)} 
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
-            >
-              <X size={20} />
-            </button>
+
           </div>
 
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
