@@ -1,5 +1,21 @@
 import React from 'react';
-import { Clock, Bookmark, Share2 } from 'lucide-react';
+import { Clock, Bookmark, Share2, Eye, Heart } from 'lucide-react';
+
+const formatCompactNumber = (num) => {
+  if (num === null || num === undefined || num === '') return '0';
+  if (typeof num === 'string') {
+    const v = num.trim();
+    if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v.toUpperCase();
+    const parsed = parseFloat(v.replace(/,/g, ''));
+    if (!isNaN(parsed)) return formatCompactNumber(parsed);
+    return v;
+  }
+  const n = Number(num);
+  if (isNaN(n) || n === 0) return '0';
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(Math.round(n));
+};
 
 const DEFAULT_EDITORIAL_FALLBACK = 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=900&auto=format&fit=crop&q=80';
 
@@ -65,6 +81,8 @@ export default function StoriesGrid({
             const authorName = story.author?.name || story.authorName || 'GoReadPost Bureau';
             const readTimeText = story.readTime || story.readingTime || '5 min read';
             const categoryText = story.categoryLabel || story.categoryName || story.category || title || 'Story';
+            const viewsCount = formatCompactNumber(story.views !== undefined ? story.views : (story.reads || 0));
+            const likesCount = formatCompactNumber(story.claps !== undefined ? story.claps : (story.likes || 0));
 
             return (
               <article
@@ -111,6 +129,20 @@ export default function StoriesGrid({
                     </div>
 
                     <div className="editorial-card-actions">
+                      <span className="editorial-stat-badge" title={`${viewsCount} views`}>
+                        <Eye size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
+                        <span>{viewsCount}</span>
+                      </span>
+                      <button 
+                        type="button" 
+                        className="editorial-stat-like-btn"
+                        onClick={() => onClapStory && onClapStory(storyId)}
+                        title="Like story"
+                        aria-label="Like story"
+                      >
+                        <Heart size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
+                        <span>{likesCount}</span>
+                      </button>
                       <button 
                         className={`editorial-icon-btn${saved ? ' active' : ''}`} 
                         onClick={() => onToggleSave(story)} 

@@ -889,6 +889,10 @@ export default function ModernHomepageView({
     const currentHeroReadTime = getStoryReadTime(activeSlide);
     const currentHeroBtnText = activeSlide.primaryBtnText || data.primaryBtnText || data.buttonText || 'Read More';
     const currentHeroBtnUrl = activeSlide.link || activeSlide.primaryBtnUrl || data.primaryBtnUrl || data.buttonUrl;
+    const heroId = getStoryId(activeSlide);
+    const heroViewsCount = formatCompactNumber(getStoryViewsCount(activeSlide));
+    const heroLikesCount = formatCompactNumber(getStoryLikesCount(activeSlide));
+    const isHeroLiked = Boolean(likedStories[heroId]);
 
     const handleHeroAction = (e) => {
       e?.stopPropagation();
@@ -1007,6 +1011,28 @@ export default function ModernHomepageView({
               >
                 {currentHeroCategory}
               </span>
+
+              <div className="mhp-hero-stats-cluster">
+                <span className="mhp-hero-views-pill" title={`${heroViewsCount} views`}>
+                  <Eye size={14} className="mhp-views-icon" />
+                  <span>{heroViewsCount}</span>
+                </span>
+                <button 
+                  type="button" 
+                  className={`mhp-hero-like-pill ${isHeroLiked ? 'active' : ''}`}
+                  onClick={(e) => handleToggleLike(activeSlide, e)}
+                  title={isHeroLiked ? 'Unlike story' : 'Like story'}
+                  aria-label="Like story"
+                >
+                  <Heart 
+                    size={14} 
+                    className="mhp-like-icon"
+                    fill={isHeroLiked ? "#ef4444" : "none"} 
+                    color={isHeroLiked ? "#ef4444" : "#ffffff"} 
+                  />
+                  <span className="mhp-like-count">{heroLikesCount}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1064,6 +1090,9 @@ export default function ModernHomepageView({
                 const itemReadTime = getStoryReadTime(item);
                 const itemId = getStoryId(item, idx);
                 const isPopularSaved = isSaved ? Boolean(isSaved(item.id || item._id || item.slug)) : false;
+                const popViewsCount = formatCompactNumber(getStoryViewsCount(item));
+                const popLikesCount = formatCompactNumber(getStoryLikesCount(item));
+                const isPopLiked = Boolean(likedStories[itemId]);
 
                 return (
                   <div 
@@ -1088,9 +1117,30 @@ export default function ModernHomepageView({
                       <h4 className="mhp-popular-title">
                         {itemTitle}
                       </h4>
-                      <span className="mhp-popular-meta">
-                        {itemReadTime}
-                      </span>
+                      <div className="mhp-popular-meta">
+                        <span>{itemReadTime}</span>
+                        <span className="mhp-meta-sep">•</span>
+                        <span className="mhp-popular-stat" title={`${popViewsCount} views`}>
+                          <Eye size={12} className="mhp-views-icon" />
+                          <span>{popViewsCount}</span>
+                        </span>
+                        <span className="mhp-meta-sep">•</span>
+                        <button 
+                          type="button" 
+                          className={`mhp-popular-like-btn ${isPopLiked ? 'active' : ''}`}
+                          onClick={(e) => handleToggleLike(item, e)}
+                          title={isPopLiked ? 'Unlike story' : 'Like story'}
+                          aria-label="Like story"
+                        >
+                          <Heart 
+                            size={12} 
+                            className="mhp-like-icon"
+                            fill={isPopLiked ? "#ef4444" : "none"} 
+                            color={isPopLiked ? "#ef4444" : "#64748b"} 
+                          />
+                          <span className="mhp-like-count">{popLikesCount}</span>
+                        </button>
+                      </div>
                     </div>
                     <button 
                       type="button" 

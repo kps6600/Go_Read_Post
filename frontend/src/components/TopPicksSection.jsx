@@ -1,5 +1,21 @@
 import React from 'react';
-import { Clock, Bookmark, Share2 } from 'lucide-react';
+import { Clock, Bookmark, Share2, Eye, Heart } from 'lucide-react';
+
+const formatCompactNumber = (num) => {
+  if (num === null || num === undefined || num === '') return '0';
+  if (typeof num === 'string') {
+    const v = num.trim();
+    if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v.toUpperCase();
+    const parsed = parseFloat(v.replace(/,/g, ''));
+    if (!isNaN(parsed)) return formatCompactNumber(parsed);
+    return v;
+  }
+  const n = Number(num);
+  if (isNaN(n) || n === 0) return '0';
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(Math.round(n));
+};
 import { TOP_PICKS } from '../data/storiesData';
 
 export default function TopPicksSection({ 
@@ -37,6 +53,8 @@ export default function TopPicksSection({
             const itemCat = item.categoryLabel || item.category || 'TOP PICK';
             const itemAuthor = item.author?.name || (typeof item.author === 'string' ? item.author : 'YourStory Desk');
             const itemReadTime = item.readTime || (item.readingTime ? `${item.readingTime} min read` : '4 min read');
+            const viewsCount = formatCompactNumber(item.views !== undefined ? item.views : (item.reads || 0));
+            const likesCount = formatCompactNumber(item.claps !== undefined ? item.claps : (item.likes || 0));
             const itemSummary = item.summary || item.excerpt || (item.content ? item.content.replace(/<[^>]+>/g, '').slice(0, 95) + '...' : '');
 
             return (
@@ -85,6 +103,14 @@ export default function TopPicksSection({
                     </div>
 
                     <div className="top-pick-actions" onClick={(e) => e.stopPropagation()}>
+                      <span className="top-pick-stat" title={`${viewsCount} views`}>
+                        <Eye size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
+                        <span>{viewsCount}</span>
+                      </span>
+                      <span className="top-pick-stat" title={`${likesCount} likes`}>
+                        <Heart size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
+                        <span>{likesCount}</span>
+                      </span>
                       {onToggleSave && (
                         <button 
                           className={`editorial-icon-btn${saved ? ' active' : ''}`}

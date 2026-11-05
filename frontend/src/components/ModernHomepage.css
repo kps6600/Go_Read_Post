@@ -104,6 +104,53 @@
   transform: translateY(-1px);
 }
 
+/* Hero Stats Cluster (Views & Likes) */
+.mhp-hero-stats-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mhp-hero-views-pill,
+.mhp-hero-like-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  user-select: none;
+  transition: all 0.2s ease;
+  line-height: 1.2;
+}
+
+.mhp-hero-like-pill {
+  cursor: pointer;
+}
+
+.mhp-hero-like-pill:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.mhp-hero-like-pill.active {
+  background: rgba(239, 68, 68, 0.32);
+  border-color: rgba(239, 68, 68, 0.7);
+  color: #ffffff;
+}
+
+.mhp-hero-like-pill.active .mhp-like-icon {
+  fill: #ef4444;
+  color: #ef4444;
+}
+
 .mhp-hero-title {
   font-size: clamp(1.25rem, 2vw + 0.45rem, 2rem);
   font-weight: 800;
@@ -493,9 +540,59 @@
 }
 
 .mhp-popular-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.76rem;
   color: #64748b;
   font-weight: 600;
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .mhp-popular-meta {
+  color: #94a3b8;
+}
+
+.mhp-popular-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .mhp-popular-stat {
+  color: #94a3b8;
+}
+
+.mhp-popular-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .mhp-popular-like-btn {
+  color: #94a3b8;
+}
+
+.mhp-popular-like-btn:hover {
+  color: #ef4444;
+}
+
+.mhp-popular-like-btn.active {
+  color: #ef4444;
+}
+
+.mhp-popular-like-btn.active .mhp-like-icon {
+  fill: #ef4444;
+  color: #ef4444;
 }
 
 /* ── Category Cards Row ── */
