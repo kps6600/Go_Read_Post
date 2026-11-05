@@ -283,7 +283,7 @@ export default function ModernHomepageView({
 
     // Mode B: Static Headline Banner
     if (data.heroSource === 'static') {
-      return [{
+      const headlineSlide = {
         id: 'static-hero-slide',
         title: data.headline || data.title || data.heading || 'Stories That Matter in Startups, Technology & Capital',
         excerpt: data.subheadline || data.subtitle || data.description || 'Unfiltered founder playbooks, deep tech breakthroughs, and market movements.',
@@ -296,7 +296,9 @@ export default function ModernHomepageView({
         primaryBtnText: data.primaryBtnText || data.buttonText || 'Read More',
         link: data.primaryBtnUrl || data.buttonUrl || '/latest',
         isCustom: true
-      }];
+      };
+      const extraStories = pool.filter(p => p.title !== headlineSlide.title).slice(0, 4);
+      return [headlineSlide, ...extraStories];
     }
 
     // Mode C: Dynamic Editorial Feed
@@ -798,9 +800,9 @@ export default function ModernHomepageView({
         }));
       }
 
-      // Mode B: Static Headline Banner or explicit headline / image
-      if (data.heroSource === 'static' || data.headline || data.bgImage) {
-        return [{
+      // Mode B: Static Headline Banner (ONLY if explicitly set to 'static')
+      if (data.heroSource === 'static') {
+        const headlineSlide = {
           id: `static-hero-slide-${sec.id || 'main'}`,
           title: data.headline || data.title || data.heading || 'Stories That Matter in Startups, Technology & Capital',
           excerpt: data.subheadline || data.subtitle || data.description || 'Unfiltered founder playbooks, deep tech breakthroughs, and market movements.',
@@ -813,7 +815,9 @@ export default function ModernHomepageView({
           primaryBtnText: data.primaryBtnText || data.buttonText || 'Read More',
           link: data.primaryBtnUrl || data.buttonUrl || '/latest',
           isCustom: true
-        }];
+        };
+        const extraStories = pool.filter(p => p.title !== headlineSlide.title).slice(0, 4);
+        return [headlineSlide, ...extraStories];
       }
 
       // Mode C: Dynamic Editorial Feed
@@ -830,7 +834,7 @@ export default function ModernHomepageView({
       );
       if (featured.length >= 3) return featured.slice(0, maxSlides);
       const combined = [...featured, ...sourcePool.filter(s => !featured.some(f => getStoryId(f) === getStoryId(s)))];
-      return combined.slice(0, maxSlides);
+      return combined.length > 0 ? combined.slice(0, maxSlides) : pool.slice(0, maxSlides);
     }, [data, sec.id]);
 
     // Autoplay rotation for this specific hero section
@@ -1036,8 +1040,8 @@ export default function ModernHomepageView({
             </div>
           </div>
 
-          {slides.length > 1 && (
-            <div className="mhp-slider-nav">
+          <div className="mhp-slider-nav">
+            {slides.length > 1 && (
               <div className="mhp-slider-dots">
                 {slides.map((_, idx) => (
                   <span 
@@ -1047,22 +1051,24 @@ export default function ModernHomepageView({
                   />
                 ))}
               </div>
-              <button 
-                className="mhp-slider-btn" 
-                onClick={handlePrevSlide}
-                aria-label="Previous slide"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button 
-                className="mhp-slider-btn" 
-                onClick={handleNextSlide}
-                aria-label="Next slide"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
+            )}
+            <button 
+              className="mhp-slider-btn" 
+              onClick={handlePrevSlide}
+              aria-label="Previous slide"
+              title="Previous slide"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button 
+              className="mhp-slider-btn" 
+              onClick={handleNextSlide}
+              aria-label="Next slide"
+              title="Next slide"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
 
         {showPopular && (

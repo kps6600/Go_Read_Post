@@ -60,16 +60,16 @@ export default function StoriesGrid({
             <span>{stories.length} {stories.length === 1 ? 'Story' : 'Stories'}</span>
           </div>
         </div>
- 
+
         <div className={`stories-editorial-grid ${stories.length === 4 ? 'grid-4-cols' : 'grid-3-cols'}`}>
           {stories.map((story) => {
             const storyId = story.id || story._id || story.slug;
             const saved = isSaved ? isSaved(storyId) : false;
-            const rawImage = story.image || 
-                             (typeof story.featuredImage === 'string' ? story.featuredImage : story.featuredImage?.url) ||
-                             story.heroImage || 
-                             story.coverImage ||
-                             story.fallbackImage;
+            const rawImage = story.image ||
+              (typeof story.featuredImage === 'string' ? story.featuredImage : story.featuredImage?.url) ||
+              story.heroImage ||
+              story.coverImage ||
+              story.fallbackImage;
             const fallback = (story.fallbackImage && typeof story.fallbackImage === 'string' && !story.fallbackImage.includes('undefined'))
               ? story.fallbackImage
               : DEFAULT_EDITORIAL_FALLBACK;
@@ -133,8 +133,8 @@ export default function StoriesGrid({
                         <Eye size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
                         <span>{viewsCount}</span>
                       </span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="editorial-stat-like-btn"
                         onClick={() => onClapStory && onClapStory(storyId)}
                         title="Like story"
@@ -143,18 +143,18 @@ export default function StoriesGrid({
                         <Heart size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
                         <span>{likesCount}</span>
                       </button>
-                      <button 
-                        className={`editorial-icon-btn${saved ? ' active' : ''}`} 
-                        onClick={() => onToggleSave(story)} 
-                        title={saved ? 'Remove bookmark' : 'Save article'} 
+                      <button
+                        className={`editorial-icon-btn${saved ? ' active' : ''}`}
+                        onClick={() => onToggleSave(story)}
+                        title={saved ? 'Remove bookmark' : 'Save article'}
                         aria-label="Save story"
                       >
                         <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
                       </button>
-                      <button 
-                        className="editorial-icon-btn" 
-                        onClick={() => onShareStory(story)} 
-                        title="Share article" 
+                      <button
+                        className="editorial-icon-btn"
+                        onClick={() => onShareStory(story)}
+                        title="Share article"
                         aria-label="Share story"
                       >
                         <Share2 size={15} />

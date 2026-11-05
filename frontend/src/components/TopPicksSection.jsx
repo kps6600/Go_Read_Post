@@ -18,14 +18,14 @@ const formatCompactNumber = (num) => {
 };
 import { TOP_PICKS } from '../data/storiesData';
 
-export default function TopPicksSection({ 
+export default function TopPicksSection({
   stories,
   title = 'Top Picks',
   subtitle,
-  onSelectStory, 
-  isSaved, 
-  onToggleSave, 
-  onShareStory 
+  onSelectStory,
+  isSaved,
+  onToggleSave,
+  onShareStory
 }) {
   const displayStories = (stories && stories.length >= 4)
     ? stories.slice(0, 4)
@@ -58,14 +58,14 @@ export default function TopPicksSection({
             const itemSummary = item.summary || item.excerpt || (item.content ? item.content.replace(/<[^>]+>/g, '').slice(0, 95) + '...' : '');
 
             return (
-              <article 
+              <article
                 key={itemId || index}
                 className="top-pick-card"
                 onClick={() => onSelectStory(item)}
               >
                 <div className="top-pick-media">
-                  <img 
-                    src={itemImg} 
+                  <img
+                    src={itemImg}
                     alt={item.title}
                     className="top-pick-img"
                     onError={(e) => {
@@ -112,7 +112,7 @@ export default function TopPicksSection({
                         <span>{likesCount}</span>
                       </span>
                       {onToggleSave && (
-                        <button 
+                        <button
                           className={`editorial-icon-btn${saved ? ' active' : ''}`}
                           onClick={() => onToggleSave(item)}
                           title={saved ? "Remove bookmark" : "Save story"}
@@ -122,7 +122,7 @@ export default function TopPicksSection({
                         </button>
                       )}
                       {onShareStory && (
-                        <button 
+                        <button
                           className="editorial-icon-btn"
                           onClick={() => onShareStory(item)}
                           title="Share story"
