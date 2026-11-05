@@ -1,9 +1,9 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Edit2, Trash2, Search, Check, Clock,
   ExternalLink, Layers, RefreshCw, X, CheckSquare,
   AlertTriangle, AlertCircle, EyeOff, 
-  ArrowUpDown, Filter, ChevronDown, CheckCircle, FileText,
+  ArrowUpDown, Filter, ChevronDown, ChevronLeft, ChevronRight, CheckCircle, FileText,
   Sparkles, Image as ImageIcon, Link2, Globe
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
@@ -359,6 +359,13 @@ export default function AdminCategoriesView({ onShowToast }) {
     return result;
   }, [categories, search, statusFilter, parentFilter, sortBy]);
 
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / pageSize));
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredAndSorted.slice(startIndex, startIndex + pageSize);
+  }, [filteredAndSorted, currentPage, pageSize]);
+
   return (
     <div className="admin-page-container">
 
@@ -472,27 +479,32 @@ export default function AdminCategoriesView({ onShowToast }) {
           )}
         </div>
 
-        {/* Filter & Sort Popover Button */}
-        <div ref={filterRef} style={{ position: 'relative' }}>
-          <button
-            type="button"
-            onClick={() => setIsFilterOpen(prev => !prev)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '0.55rem 0.95rem',
-              borderRadius: '9px',
-              border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
-              background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
-              color: activeFilterCount > 0 ? '#dc2626' : '#334155',
-              fontSize: '0.86rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title="Filter and sort categories"
-          >
+        {/* Right Actions: Filter & Add Category in ONE Line */}
+        <div className="abv-toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          {/* Filter & Sort Popover Button */}
+          <div ref={filterRef} style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }}>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '0.55rem 0.95rem',
+                borderRadius: '9px',
+                border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
+                background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
+                color: activeFilterCount > 0 ? '#dc2626' : '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                width: '100%',
+                whiteSpace: 'nowrap'
+              }}
+              title="Filter and sort categories"
+            >
             <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
             <span>Filter</span>
             {activeFilterCount > 0 && (
@@ -628,34 +640,38 @@ export default function AdminCategoriesView({ onShowToast }) {
           )}
         </div>
 
-        {/* + Add Category Button */}
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0.55rem 1.25rem',
-            backgroundColor: 'var(--brand-primary, #dc2626)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '9px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
-            transition: 'transform 0.15s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <span>+ Add Category</span>
-        </button>
+          {/* + Add Category Button */}
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '0.55rem 1.15rem',
+              backgroundColor: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '9px',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+              transition: 'transform 0.15s ease',
+              whiteSpace: 'nowrap',
+              flex: '1 1 auto',
+              minWidth: 0
+            }}
+          >
+            <span>+ Add Category</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Sub-Header Bar: Select All, Bulk Actions & Count ── */}
-      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+        <div className="abv-cards-header-left">
           <label className="abv-select-all-label" title="Select all categories">
             <input
               type="checkbox"
@@ -673,24 +689,14 @@ export default function AdminCategoriesView({ onShowToast }) {
           </label>
           {selectedIds.size > 0 && (
             <span className="abv-selected-pill">
-              {selectedIds.size} of {filteredAndSorted.length} selected
+              {selectedIds.size} selected
             </span>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {selectedIds.size > 0 && (
+        <div className="abv-cards-header-right">
+          {selectedIds.size > 0 ? (
             <div className="abv-bulk-actions-group">
-              <button
-                type="button"
-                onClick={() => handleBulkStatus(false)}
-                disabled={bulkProcessing}
-                className="abv-bulk-btn abv-bulk-btn-draft"
-                title="Set selected categories to inactive"
-              >
-                <Clock size={14} />
-                <span>Send Draft</span>
-              </button>
               <button
                 type="button"
                 onClick={handleBulkDelete}
@@ -702,15 +708,16 @@ export default function AdminCategoriesView({ onShowToast }) {
                 <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
               </button>
             </div>
+          ) : (
+            <div className="abv-cards-count-badge">
+              <span>
+                {statusFilter === 'active' && 'Active: '}
+                {statusFilter === 'inactive' && 'Inactive: '}
+                {statusFilter === 'all' && 'All: '}
+                {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'category' : 'categories'}
+              </span>
+            </div>
           )}
-          <div className="abv-cards-count-badge">
-            <span>
-              {statusFilter === 'active' && 'Active: '}
-              {statusFilter === 'inactive' && 'Inactive: '}
-              {statusFilter === 'all' && 'All Posts: '}
-              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'article' : 'articles'}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -790,7 +797,7 @@ export default function AdminCategoriesView({ onShowToast }) {
                   </td>
                 </tr>
               ) : (
-                filteredAndSorted.map((cat) => {
+                paginatedCategories.map((cat) => {
                   const id = cat._id || cat.slug;
                   const isSelected = selectedIds.has(id);
                   const parentName = typeof cat.parentId === 'object' && cat.parentId?.name 
@@ -1004,7 +1011,87 @@ export default function AdminCategoriesView({ onShowToast }) {
           </table>
         </div>
 
+        {/* ── Table Footer & Modern Pagination ── */}
+        <div className="abv-pagination-bar" style={{ borderTop: '1px solid #e2e8f0', borderRadius: '0 0 14px 14px', background: '#f8fafc' }}>
+          <div className="abv-pagination-left">
+            <div className="abv-pagination-info">
+              Showing{' '}
+              <span className="abv-pg-bold">
+                {filteredAndSorted.length > 0 ? ((currentPage - 1) * pageSize + 1) : 0}–{Math.min(currentPage * pageSize, filteredAndSorted.length)}
+              </span>{' '}
+              of <span className="abv-pg-bold">{filteredAndSorted.length}</span> categories
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="abv-pagination-actions">
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Previous Page"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="abv-page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 || 
+                      page === totalPages || 
+                      Math.abs(page - currentPage) <= 1 ||
+                      (currentPage <= 3 && page <= 4) ||
+                      (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                    );
+                  })
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) {
+                      acc.push(`ellipsis-${page}`);
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map(item => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="abv-page-ellipsis">…</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentPage(item);
+                          window.scrollTo({ top: 180, behavior: 'smooth' });
+                        }}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Next Page"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
+      </div>
 
       {/* ── CREATE / EDIT CATEGORY MODAL ── */}
       {isModalOpen && (
@@ -1035,7 +1122,7 @@ export default function AdminCategoriesView({ onShowToast }) {
           }}>
             {/* Modal Header */}
             <div style={{
-              padding: '1.25rem 1.5rem',
+              padding: '1rem clamp(1rem, 3vw, 1.5rem)',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
@@ -1043,7 +1130,7 @@ export default function AdminCategoriesView({ onShowToast }) {
               background: '#f8fafc'
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingCategory ? `Edit Category: ${editingCategory.name}` : 'Create New Category'}
                 </h3>
               </div>
@@ -1064,7 +1151,7 @@ export default function AdminCategoriesView({ onShowToast }) {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSave} style={{ overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSave} style={{ overflowY: 'auto', padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
               {formErrors.submit && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1074,7 +1161,7 @@ export default function AdminCategoriesView({ onShowToast }) {
               )}
 
               {/* Row 1: Name and Slug */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
                     Category Name *
@@ -1215,20 +1302,23 @@ export default function AdminCategoriesView({ onShowToast }) {
                 justifyContent: 'flex-end',
                 gap: '0.75rem',
                 paddingTop: '0.75rem',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid #e2e8f0',
+                flexWrap: 'nowrap'
               }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: '0.65rem 1.25rem',
+                    height: '38px',
+                    padding: '0 1.25rem',
                     background: '#f1f5f9',
                     border: '1px solid #cbd5e1',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
-                    fontWeight: 600,
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
                     color: '#475569',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   Cancel
@@ -1237,15 +1327,17 @@ export default function AdminCategoriesView({ onShowToast }) {
                   type="submit"
                   disabled={saving}
                   style={{
-                    padding: '0.65rem 1.5rem',
+                    height: '38px',
+                    padding: '0 1.5rem',
                     background: 'var(--brand-primary, #dc2626)',
                     border: 'none',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
+                    fontSize: '0.84rem',
                     fontWeight: 700,
                     color: '#ffffff',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {saving ? 'Saving...' : editingCategory ? 'Save Changes' : 'Create Category'}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, Eye, AlertCircle, Sparkles, Layers, FileText, Users, Heart, RefreshCw, TrendingUp
+  Eye, AlertCircle, Layers, Heart, TrendingUp
 } from 'lucide-react';
 import { AnalyticsService } from '../../services/analyticsService';
 import './AdminAnalyticsView.css';
@@ -15,6 +15,17 @@ const CATEGORY_ACCENTS = {
   'SocialStory': '#10b981',
   'YS हिंदी': '#ea580c',
   'FinTech': '#059669'
+};
+
+const formatK = (num) => {
+  if (!num || num <= 0) return '0';
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return num.toLocaleString();
 };
 
 export default function AdminAnalyticsView() {
@@ -54,55 +65,22 @@ export default function AdminAnalyticsView() {
 
   return (
     <div className="anv-container">
-      {/* Overview Header Card */}
-      <div className="anv-header-card">
-        <div className="anv-header-left">
-          <h2 className="anv-page-title">
-            <BarChart3 size={20} color="#dc2626" />
-            <span>Readership & Analytics</span>
-          </h2>
-          <p className="anv-page-subtitle">Real-time reader volume, catalog distribution, and content engagement.</p>
-        </div>
-        <div className="anv-header-actions">
-          <div className="anv-live-badge">
-            <span className="anv-pulse-dot" />
-            <span>Live Data</span>
-          </div>
-          <button 
-            type="button" 
-            className="anv-refresh-btn" 
-            onClick={loadAnalytics}
-            disabled={loading}
-            title="Refresh Analytics"
-          >
-            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </button>
-        </div>
-      </div>
-
       {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Primary KPI Cards Grid (Balanced 2-col on Mobile, 5-col on Desktop) */}
+      {/* Primary KPI Cards Grid */}
       <div className="anv-kpi-grid">
         {/* 1. Total Views */}
         <div className="anv-kpi-card">
           <div className="anv-kpi-top">
             <span className="anv-kpi-label">TOTAL READS</span>
-            <div className="anv-kpi-icon-pill anv-kpi-icon-blue">
-              <Eye size={15} />
-            </div>
           </div>
           <div className="anv-kpi-value">
             {(metrics.totalViews || 0).toLocaleString()}
-          </div>
-          <div className="anv-kpi-footer">
-            <span>avg ~{metrics.avgViewsPerArticle || 0} / story</span>
           </div>
         </div>
 
@@ -110,15 +88,9 @@ export default function AdminAnalyticsView() {
         <div className="anv-kpi-card">
           <div className="anv-kpi-top">
             <span className="anv-kpi-label">ARTICLES</span>
-            <div className="anv-kpi-icon-pill anv-kpi-icon-emerald">
-              <FileText size={15} />
-            </div>
           </div>
           <div className="anv-kpi-value">
             {metrics.totalArticles || 0}
-          </div>
-          <div className="anv-kpi-footer">
-            <span>{metrics.publishedCount || 0} published stories</span>
           </div>
         </div>
 
@@ -126,15 +98,9 @@ export default function AdminAnalyticsView() {
         <div className="anv-kpi-card">
           <div className="anv-kpi-top">
             <span className="anv-kpi-label">AUTHORS</span>
-            <div className="anv-kpi-icon-pill anv-kpi-icon-purple">
-              <Users size={15} />
-            </div>
           </div>
           <div className="anv-kpi-value">
             {metrics.totalAuthors || 0}
-          </div>
-          <div className="anv-kpi-footer">
-            <span>verified contributors</span>
           </div>
         </div>
 
@@ -142,15 +108,9 @@ export default function AdminAnalyticsView() {
         <div className="anv-kpi-card">
           <div className="anv-kpi-top">
             <span className="anv-kpi-label">CATEGORIES</span>
-            <div className="anv-kpi-icon-pill anv-kpi-icon-amber">
-              <Layers size={15} />
-            </div>
           </div>
           <div className="anv-kpi-value">
             {metrics.totalCategories || 0}
-          </div>
-          <div className="anv-kpi-footer">
-            <span>editorial verticals</span>
           </div>
         </div>
 
@@ -158,15 +118,9 @@ export default function AdminAnalyticsView() {
         <div className="anv-kpi-card">
           <div className="anv-kpi-top">
             <span className="anv-kpi-label">TOTAL ENGAGEMENT</span>
-            <div className="anv-kpi-icon-pill anv-kpi-icon-rose">
-              <Heart size={15} />
-            </div>
           </div>
           <div className="anv-kpi-value">
             {(metrics.totalClaps || 0).toLocaleString()}
-          </div>
-          <div className="anv-kpi-footer">
-            <span>reader claps & reactions</span>
           </div>
         </div>
       </div>
@@ -195,46 +149,42 @@ export default function AdminAnalyticsView() {
                 
                 return (
                   <div key={art._id || idx} className="anv-article-row">
-                    <div className="anv-article-top-row">
+                    <div className="anv-article-main">
                       <span className={`anv-rank-badge ${rankClass}`}>#{idx + 1}</span>
-                      <span className="anv-views-chip">
-                        <Eye size={12} />
-                        {(art.views || 0).toLocaleString()}
-                      </span>
+                      <a 
+                        href={`/article/${art.slug}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="anv-article-title-link"
+                        title={art.title}
+                      >
+                        {art.title}
+                      </a>
                     </div>
 
-                    <a 
-                      href={`/article/${art.slug}`} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="anv-article-title-link"
-                      title={art.title}
-                    >
-                      {art.title}
-                    </a>
-
-                    <div className="anv-article-meta-row">
-                      <span 
-                        className="anv-cat-chip"
-                        style={{
-                          color: catColor,
-                          background: `${catColor}14`,
-                          border: `1px solid ${catColor}30`
-                        }}
-                      >
-                        {art.categoryName || 'Startups'}
-                      </span>
-                      <span className="anv-dot-sep">•</span>
-                      <span>{art.authorName || 'Editorial Desk'}</span>
-                      {art.claps > 0 && (
-                        <>
-                          <span className="anv-dot-sep">•</span>
+                    <div className="anv-article-footer-row">
+                      <div className="anv-article-meta-left">
+                        <span 
+                          className="anv-cat-chip"
+                          style={{
+                            color: catColor
+                          }}
+                        >
+                          {art.categoryName || 'Startups'}
+                        </span>
+                        <span className="anv-author-name">{art.authorName || 'Editorial Desk'}</span>
+                        {art.claps > 0 && (
                           <span className="anv-claps-chip">
                             <Heart size={10} color="#e11d48" fill="#e11d48" />
-                            <span>{art.claps}</span>
+                            <span>{formatK(art.claps)}</span>
                           </span>
-                        </>
-                      )}
+                        )}
+                      </div>
+
+                      <div className="anv-article-views-right">
+                        <Eye size={12} />
+                        <span>{formatK(art.views || 0)}</span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -271,7 +221,7 @@ export default function AdminAnalyticsView() {
                         <span>{cat.name}</span>
                       </div>
                       <span className="anv-cat-views-badge" style={{ color: color }}>
-                        {(cat.views || 0).toLocaleString()} reads
+                        {formatK(cat.views || 0)} reads
                       </span>
                     </div>
 

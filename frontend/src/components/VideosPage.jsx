@@ -243,19 +243,42 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
             }}
           />
           <div className="vpage-stage-overlay">
-            <h1 className="vpage-stage-title">{heroVideo.title}</h1>
-            
-            <div className="vpage-stage-meta">
-              <span className="vpage-stage-guest">
-                <User size={13} style={{ display: 'inline', marginRight: '5px' }} />
-                {heroVideo.guest} {heroVideo.guestCompany ? `• ${heroVideo.guestCompany}` : ''}
+            {/* Spotlight Series Badge */}
+            <div className="vpage-stage-badge-wrap">
+              <span className="vpage-stage-badge">
+                <span className="vpage-live-dot" />
+                {heroVideo.series || 'Spotlight Episode'}
               </span>
-              <span className="vpage-meta-dot">•</span>
-              <span><Clock size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.duration}</span>
-              <span className="vpage-meta-dot">•</span>
-              <span><Eye size={13} style={{ display: 'inline', marginRight: '4px' }} />{heroVideo.views} views</span>
             </div>
 
+            {/* Episode Title */}
+            <h1 className="vpage-stage-title" onClick={() => handlePlayVideo(heroVideo)}>
+              {heroVideo.title}
+            </h1>
+            
+            {/* Guest & Meta Byline */}
+            <div className="vpage-stage-meta">
+              <div className="vpage-stage-guest-box">
+                <User size={13} className="vpage-stage-guest-icon" />
+                <span className="vpage-stage-guest-name">{heroVideo.guest}</span>
+                {heroVideo.guestCompany && (
+                  <span className="vpage-stage-company">• {heroVideo.guestCompany}</span>
+                )}
+              </div>
+              <div className="vpage-stage-stats-line">
+                <span className="vpage-meta-item">
+                  <Clock size={12} />
+                  <span>{heroVideo.duration}</span>
+                </span>
+                <span className="vpage-meta-dot">•</span>
+                <span className="vpage-meta-item">
+                  <Eye size={12} />
+                  <span>{heroVideo.views} views</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Actions Row: CTA Buttons on Left, Spotlight Tabs on Right */}
             <div className="vpage-stage-btn-row">
               <div className="vpage-stage-cta-group">
                 <button 
@@ -266,8 +289,8 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
                     handlePlayVideo(heroVideo);
                   }}
                 >
-                  <Play size={18} fill="#ffffff" color="#ffffff" style={{ marginLeft: '2px' }} />
-                  <span>Watch Episode Now</span>
+                  <Play size={16} fill="#ffffff" color="#ffffff" style={{ marginLeft: '2px' }} />
+                  <span>Watch Episode</span>
                 </button>
 
                 <button 
@@ -279,14 +302,12 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
                   }}
                   title={isSaved && isSaved(heroVideo.id || heroVideo._id) ? "Remove from bookmarks" : "Save video"}
                 >
-                  <Bookmark size={16} fill={isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'currentColor' : 'none'} />
+                  <Bookmark size={15} fill={isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'currentColor' : 'none'} />
                   <span>{isSaved && isSaved(heroVideo.id || heroVideo._id) ? 'Saved' : 'Save'}</span>
                 </button>
-
-
               </div>
 
-              {/* Auto sliding indicator dots without text */}
+              {/* Spotlight sliding indicator dots */}
               <div className="vpage-spotlight-tabs" onClick={(e) => e.stopPropagation()}>
                 {spotlightVideos.map((vid, idx) => (
                   <button

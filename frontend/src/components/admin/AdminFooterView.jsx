@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Layers, Save, RefreshCw, AlertCircle, Plus, Trash2, Globe, Shield, 
   Share2, MessageSquare, Send, CheckCircle, ArrowUpRight,
   ExternalLink, Sparkles, MoveUp, MoveDown, Compass, HeartHandshake, 
-  ArrowLeft, ArrowRight, Tag, Rss
+  ArrowLeft, ArrowRight, Tag, Rss,
+  Filter, ChevronDown, Check
 } from 'lucide-react';
 import { FooterService } from '../../services/footerService';
 
@@ -117,6 +118,20 @@ export default function AdminFooterView({ onShowToast }) {
 
   const [activeTab, setActiveTab] = useState('columns');
   const [columnFilter, setColumnFilter] = useState('all');
+  const [isColumnFilterOpen, setIsColumnFilterOpen] = useState(false);
+  const columnFilterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (columnFilterRef.current && !columnFilterRef.current.contains(e.target)) {
+        setIsColumnFilterOpen(false);
+      }
+    };
+    if (isColumnFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isColumnFilterOpen]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -362,7 +377,7 @@ export default function AdminFooterView({ onShowToast }) {
   }
 
   return (
-    <div className="afv-container" style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div className="afv-container" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', boxSizing: 'border-box', padding: '0 0 3.5rem 0' }}>
       
 
       {error && (
@@ -384,10 +399,10 @@ export default function AdminFooterView({ onShowToast }) {
       )}
 
       {/* TAB NAVIGATION */}
-      <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--border-color, #e2e8f0)', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="afv-tabs-nav">
         {[
-          { id: 'columns', label: 'Navigation Columns', icon: Globe },
-          { id: 'brand', label: 'Brand & Mission Manifesto', icon: Layers },
+          { id: 'columns', label: 'Nav Columns', icon: Globe },
+          { id: 'brand', label: 'Brand & Mission', icon: Layers },
           { id: 'social', label: 'Social Networks', icon: Share2 },
           { id: 'bottom', label: 'Bottom Bar & Meta', icon: Shield }
         ].map(tab => {
@@ -397,22 +412,10 @@ export default function AdminFooterView({ onShowToast }) {
             <button
               key={tab.id}
               type="button"
+              className={`afv-tab-btn ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '11px 18px',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                fontWeight: isActive ? '750' : '600',
-                color: isActive ? 'var(--brand-primary, #ea580c)' : 'var(--text-secondary, #64748b)',
-                borderBottom: isActive ? '2px solid var(--brand-primary, #ea580c)' : '2px solid transparent',
-                fontSize: '0.9rem',
-                transition: 'all 0.15s ease'
-              }}
             >
+              <Icon size={16} />
               <span>{tab.label}</span>
             </button>
           );
@@ -425,110 +428,294 @@ export default function AdminFooterView({ onShowToast }) {
           
           {/* Quick Column Filter Bar & Add Column */}
           {footer.columns.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', background: 'var(--card-bg, #ffffff)', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border-color, #e2e8f0)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b' }}>Quick Filter:</span>
-              <button
-                type="button"
-                onClick={() => setColumnFilter('all')}
-                style={{
-                  padding: '4px 12px',
-                  borderRadius: '16px',
-                  fontSize: '0.78rem',
-                  fontWeight: columnFilter === 'all' ? 700 : 500,
-                  background: columnFilter === 'all' ? 'var(--brand-primary, #ea580c)' : '#f1f5f9',
-                  color: columnFilter === 'all' ? '#ffffff' : '#475569',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                All Columns ({footer.columns.length})
-              </button>
-              {footer.columns.map((c, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setColumnFilter(idx)}
-                  style={{
-                    padding: '4px 12px',
-                    borderRadius: '16px',
-                    fontSize: '0.78rem',
-                    fontWeight: columnFilter === idx ? 700 : 500,
-                    background: columnFilter === idx ? 'var(--brand-primary, #ea580c)' : '#f1f5f9',
-                    color: columnFilter === idx ? '#ffffff' : '#475569',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {c.title || `Column ${idx + 1}`} ({c.links?.length || 0})
-                </button>
-              ))}
-              </div>
+            <>
+              {/* ── Toolbar: Filter & Actions in ONE LINE ── */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '6px',
+                flexWrap: 'nowrap',
+                background: 'var(--card-bg, #ffffff)',
+                padding: '0.65rem 0.85rem',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color, #e2e8f0)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                width: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box'
+              }}>
+                {/* Left: Column Filter Dropdown */}
+                <div ref={columnFilterRef} style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsColumnFilterOpen(!isColumnFilterOpen)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      padding: '0.55rem 0.65rem',
+                      background: columnFilter !== 'all' ? '#fff1f2' : '#ffffff',
+                      color: columnFilter !== 'all' ? '#dc2626' : '#334155',
+                      border: `1px solid ${columnFilter !== 'all' ? '#dc2626' : '#cbd5e1'}`,
+                      borderRadius: '9px',
+                      fontWeight: 650,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      minWidth: 0
+                    }}
+                  >
+                    <Filter size={13} color={columnFilter !== 'all' ? '#dc2626' : '#64748b'} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {columnFilter === 'all'
+                        ? 'All Columns'
+                        : (footer.columns[columnFilter]?.title || `Column ${Number(columnFilter) + 1}`)}
+                    </span>
+                    {columnFilter !== 'all' && (
+                      <span style={{
+                        background: '#dc2626',
+                        color: '#ffffff',
+                        fontSize: '0.7rem',
+                        fontWeight: 750,
+                        borderRadius: '10px',
+                        padding: '1px 6px',
+                        lineHeight: 1.2
+                      }}>
+                        1
+                      </span>
+                    )}
+                    <ChevronDown
+                      size={14}
+                      style={{
+                        transform: isColumnFilterOpen ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.18s ease',
+                        color: columnFilter !== 'all' ? '#dc2626' : '#64748b'
+                      }}
+                    />
+                  </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={addColumn}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '7px 14px',
-                    background: '#0f172a',
-                    color: '#fff',
-                    borderRadius: '6px',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(15, 23, 42, 0.15)'
-                  }}
-                >
-                  <Plus size={14} />
-                  <span>Add Column</span>
-                </button>
+                  {isColumnFilterOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 'calc(100% + 8px)',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
+                      minWidth: '220px',
+                      maxWidth: '300px',
+                      zIndex: 60,
+                      padding: '8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '3px'
+                    }}>
+                      <div style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 750,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        color: '#94a3b8',
+                        padding: '5px 10px 4px'
+                      }}>
+                        Filter by Column
+                      </div>
 
-                <button 
-                  type="button" 
-                  onClick={handleSave}
-                  disabled={saving}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '7px 16px',
-                    background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    cursor: saving ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 1px 4px rgba(234, 88, 12, 0.25)',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {saving ? (
-                    <>
-                      <RefreshCw className="animate-spin" size={14} />
-                      <span>Saving...</span>
-                    </>
-                  ) : savedSuccess ? (
-                    <>
-                      <CheckCircle size={14} />
-                      <span>Saved!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save size={14} />
-                      <span>Save Footer Configuration</span>
-                    </>
+                      {/* All Columns Option */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setColumnFilter('all');
+                          setIsColumnFilterOpen(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '7px',
+                          border: 'none',
+                          background: columnFilter === 'all' ? '#fff1f2' : 'transparent',
+                          color: columnFilter === 'all' ? '#dc2626' : '#334155',
+                          fontSize: '0.84rem',
+                          fontWeight: columnFilter === 'all' ? 700 : 500,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'background 0.12s ease'
+                        }}
+                        onMouseEnter={e => {
+                          if (columnFilter !== 'all') e.currentTarget.style.background = '#f8fafc';
+                        }}
+                        onMouseLeave={e => {
+                          if (columnFilter !== 'all') e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <span>All Columns ({footer.columns.length})</span>
+                        {columnFilter === 'all' && <Check size={14} color="#dc2626" />}
+                      </button>
+
+                      <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }} />
+
+                      {/* Individual Columns */}
+                      {footer.columns.map((c, idx) => {
+                        const isSelected = columnFilter === idx;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setColumnFilter(idx);
+                              setIsColumnFilterOpen(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px',
+                              padding: '8px 10px',
+                              borderRadius: '7px',
+                              border: 'none',
+                              background: isSelected ? '#fff1f2' : 'transparent',
+                              color: isSelected ? '#dc2626' : '#334155',
+                              fontSize: '0.84rem',
+                              fontWeight: isSelected ? 700 : 500,
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'background 0.12s ease'
+                            }}
+                            onMouseEnter={e => {
+                              if (!isSelected) e.currentTarget.style.background = '#f8fafc';
+                            }}
+                            onMouseLeave={e => {
+                              if (!isSelected) e.currentTarget.style.background = 'transparent';
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {c.title || `Column ${idx + 1}`} ({c.links?.length || 0})
+                            </span>
+                            {isSelected && <Check size={14} color="#dc2626" style={{ flexShrink: 0 }} />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                </button>
+                </div>
+
+                {/* Right: Action Buttons in ONE Line */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={addColumn}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      padding: '0.55rem 0.8rem',
+                      background: '#0f172a',
+                      color: '#fff',
+                      borderRadius: '9px',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.15)',
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Plus size={14} />
+                    <span>Add Column</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      padding: '0.55rem 0.9rem',
+                      background: savedSuccess ? '#10b981' : 'var(--brand-primary, #dc2626)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '9px',
+                      fontWeight: 700,
+                      fontSize: '0.82rem',
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
+                    }}
+                  >
+                    {saving ? (
+                      <>
+                        <RefreshCw className="animate-spin" size={14} />
+                        <span>Saving...</span>
+                      </>
+                    ) : savedSuccess ? (
+                      <>
+                        <CheckCircle size={14} />
+                        <span>Saved!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={14} />
+                        <span>Save Footer</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
+
+              {/* ── Sub-Header Bar: Quick Filter Status & Counter Badge ── */}
+              <div className="abv-cards-header-bar" style={{ marginBottom: 0 }}>
+                <div className="abv-cards-header-left">
+                  {columnFilter !== 'all' ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                        Filtered: <strong style={{ color: '#0f172a' }}>{footer.columns[columnFilter]?.title || `Column ${Number(columnFilter) + 1}`}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setColumnFilter('all')}
+                        style={{
+                          background: '#f1f5f9',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '2px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#dc2626',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Clear Filter
+                      </button>
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                      Showing all footer columns
+                    </span>
+                  )}
+                </div>
+
+                <div className="abv-cards-header-right">
+                  <div className="abv-cards-count-badge">
+                    <span>{footer.columns.length} Columns • {footer.columns.reduce((acc, col) => acc + (col.links?.length || 0), 0)} Total Links</span>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Columns Grid */}
@@ -536,9 +723,11 @@ export default function AdminFooterView({ onShowToast }) {
             display: 'grid', 
             gridTemplateColumns: columnFilter !== 'all' 
               ? '1fr' 
-              : 'repeat(auto-fit, minmax(360px, 1fr))', 
+              : 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', 
             gap: '1.25rem',
-            alignItems: 'start'
+            alignItems: 'start',
+            width: '100%',
+            boxSizing: 'border-box'
           }}>
             {(columnFilter === 'all' || !footer.columns[columnFilter]
               ? footer.columns.map((col, idx) => ({ col, cIdx: idx }))
@@ -548,18 +737,31 @@ export default function AdminFooterView({ onShowToast }) {
                 key={cIdx} 
                 style={{
                   background: 'var(--card-bg, #ffffff)',
-                  padding: '1.2rem',
+                  padding: '1.1rem',
                   borderRadius: '12px',
                   border: '1px solid var(--border-color, #e2e8f0)',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px'
+                  gap: '12px',
+                  width: '100%',
+                  minWidth: 0,
+                  boxSizing: 'border-box'
                 }}
               >
-                {/* Column Header & Reorder Controls */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', borderBottom: '1px solid var(--border-color, #f1f5f9)', paddingBottom: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                {/* Column Header & Reorder Controls in ONE LINE */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  gap: '6px', 
+                  borderBottom: '1px solid var(--border-color, #f1f5f9)', 
+                  paddingBottom: '10px',
+                  flexWrap: 'nowrap',
+                  width: '100%',
+                  minWidth: 0
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                     <input
                       type="text"
                       value={col.title}
@@ -567,30 +769,32 @@ export default function AdminFooterView({ onShowToast }) {
                       placeholder="Column Title"
                       style={{
                         flex: 1,
+                        minWidth: 0,
                         fontWeight: 750,
-                        fontSize: '0.98rem',
+                        fontSize: '0.92rem',
                         border: '1px solid var(--border-color, #cbd5e1)',
                         borderRadius: '6px',
-                        padding: '6px 10px',
+                        padding: '5px 8px',
                         color: 'var(--text-primary)',
                         background: '#ffffff'
                       }}
                     />
                     <span style={{ 
-                      fontSize: '0.72rem', 
+                      fontSize: '0.7rem', 
                       background: '#f1f5f9', 
                       color: '#475569', 
-                      padding: '3px 8px', 
+                      padding: '3px 7px', 
                       borderRadius: '12px', 
                       fontWeight: 700,
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}>
                       {col.links?.length || 0} links
                     </span>
                   </div>
 
                   {/* Reorder & Delete Column Controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
                     <button
                       type="button"
                       onClick={() => moveColumn(cIdx, -1)}
@@ -599,13 +803,17 @@ export default function AdminFooterView({ onShowToast }) {
                         background: '#f8fafc', 
                         border: '1px solid #e2e8f0', 
                         borderRadius: '6px', 
-                        padding: '5px 7px', 
+                        padding: '5px 6px', 
                         cursor: cIdx === 0 ? 'not-allowed' : 'pointer', 
-                        color: cIdx === 0 ? '#cbd5e1' : '#475569' 
+                        color: cIdx === 0 ? '#cbd5e1' : '#475569',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}
                       title="Move Column Left"
                     >
-                      <ArrowLeft size={14} />
+                      <ArrowLeft size={13} />
                     </button>
                     <button
                       type="button"
@@ -615,13 +823,17 @@ export default function AdminFooterView({ onShowToast }) {
                         background: '#f8fafc', 
                         border: '1px solid #e2e8f0', 
                         borderRadius: '6px', 
-                        padding: '5px 7px', 
+                        padding: '5px 6px', 
                         cursor: cIdx === footer.columns.length - 1 ? 'not-allowed' : 'pointer', 
-                        color: cIdx === footer.columns.length - 1 ? '#cbd5e1' : '#475569' 
+                        color: cIdx === footer.columns.length - 1 ? '#cbd5e1' : '#475569',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}
                       title="Move Column Right"
                     >
-                      <ArrowRight size={14} />
+                      <ArrowRight size={13} />
                     </button>
                     <button
                       type="button"
@@ -631,12 +843,16 @@ export default function AdminFooterView({ onShowToast }) {
                         color: '#dc2626', 
                         border: '1px solid #fecaca', 
                         borderRadius: '6px', 
-                        padding: '5px 7px', 
-                        cursor: 'pointer' 
+                        padding: '5px 6px', 
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}
                       title="Delete Column"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
@@ -657,88 +873,109 @@ export default function AdminFooterView({ onShowToast }) {
                           gap: '6px',
                           background: '#ffffff',
                           border: '1px solid #e2e8f0',
-                          borderRadius: '6px',
+                          borderRadius: '8px',
                           padding: '6px 8px',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          flexWrap: 'wrap',
+                          width: '100%',
+                          minWidth: 0,
+                          boxSizing: 'border-box'
                         }}
                       >
-                        {/* Index Number */}
-                        <span style={{ 
-                          fontSize: '0.72rem', 
-                          fontWeight: 700, 
-                          color: '#64748b', 
-                          background: '#f1f5f9', 
-                          borderRadius: '4px', 
-                          padding: '3px 6px',
-                          minWidth: '20px',
-                          textAlign: 'center',
-                          userSelect: 'none',
-                          flexShrink: 0
+                        {/* Left Group: Index, Label, URL */}
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          flex: '1 1 190px', 
+                          minWidth: 0 
                         }}>
-                          {lIdx + 1}
-                        </span>
+                          {/* Index Number */}
+                          <span style={{ 
+                            fontSize: '0.72rem', 
+                            fontWeight: 700, 
+                            color: '#64748b', 
+                            background: '#f1f5f9', 
+                            borderRadius: '4px', 
+                            padding: '3px 6px',
+                            minWidth: '20px',
+                            textAlign: 'center',
+                            userSelect: 'none',
+                            flexShrink: 0
+                          }}>
+                            {lIdx + 1}
+                          </span>
 
-                        {/* Name (Link Label) */}
-                        <input
-                          type="text"
-                          placeholder="Name"
-                          value={lnk.label}
-                          onChange={e => updateColumnLink(cIdx, lIdx, 'label', e.target.value)}
-                          style={{
-                            flex: 1.2,
-                            minWidth: 0,
-                            padding: '6px 8px',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '5px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
-                            background: '#ffffff',
-                            color: 'var(--text-primary)'
-                          }}
-                          title="Link Name"
-                        />
+                          {/* Name (Link Label) */}
+                          <input
+                            type="text"
+                            placeholder="Name"
+                            value={lnk.label}
+                            onChange={e => updateColumnLink(cIdx, lIdx, 'label', e.target.value)}
+                            style={{
+                              flex: 1.1,
+                              minWidth: 0,
+                              padding: '5px 8px',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '5px',
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              background: '#ffffff',
+                              color: 'var(--text-primary)'
+                            }}
+                            title="Link Name"
+                          />
 
-                        {/* Slug (URL) */}
-                        <input
-                          type="text"
-                          placeholder="Slug / URL"
-                          value={lnk.url}
-                          onChange={e => updateColumnLink(cIdx, lIdx, 'url', e.target.value)}
-                          style={{
-                            flex: 1,
-                            minWidth: 0,
-                            padding: '6px 8px',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '5px',
-                            fontSize: '0.8rem',
-                            background: '#ffffff',
-                            color: '#2563eb',
-                            fontFamily: 'monospace'
-                          }}
-                          title="Slug / URL"
-                        />
+                          {/* Slug (URL) */}
+                          <input
+                            type="text"
+                            placeholder="Slug / URL"
+                            value={lnk.url}
+                            onChange={e => updateColumnLink(cIdx, lIdx, 'url', e.target.value)}
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              padding: '5px 8px',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '5px',
+                              fontSize: '0.8rem',
+                              background: '#ffffff',
+                              color: '#2563eb',
+                              fontFamily: 'monospace'
+                            }}
+                            title="Slug / URL"
+                          />
+                        </div>
 
-                        {/* Badge text & Color */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                        {/* Right Group: Badge, Color, Preview & Delete */}
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '5px', 
+                          flexShrink: 0,
+                          marginLeft: 'auto'
+                        }}>
+                          {/* Badge text */}
                           <input
                             type="text"
                             placeholder="Badge"
                             value={lnk.badge || ''}
                             onChange={e => updateColumnLink(cIdx, lIdx, 'badge', e.target.value)}
                             style={{
-                              width: '56px',
-                              padding: '5px 4px',
+                              width: '52px',
+                              padding: '4px 4px',
                               border: '1px solid #cbd5e1',
                               borderRadius: '4px',
                               fontSize: '0.72rem',
-                              fontWeight: 700,
+                              fontWeight: 750,
                               background: '#ffffff',
                               color: '#334155',
                               textAlign: 'center'
                             }}
-                            title="Badge text (optional, e.g. HOT)"
+                            title="Badge text (optional, e.g. LIVE)"
                           />
 
+                          {/* Badge Color Picker */}
                           <input
                             type="color"
                             value={lnk.badgeColor || '#dc2626'}
@@ -756,6 +993,7 @@ export default function AdminFooterView({ onShowToast }) {
                             title="Badge Color"
                           />
 
+                          {/* Preview Pill */}
                           {Boolean(lnk.badge) && (
                             <span style={{
                               display: 'inline-block',
@@ -766,35 +1004,46 @@ export default function AdminFooterView({ onShowToast }) {
                               fontSize: '0.62rem',
                               fontWeight: 800,
                               textTransform: 'uppercase',
-                              flexShrink: 0
+                              flexShrink: 0,
+                              maxWidth: '52px',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
                             }}>
                               {lnk.badge}
                             </span>
                           )}
-                        </div>
 
-                        {/* Delete Button */}
-                        <button
-                          type="button"
-                          onClick={() => removeColumnLink(cIdx, lIdx)}
-                          style={{
-                            background: 'transparent',
-                            color: '#94a3b8',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            padding: '4px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                          onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
-                          title="Remove Link"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => removeColumnLink(cIdx, lIdx)}
+                            style={{
+                              background: '#fff1f2',
+                              color: '#dc2626',
+                              border: '1px solid #fecaca',
+                              borderRadius: '5px',
+                              cursor: 'pointer',
+                              padding: '4px 6px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.background = '#dc2626';
+                              e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.background = '#fff1f2';
+                              e.currentTarget.style.color = '#dc2626';
+                            }}
+                            title="Remove Link"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </div>
                     ))
                   )}
@@ -810,7 +1059,7 @@ export default function AdminFooterView({ onShowToast }) {
                     background: '#ffffff',
                     border: '1px dashed #cbd5e1',
                     borderRadius: '8px',
-                    color: 'var(--brand-primary, #ea580c)',
+                    color: 'var(--brand-primary, #dc2626)',
                     fontSize: '0.82rem',
                     cursor: 'pointer',
                     fontWeight: 700,
@@ -822,7 +1071,7 @@ export default function AdminFooterView({ onShowToast }) {
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.background = '#fff7ed';
-                    e.currentTarget.style.borderColor = 'var(--brand-primary, #ea580c)';
+                    e.currentTarget.style.borderColor = 'var(--brand-primary, #dc2626)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.background = '#ffffff';
@@ -840,9 +1089,30 @@ export default function AdminFooterView({ onShowToast }) {
 
       {/* TAB 2: BRAND, MISSION & CTA */}
       {activeTab === 'brand' && (
-        <div style={{ background: 'var(--card-bg, #ffffff)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>Brand &amp; Mission Manifesto</h3>
+        <div style={{ background: 'var(--card-bg, #ffffff)', padding: 'clamp(0.75rem, 2.5vw, 1.5rem)', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+            gap: '8px',
+            borderBottom: '1px solid #f1f5f9',
+            paddingBottom: '12px',
+            overflowX: 'auto',
+            maxWidth: '100%'
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: 'clamp(0.88rem, 3.2vw, 1.05rem)',
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              flexShrink: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              Brand &amp; Mission Manifesto
+            </h3>
             <button
               type="button"
               onClick={handleSave}
@@ -850,21 +1120,25 @@ export default function AdminFooterView({ onShowToast }) {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '7px 16px',
-                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
+                justifyContent: 'center',
+                gap: '5px',
+                height: '34px',
+                padding: '0 12px',
+                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #dc2626)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 fontWeight: 700,
-                fontSize: '0.82rem',
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
                 cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 1px 4px rgba(234, 88, 12, 0.25)',
+                boxShadow: '0 1px 4px rgba(220, 38, 38, 0.25)',
                 transition: 'all 0.15s ease'
               }}
             >
               {saving ? <RefreshCw className="animate-spin" size={13} /> : savedSuccess ? <CheckCircle size={13} /> : <Save size={13} />}
-              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer Configuration'}</span>
+              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer'}</span>
             </button>
           </div>
           <div>
@@ -903,70 +1177,39 @@ export default function AdminFooterView({ onShowToast }) {
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
             <div>
-              <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Official Social Networks &amp; Feeds
               </h3>
-              <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>
-                Add, customize, reorder, or delete social channel buttons displayed in the footer utility bar.
-              </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => addSocialLink('telegram')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 12px',
-                  background: '#0284c7',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <Plus size={14} />
-                <span>+ Telegram</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => addSocialLink('whatsapp')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 12px',
-                  background: '#16a34a',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <Plus size={14} />
-                <span>+ WhatsApp</span>
-              </button>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'nowrap',
+              overflowX: 'auto',
+              maxWidth: '100%',
+              paddingBottom: '2px'
+            }}>
               <button
                 type="button"
                 onClick={() => addSocialLink('custom')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 14px',
+                  gap: '5px',
+                  height: '36px',
+                  padding: '0 14px',
                   background: '#0f172a',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   fontSize: '0.8rem',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 <Plus size={14} />
@@ -981,20 +1224,23 @@ export default function AdminFooterView({ onShowToast }) {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '7px 16px',
-                  background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
+                  height: '36px',
+                  padding: '0 16px',
+                  background: savedSuccess ? '#10b981' : 'var(--brand-primary, #dc2626)',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   fontWeight: 700,
                   fontSize: '0.8rem',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   cursor: saving ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 1px 4px rgba(234, 88, 12, 0.25)',
+                  boxShadow: '0 1px 4px rgba(220, 38, 38, 0.25)',
                   transition: 'all 0.15s ease'
                 }}
               >
                 {saving ? <RefreshCw className="animate-spin" size={13} /> : savedSuccess ? <CheckCircle size={13} /> : <Save size={13} />}
-                <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer Configuration'}</span>
+                <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer'}</span>
               </button>
             </div>
           </div>
@@ -1008,7 +1254,7 @@ export default function AdminFooterView({ onShowToast }) {
               <button
                 type="button"
                 onClick={() => addSocialLink('twitter')}
-                style={{ padding: '7px 16px', background: 'var(--brand-primary, #ea580c)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}
+                style={{ padding: '7px 16px', background: 'var(--brand-primary, #dc2626)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}
               >
                 + Add Twitter / X
               </button>
@@ -1019,18 +1265,21 @@ export default function AdminFooterView({ onShowToast }) {
                 <div
                   key={idx}
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 200px 1fr auto auto',
-                    gap: '12px',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px',
                     alignItems: 'center',
                     background: '#f8fafc',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #e2e8f0'
+                    border: '1px solid #e2e8f0',
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box'
                   }}
                 >
                   {/* Reorder handles */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
                     <button
                       type="button"
                       disabled={idx === 0}
@@ -1052,7 +1301,7 @@ export default function AdminFooterView({ onShowToast }) {
                   </div>
 
                   {/* Platform dropdown */}
-                  <div>
+                  <div style={{ flex: '1 1 140px', minWidth: 0 }}>
                     <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', marginBottom: '2px' }}>Platform</label>
                     <select
                       value={item.platform || 'custom'}
@@ -1066,7 +1315,7 @@ export default function AdminFooterView({ onShowToast }) {
                   </div>
 
                   {/* Target URL */}
-                  <div>
+                  <div style={{ flex: '2 1 180px', minWidth: 0 }}>
                     <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', marginBottom: '2px' }}>Destination URL / Link</label>
                     <input
                       type="text"
@@ -1077,40 +1326,41 @@ export default function AdminFooterView({ onShowToast }) {
                     />
                   </div>
 
-                  {/* Test link */}
-                  {item.url && item.url.startsWith('http') ? (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Open link in new tab"
-                      style={{ color: '#64748b', padding: '6px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
+                  {/* Actions (Test link + Delete button) */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: 'auto' }}>
+                    {item.url && item.url.startsWith('http') ? (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open link in new tab"
+                        style={{ color: '#64748b', padding: '6px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center' }}
+                      >
+                        <ExternalLink size={14} />
+                      </a>
+                    ) : null}
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => removeSocialLink(idx)}
+                      title="Delete this social link"
+                      style={{
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '7px 10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
                     >
-                      <ExternalLink size={14} />
-                    </a>
-                  ) : <div style={{ width: '28px' }} />}
-
-                  {/* Delete button */}
-                  <button
-                    type="button"
-                    onClick={() => removeSocialLink(idx)}
-                    title="Delete this social link"
-                    style={{
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '7px 10px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1121,9 +1371,30 @@ export default function AdminFooterView({ onShowToast }) {
 
       {/* TAB 6: BOTTOM BAR & META */}
       {activeTab === 'bottom' && (
-        <div style={{ background: 'var(--card-bg, #ffffff)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>Bottom Bar &amp; Meta Notice</h3>
+        <div style={{ background: 'var(--card-bg, #ffffff)', padding: 'clamp(0.75rem, 2.5vw, 1.5rem)', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+            gap: '8px',
+            borderBottom: '1px solid #f1f5f9',
+            paddingBottom: '12px',
+            overflowX: 'auto',
+            maxWidth: '100%'
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: 'clamp(0.88rem, 3.2vw, 1.05rem)',
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              flexShrink: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              Bottom Bar &amp; Meta Notice
+            </h3>
             <button
               type="button"
               onClick={handleSave}
@@ -1131,21 +1402,25 @@ export default function AdminFooterView({ onShowToast }) {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '7px 16px',
-                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #ea580c)',
+                justifyContent: 'center',
+                gap: '5px',
+                height: '34px',
+                padding: '0 12px',
+                background: savedSuccess ? '#10b981' : 'var(--brand-primary, #dc2626)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 fontWeight: 700,
-                fontSize: '0.82rem',
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
                 cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 1px 4px rgba(234, 88, 12, 0.25)',
+                boxShadow: '0 1px 4px rgba(220, 38, 38, 0.25)',
                 transition: 'all 0.15s ease'
               }}
             >
               {saving ? <RefreshCw className="animate-spin" size={13} /> : savedSuccess ? <CheckCircle size={13} /> : <Save size={13} />}
-              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer Configuration'}</span>
+              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Footer'}</span>
             </button>
           </div>
           <div>

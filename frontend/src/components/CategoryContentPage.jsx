@@ -606,6 +606,15 @@ export default function CategoryContentPage({
             >
               <div className="cat-hero-overlay" />
               <div className="cat-hero-content">
+                {/* Category Spotlight Badge */}
+                <div className="cat-hero-badge-wrap">
+                  <span className="cat-hero-badge">
+                    <span className="cat-hero-badge-dot" />
+                    {heroCategory || categoryInfo.name}
+                  </span>
+                </div>
+
+                {/* Article Headline */}
                 <h1 
                   className="cat-hero-title"
                   onClick={() => handleCardClick(activeSlide)}
@@ -613,7 +622,8 @@ export default function CategoryContentPage({
                   {heroTitle}
                 </h1>
 
-                <div className="cat-author-meta">
+                {/* Author Card */}
+                <div className="cat-author-card">
                   <img 
                     src={heroAvatar} 
                     alt={heroAuthor} 
@@ -623,68 +633,79 @@ export default function CategoryContentPage({
                       e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
                     }}
                   />
-                  <span style={{ fontWeight: 700 }}>{heroAuthor}</span>
-                  <span className="cat-meta-sep">•</span>
-                  <span>{heroDate}</span>
-                  <span className="cat-meta-sep">•</span>
-                  <span>{heroReadTime}</span>
+                  <div className="cat-author-info">
+                    <span className="cat-author-name">{heroAuthor}</span>
+                    <div className="cat-author-meta-line">
+                      <span className="cat-meta-item">{heroDate}</span>
+                      <span className="cat-meta-sep">•</span>
+                      <span className="cat-meta-item">{heroReadTime}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="cat-hero-bottom-actions">
+                {/* Hero Footer: Action Buttons & Slider Navigation */}
+                <div className="cat-hero-footer">
+                  <div className="cat-hero-btns-group">
+                    <button 
+                      type="button"
+                      className="cat-hero-read-btn"
+                      onClick={() => handleCardClick(activeSlide)}
+                    >
+                      <span>{liveConfig?.heroBtnText || 'Read Story'}</span>
+                      <ArrowRight size={15} />
+                    </button>
 
-                  <button 
-                    className="cat-hero-read-btn"
-                    onClick={() => handleCardClick(activeSlide)}
-                  >
-                    <span>{liveConfig?.heroBtnText || 'Read More'}</span>
-                    <ArrowRight size={15} />
-                  </button>
+                    <button 
+                      type="button" 
+                      className={`cat-hero-save-btn ${isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onToggleSave) onToggleSave(activeSlide);
+                      }}
+                      title={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Remove from reading list" : "Save to read later"}
+                      aria-label="Save story"
+                    >
+                      <Bookmark size={15} fill={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "currentColor" : "none"} />
+                      <span>{isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Saved" : "Save"}</span>
+                    </button>
+                  </div>
 
-                  <button 
-                    type="button" 
-                    className={`cat-hero-save-btn ${isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onToggleSave) onToggleSave(activeSlide);
-                    }}
-                    title={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Remove from reading list" : "Save to read later"}
-                    aria-label="Save story"
-                  >
-                    <Bookmark size={15} fill={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "currentColor" : "none"} />
-                    <span>{isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Saved" : "Save"}</span>
-                  </button>
+                  {/* Slider Pagination Controls */}
+                  {heroSlides.length > 1 && (
+                    <div className="cat-slider-nav">
+                      <div className="cat-slider-dots">
+                        {heroSlides.map((_, idx) => (
+                          <button 
+                            type="button"
+                            key={idx}
+                            className={`cat-slider-dot ${idx === currentSlide ? 'active' : ''}`}
+                            onClick={() => setCurrentSlide(idx)}
+                            aria-label={`Go to slide ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                      <div className="cat-slider-arrows">
+                        <button 
+                          type="button"
+                          className="cat-slider-btn" 
+                          onClick={handlePrevSlide}
+                          aria-label="Previous slide"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button 
+                          type="button"
+                          className="cat-slider-btn" 
+                          onClick={handleNextSlide}
+                          aria-label="Next slide"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Slider Pagination Controls */}
-              {heroSlides.length > 1 && (
-                <div className="cat-slider-nav">
-                  <div className="cat-slider-dots">
-                    {heroSlides.map((_, idx) => (
-                      <span 
-                        key={idx}
-                        className={`cat-slider-dot ${idx === currentSlide ? 'active' : ''}`}
-                        onClick={() => setCurrentSlide(idx)}
-                        aria-label={`Go to slide ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                  <button 
-                    className="cat-slider-btn" 
-                    onClick={handlePrevSlide}
-                    aria-label="Previous slide"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button 
-                    className="cat-slider-btn" 
-                    onClick={handleNextSlide}
-                    aria-label="Next slide"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              )}
             </div>
           </section>
         ) : (

@@ -41,9 +41,10 @@ export default function AdminTopNavbar({
     if (currentPath === '/admin/testimonials') return 'Testimonials';
     if (currentPath === '/admin/media') return 'Media Library';
     if (currentPath === '/admin/navigation') return 'Navbar Menu Manager';
-    if (currentPath === '/admin/footer') return 'Footer Configuration';
+    if (currentPath === '/admin/footer') return 'Footer Settings';
     if (currentPath === '/admin/seo') return 'Global SEO & Metadata';
     if (currentPath === '/admin/settings') return 'Website Settings';
+    if (currentPath === '/admin/users' || currentPath === '/admin/roles') return 'User Management';
     return 'Admin Console';
   };
 

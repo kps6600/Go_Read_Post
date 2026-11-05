@@ -4,7 +4,7 @@ import {
   ArrowUpRight, Image as ImageIcon, Navigation, Settings, Search,
   RefreshCw, TrendingUp, Sparkles, Layers, ShieldCheck, BookOpen,
   Cpu, Heart, ShoppingBag, Building2, Languages, Rocket, Activity,
-  ChevronRight, Calendar, ExternalLink, Archive, FileEdit, RotateCcw,
+  Calendar, ExternalLink, Archive, FileEdit, RotateCcw,
   Tv, Mail, MessageSquare, Send
 } from 'lucide-react';
 import { PageService } from '../../services/pageService';
@@ -251,13 +251,6 @@ export default function AdminDashboardView({ onNavigate, onShowToast, siteSettin
         <div>
           <h2 className="adv-section-title">Content Categories &amp; Desks</h2>
         </div>
-        <button 
-          className="adv-link-btn" 
-          onClick={() => onNavigate('/admin/categories')}
-        >
-          <span>Manage Categories ({categories.length})</span>
-          <ChevronRight size={14} />
-        </button>
       </div>
 
       {/* Dynamic Database Categories Grid */}

@@ -23,7 +23,7 @@ export const FAKE_TOPICS_LIST = [
     articleCount: 7,
     isTrending: true,
     color: "#dc2626",
-    badge: "Hot"
+    badge: ""
   },
   {
     id: "top-dpi",

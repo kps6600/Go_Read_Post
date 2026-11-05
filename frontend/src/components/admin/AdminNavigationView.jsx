@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Plus, Edit2, Trash2, Eye, EyeOff, 
   ArrowUp, ArrowDown, RefreshCw, X, Link as LinkIcon,
   ChevronDown, ChevronUp, ExternalLink, Sparkles, Check,
   Search, Layers, Folder, FolderPlus, Copy, GripVertical,
   Info, Home, FileText, Database, Briefcase, Rocket,
-  Users, Mail, Video, TrendingUp, Compass, Cpu, Flame, Building2
+  Users, Mail, Video, TrendingUp, Compass, Cpu, Flame, Building2,
+  Filter
 } from 'lucide-react';
 import { NavigationService } from '../../services/navigationService';
 import { useNavigation } from '../../context/NavigationContext';
@@ -21,6 +22,22 @@ export default function AdminNavigationView({ onShowToast }) {
   // Search & Type Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
+
+  // Unified Filter Dropdown State
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen]);
 
   // Expanded Items set
   const [expandedIds, setExpandedIds] = useState(new Set());
@@ -584,99 +601,266 @@ export default function AdminNavigationView({ onShowToast }) {
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontFamily: 'inherit' }}>
       
-      {/* ── TOP FILTER & ACTION TOOLBAR ── */}
+      {/* ── Search, Filters & Controls Bar ── */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
         background: '#ffffff',
         padding: '0.85rem 1.15rem',
         borderRadius: '12px',
         border: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.85rem',
+        flexWrap: 'wrap',
         boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
       }}>
-        {/* Left: Search & Filter Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-          <div style={{ position: 'relative', minWidth: '220px', flex: '1 1 240px' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-            <input 
-              type="text"
-              placeholder="Search navbar items or URLs..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '6px 10px 6px 32px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.84rem',
-                outline: 'none',
-                background: '#ffffff'
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-            {['ALL', 'dropdown', 'link', 'category', 'topic', 'page'].map(tKey => (
-              <button
-                key={tKey}
-                type="button"
-                onClick={() => setTypeFilter(tKey)}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 650,
-                  border: '1px solid',
-                  borderColor: typeFilter === tKey ? 'var(--brand-primary, #ea580c)' : 'transparent',
-                  background: typeFilter === tKey ? 'rgba(234, 88, 12, 0.08)' : 'transparent',
-                  color: typeFilter === tKey ? 'var(--brand-primary, #ea580c)' : '#64748b',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {tKey === 'ALL' ? 'All Items' : (tKey.charAt(0).toUpperCase() + tKey.slice(1))}
-              </button>
-            ))}
-          </div>
+        {/* Search */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#f8fafc',
+          padding: '0.55rem 0.95rem',
+          borderRadius: '9px',
+          border: '1px solid #e2e8f0',
+          flex: '1 1 240px',
+          minWidth: '220px'
+        }}>
+          <Search size={16} color="#94a3b8" />
+          <input 
+            type="text" 
+            placeholder="Search navbar items or URLs..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              fontSize: '0.88rem',
+              background: 'transparent',
+              color: '#0f172a'
+            }}
+          />
+          {searchQuery && (
+            <button 
+              type="button" 
+              onClick={() => setSearchQuery('')}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px' }}
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
-        {/* Right: Counter & Add Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ 
-            fontSize: '0.78rem', 
-            fontWeight: 700, 
-            color: '#64748b', 
-            background: '#f8fafc', 
-            padding: '5px 12px', 
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            whiteSpace: 'nowrap'
-          }}>
-            {treeItems.length} Root Items • {flatItems.length} Total Links
-          </span>
+        {/* Right Controls Container: Filter & Add Navbar Item CTA in ONE Line */}
+        <div className="anv-toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          {/* Unified Filter Button & Popover */}
+          <div style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }} ref={filterRef}>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '0.55rem 0.95rem',
+                borderRadius: '9px',
+                border: typeFilter !== 'ALL' ? '1px solid #dc2626' : '1px solid #cbd5e1',
+                background: typeFilter !== 'ALL' ? '#fff1f2' : '#ffffff',
+                color: typeFilter !== 'ALL' ? '#dc2626' : '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                width: '100%',
+                whiteSpace: 'nowrap'
+              }}
+              title="Filter navigation items by type"
+            >
+              <Filter size={14} color={typeFilter !== 'ALL' ? '#dc2626' : '#64748b'} />
+              <span>
+                {typeFilter === 'ALL' 
+                  ? 'Filter' 
+                  : (typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1))}
+              </span>
+              {typeFilter !== 'ALL' && (
+                <span style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  fontSize: '0.7rem',
+                  fontWeight: 750,
+                  borderRadius: '10px',
+                  padding: '1px 6px',
+                  lineHeight: 1.2
+                }}>
+                  1
+                </span>
+              )}
+              <ChevronDown 
+                size={14} 
+                style={{
+                  transform: isFilterOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.18s ease',
+                  color: typeFilter !== 'ALL' ? '#dc2626' : '#64748b'
+                }} 
+              />
+            </button>
 
+            {isFilterOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 8px)',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
+                minWidth: '200px',
+                zIndex: 60,
+                padding: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3px'
+              }}>
+                <div style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 750,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  color: '#94a3b8',
+                  padding: '5px 10px 4px'
+                }}>
+                  Filter by Type
+                </div>
+                {[
+                  { key: 'ALL', label: 'All Items' },
+                  { key: 'dropdown', label: 'Dropdown' },
+                  { key: 'link', label: 'Simple Link' },
+                  { key: 'category', label: 'Category' },
+                  { key: 'topic', label: 'Topic' },
+                  { key: 'page', label: 'CMS Page' }
+                ].map(opt => {
+                  const isSelected = typeFilter === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => {
+                        setTypeFilter(opt.key);
+                        setIsFilterOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        borderRadius: '7px',
+                        border: 'none',
+                        background: isSelected ? '#fff1f2' : 'transparent',
+                        color: isSelected ? '#dc2626' : '#334155',
+                        fontSize: '0.84rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.12s ease'
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) e.currentTarget.style.background = '#f8fafc';
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <span>{opt.label}</span>
+                      {isSelected && <Check size={14} color="#dc2626" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* + Add Root Navbar Item CTA Button */}
           <button
             type="button"
-            onClick={loadNavigation}
-            title="Refresh navigation list"
+            onClick={() => handleOpenAdd(null, 'link')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '34px',
-              height: '34px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#475569',
-              cursor: 'pointer'
+              gap: '6px',
+              padding: '0.55rem 1.15rem',
+              backgroundColor: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '9px',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
+              flex: '1 1 auto',
+              minWidth: 0
             }}
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <Plus size={15} />
+            <span>Add Navbar Item</span>
           </button>
+        </div>
+      </div>
+
+      {/* ── Sub-Header Bar: Tree Expand/Collapse Controls & Counter Badge ── */}
+      <div className="abv-cards-header-bar" style={{ marginBottom: 0 }}>
+        <div className="abv-cards-header-left">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={() => setExpandedIds(new Set(treeItems.map(i => i._id)))}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '7px',
+                padding: '4px 10px',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                color: '#475569',
+                cursor: 'pointer',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+            >
+              Expand All
+            </button>
+            <button
+              type="button"
+              onClick={() => setExpandedIds(new Set())}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '7px',
+                padding: '4px 10px',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                color: '#475569',
+                cursor: 'pointer',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+            >
+              Collapse All
+            </button>
+          </div>
+        </div>
+
+        <div className="abv-cards-header-right">
+          <div className="abv-cards-count-badge">
+            <span>{treeItems.length} Root Items • {flatItems.length} Total Links</span>
+          </div>
         </div>
       </div>
 
@@ -1299,21 +1483,7 @@ export default function AdminNavigationView({ onShowToast }) {
           </div>
         )}
 
-        {/* ── STYLISH TIP BAR AT BOTTOM (EXACTLY MATCHING IMAGE) ── */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '12px 20px',
-          background: '#eff6ff',
-          borderTop: '1px solid #dbeafe',
-          color: '#1e40af',
-          fontSize: '0.82rem',
-          fontWeight: 600
-        }}>
-          <Info size={16} color="#2563eb" style={{ flexShrink: 0 }} />
-          <span>Tip: Click on the arrow icon on any menu to expand its submenus. Use the action buttons to edit, duplicate, or delete menu items.</span>
-        </div>
+
       </div>
 
       {/* ── ADD / EDIT MODAL ── */}
@@ -1355,7 +1525,7 @@ export default function AdminNavigationView({ onShowToast }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '1.1rem 1.35rem',
+              padding: '1rem clamp(1rem, 3vw, 1.5rem)',
               borderBottom: '1px solid #f1f5f9'
             }}>
               <div>
@@ -1391,7 +1561,7 @@ export default function AdminNavigationView({ onShowToast }) {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSaveItem} style={{ padding: '1.25rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSaveItem} style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
               {/* Parent Banner (Locked when adding child) */}
               {parentItem ? (
@@ -1673,14 +1843,16 @@ export default function AdminNavigationView({ onShowToast }) {
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: '8px 16px',
+                    height: '38px',
+                    padding: '0 16px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
                     background: '#ffffff',
                     color: '#475569',
                     fontSize: '0.84rem',
                     fontWeight: 650,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   Cancel
@@ -1690,10 +1862,12 @@ export default function AdminNavigationView({ onShowToast }) {
                   type="submit"
                   disabled={saving}
                   style={{
+                    height: '38px',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
-                    padding: '8px 20px',
+                    padding: '0 20px',
                     borderRadius: '8px',
                     border: 'none',
                     background: 'var(--brand-primary, #ea580c)',
@@ -1701,7 +1875,8 @@ export default function AdminNavigationView({ onShowToast }) {
                     fontSize: '0.84rem',
                     fontWeight: 700,
                     cursor: saving ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 1px 3px rgba(234, 88, 12, 0.3)'
+                    boxShadow: '0 1px 3px rgba(234, 88, 12, 0.3)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {saving && <RefreshCw size={13} className="animate-spin" />}

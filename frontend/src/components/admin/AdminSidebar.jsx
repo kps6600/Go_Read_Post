@@ -129,47 +129,42 @@ export default function AdminSidebar({
         {/* Brand Header */}
         <div className="sidebar-brand-header">
           <div 
-            className="sidebar-brand-link" 
+            className="sidebar-brand-link" style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1, overflow: 'hidden', cursor: 'pointer' }} 
             onClick={() => onNavigate('/admin/dashboard')}
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}
             title={siteSettings?.siteTitle || siteSettings?.siteName || "Dashboard"}
           >
             {(siteSettings?.logo || siteSettings?.logoUrl) && !imgFailed ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, maxWidth: '100%' }}>
-                <img 
-                  src={siteSettings.logo || siteSettings.logoUrl} 
-                  alt={siteSettings?.siteTitle || siteSettings?.siteName || 'Logo'} 
-                  style={{ maxHeight: '32px', maxWidth: '36px', objectFit: 'contain', flexShrink: 0 }}
-                  referrerPolicy="no-referrer"
-                  onError={() => setImgFailed(true)}
-                />
-                <div className="sidebar-brand-text" style={{ minWidth: 0, overflow: 'hidden' }}>
-                  <h3 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
-                  </h3>
-                  <span className="sidebar-tag">EDITORIAL CMS</span>
-                </div>
-              </div>
+              <img 
+                src={siteSettings.logo || siteSettings.logoUrl} 
+                alt={siteSettings?.siteTitle || siteSettings?.siteName || 'Logo'} 
+                className="sidebar-brand-img"
+                referrerPolicy="no-referrer"
+                onError={() => setImgFailed(true)}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                  minHeight: '36px',
+                  maxWidth: '36px',
+                  maxHeight: '36px',
+                  borderRadius: '9px',
+                  objectFit: 'cover',
+                  display: 'block',
+                  flexShrink: 0
+                }}
+              />
             ) : (
-              <>
-                <div className="sidebar-logo-mark">
-                  {siteSettings?.brandEmblem || (siteSettings?.siteName ? siteSettings.siteName.trim().charAt(0).toUpperCase() : 'G')}
-                </div>
-                <div className="sidebar-brand-text" style={{ minWidth: 0, overflow: 'hidden' }}>
-                  <h3 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {siteSettings?.brandPrefix || (siteSettings?.brandSuffix && siteSettings?.siteName?.endsWith(siteSettings.brandSuffix) ? siteSettings.siteName.slice(0, -siteSettings.brandSuffix.length) : siteSettings?.siteName) || 'GoRead'}
-                    {siteSettings?.brandSuffix ? (
-                      <span style={{ color: 'var(--brand-primary)' }}>
-                        {siteSettings.brandSuffix}
-                      </span>
-                    ) : null}
-                  </h3>
-                  <span className="sidebar-tag">EDITORIAL CMS</span>
-                </div>
-              </>
+              <div className="sidebar-logo-mark">
+                {siteSettings?.brandEmblem || (siteSettings?.siteName ? siteSettings.siteName.trim().charAt(0).toUpperCase() : 'B')}
+              </div>
             )}
+            <div className="sidebar-brand-text" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+              <h3 className="sidebar-brand-title" style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {siteSettings?.siteName || siteSettings?.brandPrefix || 'Blogger'}
+              </h3>
+              <span className="sidebar-tag">EDITORIAL CMS</span>
+            </div>
           </div>
-          
         </div>
 
         {/* Navigation Items Grouped */}

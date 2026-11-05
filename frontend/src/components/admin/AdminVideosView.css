@@ -774,8 +774,11 @@
 .abv-page-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
   border: 1.5px solid #e2e8f0;
   background: #ffffff;
   color: #334155;
@@ -784,6 +787,10 @@
   border-radius: 9px;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.abv-page-nav-btn span {
+  display: none !important;
 }
 
 .abv-page-nav-btn:hover:not(:disabled) {

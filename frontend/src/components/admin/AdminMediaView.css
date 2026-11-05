@@ -1109,41 +1109,12 @@
 }
 
 /* ── Media Sub-Header Bar (Matching AdminPostsView) ── */
-.abv-cards-header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.35rem 0.2rem;
-  margin: 0.2rem 0;
-}
-
-.abv-select-all-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
-  user-select: none;
-}
-
 .abv-select-all-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
   accent-color: #dc2626;
   margin: 0;
-}
-
-.abv-selected-pill {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  background: transparent;
-  color: #0284c7;
-  border: 1px solid rgba(2, 132, 199, 0.28);
 }
 
 .abv-bulk-actions-group {
@@ -1305,8 +1276,11 @@
 .abv-page-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
   border: 1.5px solid #e2e8f0;
   background: #ffffff;
   color: #334155;
@@ -1315,6 +1289,10 @@
   border-radius: 9px;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.abv-page-nav-btn span {
+  display: none !important;
 }
 
 .abv-page-nav-btn:hover:not(:disabled) {

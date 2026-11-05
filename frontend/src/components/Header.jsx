@@ -7,6 +7,7 @@ import {
 import { NAV_LINKS, NAV_DROPDOWNS_DATA, BRANDS_MENU_DATA } from '../data/storiesData';
 import { AuthService } from '../services/authService';
 import { useNavigation } from '../context/NavigationContext';
+import './Header.css';
 export default function Header({ 
   theme, 
   setTheme, 
@@ -1280,7 +1281,7 @@ export default function Header({
         )}
 
         {/* 3. Secondary Tier: Categorical Navigation with 3-Column Mega Dropdowns */}
-        <nav className="modern-nav-sub">
+        <nav className="modern-nav-sub header-subnav-tier">
           <div className="nav-pills-row">
             {visibleNavLinks.map((link, idx) => {
               const hasColumns = Boolean(

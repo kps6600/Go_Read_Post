@@ -36,7 +36,7 @@ const footerData = {
       links: [
         { label: 'Startups & Funding', url: '/category/startups', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'Technology & AI', url: '/category/technology', badge: '', badgeColor: '', openInNewTab: false },
-        { label: 'AI Topic Hub', url: '/topic/artificial-intelligence', badge: 'Hot', badgeColor: '#4f46e5', openInNewTab: false },
+        { label: 'AI Topic Hub', url: '/topic/artificial-intelligence', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'ChatGPT & LLMs', url: '/tag/chatgpt', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'Founder Stories', url: '/category/startups', badge: '', badgeColor: '', openInNewTab: false },
         { label: 'Video Shows (YSTV)', url: '/videos', badge: '', badgeColor: '', openInNewTab: false }

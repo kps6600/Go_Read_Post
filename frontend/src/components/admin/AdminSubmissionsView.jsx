@@ -397,7 +397,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                 </div>
 
                 {/* Card Actions Footer */}
-                <div className="asv-card-footer">
+                <div className="asv-card-footer" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'nowrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                     {isPitch ? (
                       <>
@@ -407,6 +407,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                           disabled={isBusy}
                           onClick={() => handleConvertToArticle(subId, sub.pitchFormat, 'published')}
                           title="Approve and make public"
+                          style={{ flex: 1, minWidth: 0 }}
                         >
                           <span>Public</span>
                         </button>
@@ -416,6 +417,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                           disabled={isBusy}
                           onClick={() => handleConvertToArticle(subId, sub.pitchFormat, 'draft')}
                           title="Convert and save to Drafts"
+                          style={{ flex: 1, minWidth: 0 }}
                         >
                           <span>Draft</span>
                         </button>
@@ -427,6 +429,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                         disabled={isBusy}
                         onClick={() => handleUpdateStatus(subId, sub.status === 'reviewing' ? 'pending' : 'reviewing')}
                         title={sub.status === 'reviewing' ? 'Move back to pending queue' : 'Mark in editorial review'}
+                        style={{ flex: 1, minWidth: 0 }}
                       >
                         <span>Draft</span>
                       </button>
@@ -439,6 +442,7 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
                     disabled={isBusy}
                     onClick={() => setSubmissionToDelete(sub)}
                     title="Delete submission"
+                    style={{ flexShrink: 0 }}
                   >
                     <Trash2 size={15} />
                   </button>

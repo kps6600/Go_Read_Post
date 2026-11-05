@@ -26,7 +26,7 @@ export const NAV_DROPDOWNS_DATA = {
       {
         title: 'CORE DESKS',
         items: [
-          { label: 'Startups & Ecosystem', url: '/category/startups', badge: 'Hot' },
+          { label: 'Startups & Ecosystem', url: '/category/startups' },
           { label: 'Technology & Cloud', url: '/category/technology' },
           { label: 'AI & DeepTech', url: '/category/ai-deeptech', badge: 'Frontier' },
           { label: 'Enterprise & SaaS', url: '/category/enterprise' },

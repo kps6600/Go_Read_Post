@@ -3,7 +3,7 @@ import {
   Hash, Plus, Edit2, Trash2, Search, ExternalLink, RefreshCw, 
   AlertCircle, AlertTriangle, CheckCircle, Check, X, Globe, 
   FileText, CheckSquare, Layers, Eye, EyeOff,
-  Filter, ChevronDown, Clock
+  Filter, ChevronDown, ChevronLeft, ChevronRight, Clock
 } from 'lucide-react';
 import { TaxonomyService } from '../../services/taxonomyService';
 
@@ -354,6 +354,13 @@ export default function AdminTopicsView({ onShowToast }) {
     return result;
   }, [topics, search, statusFilter, categoryFilter, sortBy]);
 
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / pageSize));
+  const paginatedTopics = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredAndSorted.slice(startIndex, startIndex + pageSize);
+  }, [filteredAndSorted, currentPage, pageSize]);
+
   return (
     <div className="admin-page-container">
       
@@ -467,14 +474,17 @@ export default function AdminTopicsView({ onShowToast }) {
           )}
         </div>
 
-        {/* Filter Popover Button */}
-        <div ref={filterRef} style={{ position: 'relative' }}>
+        {/* Right Actions: Filter & Add Topic in ONE Line */}
+        <div className="abv-toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          {/* Filter Popover Button */}
+          <div ref={filterRef} style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }}>
           <button
             type="button"
             onClick={() => setIsFilterOpen(prev => !prev)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '8px',
               padding: '0.55rem 0.95rem',
               borderRadius: '9px',
@@ -484,7 +494,9 @@ export default function AdminTopicsView({ onShowToast }) {
               fontSize: '0.86rem',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.15s ease',
+              width: '100%',
+              whiteSpace: 'nowrap'
             }}
             title="Filter and sort topics"
           >
@@ -622,35 +634,39 @@ export default function AdminTopicsView({ onShowToast }) {
           )}
         </div>
       
-        {/* + Add Topic Button */}
-        <button
-          type="button"
-          onClick={openCreateModal}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0.55rem 1.25rem',
-            backgroundColor: 'var(--brand-primary, #dc2626)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '9px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
-            transition: 'transform 0.15s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Plus size={16} />
-          <span>Add Topic</span>
-        </button>
+          {/* + Add Topic Button */}
+          <button
+            type="button"
+            onClick={openCreateModal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '0.55rem 1.15rem',
+              backgroundColor: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '9px',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+              transition: 'transform 0.15s ease',
+              whiteSpace: 'nowrap',
+              flex: '1 1 auto',
+              minWidth: 0
+            }}
+          >
+            <Plus size={16} />
+            <span>Add Topic</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Sub-Header Bar: Select All, Bulk Actions, & Count (Exact match to AdminPostsView) ── */}
-      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+        <div className="abv-cards-header-left">
           <label className="abv-select-all-label" title="Select all topics">
             <input 
               type="checkbox" 
@@ -668,25 +684,14 @@ export default function AdminTopicsView({ onShowToast }) {
           </label>
           {selectedIds.size > 0 && (
             <span className="abv-selected-pill">
-              {selectedIds.size} of {filteredAndSorted.length} selected
+              {selectedIds.size} selected
             </span>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {selectedIds.size > 0 && (
+        <div className="abv-cards-header-right">
+          {selectedIds.size > 0 ? (
             <div className="abv-bulk-actions-group">
-              <button
-                type="button"
-                onClick={() => handleBulkStatus(false)}
-                disabled={bulkProcessing}
-                className="abv-bulk-btn abv-bulk-btn-draft"
-                title="Set selected topic(s) to inactive"
-              >
-                <Clock size={14} />
-                <span>Send Draft</span>
-              </button>
-
               <button
                 type="button"
                 onClick={handleBulkDelete}
@@ -698,16 +703,28 @@ export default function AdminTopicsView({ onShowToast }) {
                 <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
               </button>
             </div>
+          ) : totalPages > 1 ? (
+            <div className="abv-header-pagination">
+              <span className="abv-header-pg-text">
+                Showing{' '}
+                <strong>
+                  {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredAndSorted.length)
+                    ? (currentPage - 1) * pageSize + 1
+                    : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredAndSorted.length)}`}
+                </strong>{' '}
+                of <strong>{filteredAndSorted.length}</strong>
+              </span>
+            </div>
+          ) : (
+            <div className="abv-cards-count-badge">
+              <span>
+                {statusFilter === 'active' && 'Active Topics: '}
+                {statusFilter === 'inactive' && 'Inactive Topics: '}
+                {statusFilter === 'all' && 'All Topics: '}
+                {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'topic' : 'topics'}
+              </span>
+            </div>
           )}
-
-          <div className="abv-cards-count-badge">
-            <span>
-              {statusFilter === 'active' && 'Active Topics: '}
-              {statusFilter === 'inactive' && 'Inactive Topics: '}
-              {statusFilter === 'all' && 'All Posts: '}
-              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'article' : 'articles'}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -787,7 +804,7 @@ export default function AdminTopicsView({ onShowToast }) {
                   </td>
                 </tr>
               ) : (
-                filteredAndSorted.map((top) => {
+                paginatedTopics.map((top) => {
                   const id = top._id || top.slug;
                   const isSelected = selectedIds.has(id);
                   const publishedCount = top.publishedArticlesCount || 0;
@@ -1000,6 +1017,87 @@ export default function AdminTopicsView({ onShowToast }) {
             </tbody>
           </table>
         </div>
+
+        {/* ── Table Footer & Modern Pagination ── */}
+        <div className="abv-pagination-bar" style={{ borderTop: '1px solid #e2e8f0', borderRadius: '0 0 14px 14px', background: '#f8fafc' }}>
+          <div className="abv-pagination-left">
+            <div className="abv-pagination-info">
+              Showing{' '}
+              <span className="abv-pg-bold">
+                {filteredAndSorted.length > 0 ? ((currentPage - 1) * pageSize + 1) : 0}–{Math.min(currentPage * pageSize, filteredAndSorted.length)}
+              </span>{' '}
+              of <span className="abv-pg-bold">{filteredAndSorted.length}</span> topics
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="abv-pagination-actions">
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Previous Page"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="abv-page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 || 
+                      page === totalPages || 
+                      Math.abs(page - currentPage) <= 1 ||
+                      (currentPage <= 3 && page <= 4) ||
+                      (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                    );
+                  })
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) {
+                      acc.push(`ellipsis-${page}`);
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map(item => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="abv-page-ellipsis">…</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentPage(item);
+                          window.scrollTo({ top: 180, behavior: 'smooth' });
+                        }}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                type="button"
+                className="abv-page-nav-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
+                }}
+                title="Next Page"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── CREATE / EDIT TOPIC MODAL ── */}
@@ -1031,7 +1129,7 @@ export default function AdminTopicsView({ onShowToast }) {
           }}>
             {/* Header */}
             <div style={{
-              padding: '1.25rem 1.5rem',
+              padding: '1rem clamp(1rem, 3vw, 1.5rem)',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
@@ -1039,7 +1137,7 @@ export default function AdminTopicsView({ onShowToast }) {
               background: '#f8fafc'
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingTopic ? `Edit Topic: ${editingTopic.name}` : 'Create New Topic'}
                 </h3>
 
@@ -1061,7 +1159,7 @@ export default function AdminTopicsView({ onShowToast }) {
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSave} style={{ overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSave} style={{ overflowY: 'auto', padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
               {formErrors.submit && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1071,7 +1169,7 @@ export default function AdminTopicsView({ onShowToast }) {
               )}
 
               {/* Row 1: Name and Slug */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
                     Topic Name *
@@ -1164,20 +1262,23 @@ export default function AdminTopicsView({ onShowToast }) {
                 justifyContent: 'flex-end',
                 gap: '0.75rem',
                 paddingTop: '0.75rem',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid #e2e8f0',
+                flexWrap: 'nowrap'
               }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: '0.65rem 1.25rem',
+                    height: '38px',
+                    padding: '0 1.25rem',
                     background: '#f1f5f9',
                     border: '1px solid #cbd5e1',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
-                    fontWeight: 600,
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
                     color: '#475569',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   Cancel
@@ -1186,15 +1287,17 @@ export default function AdminTopicsView({ onShowToast }) {
                   type="submit"
                   disabled={saving}
                   style={{
-                    padding: '0.65rem 1.5rem',
+                    height: '38px',
+                    padding: '0 1.5rem',
                     background: 'var(--brand-primary, #dc2626)',
                     border: 'none',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
+                    fontSize: '0.84rem',
                     fontWeight: 700,
                     color: '#ffffff',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {saving ? 'Saving...' : editingTopic ? 'Save Changes' : 'Create Topic'}

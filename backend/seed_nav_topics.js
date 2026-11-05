@@ -24,7 +24,7 @@ const NAV_TOPICS = [
     slug: 'venture-capital',
     description: 'Seed-to-IPO cap table movements, term sheet covenants, LP distribution cycles, and private market valuation resets.',
     categorySlug: 'startups',
-    badge: 'Hot'
+    badge: ''
   },
   {
     name: 'Early-Stage Seed & Pre-A',

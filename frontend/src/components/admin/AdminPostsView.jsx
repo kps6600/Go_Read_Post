@@ -3958,8 +3958,8 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
       {/* 5. Articles Content: Cards Grid View */}
       <div>
           {/* Cards Header: Select All, Conditional Actions, & Count */}
-          <div className="abv-cards-header-bar">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+            <div className="abv-cards-header-left">
               <label className="abv-select-all-label" title="Select articles on this page">
                 <input 
                   type="checkbox" 
@@ -3985,13 +3985,13 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
               </label>
               {selectedIds.size > 0 && (
                 <span className="abv-selected-pill">
-                  {selectedIds.size} of {filteredArticles.length} selected
+                  {selectedIds.size} selected
                 </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              {selectedIds.size > 0 && (
+            <div className="abv-cards-header-right">
+              {selectedIds.size > 0 ? (
                 <div className="abv-bulk-actions-group">
                   {showBulkPublish && (
                     <button
@@ -4028,9 +4028,23 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
                     </button>
                   )}
                 </div>
+              ) : totalPages > 1 ? (
+                <div className="abv-header-pagination">
+                  <span className="abv-header-pg-text">
+                    Showing{' '}
+                    <strong>
+                      {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredArticles.length)
+                        ? (currentPage - 1) * pageSize + 1
+                        : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredArticles.length)}`}
+                    </strong>{' '}
+                    of <strong>{filteredArticles.length}</strong>
+                  </span>
+                </div>
+              ) : (
+                <div className="abv-cards-count-badge">
+                  <span>{filteredArticles.length} {filteredArticles.length === 1 ? 'story' : 'stories'}</span>
+                </div>
               )}
-
-              
             </div>
           </div>
 

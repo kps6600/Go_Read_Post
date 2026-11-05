@@ -95,6 +95,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .las-status-tag.published {
@@ -119,6 +122,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .las-view-toggle-group {
@@ -128,13 +132,17 @@
   padding: 3px;
   border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .las-view-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 5px 11px;
+  padding: 0 12px;
+  height: 34px;
   background: transparent;
   border: none;
   border-radius: 6px;
@@ -142,6 +150,8 @@
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
@@ -159,17 +169,22 @@
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  flex-shrink: 0;
 }
 
 .las-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
+  height: 38px;
   border-radius: 8px;
   font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
   border: none;
 }
@@ -420,12 +435,16 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   margin-bottom: 0.75rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .las-headline-tools-group {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 3px;
+  max-width: 100%;
 }
 
 .las-headline-tool-btn {
@@ -2217,21 +2236,120 @@
 
 @media (max-width: 768px) {
   .las-studio-header {
-    height: auto !important;
-    padding: 0.65rem 0.85rem !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 0.6rem !important;
+    height: 56px !important;
+    padding: 0 0.85rem !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
   }
   .las-header-left {
-    justify-content: space-between !important;
-    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    overflow: hidden !important;
+  }
+  .las-title-meta {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+  .las-studio-badge-row {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .las-status-tag,
+  .las-studio-status-badge {
+    display: none !important;
+  }
+  .las-studio-title {
+    font-size: 0.88rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    max-width: 140px !important;
+  }
+  .las-back-btn {
+    padding: 0 0.65rem !important;
+    height: 36px !important;
+    font-size: 0.78rem !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  .las-header-center {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    gap: 4px !important;
+  }
+  .las-view-toggle-group {
+    padding: 2px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .las-view-btn {
+    height: 34px !important;
+    padding: 0 10px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .las-header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
   }
   .las-header-actions {
-    width: 100% !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
+    width: auto !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
     gap: 6px !important;
+  }
+  .las-btn-draft {
+    height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .las-btn-publish {
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .las-btn-delete {
+    height: 36px !important;
+    padding: 0 8px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .las-editor-pane {
+    padding: 0 !important;
+  }
+  .las-editor-inner {
+    padding: 0.75rem 0.5rem !important;
+  }
+  .las-card {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+    margin-bottom: 1rem !important;
+  }
+  .las-headline-input {
+    font-size: 1.35rem !important;
+  }
+  .las-headline-tools-group {
+    flex-wrap: wrap !important;
   }
   .las-workspace {
     flex-direction: column !important;
@@ -2239,5 +2357,36 @@
   .las-sidebar-pane {
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+@media (max-width: 580px) {
+  .las-studio-header {
+    padding: 0 0.5rem !important;
+    gap: 0.35rem !important;
+  }
+  .las-studio-title {
+    max-width: 90px !important;
+  }
+  .las-view-btn {
+    padding: 0 8px !important;
+  }
+  .las-view-btn span {
+    display: none !important;
+  }
+  .las-view-btn svg {
+    margin-right: 0 !important;
+  }
+  .las-btn-draft {
+    padding: 0 8px !important;
+  }
+  .las-btn-draft .las-btn-label {
+    display: none !important;
+  }
+  .las-btn-delete .las-btn-label {
+    display: none !important;
+  }
+  .las-btn-publish {
+    padding: 0 10px !important;
   }
 }

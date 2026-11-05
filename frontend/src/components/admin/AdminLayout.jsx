@@ -178,6 +178,25 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
   const effectiveUser = adminUser || (AuthService.canAccessAdmin(AuthService.getUser()) ? AuthService.getUser() : null);
   const isAdminAuthenticated = Boolean(isAuthenticated && AuthService.canAccessAdmin(effectiveUser));
 
+  // 🔒 Route Protection: Prevent Authors from accessing sensitive admin settings routes (placed before any early return)
+  useEffect(() => {
+    const role = (adminUser?.role || effectiveUser?.role || '').toUpperCase();
+    if (role === 'AUTHOR') {
+      const forbiddenForAuthors = [
+        '/admin/settings',
+        '/admin/users',
+        '/admin/roles',
+        '/admin/seo',
+        '/admin/navigation',
+        '/admin/footer'
+      ];
+      if (forbiddenForAuthors.some(p => currentPath === p || currentPath.startsWith(p + '/'))) {
+        handleNavigate('/admin/dashboard');
+        if (onShowToast) onShowToast('Access Denied: Authors cannot modify system configuration.');
+      }
+    }
+  }, [currentPath, adminUser, effectiveUser]);
+
   // If user is accessing /admin/login specifically or is not an assigned admin
   if (!isAdminAuthenticated || currentPath === '/admin/login') {
     return (
@@ -475,28 +494,7 @@ export default function AdminLayout({ onBackToSite, onShowToast, siteSettings: p
   }
 
   // Check if we are on an article create/edit studio route
-  
-  // 🔒 Route Protection: Prevent Authors from accessing sensitive admin settings routes
-  useEffect(() => {
-    const role = (adminUser?.role || effectiveUser?.role || '').toUpperCase();
-    if (role === 'AUTHOR') {
-      const forbiddenForAuthors = [
-        '/admin/settings',
-        '/admin/users',
-        '/admin/roles',
-        '/admin/seo',
-        '/admin/navigation',
-        '/admin/footer'
-      ];
-      if (forbiddenForAuthors.some(p => currentPath === p || currentPath.startsWith(p + '/'))) {
-        handleNavigate('/admin/dashboard');
-        if (onShowToast) onShowToast('Access Denied: Authors cannot modify system configuration.');
-      }
-    }
-  }, [currentPath, adminUser, effectiveUser]);
-
-  
-const isPostEditorRoute = (
+  const isPostEditorRoute = (
     currentPath.startsWith('/admin/articles') || 
     currentPath.startsWith('/admin/posts') || 
     currentPath.startsWith('/admin/blogs')

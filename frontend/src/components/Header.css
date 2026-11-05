@@ -1,0 +1,25 @@
+/* ══════════════════════════════════════════════════════════════════
+   HEADER COMPONENT STYLES
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Hide secondary categorical navmenu on mobile views (<= 900px)
+   Mobile navigation is handled seamlessly via the top-left hamburger 
+   menu drawer and the fixed mobile bottom navigation bar. */
+@media (max-width: 900px) {
+  nav.modern-nav-sub,
+  .modern-nav-sub,
+  .header-subnav-tier {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+  }
+
+  .modern-menu-btn {
+    display: flex !important;
+  }
+}
+

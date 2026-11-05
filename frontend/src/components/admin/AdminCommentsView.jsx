@@ -586,6 +586,18 @@ export default function AdminCommentsView({ onShowToast }) {
               </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="abv-header-pagination">
+              <span className="abv-header-pg-text">
+                Showing{' '}
+                <strong>
+                  {((currentPage - 1) * pageSize + 1)}–{Math.min(currentPage * pageSize, filteredSortedComments.length)}
+                </strong>{' '}
+                of <strong>{filteredSortedComments.length}</strong>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

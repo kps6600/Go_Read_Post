@@ -527,9 +527,9 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
       </div>
 
       {/* ── Cards Header: Select All, Bulk Actions, Count & View Mode ── */}
-      <div className="abv-cards-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <label className="abv-select-all-label" title="Select videos on this page" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none', fontWeight: 600, fontSize: '0.84rem', color: '#475569' }}>
+      <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+        <div className="abv-cards-header-left">
+          <label className="abv-select-all-label" title="Select videos on this page">
             <input 
               type="checkbox" 
               className="admin-table-checkbox"
@@ -555,17 +555,15 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
           </label>
 
           {selectedIds.size > 0 && (
-            <span className="abv-selected-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '999px', background: '#fee2e2', color: '#dc2626', fontSize: '0.78rem', fontWeight: 700, border: '1px solid #fecaca' }}>
-              {selectedIds.size} of {filteredVideos.length} selected
+            <span className="abv-selected-pill">
+              {selectedIds.size} selected
             </span>
           )}
-
-          
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {selectedIds.size > 0 && (
-            <div className="abv-bulk-actions-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <div className="abv-cards-header-right">
+          {selectedIds.size > 0 ? (
+            <div className="abv-bulk-actions-group">
               {showBulkPublish && (
                 <button
                   type="button"
@@ -591,9 +589,23 @@ export default function AdminVideosView({ onShowToast, onNavigate, currentPath =
                 </button>
               )}
             </div>
+          ) : totalPages > 1 ? (
+            <div className="abv-header-pagination">
+              <span className="abv-header-pg-text">
+                Showing{' '}
+                <strong>
+                  {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredVideos.length)
+                    ? (currentPage - 1) * pageSize + 1
+                    : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredVideos.length)}`}
+                </strong>{' '}
+                of <strong>{filteredVideos.length}</strong>
+              </span>
+            </div>
+          ) : (
+            <div className="abv-cards-count-badge">
+              <span>{filteredVideos.length} {filteredVideos.length === 1 ? 'video' : 'videos'}</span>
+            </div>
           )}
-
-          
         </div>
       </div>
 

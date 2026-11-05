@@ -2482,9 +2482,48 @@ export default function LiveArticleStudio({
                       <span>Article Details</span>
                     </h3>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {formData.featuredImage?.url && (
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="las-stats-badge">
+                    <input 
+                      type="text"
+                      className="las-stats-input"
+                      value={formData.readingTime ?? `~${stats.minutes} min read`}
+                      onChange={(e) => {
+                        setIsReadingTimeCustom(true);
+                        setFormData(prev => ({ ...prev, readingTime: e.target.value }));
+                      }}
+                      title="Click to edit estimated reading time"
+                      placeholder={`~${stats.minutes} min read`}
+                    />
+                    {isReadingTimeCustom && (
+                      <button
+                        type="button"
+                        className="las-stats-reset-btn"
+                        title="Reset to auto-calculated time"
+                        onClick={() => {
+                          setIsReadingTimeCustom(false);
+                          setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
+                        }}
+                      >
+                        ↺ auto
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {formData.featuredImage?.url ? (
+                  <div className="las-cover-image-preview-wrap">
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      marginBottom: '10px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Cover Photo
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <button
                           type="button"
                           className="las-block-action-btn"
@@ -2522,38 +2561,8 @@ export default function LiveArticleStudio({
                           <span>Remove</span>
                         </button>
                       </div>
-                    )}
-                    <div className="las-stats-badge">
-                      <input 
-                        type="text"
-                        className="las-stats-input"
-                        value={formData.readingTime ?? `~${stats.minutes} min read`}
-                        onChange={(e) => {
-                          setIsReadingTimeCustom(true);
-                          setFormData(prev => ({ ...prev, readingTime: e.target.value }));
-                        }}
-                        title="Click to edit estimated reading time"
-                        placeholder={`~${stats.minutes} min read`}
-                      />
-                      {isReadingTimeCustom && (
-                        <button
-                          type="button"
-                          className="las-stats-reset-btn"
-                          title="Reset to auto-calculated time"
-                          onClick={() => {
-                            setIsReadingTimeCustom(false);
-                            setFormData(prev => ({ ...prev, readingTime: `~${stats.minutes} min read` }));
-                          }}
-                        >
-                          ↺ auto
-                        </button>
-                      )}
                     </div>
-                  </div>
-                </div>
 
-                {formData.featuredImage?.url ? (
-                  <div className="las-cover-image-preview-wrap">
                     <div className="las-cover-preview-img-container">
                       <img 
                         src={formData.featuredImage.url} 
@@ -2586,11 +2595,11 @@ export default function LiveArticleStudio({
                 ) : (
                   <div className="las-cover-dropzone">
                     <div className="las-cover-dropzone-content" style={{ width: '100%' }}>
-                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
                         <button
                           type="button"
                           className="las-btn las-btn-publish"
-                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          style={{ flex: '1 1 140px', maxWidth: '200px', height: '38px', padding: '0 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                           onClick={() => {
                             if (coverFileInputRef.current) coverFileInputRef.current.click();
                           }}
@@ -2603,7 +2612,7 @@ export default function LiveArticleStudio({
                           <button
                             type="button"
                             className="las-btn"
-                            style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                            style={{ flex: '1 1 140px', maxWidth: '200px', height: '38px', background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                             onClick={() => openMediaPicker({ type: 'featured' })}
                           >
                             <FolderOpen size={14} />

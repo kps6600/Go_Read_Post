@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Tag as TagIcon, Plus, Filter, ChevronDown, Edit2, Trash2, Search, 
+  Tag as TagIcon, Plus, Filter, ChevronDown, ChevronLeft, ChevronRight, Edit2, Trash2, Search, 
   RefreshCw, AlertCircle, AlertTriangle, CheckCircle, Check, 
   X, FileText, CheckSquare, GitMerge, Sparkles, 
   Eye, EyeOff, Clock
@@ -502,190 +502,199 @@ export default function AdminTagsView({ onShowToast }) {
           )}
         </div>
 
-        {/* Filter Popover Button */}
-        <div ref={filterRef} style={{ position: 'relative' }}>
-          <button
-            type="button"
-            onClick={() => setIsFilterOpen(prev => !prev)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '0.55rem 0.95rem',
-              borderRadius: '9px',
-              border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
-              background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
-              color: activeFilterCount > 0 ? '#dc2626' : '#334155',
-              fontSize: '0.86rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title="Filter and sort tags"
-          >
-            <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
-            <span>Filter</span>
-            {activeFilterCount > 0 && (
-              <span style={{
-                background: '#dc2626',
-                color: '#ffffff',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                borderRadius: '10px',
-                padding: '1px 6px',
-                lineHeight: 1.2
-              }}>
-                {activeFilterCount}
-              </span>
-            )}
-            <ChevronDown 
-              size={14} 
+        {/* Right Actions: Filter & Add Tag in ONE Line */}
+        <div className="abv-toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          {/* Filter Popover Button */}
+          <div ref={filterRef} style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }}>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(prev => !prev)}
               style={{
-                transform: isFilterOpen ? 'rotate(180deg)' : 'none',
-                transition: 'transform 0.18s ease',
-                color: activeFilterCount > 0 ? '#dc2626' : '#64748b'
-              }} 
-            />
-          </button>
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '0.55rem 0.95rem',
+                borderRadius: '9px',
+                border: activeFilterCount > 0 ? '1px solid #dc2626' : '1px solid #cbd5e1',
+                background: activeFilterCount > 0 ? '#fff1f2' : '#ffffff',
+                color: activeFilterCount > 0 ? '#dc2626' : '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                width: '100%',
+                whiteSpace: 'nowrap'
+              }}
+              title="Filter and sort tags"
+            >
+              <Filter size={15} color={activeFilterCount > 0 ? '#dc2626' : '#64748b'} />
+              <span>Filter</span>
+              {activeFilterCount > 0 && (
+                <span style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  borderRadius: '10px',
+                  padding: '1px 6px',
+                  lineHeight: 1.2
+                }}>
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDown 
+                size={14} 
+                style={{
+                  transform: isFilterOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.18s ease',
+                  color: activeFilterCount > 0 ? '#dc2626' : '#64748b'
+                }} 
+              />
+            </button>
 
-          {isFilterOpen && (
-            <div style={{
-              position: 'absolute',
-              right: 0,
-              top: 'calc(100% + 8px)',
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
-              width: '280px',
-              zIndex: 50,
-              padding: '1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.85rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
-                  <Filter size={14} color="#dc2626" />
-                  <span>Filter Tags</span>
+            {isFilterOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 8px)',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04)',
+                width: '280px',
+                zIndex: 50,
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+                    <Filter size={14} color="#dc2626" />
+                    <span>Filter Tags</span>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter('all');
+                        setSortBy('articles_desc');
+                        setCurrentPage(1);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#dc2626',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      Reset All
+                    </button>
+                  )}
                 </div>
-                {activeFilterCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter('all');
-                      setSortBy('articles_desc');
+
+                {/* Status Filter */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                    Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
                       setCurrentPage(1);
                     }}
                     style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#dc2626',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.84rem',
+                      fontWeight: 500,
+                      color: '#1e293b',
+                      background: '#ffffff',
+                      outline: 'none',
                       cursor: 'pointer',
-                      padding: 0
+                      width: '100%'
                     }}
                   >
-                    Reset All
-                  </button>
-                )}
-              </div>
+                    <option value="all">All Status ({tags.length})</option>
+                    <option value="active">Active Only ({stats.active})</option>
+                    <option value="inactive">Inactive Only ({stats.total - stats.active})</option>
+                  </select>
+                </div>
 
-              {/* Status Filter */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Status
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.84rem',
-                    fontWeight: 500,
-                    color: '#1e293b',
-                    background: '#ffffff',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  <option value="all">All Status ({tags.length})</option>
-                  <option value="active">Active Only ({stats.active})</option>
-                  <option value="inactive">Inactive Only ({stats.total - stats.active})</option>
-                </select>
+                {/* Sort By */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                    Sort By
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.84rem',
+                      fontWeight: 500,
+                      color: '#1e293b',
+                      background: '#ffffff',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      width: '100%'
+                    }}
+                  >
+                    <option value="articles_desc">Most Published Articles / Videos</option>
+                    <option value="drafts_desc">Most Draft Articles / Videos</option>
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="updated_desc">Recently Updated</option>
+                  </select>
+                </div>
               </div>
+            )}
+          </div>
 
-              {/* Sort By */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                  Sort By
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => {
-                    setSortBy(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.84rem',
-                    fontWeight: 500,
-                    color: '#1e293b',
-                    background: '#ffffff',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  <option value="articles_desc">Most Published Articles / Videos</option>
-                  <option value="drafts_desc">Most Draft Articles / Videos</option>
-                  <option value="name_asc">Name (A-Z)</option>
-                  <option value="name_desc">Name (Z-A)</option>
-                  <option value="updated_desc">Recently Updated</option>
-                </select>
-              </div>
-            </div>
-          )}
+          {/* + Add Tag Button */}
+          <button
+            type="button"
+            onClick={openCreateModal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '0.55rem 1.15rem',
+              backgroundColor: 'var(--brand-primary, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '9px',
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
+              transition: 'transform 0.15s ease',
+              whiteSpace: 'nowrap',
+              flex: '1 1 auto',
+              minWidth: 0
+            }}
+          >
+            <Plus size={16} />
+            <span>Add Tag</span>
+          </button>
         </div>
-
-        {/* + Add Tag Button */}
-        <button
-          type="button"
-          onClick={openCreateModal}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0.55rem 1.25rem',
-            backgroundColor: 'var(--brand-primary, #dc2626)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '9px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.28)',
-            transition: 'transform 0.15s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Plus size={16} />
-          <span>Add Tag</span>
-        </button>
       </div>
 
       {/* ── Sub-Header Bar: Select All, Bulk Actions, & Count (Matches Categories, Topics & Posts) ── */}
-      <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.4rem 0.25rem 0.6rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+        <div className="abv-cards-header-left">
           <label className="abv-select-all-label" title="Select all tags">
             <input 
               type="checkbox" 
@@ -703,25 +712,14 @@ export default function AdminTagsView({ onShowToast }) {
           </label>
           {selectedIds.size > 0 && (
             <span className="abv-selected-pill">
-              {selectedIds.size} of {filteredAndSorted.length} selected
+              {selectedIds.size} selected
             </span>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {selectedIds.size > 0 && (
+        <div className="abv-cards-header-right">
+          {selectedIds.size > 0 ? (
             <div className="abv-bulk-actions-group">
-              <button
-                type="button"
-                onClick={() => handleBulkStatus(false)}
-                disabled={bulkProcessing}
-                className="abv-bulk-btn abv-bulk-btn-draft"
-                title="Set selected tag(s) to inactive"
-              >
-                <Clock size={14} />
-                <span>Send Draft</span>
-              </button>
-
               <button
                 type="button"
                 onClick={handleBulkDelete}
@@ -733,16 +731,28 @@ export default function AdminTagsView({ onShowToast }) {
                 <span>{bulkProcessing ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
               </button>
             </div>
+          ) : totalPages > 1 ? (
+            <div className="abv-header-pagination">
+              <span className="abv-header-pg-text">
+                Showing{' '}
+                <strong>
+                  {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredAndSorted.length)
+                    ? (currentPage - 1) * pageSize + 1
+                    : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredAndSorted.length)}`}
+                </strong>{' '}
+                of <strong>{filteredAndSorted.length}</strong>
+              </span>
+            </div>
+          ) : (
+            <div className="abv-cards-count-badge">
+              <span>
+                {statusFilter === 'active' && 'Active Tags: '}
+                {statusFilter === 'inactive' && 'Inactive Tags: '}
+                {statusFilter === 'all' && 'All Tags: '}
+                {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'tag' : 'tags'}
+              </span>
+            </div>
           )}
-
-          <div className="abv-cards-count-badge">
-            <span>
-              {statusFilter === 'active' && 'Active Tags: '}
-              {statusFilter === 'inactive' && 'Inactive Tags: '}
-              {statusFilter === 'all' && 'All Tags: '}
-              {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'tag' : 'tags'}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -1034,60 +1044,85 @@ export default function AdminTagsView({ onShowToast }) {
           </table>
         </div>
 
-        {/* ── Table Footer & Pagination ── */}
-        <div style={{
-          padding: '0.85rem 1.25rem',
-          borderTop: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          background: '#f8fafc'
-        }}>
-          <div style={{ fontSize: '0.84rem', color: '#64748b' }}>
-            Showing <strong>{filteredAndSorted.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong>{Math.min(currentPage * pageSize, filteredAndSorted.length)}</strong> of <strong>{filteredAndSorted.length}</strong> tags
+        {/* ── Table Footer & Modern Pagination ── */}
+        <div className="abv-pagination-bar" style={{ borderTop: '1px solid #e2e8f0', borderRadius: '0 0 14px 14px', background: '#f8fafc' }}>
+          <div className="abv-pagination-left">
+            <div className="abv-pagination-info">
+              Showing{' '}
+              <span className="abv-pg-bold">
+                {filteredAndSorted.length > 0 ? ((currentPage - 1) * pageSize + 1) : 0}–{Math.min(currentPage * pageSize, filteredAndSorted.length)}
+              </span>{' '}
+              of <span className="abv-pg-bold">{filteredAndSorted.length}</span> tags
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          {totalPages > 1 && (
+            <div className="abv-pagination-actions">
               <button
                 type="button"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="abv-page-nav-btn"
                 disabled={currentPage === 1}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === 1 ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
                 }}
+                title="Previous Page"
               >
-                Previous
+                <ChevronLeft size={16} />
               </button>
-              <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600, padding: '0 4px' }}>
-                {currentPage} / {totalPages}
-              </span>
+
+              <div className="abv-page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 || 
+                      page === totalPages || 
+                      Math.abs(page - currentPage) <= 1 ||
+                      (currentPage <= 3 && page <= 4) ||
+                      (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                    );
+                  })
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) {
+                      acc.push(`ellipsis-${page}`);
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map(item => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="abv-page-ellipsis">…</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentPage(item);
+                          window.scrollTo({ top: 180, behavior: 'smooth' });
+                        }}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
               <button
                 type="button"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="abv-page-nav-btn"
                 disabled={currentPage === totalPages}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: currentPage === totalPages ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === totalPages ? '#94a3b8' : '#334155',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 180, behavior: 'smooth' });
                 }}
+                title="Next Page"
               >
-                Next
+                <ChevronRight size={16} />
               </button>
             </div>
+          )}
         </div>
       </div>
 
@@ -1116,7 +1151,7 @@ export default function AdminTagsView({ onShowToast }) {
             overflow: 'hidden'
           }}>
             <div style={{
-              padding: '1.25rem 1.5rem',
+              padding: '1rem clamp(1rem, 3vw, 1.5rem)',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
@@ -1124,7 +1159,7 @@ export default function AdminTagsView({ onShowToast }) {
               background: '#f8fafc'
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.18rem', fontWeight: 800, color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
                   {editingTag ? `Edit Tag: #${editingTag.name}` : 'Create New Keyword Tag'}
                 </h3>
               </div>
@@ -1137,7 +1172,7 @@ export default function AdminTagsView({ onShowToast }) {
               </button>
             </div>
 
-            <form onSubmit={handleSave} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+            <form onSubmit={handleSave} style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               
               {formErrors.submit && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
@@ -1234,20 +1269,23 @@ export default function AdminTagsView({ onShowToast }) {
                 gap: '0.75rem',
                 marginTop: '0.5rem',
                 paddingTop: '0.75rem',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid #e2e8f0',
+                flexWrap: 'nowrap'
               }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: '0.65rem 1.25rem',
+                    height: '38px',
+                    padding: '0 1.25rem',
                     background: '#f1f5f9',
                     border: '1px solid #cbd5e1',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
-                    fontWeight: 600,
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
                     color: '#475569',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   Cancel
@@ -1256,15 +1294,17 @@ export default function AdminTagsView({ onShowToast }) {
                   type="submit"
                   disabled={saving}
                   style={{
-                    padding: '0.65rem 1.5rem',
+                    height: '38px',
+                    padding: '0 1.5rem',
                     background: 'var(--brand-primary, #dc2626)',
                     border: 'none',
                     borderRadius: '8px',
-                    fontSize: '0.88rem',
+                    fontSize: '0.84rem',
                     fontWeight: 700,
                     color: '#ffffff',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)'
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {saving ? 'Saving...' : editingTag ? 'Save Changes' : 'Create Tag'}

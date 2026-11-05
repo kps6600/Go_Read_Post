@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Users, Shield, Plus, Trash2, Search, RefreshCw, AlertCircle, X, Mail, CheckSquare, Filter, ChevronDown,
-  Eye, EyeOff, Lock, Phone, Check, User, Upload
+  Eye, EyeOff, Lock, Phone, Check, User, Upload, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AuthService } from '../../services/authService';
@@ -41,6 +41,8 @@ export default function AdminUsersView({ onShowToast }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
@@ -112,6 +114,13 @@ export default function AdminUsersView({ onShowToast }) {
       );
     });
   }, [communityUsers, search, statusFilter]);
+
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(startIndex, startIndex + pageSize);
+  }, [filteredUsers, currentPage, pageSize]);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -388,7 +397,7 @@ export default function AdminUsersView({ onShowToast }) {
             type="text"
             placeholder="Search by name, email, or username..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
             style={{
               width: '100%',
               height: '40px',
@@ -407,7 +416,7 @@ export default function AdminUsersView({ onShowToast }) {
           {search && (
             <button
               type="button"
-              onClick={() => setSearch('')}
+              onClick={() => { setSearch(''); setCurrentPage(1); }}
               title="Clear search"
               style={{
                 position: 'absolute',
@@ -433,18 +442,19 @@ export default function AdminUsersView({ onShowToast }) {
         </div>
 
         {/* Right Controls: Status Filter, Reset & Add User Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div className="auv-toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
           {/* Status Filter Dropdown */}
-          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', flex: '1 1 auto', minWidth: 0 }}>
             <Filter size={13} color={statusFilter !== 'all' ? 'var(--brand-primary, #dc2626)' : '#64748b'} style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }} />
             <select
               value={statusFilter}
-              onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); }}
+              onChange={e => { setStatusFilter(e.target.value); setSelectedIds(new Set()); setCurrentPage(1); }}
               style={{
                 appearance: 'none',
                 height: '40px',
-                minWidth: '150px',
-                padding: '0 32px 0 32px',
+                width: '100%',
+                minWidth: 0,
+                padding: '0 28px 0 30px',
                 border: statusFilter !== 'all' ? '1.5px solid rgba(220, 38, 38, 0.4)' : '1px solid #cbd5e1',
                 borderRadius: '8px',
                 fontSize: '13px',
@@ -470,9 +480,10 @@ export default function AdminUsersView({ onShowToast }) {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '6px',
               height: '40px',
-              padding: '0 16px',
+              padding: '0 14px',
               background: 'var(--brand-primary, #dc2626)',
               color: '#ffffff',
               border: 'none',
@@ -482,7 +493,9 @@ export default function AdminUsersView({ onShowToast }) {
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
               transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              flex: '1 1 auto',
+              minWidth: 0
             }}
           >
             <Plus size={15} />
@@ -510,7 +523,7 @@ export default function AdminUsersView({ onShowToast }) {
           </p>
           {(search || statusFilter !== 'all') ? (
             <button
-              onClick={() => { setSearch(''); setStatusFilter('all'); }}
+              onClick={() => { setSearch(''); setStatusFilter('all'); setCurrentPage(1); }}
               style={{ padding: '8px 16px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '0.84rem' }}
             >
               Reset Filters
@@ -532,8 +545,8 @@ export default function AdminUsersView({ onShowToast }) {
       ) : (
         <>
           {/* Sub-Header Bar: Select All & Bulk Actions */}
-          <div className="abv-cards-header-bar" style={{ marginBottom: '0.5rem', padding: '0.2rem 0.25rem 0.6rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+            <div className="abv-cards-header-left">
               <label className="abv-select-all-label" title="Select all users">
                 <input 
                   type="checkbox" 
@@ -551,13 +564,13 @@ export default function AdminUsersView({ onShowToast }) {
               </label>
               {selectedIds.size > 0 && (
                 <span className="abv-selected-pill">
-                  {selectedIds.size} of {filteredUsers.length} selected
+                  {selectedIds.size} selected
                 </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              {selectedIds.size > 0 && (
+            <div className="abv-cards-header-right">
+              {selectedIds.size > 0 ? (
                 <div className="abv-bulk-actions-group">
                   <button
                     type="button"
@@ -570,51 +583,52 @@ export default function AdminUsersView({ onShowToast }) {
                     <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
                   </button>
                 </div>
+              ) : totalPages > 1 ? (
+                <div className="abv-header-pagination">
+                  <span className="abv-header-pg-text">
+                    Showing{' '}
+                    <strong>
+                      {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredUsers.length)
+                        ? (currentPage - 1) * pageSize + 1
+                        : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredUsers.length)}`}
+                    </strong>{' '}
+                    of <strong>{filteredUsers.length}</strong>
+                  </span>
+                </div>
+              ) : (
+                <div className="abv-cards-count-badge">
+                  <span>{filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}</span>
+                </div>
               )}
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}></th>
-                <th style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Sr. No.
-                </th>
-                <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Name & Username
-                </th>
-                <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Email Address
-                </th>
-                <th style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Status
-                </th>
-                <th style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u, index) => {
-                const isSelected = selectedIds.has(u._id);
-                const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
-                const avatarUrl = getUserAvatar(u);
-                const initials = getUserInitials(u.name);
+          {/* Mobile Cards List (< 640px) */}
+          <div className="auv-mobile-cards-list">
+            {paginatedUsers.map((u, index) => {
+              const isSelected = selectedIds.has(u._id);
+              const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
+              const avatarUrl = getUserAvatar(u);
+              const initials = getUserInitials(u.name);
 
-                return (
-                  <tr 
-                    key={u._id} 
-                    style={{ 
-                      borderBottom: '1px solid #f1f5f9', 
-                      backgroundColor: isSelected ? '#fff1f2' : 'transparent',
-                      transition: 'background-color 0.15s ease'
-                    }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                  >
-                    <td style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+              return (
+                <div 
+                  key={u._id}
+                  style={{
+                    background: isSelected ? '#fff1f2' : '#ffffff',
+                    border: isSelected ? '1.5px solid #fecdd3' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '14px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {/* Top: Selection, Avatar, Name & Status Badge */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
                       <input 
                         type="checkbox"
                         checked={isSelected}
@@ -624,143 +638,435 @@ export default function AdminUsersView({ onShowToast }) {
                           else next.delete(u._id);
                           setSelectedIds(next);
                         }}
-                        style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+                        style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: '#dc2626', flexShrink: 0 }}
                       />
-                    </td>
-                    <td style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
-                        {index + 1}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ position: 'relative', width: '38px', height: '38px', flexShrink: 0 }}>
-                          <img
-                            src={avatarUrl}
-                            alt={u.name}
-                            style={{
-                              width: '38px',
-                              height: '38px',
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                              border: '1.5px solid #e2e8f0',
-                              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                              display: 'block'
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              if (e.currentTarget.nextElementSibling) {
-                                e.currentTarget.nextElementSibling.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <div
-                            style={{
-                              width: '38px',
-                              height: '38px',
-                              borderRadius: '50%',
-                              background: '#f1f5f9',
-                              color: '#475569',
-                              display: 'none',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: '700',
-                              fontSize: '13px',
-                              border: '1.5px solid #cbd5e1',
-                              textTransform: 'uppercase'
-                            }}
-                          >
-                            {initials}
-                          </div>
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '13.5px' }}>{u.name}</div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>@{u.username}</div>
+                      
+                      <div style={{ position: 'relative', width: '42px', height: '42px', flexShrink: 0 }}>
+                        <img
+                          src={avatarUrl}
+                          alt={u.name}
+                          style={{
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            border: '1.5px solid #e2e8f0',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                            display: 'block'
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            if (e.currentTarget.nextElementSibling) {
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div
+                          style={{
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '50%',
+                            background: '#f1f5f9',
+                            color: '#475569',
+                            display: 'none',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '700',
+                            fontSize: '13px',
+                            border: '1.5px solid #cbd5e1',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          {initials}
                         </div>
                       </div>
-                    </td>
-                    <td style={{ padding: '12px 16px', color: '#334155', verticalAlign: 'middle' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                        <Mail size={13} color="#94a3b8" />
-                        <span>{u.email}</span>
+
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontWeight: '750', color: '#0f172a', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {u.name}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                          @{u.username}
+                        </div>
                       </div>
-                    </td>
-                    <td style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    </div>
+
+                    {/* Status Badge */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(u)}
+                      disabled={updatingStatusId === u._id || isRoot}
+                      title={isRoot ? 'Cannot suspend Super Admin' : (u.isActive !== false ? 'Click to suspend' : 'Click to activate')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '11.5px',
+                        fontWeight: '700',
+                        cursor: isRoot ? 'not-allowed' : 'pointer',
+                        border: u.isActive !== false ? '1px solid #bbf7d0' : '1px solid #fed7aa',
+                        background: u.isActive !== false ? '#f0fdf4' : '#fff7ed',
+                        color: u.isActive !== false ? '#15803d' : '#c2410c',
+                        flexShrink: 0
+                      }}
+                    >
+                      <span style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: u.isActive !== false ? '#16a34a' : '#ea580c',
+                        display: 'inline-block'
+                      }} />
+                      <span>{u.isActive !== false ? 'Active' : 'Suspended'}</span>
+                    </button>
+                  </div>
+
+                  {/* Email Pill */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    background: '#f8fafc', 
+                    padding: '8px 12px', 
+                    borderRadius: '8px',
+                    border: '1px solid #f1f5f9',
+                    fontSize: '12.5px',
+                    color: '#334155'
+                  }}>
+                    <Mail size={14} color="#94a3b8" style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {u.email}
+                    </span>
+                  </div>
+
+                  {/* Card Actions Footer */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8' }}>
+                      User #{(currentPage - 1) * pageSize + index + 1}
+                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <button
                         type="button"
                         onClick={() => handleToggleStatus(u)}
                         disabled={updatingStatusId === u._id || isRoot}
-                        title={isRoot ? 'Cannot suspend Super Admin' : (u.isActive !== false ? 'Click to suspend this account' : 'Click to activate this account')}
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 11px',
-                          borderRadius: '20px',
+                          gap: '5px',
+                          padding: '5px 10px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
                           fontSize: '12px',
                           fontWeight: '600',
-                          cursor: isRoot ? 'not-allowed' : 'pointer',
-                          border: u.isActive !== false ? '1px solid #bbf7d0' : '1px solid #fed7aa',
-                          background: u.isActive !== false ? '#f0fdf4' : '#fff7ed',
-                          color: u.isActive !== false ? '#15803d' : '#c2410c',
-                          transition: 'all 0.15s ease',
-                          opacity: updatingStatusId === u._id ? 0.6 : 1
-                        }}
-                        onMouseEnter={e => {
-                          if (!isRoot) e.currentTarget.style.filter = 'brightness(0.95)';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.filter = 'none';
+                          color: '#475569',
+                          cursor: isRoot ? 'not-allowed' : 'pointer'
                         }}
                       >
-                        <span style={{
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '50%',
-                          background: u.isActive !== false ? '#16a34a' : '#ea580c',
-                          display: 'inline-block'
-                        }} />
-                        <span>{u.isActive !== false ? 'Active' : 'Suspended'}</span>
+                        <span>{u.isActive !== false ? 'Suspend' : 'Activate'}</span>
                       </button>
-                    </td>
-                    <td style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle' }}>
+
                       <button
+                        type="button"
                         onClick={() => handleDelete(u)}
                         style={{
-                          padding: '6px',
-                          border: '1px solid #fecaca',
-                          background: '#fff',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          color: '#dc2626',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.15s ease'
+                          gap: '5px',
+                          padding: '5px 10px',
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: '#dc2626',
+                          cursor: 'pointer'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#dc2626'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
-                        title="Delete Account"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
+                        <span>Delete</span>
                       </button>
-                    </td>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (>= 640px) */}
+          <div className="auv-desktop-table-wrapper">
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}></th>
+                    <th style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                      Sr. No.
+                    </th>
+                    <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                      Name & Username
+                    </th>
+                    <th style={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                      Email Address
+                    </th>
+                    <th style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                      Status
+                    </th>
+                    <th style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b' }}>
+                      Actions
+                    </th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {paginatedUsers.map((u, index) => {
+                    const isSelected = selectedIds.has(u._id);
+                    const isRoot = u.role === 'SUPER_ADMIN' || u.username === 'admin' || u.email === 'admin@goreadpost.com';
+                    const avatarUrl = getUserAvatar(u);
+                    const initials = getUserInitials(u.name);
+
+                    return (
+                      <tr 
+                        key={u._id} 
+                        style={{ 
+                          borderBottom: '1px solid #f1f5f9', 
+                          backgroundColor: isSelected ? '#fff1f2' : 'transparent',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      >
+                        <td style={{ width: '42px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <input 
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const next = new Set(selectedIds);
+                              if (e.target.checked) next.add(u._id);
+                              else next.delete(u._id);
+                              setSelectedIds(next);
+                            }}
+                            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#dc2626' }}
+                          />
+                        </td>
+                        <td style={{ width: '68px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
+                            {(currentPage - 1) * pageSize + index + 1}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ position: 'relative', width: '38px', height: '38px', flexShrink: 0 }}>
+                              <img
+                                src={avatarUrl}
+                                alt={u.name}
+                                style={{
+                                  width: '38px',
+                                  height: '38px',
+                                  borderRadius: '50%',
+                                  objectFit: 'cover',
+                                  border: '1.5px solid #e2e8f0',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                                  display: 'block'
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  if (e.currentTarget.nextElementSibling) {
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }
+                                }}
+                              />
+                              <div
+                                style={{
+                                  width: '38px',
+                                  height: '38px',
+                                  borderRadius: '50%',
+                                  background: '#f1f5f9',
+                                  color: '#475569',
+                                  display: 'none',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: '700',
+                                  fontSize: '13px',
+                                  border: '1.5px solid #cbd5e1',
+                                  textTransform: 'uppercase'
+                                }}
+                              >
+                                {initials}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '13.5px' }}>{u.name}</div>
+                              <div style={{ fontSize: '12px', color: '#64748b' }}>@{u.username}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#334155', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+                            <Mail size={13} color="#94a3b8" />
+                            <span>{u.email}</span>
+                          </div>
+                        </td>
+                        <td style={{ width: '140px', padding: '12px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(u)}
+                            disabled={updatingStatusId === u._id || isRoot}
+                            title={isRoot ? 'Cannot suspend Super Admin' : (u.isActive !== false ? 'Click to suspend this account' : 'Click to activate this account')}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '4px 11px',
+                              borderRadius: '20px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              cursor: isRoot ? 'not-allowed' : 'pointer',
+                              border: u.isActive !== false ? '1px solid #bbf7d0' : '1px solid #fed7aa',
+                              background: u.isActive !== false ? '#f0fdf4' : '#fff7ed',
+                              color: u.isActive !== false ? '#15803d' : '#c2410c',
+                              transition: 'all 0.15s ease',
+                              opacity: updatingStatusId === u._id ? 0.6 : 1
+                            }}
+                            onMouseEnter={e => {
+                              if (!isRoot) e.currentTarget.style.filter = 'brightness(0.95)';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.filter = 'none';
+                            }}
+                          >
+                            <span style={{
+                              width: '7px',
+                              height: '7px',
+                              borderRadius: '50%',
+                              background: u.isActive !== false ? '#16a34a' : '#ea580c',
+                              display: 'inline-block'
+                            }} />
+                            <span>{u.isActive !== false ? 'Active' : 'Suspended'}</span>
+                          </button>
+                        </td>
+                        <td style={{ width: '90px', padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle' }}>
+                          <button
+                            onClick={() => handleDelete(u)}
+                            style={{
+                              padding: '6px',
+                              border: '1px solid #fecaca',
+                              background: '#fff',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              color: '#dc2626',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#dc2626'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
+                            title="Delete Account"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Table Footer & Modern Pagination ── */}
+            <div className="abv-pagination-bar" style={{ borderTop: '1px solid #e2e8f0', borderRadius: '0 0 14px 14px', background: '#f8fafc' }}>
+              <div className="abv-pagination-left">
+                <div className="abv-pagination-info">
+                  Showing{' '}
+                  <span className="abv-pg-bold">
+                    {filteredUsers.length > 0 ? ((currentPage - 1) * pageSize + 1) : 0}–{Math.min(currentPage * pageSize, filteredUsers.length)}
+                  </span>{' '}
+                  of <span className="abv-pg-bold">{filteredUsers.length}</span> users
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="abv-pagination-actions">
+                  <button
+                    type="button"
+                    className="abv-page-nav-btn"
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(1, p - 1));
+                      window.scrollTo({ top: 180, behavior: 'smooth' });
+                    }}
+                    title="Previous Page"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  <div className="abv-page-numbers">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => {
+                        return (
+                          page === 1 || 
+                          page === totalPages || 
+                          Math.abs(page - currentPage) <= 1 ||
+                          (currentPage <= 3 && page <= 4) ||
+                          (currentPage >= totalPages - 2 && page >= totalPages - 3)
+                        );
+                      })
+                      .reduce((acc, page, idx, arr) => {
+                        if (idx > 0 && page - arr[idx - 1] > 1) {
+                          acc.push(`ellipsis-${page}`);
+                        }
+                        acc.push(page);
+                        return acc;
+                      }, [])
+                      .map(item => {
+                        if (typeof item === 'string') {
+                          return <span key={item} className="abv-page-ellipsis">…</span>;
+                        }
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            className={`abv-page-number-btn ${currentPage === item ? 'active' : ''}`}
+                            onClick={() => {
+                              setCurrentPage(item);
+                              window.scrollTo({ top: 180, behavior: 'smooth' });
+                            }}
+                          >
+                            {item}
+                          </button>
+                        );
+                      })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="abv-page-nav-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 180, behavior: 'smooth' });
+                    }}
+                    title="Next Page"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </>
       )}
 
       {/* Create / Edit User Modal */}
       {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 'clamp(0.75rem, 3vw, 1.25rem)' }}>
           <div style={{ background: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
             
             {/* Modal Header */}
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
+            <div style={{ padding: '14px clamp(14px, 3vw, 24px)', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
                 {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
               </h3>
@@ -789,7 +1095,7 @@ export default function AdminUsersView({ onShowToast }) {
 
             {/* Modal Scrollable Body */}
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-              <div style={{ padding: '22px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div style={{ padding: '18px clamp(14px, 3vw, 24px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 
                 {/* Form Error Alert */}
                 {formError && (
@@ -1129,19 +1435,21 @@ export default function AdminUsersView({ onShowToast }) {
               </div>
 
               {/* Modal Sticky Footer */}
-              <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', background: '#fafbfc', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ padding: '12px clamp(14px, 3vw, 24px)', borderTop: '1px solid #f1f5f9', background: '#fafbfc', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', flexWrap: 'nowrap' }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: '8px 16px',
+                    height: '38px',
+                    padding: '0 16px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
                     background: '#ffffff',
                     color: '#475569',
                     fontSize: '13px',
-                    fontWeight: '600',
+                    fontWeight: '700',
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
                     transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; }}
@@ -1155,14 +1463,17 @@ export default function AdminUsersView({ onShowToast }) {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
-                    padding: '8px 20px',
+                    height: '38px',
+                    padding: '0 20px',
                     borderRadius: '8px',
                     border: 'none',
                     background: 'var(--brand-primary, #dc2626)',
                     color: '#ffffff',
                     fontSize: '13px',
                     fontWeight: '700',
+                    whiteSpace: 'nowrap',
                     cursor: saving ? 'not-allowed' : 'pointer',
                     boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
                     opacity: saving ? 0.7 : 1,

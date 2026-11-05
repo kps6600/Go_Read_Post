@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Send, Globe, ArrowUp, ArrowUpRight, ShieldCheck, 
   ExternalLink, Rss, MessageSquare, Radio
 } from 'lucide-react';
 import { FooterService } from '../services/footerService';
+import './Footer.css';
 
 const renderSocialIcon = (platform, label = '') => {
   const p = (platform || label || '').toLowerCase();
@@ -86,12 +87,12 @@ const renderSocialIcon = (platform, label = '') => {
 export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings }) {
   const [footerData, setFooterData] = useState({
     aboutText: 'GoReadPost is your trusted source for quality blogs, tips, and insights across technology, business, education, health and lifestyle.',
-    copyrightText: '© 2025 GoReadPost. All rights reserved.',
+    copyrightText: '� 2025 GoReadPost. All rights reserved.',
     brandCtaText: 'Pitch Your Story',
     brandCtaLink: '/pitch',
     trustBadgeText: '100% Independent Editorial Integrity',
     liveDeskText: 'LIVE DESK',
-    liveDeskLocations: 'Bengaluru • New Delhi • San Francisco • Singapore',
+    liveDeskLocations: 'Bengaluru � New Delhi � San Francisco � Singapore',
     bottomCommunityTag: 'Built with precision for the global builder community',
     bottomEditionText: 'Global Edition (English)',
     socialLinks: {
@@ -254,7 +255,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
   const colCount = visibleColumns.length;
   const totalCols = 1 + (colCount > 0 ? colCount : 3);
 
-  const liveLocations = footerData.liveDeskLocations || siteSettings?.liveDeskLocations || 'Bengaluru • New Delhi • San Francisco • Singapore';
+  const liveLocations = footerData.liveDeskLocations || siteSettings?.liveDeskLocations || 'Bengaluru � New Delhi � San Francisco � Singapore';
   const liveDeskText = footerData.liveDeskText || 'LIVE DESK';
 
   const socialList = (() => {
@@ -366,7 +367,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
                       {siteSettings?.siteName || siteSettings?.brandPrefix || 'GoReadPost'}
                     </div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.04em', marginTop: '1px' }}>
-                      Read • Learn • Grow
+                      Read � Learn � Grow
                     </div>
                   </div>
                 </div>
@@ -432,7 +433,7 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
             <span className="footer-community-tag">
               {footerData.bottomCommunityTag || 'Built with precision for the global builder community'}
             </span>
-            <span className="footer-dot-sep">•</span>
+            <span className="footer-dot-sep">�</span>
             <div className="footer-edition-selector">
               <Globe size={13} className="globe-icon" />
               <span>{footerData.bottomEditionText || 'Global Edition (English)'}</span>

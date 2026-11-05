@@ -485,29 +485,23 @@ export default function TrendingPage({
       <section 
         className="tp-hero-header"
         style={{ 
-          backgroundImage: `url(${heroImage})`,
-          position: 'relative',
-          minHeight: 'clamp(500px, 62vh, 660px)',
-          display: 'flex',
-          alignItems: 'flex-end',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          overflow: 'hidden'
+          backgroundImage: `url(${heroImage})`
         }}
       >
-        <div 
-          className="tp-hero-overlay" 
-          style={{ position: 'absolute', inset: 0, zIndex: 1 }} 
-        />
-        <div 
-          className="tp-hero-inner" 
-          style={{ position: 'relative', zIndex: 2, width: '100%' }}
-        >
+        <div className="tp-hero-overlay" />
+        <div className="tp-hero-inner">
           <div className="tp-hero-left">
+            {/* Category / Trending pill */}
+            <div className="tp-hero-badge-wrap">
+              <span className="tp-hero-badge">
+                <span className="tp-hero-badge-dot" />
+                {heroCategory || 'Trending Story'}
+              </span>
+            </div>
+
             {/* Headline */}
             <h1 
               className="tp-hero-title"
-              style={{ color: '#ffffff', textShadow: '0 2px 14px rgba(0,0,0,0.8)' }}
               onClick={() => onSelectStory && onSelectStory(activeHero)}
             >
               {heroTitle}
@@ -515,56 +509,60 @@ export default function TrendingPage({
 
             {/* Bottom Left Row: Action Buttons & Author Meta */}
             <div className="tp-hero-actions-cluster">
-              <button 
-                type="button"
-                className="tp-hero-read-btn"
-                style={{ cursor: 'pointer' }}
-                onClick={() => onSelectStory && onSelectStory(activeHero)}
-              >
-                <span>Read Story</span>
-                <ArrowRight size={15} />
-              </button>
+              <div className="tp-hero-btns-group">
+                <button 
+                  type="button"
+                  className="tp-hero-read-btn"
+                  onClick={() => onSelectStory && onSelectStory(activeHero)}
+                >
+                  <span>Read Story</span>
+                  <ArrowRight size={15} />
+                </button>
 
-              <button 
-                type="button"
-                className={`tp-hero-save-btn ${isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onToggleSave) onToggleSave(activeHero);
-                }}
-                title={isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "Remove from reading list" : "Save to read later"}
-                aria-label="Save story"
-              >
-                <Bookmark size={15} fill={isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "currentColor" : "none"} />
-                <span>{isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "Saved" : "Save"}</span>
-              </button>
+                <button 
+                  type="button"
+                  className={`tp-hero-save-btn ${isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onToggleSave) onToggleSave(activeHero);
+                  }}
+                  title={isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "Remove from reading list" : "Save to read later"}
+                  aria-label="Save story"
+                >
+                  <Bookmark size={15} fill={isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "currentColor" : "none"} />
+                  <span>{isSaved && isSaved(activeHero?.id || activeHero?._id || activeHero?.slug) ? "Saved" : "Save"}</span>
+                </button>
+              </div>
 
-              <div className="tp-hero-author-meta">
+              {/* Author Byline & Live Story Stats */}
+              <div className="tp-hero-author-card">
                 <img 
                   src={heroAvatar} 
                   alt={heroAuthor} 
                   className="tp-hero-avatar"
-                  style={{ width: '32px', height: '32px', minWidth: '32px', borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
                   }}
                 />
-                <span className="tp-hero-author-name">{heroAuthor}</span>
-                <span className="tp-hero-sep">•</span>
-                <span>{heroDate}</span>
-                <span className="tp-hero-sep">•</span>
-                <span>{heroReadTime}</span>
-                <span className="tp-hero-sep">•</span>
-                <span className="tp-hero-stat-badge" title="Total Views">
-                  <Eye size={13} />
-                  <span>{formatCount(getStoryViews(activeHero))}</span>
-                </span>
-                <span className="tp-hero-sep">•</span>
-                <span className="tp-hero-stat-badge" title="Total Likes">
-                  <Heart size={13} fill="currentColor" />
-                  <span>{formatCount(getStoryLikes(activeHero))}</span>
-                </span>
+                <div className="tp-hero-author-info">
+                  <span className="tp-hero-author-name">{heroAuthor}</span>
+                  <div className="tp-hero-author-meta-line">
+                    <span className="tp-hero-meta-item">{heroDate}</span>
+                    <span className="tp-hero-sep">•</span>
+                    <span className="tp-hero-meta-item">{heroReadTime}</span>
+                    <span className="tp-hero-sep">•</span>
+                    <span className="tp-hero-stat-item" title="Total Views">
+                      <Eye size={12} />
+                      <span>{formatCount(getStoryViews(activeHero))}</span>
+                    </span>
+                    <span className="tp-hero-sep">•</span>
+                    <span className="tp-hero-stat-item" title="Total Likes">
+                      <Heart size={12} fill="currentColor" />
+                      <span>{formatCount(getStoryLikes(activeHero))}</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -590,21 +588,23 @@ export default function TrendingPage({
               </button>
             </div>
 
-            <div className="tp-slider-dots">
-              {trendingHeroSlides.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`tp-slider-dot ${idx === currentHeroSlide ? 'active' : ''}`}
-                  onClick={() => setCurrentHeroSlide(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
-            </div>
+            <div className="tp-slider-dots-group">
+              <div className="tp-slider-dots">
+                {trendingHeroSlides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`tp-slider-dot ${idx === currentHeroSlide ? 'active' : ''}`}
+                    onClick={() => setCurrentHeroSlide(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
 
-            <span className="tp-slider-counter">
-              0{currentHeroSlide + 1} / 0{trendingHeroSlides.length}
-            </span>
+              <span className="tp-slider-counter">
+                0{currentHeroSlide + 1} / 0{trendingHeroSlides.length}
+              </span>
+            </div>
           </div>
         </div>
       </section>

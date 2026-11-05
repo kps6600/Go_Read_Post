@@ -188,7 +188,8 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
               title="Close Cinema Mode (Esc)"
             >
               <ArrowLeft size={16} />
-              <span>Back to Shows</span>
+              <span className="cvp-back-btn-text">Back to Shows</span>
+              <span className="cvp-back-btn-text-mobile">Shows</span>
             </button>
             <div className="cvp-header-divider" />
             <span className="cvp-series-pill">{currentVideo.series}</span>
@@ -277,7 +278,8 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
               onClick={() => setIsSaved(!isSaved)}
             >
               <Bookmark size={15} fill={isSaved ? "var(--brand-primary)" : "none"} />
-              <span>{isSaved ? 'In Watchlist' : 'Watch Later'}</span>
+              <span className="cvp-act-label-desktop">{isSaved ? 'In Watchlist' : 'Watch Later'}</span>
+              <span className="cvp-act-label-mobile">{isSaved ? 'Saved' : 'Save'}</span>
             </button>
 
             <button 
@@ -286,7 +288,8 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
               onClick={handleShare}
             >
               {isCopied ? <Check size={15} color="#10b981" /> : <Share2 size={15} />}
-              <span>{isCopied ? 'Link Copied!' : 'Share Show'}</span>
+              <span className="cvp-act-label-desktop">{isCopied ? 'Link Copied!' : 'Share Show'}</span>
+              <span className="cvp-act-label-mobile">{isCopied ? 'Copied' : 'Share'}</span>
             </button>
           </div>
 
@@ -295,10 +298,12 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
               <Eye size={14} />
               <span>{currentVideo.views} views</span>
             </div>
+            <span className="cvp-meta-dot">•</span>
             <div className="cvp-meta-stat">
               <Clock size={14} />
               <span>{currentVideo.duration}</span>
             </div>
+            <span className="cvp-meta-dot">•</span>
             <div className="cvp-meta-stat">
               <span>Published {currentVideo.publishedAt}</span>
             </div>

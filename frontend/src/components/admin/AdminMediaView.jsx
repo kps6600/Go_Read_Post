@@ -539,9 +539,9 @@ export default function AdminMediaView({ onShowToast }) {
       )}
 
       {/* ── Cards Header: Select All & Bulk Actions (Matching other pages) ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <label title="Select assets on this page" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none', fontWeight: 600, fontSize: '0.84rem', color: '#475569' }}>
+      <div className={`abv-cards-header-bar ${selectedIds.size > 0 ? 'has-selection' : ''}`}>
+        <div className="abv-cards-header-left">
+          <label className="abv-select-all-label" title="Select assets on this page">
             <input 
               type="checkbox" 
               className="admin-table-checkbox"
@@ -567,40 +567,44 @@ export default function AdminMediaView({ onShowToast }) {
           </label>
 
           {selectedIds.size > 0 && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '999px', background: '#fee2e2', color: '#dc2626', fontSize: '0.78rem', fontWeight: 700, border: '1px solid #fecaca' }}>
-              {selectedIds.size} of {filteredFiles.length} selected
+            <span className="abv-selected-pill">
+              {selectedIds.size} selected
             </span>
           )}
         </div>
 
-        {selectedIds.size > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-              title="Delete selected file(s)"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                background: '#dc2626',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                cursor: bulkDeleting ? 'not-allowed' : 'pointer',
-                boxShadow: '0 1px 3px rgba(220, 38, 38, 0.25)'
-              }}
-            >
-              <Trash2 size={14} />
-              <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
-            </button>
-
-          </div>
-        )}
+        <div className="abv-cards-header-right">
+          {selectedIds.size > 0 ? (
+            <div className="abv-bulk-actions-group">
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                title="Delete selected file(s)"
+                className="abv-bulk-btn abv-bulk-btn-delete"
+              >
+                <Trash2 size={14} />
+                <span>{bulkDeleting ? 'Deleting...' : `Delete (${selectedIds.size})`}</span>
+              </button>
+            </div>
+          ) : totalPages > 1 ? (
+            <div className="abv-header-pagination">
+              <span className="abv-header-pg-text">
+                Showing{' '}
+                <strong>
+                  {((currentPage - 1) * pageSize + 1) === Math.min(currentPage * pageSize, filteredFiles.length)
+                    ? (currentPage - 1) * pageSize + 1
+                    : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredFiles.length)}`}
+                </strong>{' '}
+                of <strong>{filteredFiles.length}</strong>
+              </span>
+            </div>
+          ) : (
+            <div className="abv-cards-count-badge">
+              <span>{filteredFiles.length} {filteredFiles.length === 1 ? 'file' : 'files'}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Media Grid ── */}

@@ -1229,8 +1229,11 @@
 .atv-pagination-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
@@ -1240,6 +1243,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.atv-pagination-nav-btn span {
+  display: none !important;
 }
 
 [data-theme='dark'] .atv-pagination-nav-btn {

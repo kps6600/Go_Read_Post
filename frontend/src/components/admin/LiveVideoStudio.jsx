@@ -3,7 +3,7 @@ import {
   ArrowLeft, Film, Play, Plus, Trash2, UploadCloud, FolderOpen, 
   Sparkles, Bold, Italic, Underline, AlignLeft, AlignCenter, 
   RemoveFormatting, Clock, Check, X, AlertCircle, Copy, 
-  RefreshCw, Eye, ThumbsUp, Tag, Star, Bookmark, Search, ChevronDown
+  RefreshCw, Eye, ThumbsUp, Tag, Star, Bookmark, Search, ChevronDown, Save
 } from 'lucide-react';
 import { VideoService } from '../../services/videoService';
 import { SubmissionService } from '../../services/submissionService';
@@ -1044,12 +1044,11 @@ export default function LiveVideoStudio({
             <div className="las-studio-badge-row">
               {!isPitchMode && (
                 <span 
-                  className="las-studio-status-badge"
+                  className={`las-status-tag ${formData.status === 'published' ? 'published' : 'draft'}`}
                   style={{
-                    background: formData.status === 'published' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                    color: formData.status === 'published' ? '#10b981' : '#f59e0b',
-                    borderColor: formData.status === 'published' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    marginRight: '6px'
                   }}
                   onClick={() => setFormData(p => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
                   title="Click to toggle Published vs Draft"
@@ -1101,7 +1100,7 @@ export default function LiveVideoStudio({
               title="Permanently remove video episode"
             >
               <Trash2 size={14} />
-              <span>Delete</span>
+              <span className="las-btn-label">Delete</span>
             </button>
           )}
 
@@ -1113,7 +1112,8 @@ export default function LiveVideoStudio({
               disabled={saving}
               title="Save as Draft (Ctrl+S)"
             >
-              <span>Save Draft</span>
+              <Save size={13} />
+              <span className="las-btn-label">Save Draft</span>
             </button>
           )}
 
@@ -1126,12 +1126,12 @@ export default function LiveVideoStudio({
             {saving ? (
               <>
                 <RefreshCw size={14} className="animate-spin" />
-                <span>{isPitchMode ? 'Submitting Pitch...' : 'Publishing...'}</span>
+                <span>{isPitchMode ? 'Submitting...' : 'Publishing...'}</span>
               </>
             ) : (
               <>
                 <Play size={14} fill="currentColor" />
-                <span>{isPitchMode ? 'Submit Video Pitch' : (formData._id ? 'Update Video' : 'Publish Video')}</span>
+                <span>{isPitchMode ? 'Submit Pitch' : (formData._id ? 'Update Video' : 'Publish Video')}</span>
               </>
             )}
           </button>
@@ -1289,11 +1289,11 @@ export default function LiveVideoStudio({
                 ) : (
                   <div className="las-cover-dropzone">
                     <div className="las-cover-dropzone-content" style={{ width: '100%' }}>
-                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
                         <button
                           type="button"
                           className="las-btn las-btn-publish"
-                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                          style={{ flex: '1 1 140px', maxWidth: '200px', height: '38px', padding: '0 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                           onClick={() => {
                             if (coverFileInputRef.current) coverFileInputRef.current.click();
                           }}
@@ -1306,7 +1306,7 @@ export default function LiveVideoStudio({
                           <button
                             type="button"
                             className="las-btn"
-                            style={{ background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                            style={{ flex: '1 1 140px', maxWidth: '200px', height: '38px', background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                             onClick={openMediaPicker}
                           >
                             <FolderOpen size={14} />
@@ -1317,7 +1317,7 @@ export default function LiveVideoStudio({
                           <button
                             type="button"
                             className="las-btn"
-                            style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                            style={{ flex: '1 1 180px', maxWidth: '250px', height: '38px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '0 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                             onClick={handleFetchYoutubeThumbnail}
                           >
                             <Sparkles size={14} />
