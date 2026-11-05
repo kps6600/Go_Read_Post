@@ -347,13 +347,8 @@ export default function LiveWholePageStudio({
   const popularArticles = useMemo(() => {
     const data = { ...(heroSection?.customConfig || {}), ...(heroSection?.data || {}) };
     if (data.hasCustomPopular || (Array.isArray(data.popularArticles) && data.popularArticles.length > 0)) {
-      const livePopular = (data.popularArticles || []).filter(item => {
-        if (!item) return false;
-        if (item.isCustom || !item.articleId) return true;
-        const id = String(item._id || item.id || item.articleId || item.slug);
-        return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
-      });
-      if (livePopular.length > 0) {
+      const livePopular = (data.popularArticles || []).filter(item => Boolean(item && (item.title || item.headline)));
+      if (livePopular.length > 0 || data.hasCustomPopular) {
         return livePopular.slice(0, 5).map(formatForPopularPost);
       }
     }
@@ -684,6 +679,32 @@ export default function LiveWholePageStudio({
       ...updates
     };
     handleUpdateHeroData({ popularArticles: nextPop });
+  };
+
+  const handleCreateCustomPopularCard = () => {
+    if (popularArticles.length >= 5) {
+      alert("Popular Posts can have a maximum of 5 cards. Delete a card first to add a new one.");
+      return;
+    }
+    const newCard = {
+      id: `custom-pop-${Date.now()}`,
+      _id: `custom-pop-${Date.now()}`,
+      title: 'New Featured Popular Story',
+      image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80',
+      readTime: '4 min read',
+      category: 'Startups',
+      isCustom: true
+    };
+    const nextPop = [...popularArticles, newCard].slice(0, 5);
+    handleUpdateHeroData({ popularArticles: nextPop, hasCustomPopular: true });
+  };
+
+  const handleEditPopularImage = (idx) => {
+    const current = popularArticles[idx]?.image || '';
+    const newUrl = window.prompt("Enter image URL for this popular card:", current);
+    if (newUrl && newUrl.trim() && newUrl.trim() !== current) {
+      handleInlinePopularUpdate(idx, { image: newUrl.trim() });
+    }
   };
   // FEED SECTIONS ARTICLE REORDERING & CURATION
 
@@ -1321,28 +1342,112 @@ export default function LiveWholePageStudio({
                           </div>
 
                           {/* Right Popular Sidebar */}
-                          <div className="mhp-popular-card">
-                            <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                              <div className="mhp-section-title-wrap">
+                          {/* Right Popular Sidebar */}
+                          <div className="mhp-popular-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                              <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span 
-                                  style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'default', userSelect: 'none' }}
+                                  contentEditable={true}
+                                  suppressContentEditableWarning={true}
+                                  onBlur={(e) => {
+                                    const val = e.currentTarget.textContent.trim();
+                                    if (val) {
+                                      handleUpdateHeroData({ popularTitle: val });
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
+                                  title="Click to edit section title"
+                                  style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'text', borderBottom: '1px dashed #94a3b8' }}
                                 >
                                   {heroSection?.data?.popularTitle || 'Popular Posts'}
                                 </span>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
+                                  {popularArticles.length}/5
+                                </span>
                               </div>
 
-                              <span 
-                                className="mhp-view-all-link"
-                                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#ea580c' }}
-                              >
-                                View All <ArrowRight size={14} />
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button
+                                  type="button"
+                                  disabled={popularArticles.length >= 5}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '4px 9px',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: '1px solid #cbd5e1',
+                                    background: popularArticles.length >= 5 ? '#f1f5f9' : '#ffffff',
+                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#2563eb',
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                  }}
+                                  onClick={() => {
+                                    if (popularArticles.length >= 5) {
+                                      alert("Popular Posts can have a maximum of 5 cards. Delete a card first to add a new one.");
+                                      return;
+                                    }
+                                    handleOpenPicker({ type: 'popular-add' });
+                                  }}
+                                  title={popularArticles.length >= 5 ? "Maximum 5 cards reached. Delete a card first." : "Add story from library (Max 5)"}
+                                >
+                                  <Plus size={12} strokeWidth={2.5} />
+                                  <span>Add Story</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={popularArticles.length >= 5}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '4px 8px',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: '1px solid #cbd5e1',
+                                    background: popularArticles.length >= 5 ? '#f1f5f9' : '#f8fafc',
+                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#475569',
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                  }}
+                                  onClick={handleCreateCustomPopularCard}
+                                  title={popularArticles.length >= 5 ? "Maximum 5 cards reached." : "Add custom blank card"}
+                                >
+                                  <span>+ Blank</span>
+                                </button>
+                              </div>
                             </div>
 
                             <div className="mhp-popular-list">
                               {popularArticles.length === 0 ? (
-                                <div className="lbe-popular-empty-state">
-                                  <h3 className="lbe-popular-empty-title">Popular Posts</h3>
+                                <div style={{ padding: '2rem 1rem', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1.5px dashed #cbd5e1' }}>
+                                  <h4 style={{ margin: '0 0 6px', fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>No Popular Cards</h4>
+                                  <p style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#64748b' }}>Add up to 5 ranked popular articles to display alongside the hero banner.</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenPicker({ type: 'popular-add' })}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      padding: '6px 14px',
+                                      fontSize: '0.84rem',
+                                      fontWeight: 700,
+                                      borderRadius: '8px',
+                                      background: '#2563eb',
+                                      color: '#ffffff',
+                                      border: 'none',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Plus size={14} /> Add First Card
+                                  </button>
                                 </div>
                               ) : (
                                 popularArticles.map((item, idx) => {
@@ -1352,47 +1457,133 @@ export default function LiveWholePageStudio({
 
                                   return (
                                     <div 
-                                      key={item.id || idx} 
-                                      className="mhp-popular-item"
-                                      style={{ cursor: 'default' }}
+                                      key={item.id || item.articleId || idx} 
+                                      className="mhp-popular-item lbe-popular-manage-item"
+                                      style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '8px' }}
                                     >
-                                      <div className="mhp-popular-rank" title={`Position #${idx + 1}`}>
+                                      <div className="mhp-popular-rank" title={`Position #${idx + 1}`} style={{ flexShrink: 0 }}>
                                         {idx + 1}
                                       </div>
 
-                                      {/* Thumbnail */}
-                                      <img 
-                                        src={itemImg} 
-                                        alt={itemTitle} 
-                                        className="mhp-popular-thumb"
-                                        onError={(e) => {
-                                          e.target.onerror = null;
-                                          e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
-                                        }}
-                                        loading="lazy"
-                                      />
+                                      {/* Thumbnail + quick replace button */}
+                                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                                        <img 
+                                          src={itemImg} 
+                                          alt={itemTitle} 
+                                          className="mhp-popular-thumb"
+                                          onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
+                                          }}
+                                          loading="lazy"
+                                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
+                                          title="Replace article from library"
+                                          style={{
+                                            position: 'absolute',
+                                            bottom: '-3px',
+                                            right: '-3px',
+                                            width: '18px',
+                                            height: '18px',
+                                            borderRadius: '50%',
+                                            background: '#ffffff',
+                                            border: '1px solid #cbd5e1',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#2563eb',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                                            padding: 0
+                                          }}
+                                        >
+                                          <RefreshCw size={10} />
+                                        </button>
+                                      </div>
 
-                                      <div className="mhp-popular-info">
+                                      <div className="mhp-popular-info" style={{ flex: 1, minWidth: 0 }}>
                                         <h4 
                                           className="mhp-popular-title"
-                                          style={{ cursor: 'default', userSelect: 'none' }}
+                                          contentEditable={true}
+                                          suppressContentEditableWarning={true}
+                                          onBlur={(e) => {
+                                            const val = e.currentTarget.textContent.trim();
+                                            if (val && val !== itemTitle) {
+                                              handleInlinePopularUpdate(idx, { title: val });
+                                            }
+                                          }}
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                              e.preventDefault();
+                                              e.currentTarget.blur();
+                                            }
+                                          }}
+                                          title="Click directly to edit headline"
+                                          style={{ cursor: 'text', borderBottom: '1px dashed transparent', margin: '0 0 2px', fontSize: '0.86rem', lineHeight: '1.3' }}
                                         >
                                           {itemTitle}
                                         </h4>
-                                        <span className="mhp-popular-meta">
-                                          {itemReadTime}
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#64748b' }}>
+                                          <span 
+                                            contentEditable={true}
+                                            suppressContentEditableWarning={true}
+                                            onBlur={(e) => {
+                                              const val = e.currentTarget.textContent.trim();
+                                              if (val && val !== itemReadTime) {
+                                                handleInlinePopularUpdate(idx, { readTime: val });
+                                              }
+                                            }}
+                                            title="Click to edit read time"
+                                            style={{ cursor: 'text' }}
+                                          >
+                                            {itemReadTime}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleEditPopularImage(idx)}
+                                            title="Change image URL"
+                                            style={{ background: 'transparent', border: 'none', padding: '0 2px', color: '#94a3b8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                                          >
+                                            <ImageIcon size={11} />
+                                          </button>
+                                        </div>
                                       </div>
 
-                                      <button 
-                                        type="button" 
-                                        className="mhp-popular-save-btn"
-                                        title="Save to read later"
-                                        aria-label="Save story"
-                                        style={{ pointerEvents: 'none' }}
-                                      >
-                                        <Bookmark size={15} />
-                                      </button>
+                                      {/* Controls: Reorder Up/Down & Delete */}
+                                      <div className="lbe-item-reorder-group" style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                                        <button
+                                          type="button"
+                                          className="lbe-reorder-btn arrow-btn"
+                                          disabled={idx === 0}
+                                          onClick={() => handleMovePopular(idx, 'up')}
+                                          title="Move Up"
+                                          style={{ width: '26px', height: '26px', padding: 0 }}
+                                        >
+                                          <ArrowUp size={12} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="lbe-reorder-btn arrow-btn"
+                                          disabled={idx === popularArticles.length - 1}
+                                          onClick={() => handleMovePopular(idx, 'down')}
+                                          title="Move Down"
+                                          style={{ width: '26px', height: '26px', padding: 0 }}
+                                        >
+                                          <ArrowDown size={12} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="lbe-reorder-btn danger"
+                                          onClick={() => handleDeletePopular(idx)}
+                                          title="Delete card"
+                                          style={{ width: '26px', height: '26px', padding: 0, color: '#ef4444' }}
+                                        >
+                                          <Trash2 size={12} />
+                                        </button>
+                                      </div>
                                     </div>
                                   );
                                 })

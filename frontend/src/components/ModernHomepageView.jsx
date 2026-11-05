@@ -862,13 +862,10 @@ export default function ModernHomepageView({
     const displayedPopular = useMemo(() => {
       if (!showPopular) return [];
       if (data.hasCustomPopular || Array.isArray(data.popularArticles)) {
-        const livePopular = (data.popularArticles || []).filter(item => {
-          if (!item) return false;
-          if (item.isCustom || !item.articleId) return true;
-          const id = String(item.articleId || item._id || item.id || item.slug);
-          return pool.some(p => String(p._id || p.id || p.slug) === id || p.title === item.title);
-        });
-        return livePopular.slice(0, popularLimit);
+        const livePopular = (data.popularArticles || []).filter(item => Boolean(item && (item.title || item.headline)));
+        if (livePopular.length > 0 || data.hasCustomPopular) {
+          return livePopular.slice(0, Math.min(5, Number(popularLimit) || 5));
+        }
       }
 
       const heroId = getStoryId(activeSlide);
