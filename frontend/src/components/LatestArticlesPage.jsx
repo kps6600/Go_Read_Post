@@ -334,22 +334,38 @@ export default function LatestArticlesPage({
     }
   };
 
+  const formatCount = (val) => {
+    if (val === null || val === undefined || val === '') return '0';
+    if (typeof val === 'string') {
+      const v = val.trim();
+      if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v.toUpperCase();
+      const parsed = parseFloat(v.replace(/,/g, ''));
+      if (!isNaN(parsed)) return formatCount(parsed);
+      return v;
+    }
+    const n = Number(val);
+    if (isNaN(n) || n === 0) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(Math.round(n));
+  };
+
   const getStoryViewsCount = (story) => {
-    if (typeof story?.views === 'number' && story.views > 0) return story.views;
-    if (typeof story?.viewsCount === 'number' && story.viewsCount > 0) return story.viewsCount;
-    if (typeof story?.claps === 'number' && story.claps > 0) return story.claps * 4;
-    return 520;
+    const raw = (story?.views !== undefined && story?.views !== null && story?.views !== '')
+      ? story.views
+      : (story?.viewsCount || (typeof story?.claps === 'number' && story.claps > 0 ? story.claps * 4 : 0));
+    return formatCount(raw);
   };
 
   const getStoryLikesCount = (story, storyId) => {
     const sId = storyId || getStoryId(story);
-    const baseLikes = typeof story?.claps === 'number' && story.claps > 0
+    const baseLikes = typeof story?.claps === 'number' && story.claps >= 0
       ? story.claps 
-      : (typeof story?.likes === 'number' && story.likes > 0 
+      : (typeof story?.likes === 'number' && story.likes >= 0 
           ? story.likes 
-          : (typeof story?.likes === 'string' ? parseInt(story.likes) || 0 : Math.max(12, Math.round(getStoryViewsCount(story) * 0.12))));
+          : (typeof story?.likes === 'string' ? parseInt(story.likes) || 0 : 0));
     const isLiked = Boolean(likedStories[sId]);
-    return baseLikes + (isLiked ? 1 : 0);
+    return formatCount((Number(baseLikes) || 0) + (isLiked ? 1 : 0));
   };
   const [activeTag, setActiveTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');

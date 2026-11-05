@@ -74,12 +74,20 @@ const getTrendingScore = (s) => {
   return views + likes * 8;
 };
 
-// Clean formatted count representation: 290k, 1.4M, 450
+// Clean formatted count representation: 290K, 1.4M, 450
 const formatCount = (num) => {
+  if (num === null || num === undefined || num === '') return '0';
+  if (typeof num === 'string') {
+    const v = num.trim();
+    if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v.toUpperCase();
+    const parsed = parseFloat(v.replace(/,/g, ''));
+    if (!isNaN(parsed)) return formatCount(parsed);
+    return v;
+  }
   const n = Number(num) || 0;
   if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  return n.toLocaleString();
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(Math.round(n));
 };
 
 // Safe normalizer for raw MongoDB Article records into uniform story shapes

@@ -587,6 +587,22 @@ export default function ModernHomepageView({
   };
 
   
+  const formatCompactNumber = (num) => {
+    if (num === null || num === undefined || num === '') return '0';
+    if (typeof num === 'string') {
+      const v = num.trim();
+      if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v.toUpperCase();
+      const parsed = parseFloat(v.replace(/,/g, ''));
+      if (!isNaN(parsed)) return formatCompactNumber(parsed);
+      return v;
+    }
+    const n = Number(num);
+    if (isNaN(n) || n === 0) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(Math.round(n));
+  };
+
   const getStoryViewsCount = (blog) => {
     if (!blog) return '0';
     const live = findLiveStory(blog);
@@ -651,8 +667,8 @@ export default function ModernHomepageView({
     const blogReadTime = getStoryReadTime(blog);
     const isCardSaved = isSaved ? Boolean(isSaved(blog.id || blog._id || blog.slug)) : false;
     const isCardLiked = Boolean(likedStories[blogId]);
-    const likesCount = getStoryLikesCount(blog);
-    const viewsCount = getStoryViewsCount(blog);
+    const likesCount = formatCompactNumber(getStoryLikesCount(blog));
+    const viewsCount = formatCompactNumber(getStoryViewsCount(blog));
 
     return (
       <article key={blogId} className="mhp-blog-card">

@@ -33,6 +33,22 @@ const getStoryExcerpt = (s) => {
   return 'Explore deep insights, operational lessons, and strategic perspectives from Indian founders and industry pioneers.';
 };
 
+const formatCount = (val) => {
+  if (val === null || val === undefined || val === '') return '0';
+  if (typeof val === 'string') {
+    const v = val.trim();
+    if (v.toLowerCase().includes('k') || v.toLowerCase().includes('m')) return v;
+    const parsed = parseFloat(v.replace(/,/g, ''));
+    if (!isNaN(parsed)) return formatCount(parsed);
+    return v;
+  }
+  const n = Number(val);
+  if (isNaN(n) || n === 0) return '0';
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(Math.round(n));
+};
+
 const isHexId = (val) => typeof val === 'string' && /^[0-9a-fA-F]{24}$/.test(val.trim());
 
 const getStoryCategory = (s) => {
@@ -751,10 +767,14 @@ export default function CategoryContentPage({
                 const storyReadTime = getStoryReadTime(story);
                 const storyImg = getStoryImage(story);
                 const isStorySaved = isSaved && isSaved(storyId);
-                const storyViews = typeof story.views === 'number' && story.views > 0 ? story.views : (typeof story.claps === 'number' && story.claps > 0 ? story.claps * 4 : 540);
+                const storyViews = (story.views !== undefined && story.views !== null && story.views !== '')
+                  ? story.views
+                  : (story.reads || (typeof story.claps === 'number' && story.claps > 0 ? story.claps * 4 : 0));
                 const isCardLiked = Boolean(likedStories[storyId]);
-                const baseLikes = typeof story.likes === 'number' && story.likes > 0 ? story.likes : (typeof story.claps === 'number' && story.claps > 0 ? story.claps : Math.max(12, Math.round(storyViews * 0.12)));
-                const storyLikes = baseLikes + (isCardLiked ? 1 : 0);
+                const baseLikes = typeof story.claps === 'number' && story.claps >= 0
+                  ? story.claps
+                  : (typeof story.likes === 'number' && story.likes >= 0 ? story.likes : 0);
+                const storyLikes = (Number(baseLikes) || 0) + (isCardLiked ? 1 : 0);
 
                 return (
                   <article 
@@ -800,7 +820,7 @@ export default function CategoryContentPage({
                         <div className="cat-card-meta-right" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                           <span className="cat-views-badge" title={`${storyViews} views`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#475569', fontSize: '0.72rem', fontWeight: 700 }}>
                             <Eye size={12} color="#64748b" />
-                            <span>{storyViews.toLocaleString()}</span>
+                            <span>{formatCount(storyViews)}</span>
                           </span>
                           <button 
                             type="button" 
@@ -811,7 +831,7 @@ export default function CategoryContentPage({
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', padding: 0, color: isCardLiked ? '#dc2626' : '#64748b', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', lineHeight: 1.2 }}
                           >
                             <Heart size={12} fill={isCardLiked ? "#dc2626" : "none"} color={isCardLiked ? "#dc2626" : "#64748b"} />
-                            <span>{storyLikes.toLocaleString()}</span>
+                            <span>{formatCount(storyLikes)}</span>
                           </button>
                         </div>
                       </div>
