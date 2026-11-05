@@ -1355,13 +1355,7 @@ export default function AdminTagsView({ onShowToast }) {
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setMergeModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
-              >
-                <X size={19} />
-              </button>
+
             </div>
 
             <form onSubmit={handleExecuteMerge} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
