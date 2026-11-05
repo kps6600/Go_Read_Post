@@ -1070,27 +1070,7 @@ export default function AdminUsersView({ onShowToast }) {
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
                 {editingUser ? `Edit Account: ${editingUser.name}` : 'Create New User Account'}
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
-              >
-                <X size={18} />
-              </button>
+
             </div>
 
             {/* Modal Scrollable Body */}
