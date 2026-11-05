@@ -1163,13 +1163,7 @@ export default function AdminTagsView({ onShowToast }) {
                   {editingTag ? `Edit Tag: #${editingTag.name}` : 'Create New Keyword Tag'}
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
-              >
-                <X size={19} />
-              </button>
+
             </div>
 
             <form onSubmit={handleSave} style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>

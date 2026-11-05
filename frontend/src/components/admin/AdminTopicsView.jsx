@@ -1142,20 +1142,7 @@ export default function AdminTopicsView({ onShowToast }) {
                 </h3>
 
               </div>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#64748b',
-                  cursor: 'pointer',
-                  padding: '6px',
-                  borderRadius: '6px'
-                }}
-              >
-                <X size={19} />
-              </button>
+
             </div>
 
             {/* Form Body */}
