@@ -480,20 +480,6 @@ const handleClap = async (req, res) => {
 };
 router.patch('/:id/clap', handleClap);
 router.post('/:id/clap', handleClap);
-    }
-
-    const stories = readFallbackData();
-    const story = stories.find(s => s._id === id || s.id === id);
-    if (story) {
-      story.claps = (story.claps || 0) + 1;
-      writeFallbackData(stories);
-      return res.json({ success: true, claps: story.claps });
-    }
-    res.status(404).json({ success: false, message: 'Story not found' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 
 // 8. POST /api/stories/seed
 router.post('/seed', protectAdmin, async (req, res) => {
