@@ -1343,9 +1343,36 @@ export default function LiveWholePageStudio({
 
                           {/* Right Popular Sidebar */}
                           {/* Right Popular Sidebar */}
-                          <div className="mhp-popular-card" style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div className="mhp-section-header" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                              <div className="mhp-section-title-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div 
+                            className="mhp-popular-card" 
+                            style={{ 
+                              display: 'flex', 
+                              flexDirection: 'column',
+                              justifyContent: 'flex-start',
+                              height: '100%',
+                              minHeight: 'auto',
+                              padding: '1.25rem',
+                              background: '#ffffff',
+                              borderRadius: '16px',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)'
+                            }}
+                          >
+                            {/* Header */}
+                            <div 
+                              className="mhp-section-header" 
+                              style={{ 
+                                marginBottom: '0.85rem', 
+                                paddingBottom: '0.65rem',
+                                borderBottom: '1px solid #f1f5f9',
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-between', 
+                                gap: '8px', 
+                                flexWrap: 'wrap' 
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span 
                                   contentEditable={true}
                                   suppressContentEditableWarning={true}
@@ -1361,12 +1388,22 @@ export default function LiveWholePageStudio({
                                       e.currentTarget.blur();
                                     }
                                   }}
-                                  title="Click to edit section title"
-                                  style={{ fontWeight: 800, fontSize: '1.1rem', cursor: 'text', borderBottom: '1px dashed #94a3b8' }}
+                                  title="Click to edit title"
+                                  style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a', cursor: 'text' }}
                                 >
                                   {heroSection?.data?.popularTitle || 'Popular Posts'}
                                 </span>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
+                                <span 
+                                  style={{ 
+                                    fontSize: '0.72rem', 
+                                    fontWeight: 700, 
+                                    color: popularArticles.length >= 5 ? '#ea580c' : '#2563eb', 
+                                    background: popularArticles.length >= 5 ? '#fff7ed' : '#eff6ff', 
+                                    padding: '2px 8px', 
+                                    borderRadius: '12px',
+                                    border: `1px solid ${popularArticles.length >= 5 ? '#ffedd5' : '#dbeafe'}`
+                                  }}
+                                >
                                   {popularArticles.length}/5
                                 </span>
                               </div>
@@ -1379,14 +1416,15 @@ export default function LiveWholePageStudio({
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    padding: '4px 9px',
+                                    padding: '5px 10px',
                                     fontSize: '0.76rem',
                                     fontWeight: 700,
                                     borderRadius: '6px',
                                     border: '1px solid #cbd5e1',
-                                    background: popularArticles.length >= 5 ? '#f1f5f9' : '#ffffff',
-                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#2563eb',
-                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                    background: popularArticles.length >= 5 ? '#f1f5f9' : '#2563eb',
+                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#ffffff',
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.15s ease'
                                   }}
                                   onClick={() => {
                                     if (popularArticles.length >= 5) {
@@ -1397,7 +1435,7 @@ export default function LiveWholePageStudio({
                                   }}
                                   title={popularArticles.length >= 5 ? "Maximum 5 cards reached. Delete a card first." : "Add story from library (Max 5)"}
                                 >
-                                  <Plus size={12} strokeWidth={2.5} />
+                                  <Plus size={13} strokeWidth={2.5} />
                                   <span>Add Story</span>
                                 </button>
                                 <button
@@ -1407,24 +1445,36 @@ export default function LiveWholePageStudio({
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    padding: '4px 8px',
+                                    padding: '5px 9px',
                                     fontSize: '0.76rem',
                                     fontWeight: 700,
                                     borderRadius: '6px',
-                                    border: '1px solid #cbd5e1',
+                                    border: '1px solid #e2e8f0',
                                     background: popularArticles.length >= 5 ? '#f1f5f9' : '#f8fafc',
-                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#475569',
-                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer'
+                                    color: popularArticles.length >= 5 ? '#94a3b8' : '#334155',
+                                    cursor: popularArticles.length >= 5 ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.15s ease'
                                   }}
                                   onClick={handleCreateCustomPopularCard}
-                                  title={popularArticles.length >= 5 ? "Maximum 5 cards reached." : "Add custom blank card"}
+                                  title={popularArticles.length >= 5 ? "Maximum 5 cards reached." : "Add blank custom card"}
                                 >
                                   <span>+ Blank</span>
                                 </button>
                               </div>
                             </div>
 
-                            <div className="mhp-popular-list">
+                            {/* Cards List */}
+                            <div 
+                              className="mhp-popular-list" 
+                              style={{ 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                gap: '8px', 
+                                flex: '0 0 auto',
+                                height: 'auto',
+                                minHeight: '0' 
+                              }}
+                            >
                               {popularArticles.length === 0 ? (
                                 <div style={{ padding: '2rem 1rem', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1.5px dashed #cbd5e1' }}>
                                   <h4 style={{ margin: '0 0 6px', fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>No Popular Cards</h4>
@@ -1458,14 +1508,45 @@ export default function LiveWholePageStudio({
                                   return (
                                     <div 
                                       key={item.id || item.articleId || idx} 
-                                      className="mhp-popular-item lbe-popular-manage-item"
-                                      style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '8px' }}
+                                      className="mhp-popular-admin-row"
+                                      style={{ 
+                                        position: 'relative', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '10px', 
+                                        padding: '8px 10px', 
+                                        background: '#ffffff', 
+                                        borderRadius: '10px', 
+                                        border: '1px solid #e2e8f0', 
+                                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                                        flex: '0 0 auto',
+                                        height: 'auto',
+                                        minHeight: '62px',
+                                        transition: 'all 0.15s ease'
+                                      }}
                                     >
-                                      <div className="mhp-popular-rank" title={`Position #${idx + 1}`} style={{ flexShrink: 0 }}>
+                                      {/* Rank Circle */}
+                                      <div 
+                                        className="mhp-popular-rank" 
+                                        title={`Position #${idx + 1}`} 
+                                        style={{ 
+                                          width: '26px', 
+                                          height: '26px', 
+                                          borderRadius: '50%', 
+                                          background: '#0f172a', 
+                                          color: '#ffffff', 
+                                          display: 'flex', 
+                                          alignItems: 'center', 
+                                          justifyContent: 'center', 
+                                          fontSize: '0.78rem', 
+                                          fontWeight: 800, 
+                                          flexShrink: 0 
+                                        }}
+                                      >
                                         {idx + 1}
                                       </div>
 
-                                      {/* Thumbnail + quick replace button */}
+                                      {/* Thumbnail */}
                                       <div style={{ position: 'relative', flexShrink: 0 }}>
                                         <img 
                                           src={itemImg} 
@@ -1476,35 +1557,12 @@ export default function LiveWholePageStudio({
                                             e.target.src = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&auto=format&fit=crop&q=80';
                                           }}
                                           loading="lazy"
-                                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                          style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
                                         />
-                                        <button
-                                          type="button"
-                                          onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
-                                          title="Replace article from library"
-                                          style={{
-                                            position: 'absolute',
-                                            bottom: '-3px',
-                                            right: '-3px',
-                                            width: '18px',
-                                            height: '18px',
-                                            borderRadius: '50%',
-                                            background: '#ffffff',
-                                            border: '1px solid #cbd5e1',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: '#2563eb',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                                            padding: 0
-                                          }}
-                                        >
-                                          <RefreshCw size={10} />
-                                        </button>
                                       </div>
 
-                                      <div className="mhp-popular-info" style={{ flex: 1, minWidth: 0 }}>
+                                      {/* Headline & Meta */}
+                                      <div className="mhp-popular-info" style={{ flex: '1 1 auto', minWidth: 0 }}>
                                         <h4 
                                           className="mhp-popular-title"
                                           contentEditable={true}
@@ -1521,8 +1579,19 @@ export default function LiveWholePageStudio({
                                               e.currentTarget.blur();
                                             }
                                           }}
-                                          title="Click directly to edit headline"
-                                          style={{ cursor: 'text', borderBottom: '1px dashed transparent', margin: '0 0 2px', fontSize: '0.86rem', lineHeight: '1.3' }}
+                                          title="Click to edit headline"
+                                          style={{ 
+                                            cursor: 'text', 
+                                            margin: '0 0 2px', 
+                                            fontSize: '0.86rem', 
+                                            fontWeight: 700, 
+                                            color: '#0f172a',
+                                            lineHeight: '1.3',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden'
+                                          }}
                                         >
                                           {itemTitle}
                                         </h4>
@@ -1541,52 +1610,126 @@ export default function LiveWholePageStudio({
                                           >
                                             {itemReadTime}
                                           </span>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleEditPopularImage(idx)}
-                                            title="Change image URL"
-                                            style={{ background: 'transparent', border: 'none', padding: '0 2px', color: '#94a3b8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                          >
-                                            <ImageIcon size={11} />
-                                          </button>
                                         </div>
                                       </div>
 
-                                      {/* Controls: Reorder Up/Down & Delete */}
-                                      <div className="lbe-item-reorder-group" style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                                      {/* Right Action Buttons */}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
                                         <button
                                           type="button"
-                                          className="lbe-reorder-btn arrow-btn"
+                                          onClick={() => handleOpenPicker({ type: 'popular-replace', index: idx })}
+                                          title="Replace with story from library"
+                                          style={{
+                                            width: '26px',
+                                            height: '26px',
+                                            borderRadius: '6px',
+                                            background: '#ffffff',
+                                            border: '1px solid #cbd5e1',
+                                            color: '#2563eb',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            padding: 0
+                                          }}
+                                        >
+                                          <RefreshCw size={11} />
+                                        </button>
+                                        <button
+                                          type="button"
                                           disabled={idx === 0}
                                           onClick={() => handleMovePopular(idx, 'up')}
                                           title="Move Up"
-                                          style={{ width: '26px', height: '26px', padding: 0 }}
+                                          style={{
+                                            width: '26px',
+                                            height: '26px',
+                                            borderRadius: '6px',
+                                            background: '#f8fafc',
+                                            border: '1px solid #cbd5e1',
+                                            color: idx === 0 ? '#cbd5e1' : '#334155',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                                            padding: 0
+                                          }}
                                         >
-                                          <ArrowUp size={12} />
+                                          <ArrowUp size={11} />
                                         </button>
                                         <button
                                           type="button"
-                                          className="lbe-reorder-btn arrow-btn"
                                           disabled={idx === popularArticles.length - 1}
                                           onClick={() => handleMovePopular(idx, 'down')}
                                           title="Move Down"
-                                          style={{ width: '26px', height: '26px', padding: 0 }}
+                                          style={{
+                                            width: '26px',
+                                            height: '26px',
+                                            borderRadius: '6px',
+                                            background: '#f8fafc',
+                                            border: '1px solid #cbd5e1',
+                                            color: idx === popularArticles.length - 1 ? '#cbd5e1' : '#334155',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: idx === popularArticles.length - 1 ? 'not-allowed' : 'pointer',
+                                            padding: 0
+                                          }}
                                         >
-                                          <ArrowDown size={12} />
+                                          <ArrowDown size={11} />
                                         </button>
                                         <button
                                           type="button"
-                                          className="lbe-reorder-btn danger"
                                           onClick={() => handleDeletePopular(idx)}
                                           title="Delete card"
-                                          style={{ width: '26px', height: '26px', padding: 0, color: '#ef4444' }}
+                                          style={{
+                                            width: '26px',
+                                            height: '26px',
+                                            borderRadius: '6px',
+                                            background: '#fff1f2',
+                                            border: '1px solid #fecdd3',
+                                            color: '#e11d48',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            padding: 0
+                                          }}
                                         >
-                                          <Trash2 size={12} />
+                                          <Trash2 size={11} />
                                         </button>
                                       </div>
                                     </div>
                                   );
                                 })
+                              )}
+
+                              {/* Subtle Dashed Add Slot if fewer than 5 */}
+                              {popularArticles.length > 0 && popularArticles.length < 5 && (
+                                <div 
+                                  onClick={() => handleOpenPicker({ type: 'popular-add' })}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                    padding: '8px 12px',
+                                    border: '1.5px dashed #cbd5e1',
+                                    borderRadius: '10px',
+                                    background: '#f8fafc',
+                                    color: '#64748b',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease',
+                                    marginTop: '2px'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; e.currentTarget.style.background = '#eff6ff'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = '#f8fafc'; }}
+                                  title="Add another card (up to 5 max)"
+                                >
+                                  <Plus size={13} />
+                                  <span>+ Add Card ({popularArticles.length}/5)</span>
+                                </div>
                               )}
                             </div>
                           </div>
