@@ -24,12 +24,109 @@
     },
     "sections": [
       {
-        "id": "hero_popular",
-        "sectionKey": "hero_popular",
+        "id": "sec_1793864264770",
+        "sectionKey": "hero_1793864264770",
         "type": "hero",
-        "title": "Lead Stories & Popular Posts",
-        "subtitle": "",
+        "title": "Lead Stories & Editorial Hero Banner",
+        "subtitle": "Primary lead dispatch hero slider (left) and top 5 ranked articles sidebar (right).",
         "order": 1,
+        "enabled": true,
+        "data": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts"
+        },
+        "customConfig": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts"
+        }
+      },
+      {
+        "id": "sec_1793861447826",
+        "sectionKey": "sec_1793861447826",
+        "type": "sec_1793861447826",
+        "title": "Lead Stories & Editorial Hero Banner",
+        "subtitle": "",
+        "order": 2,
+        "enabled": true,
+        "data": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts",
+          "popularArticles": [
+            {
+              "id": "6ac74207caca5851772df7bd",
+              "_id": "6ac74207caca5851772df7bd",
+              "title": "Himalayan Shepherds: High-altitude rescue mission with mountain hounds",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "coverImage": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&auto=format&fit=crop&q=80",
+              "isCustom": true,
+              "readTime": "5 min read",
+              "category": "Startups",
+              "slug": "sim-5",
+              "link": "/stories/sim-5",
+              "author": "Rashi Goel",
+              "date": "Oct 7, 2026"
+            },
+            {
+              "id": "6aec229ffa12bd736ebca1ed",
+              "_id": "6aec229ffa12bd736ebca1ed",
+              "title": "Hanuman jii",
+              "image": "/uploads/01e3958788d49b68812ceca899d4808d_jpg_1793860126678.jpg",
+              "coverImage": "/uploads/01e3958788d49b68812ceca899d4808d_jpg_1793860126678.jpg",
+              "isCustom": true,
+              "readTime": "~1 min read",
+              "category": "YS हिंदी",
+              "slug": "hanuman-jii",
+              "link": "/stories/hanuman-jii",
+              "author": "Author Name",
+              "date": "Nov 5, 2026"
+            }
+          ],
+          "hasCustomPopular": true
+        },
+        "customConfig": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts"
+        },
+        "_id": "6aec2747973feb0d311c53ae",
+        "__v": 0,
+        "articleIds": [],
+        "createdAt": "2026-11-05T06:50:47.896Z",
+        "filterCategory": "",
+        "filterTag": "",
+        "limit": 6,
+        "updatedAt": "2026-11-05T07:01:41.144Z"
+      },
+      {
+        "id": "sec_1793860412515",
+        "sectionKey": "sec_1793860412515",
+        "type": "sec_1793860412515",
+        "title": "Lead Stories & Editorial Hero Banner",
+        "subtitle": "",
+        "order": 3,
         "enabled": true,
         "data": {
           "title": "Lead Stories & Editorial Hero Banner",
@@ -61,12 +158,49 @@
         "updatedAt": "2026-11-05T07:01:41.159Z"
       },
       {
+        "id": "sec_1793861269024",
+        "sectionKey": "sec_1793861269024",
+        "type": "sec_1793861269024",
+        "title": "Lead Stories & Editorial Hero Banner",
+        "subtitle": "",
+        "order": 4,
+        "enabled": true,
+        "data": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts"
+        },
+        "customConfig": {
+          "title": "Lead Stories & Editorial Hero Banner",
+          "heading": "Lead Stories & Editorial Hero Banner",
+          "headline": "Stories That Matter in Startups, Technology & Capital",
+          "subheadline": "Unfiltered founder playbooks, deep tech breakthroughs, and market movements.",
+          "badge": "HEADLINE DISPATCHES",
+          "primaryBtnText": "Read Latest",
+          "primaryBtnUrl": "/latest",
+          "popularTitle": "Popular Posts"
+        },
+        "_id": "6aec2695973feb0d311c53ad",
+        "__v": 0,
+        "articleIds": [],
+        "createdAt": "2026-11-05T06:47:49.106Z",
+        "filterCategory": "",
+        "filterTag": "",
+        "limit": 6,
+        "updatedAt": "2026-11-05T07:01:41.152Z"
+      },
+      {
         "id": "popular_editors",
         "sectionKey": "popular_editors",
         "type": "popular_editors",
         "title": "Most Popular & Editor's Picks",
         "subtitle": "Essential reads handpicked by newsroom editors",
-        "order": 2,
+        "order": 5,
         "enabled": true,
         "data": {
           "badgeText": "Editor's Choice",
@@ -93,7 +227,7 @@
         "type": "trending",
         "title": "Trending Now",
         "subtitle": "High-velocity stories capturing builder attention",
-        "order": 3,
+        "order": 6,
         "enabled": true,
         "data": {
           "viewAllText": "View All Trending",
@@ -115,10 +249,10 @@
       {
         "id": "latest_blogs",
         "sectionKey": "latest_blogs",
-        "type": "stories_feed",
+        "type": "latest_blogs",
         "title": "Latest from the Blog",
         "subtitle": "Real-time reporting and latest editorial dispatches",
-        "order": 4,
+        "order": 7,
         "enabled": true,
         "data": {
           "viewAllText": "View All Articles",
@@ -143,7 +277,7 @@
         "type": "spotlight",
         "title": "Tech & Startup Spotlight",
         "subtitle": "Deep tech, generative AI, and emerging ventures",
-        "order": 5,
+        "order": 8,
         "enabled": true,
         "data": {
           "badgeText": "Spotlight",
@@ -170,7 +304,7 @@
         "type": "newsletter",
         "title": "Newsletter Subscription Banner",
         "subtitle": "Get the Latest Blogs Delivered to Your Inbox",
-        "order": 6,
+        "order": 9,
         "enabled": true,
         "data": {
           "headline": "Get the Latest Blogs Delivered to Your Inbox",
