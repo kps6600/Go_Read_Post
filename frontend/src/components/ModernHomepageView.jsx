@@ -431,6 +431,25 @@ export default function ModernHomepageView({
     return combined.slice(0, 10);
   }, [pool, heroSlides]);
 
+  // Safe lookup helper to retrieve the live article from pool (with fresh views & claps)
+  const findLiveStory = (blog) => {
+    if (!blog) return null;
+    const bId = String(blog.id || blog._id || blog.articleId || '').trim();
+    const bSlug = String(blog.slug || '').trim().toLowerCase();
+    const bTitle = String(blog.title || '').trim().toLowerCase();
+
+    return pool.find(p => {
+      if (!p) return false;
+      const pId = String(p.id || p._id || '').trim();
+      if (bId && pId && bId === pId) return true;
+      const pSlug = String(p.slug || '').trim().toLowerCase();
+      if (bSlug && pSlug && bSlug === pSlug) return true;
+      const pTitle = String(p.title || '').trim().toLowerCase();
+      if (bTitle && pTitle && bTitle === pTitle) return true;
+      return false;
+    }) || null;
+  };
+
   // Helper to strictly produce EXACTLY 4 unique articles for every homepage section
   const getSectionArticles = (sec, defaultArticles) => {
     const limit = 4;
@@ -439,14 +458,25 @@ export default function ModernHomepageView({
 
     const addArticles = (list) => {
       if (!Array.isArray(list)) return;
-      for (const item of list) {
-        if (!item) continue;
-        const key = String(item.id || item._id || item.articleId || item.slug || item.title || '').trim().toLowerCase();
-        if (key && !seen.has(key)) {
-          seen.add(key);
-          result.push(item);
-          if (result.length >= limit) return;
-        }
+      for (const rawItem of list) {
+        if (!rawItem) continue;
+        const live = findLiveStory(rawItem);
+        const item = live ? { ...live, ...rawItem, views: (live.views !== undefined ? live.views : rawItem.views), claps: (live.claps !== undefined ? live.claps : rawItem.claps), likes: (live.likes !== undefined ? live.likes : rawItem.likes) } : rawItem;
+
+        const idKey = String(item.id || item._id || item.articleId || '').trim().toLowerCase();
+        const slugKey = String(item.slug || '').trim().toLowerCase();
+        const titleKey = String(item.title || '').trim().toLowerCase();
+
+        if (idKey && seen.has(idKey)) continue;
+        if (slugKey && seen.has(slugKey)) continue;
+        if (titleKey && seen.has(titleKey)) continue;
+
+        if (idKey) seen.add(idKey);
+        if (slugKey) seen.add(slugKey);
+        if (titleKey) seen.add(titleKey);
+
+        result.push(item);
+        if (result.length >= limit) return;
       }
     };
 
@@ -558,8 +588,14 @@ export default function ModernHomepageView({
 
   
   const getStoryViewsCount = (blog) => {
-    if (!blog) return '1.2K';
-    const raw = blog.views || blog.reads || blog.readsCount;
+    if (!blog) return '0';
+    const live = findLiveStory(blog);
+    const raw = blog.views !== undefined && blog.views !== null && blog.views !== ''
+      ? blog.views
+      : (live && live.views !== undefined && live.views !== null && live.views !== ''
+          ? live.views
+          : (blog.reads || live?.reads || blog.readsCount || live?.readsCount));
+
     if (raw !== undefined && raw !== null && raw !== '') {
       if (typeof raw === 'string') {
         const v = raw.trim();
@@ -567,32 +603,38 @@ export default function ModernHomepageView({
           return v.replace(/\s*reads|\s*views/gi, '').trim();
         }
         const parsed = parseFloat(v.replace(/,/g, ''));
-        if (!isNaN(parsed) && parsed > 0) {
+        if (!isNaN(parsed)) {
           if (parsed >= 1000000) return (parsed / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
           if (parsed >= 1000) return (parsed / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
           return String(Math.round(parsed));
         }
-      } else if (typeof raw === 'number' && raw > 0) {
+      } else if (typeof raw === 'number' && !isNaN(raw)) {
         if (raw >= 1000000) return (raw / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
         if (raw >= 1000) return (raw / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
         return String(Math.round(raw));
       }
     }
-    const str = String(blog.id || blog._id || blog.slug || blog.title || 'story');
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash << 5) - hash + str.charCodeAt(i);
-      hash |= 0;
-    }
-    const fallbackNum = Math.abs(hash % 8500) + 1200;
-    return (fallbackNum / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return '0';
   };
 
   const getStoryLikesCount = (blog) => {
     const blogId = getStoryId(blog);
-    const baseLikes = typeof blog?.claps === 'number' ? blog.claps : 
-                      (typeof blog?.likes === 'number' ? blog.likes : 
-                      (typeof blog?.likes === 'string' ? parseInt(blog.likes) || 0 : 0));
+    const live = findLiveStory(blog);
+    const rawLikes = blog?.claps !== undefined && blog.claps !== null
+      ? blog.claps
+      : (live && live.claps !== undefined && live.claps !== null
+          ? live.claps
+          : (blog?.likes !== undefined && blog.likes !== null
+              ? blog.likes
+              : (live?.likes !== undefined && live.likes !== null ? live.likes : 0)));
+
+    let baseLikes = 0;
+    if (typeof rawLikes === 'number' && !isNaN(rawLikes)) {
+      baseLikes = rawLikes;
+    } else if (typeof rawLikes === 'string') {
+      const parsed = parseInt(rawLikes.replace(/[^0-9]/g, ''), 10);
+      if (!isNaN(parsed)) baseLikes = parsed;
+    }
     const isLiked = Boolean(likedStories[blogId]);
     return baseLikes + (isLiked ? 1 : 0);
   };
@@ -696,7 +738,7 @@ export default function ModernHomepageView({
                   fill={isCardLiked ? "#dc2626" : "none"} 
                   color={isCardLiked ? "#dc2626" : "#64748b"} 
                 />
-                {likesCount > 0 && <span className="mhp-like-count">{likesCount}</span>}
+                <span className="mhp-like-count">{likesCount}</span>
               </button>
             </div>
           </div>

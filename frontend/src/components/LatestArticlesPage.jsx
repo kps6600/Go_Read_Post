@@ -1102,7 +1102,7 @@ export default function LatestArticlesPage({
                               fill={isCardLiked ? "#dc2626" : "none"} 
                               color={isCardLiked ? "#dc2626" : "#64748b"} 
                             />
-                            {storyLikes > 0 && <span className="lap-like-count">{storyLikes}</span>}
+                            <span className="lap-like-count">{storyLikes}</span>
                           </button>
                         </div>
                       </div>

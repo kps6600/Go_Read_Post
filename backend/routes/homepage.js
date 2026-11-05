@@ -71,7 +71,27 @@ router.get('/', async (req, res) => {
             : ((Array.isArray(doc.articles) && doc.articles.length > 0) ? doc.articles : null);
 
           if (customArticles && customArticles.length > 0) {
-            doc.articles = customArticles.map(formatHomepageArticle);
+            const allPublishedArticles = await Article.find({ status: 'published' })
+              .select('title slug subtitle excerpt featuredImage authorName categoryName publishedAt views claps readingTime isFeatured isTrending isBreaking')
+              .lean();
+            const liveMap = new Map();
+            allPublishedArticles.forEach(a => {
+              if (a._id) liveMap.set(String(a._id), a);
+              if (a.slug) liveMap.set(String(a.slug).toLowerCase(), a);
+              if (a.title) liveMap.set(String(a.title).trim().toLowerCase(), a);
+            });
+            const enrichedCustom = customArticles.map(raw => {
+              const a = typeof raw.toObject === 'function' ? raw.toObject() : { ...raw };
+              const live = liveMap.get(String(a._id || a.id || a.articleId)) ||
+                           liveMap.get(String(a.slug || '').toLowerCase()) ||
+                           liveMap.get(String(a.title || '').trim().toLowerCase());
+              if (live) {
+                if (live.views !== undefined) a.views = live.views;
+                if (live.claps !== undefined) a.claps = live.claps;
+              }
+              return a;
+            });
+            doc.articles = enrichedCustom.map(formatHomepageArticle);
           } else if (doc.articleIds && doc.articleIds.length > 0) {
             doc.articles = (doc.articleIds || []).map(formatHomepageArticle);
           } else {

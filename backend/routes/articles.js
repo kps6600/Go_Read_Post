@@ -266,6 +266,38 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
+// POST & PATCH /:id/clap & /:id/like
+const handleArticleClap = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (isDbConnected()) {
+      let article = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        article = await Article.findByIdAndUpdate(id, { $inc: { claps: 1 } }, { new: true }).catch(() => null);
+        await Story.findByIdAndUpdate(id, { $inc: { claps: 1 } }).catch(() => null);
+      }
+      if (!article) {
+        article = await Article.findOneAndUpdate({ $or: [{ slug: id }, { title: id }] }, { $inc: { claps: 1 } }, { new: true }).catch(() => null);
+        await Story.findOneAndUpdate({ $or: [{ id }, { slug: id }] }, { $inc: { claps: 1 } }).catch(() => null);
+      }
+      return res.json({ success: true, claps: article?.claps || 1 });
+    }
+
+    const fallback = readFallbackArticles();
+    const article = fallback.find(a => a._id === id || a.id === id || a.slug === id);
+    if (article) {
+      article.claps = (article.claps || 0) + 1;
+      writeFallbackArticles(fallback);
+    }
+    return res.json({ success: true, claps: (article?.claps || 1) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+router.post('/:id/clap', handleArticleClap);
+router.patch('/:id/clap', handleArticleClap);
+router.post('/:id/like', handleArticleClap);
+
 // --------------------------------------------------------------------------
 // 3. ADMIN APIS: /api/admin/articles
 // --------------------------------------------------------------------------

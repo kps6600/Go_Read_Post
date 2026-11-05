@@ -437,19 +437,49 @@ router.delete('/:id', protectAdmin, async (req, res) => {
   }
 });
 
-// 7. PATCH /api/stories/:id/clap
-router.patch('/:id/clap', async (req, res) => {
+// 7. PATCH & POST /api/stories/:id/clap
+const handleClap = async (req, res) => {
   try {
     const { id } = req.params;
     if (isDbConnected()) {
       let story = null;
       if (mongoose.Types.ObjectId.isValid(id)) {
         story = await Story.findByIdAndUpdate(id, { $inc: { claps: 1 } }, { new: true }).catch(() => null);
+        await Article.findByIdAndUpdate(id, { $inc: { claps: 1 } }).catch(() => null);
       }
       if (!story) {
-        story = await Story.findOneAndUpdate({ $or: [{ id }, { slug: id }] }, { $inc: { claps: 1 } }, { new: true }).catch(() => null);
+        story = await Story.findOneAndUpdate({ $or: [{ id }, { slug: id }, { title: id }] }, { $inc: { claps: 1 } }, { new: true }).catch(() => null);
+        await Article.findOneAndUpdate({ $or: [{ slug: id }, { title: id }] }, { $inc: { claps: 1 } }).catch(() => null);
       }
-      return res.json({ success: true, claps: story?.claps });
+      return res.json({ success: true, claps: story?.claps || 1 });
+    }
+
+    const stories = readFallbackData();
+    const story = stories.find(s => s._id === id || s.id === id || s.slug === id);
+    if (story) {
+      story.claps = (story.claps || 0) + 1;
+      writeFallbackData(stories);
+    }
+
+    const fallbackArticlesPath = path.join(__dirname, '..', 'articles_data_store.json');
+    if (fs.existsSync(fallbackArticlesPath)) {
+      try {
+        let arts = JSON.parse(fs.readFileSync(fallbackArticlesPath, 'utf-8'));
+        const art = arts.find(a => a._id === id || a.id === id || a.slug === id);
+        if (art) {
+          art.claps = (art.claps || 0) + 1;
+          fs.writeFileSync(fallbackArticlesPath, JSON.stringify(arts, null, 2), 'utf-8');
+        }
+      } catch (e) {}
+    }
+
+    return res.json({ success: true, claps: (story?.claps || 1) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+router.patch('/:id/clap', handleClap);
+router.post('/:id/clap', handleClap);
     }
 
     const stories = readFallbackData();

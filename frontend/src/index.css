@@ -1416,7 +1416,7 @@ main {
   overflow: visible !important;
 }
 
-@media (max-width: 1023px) {
+@media (min-width: 861px) and (max-width: 1023px) {
   .modern-nav-sub {
     display: flex !important;
     justify-content: flex-start;
@@ -1429,6 +1429,20 @@ main {
   }
   .modern-nav-sub::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  nav.modern-nav-sub,
+  .modern-nav-sub,
+  .header-subnav-tier {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
   }
 }
 
@@ -5023,17 +5037,17 @@ main {
 
 @media (max-width: 540px) {
   .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem 1rem !important;
   }
 }
 
-/* Brand Column - Centered */
+/* Brand Column */
 .footer-brand-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   width: 100%;
 }
 
@@ -5044,7 +5058,7 @@ main {
   color: #0f172a !important;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
   margin-bottom: 0.75rem;
   text-transform: uppercase;
@@ -5063,9 +5077,9 @@ main {
   font-size: 0.82rem;
   line-height: 1.55;
   color: #64748b;
-  margin: 0 auto 1.25rem auto;
+  margin: 0 0 1.25rem 0;
   max-width: 100%;
-  text-align: center;
+  text-align: left;
 }
 
 [data-theme='dark'] .footer-mission-text {
@@ -5074,7 +5088,7 @@ main {
 
 .footer-brand-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 1.25rem;
   width: 100%;
 }
@@ -5103,7 +5117,7 @@ main {
 .footer-trust-badge {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.4rem;
   font-size: 0.72rem;
   font-weight: 600;
@@ -5118,12 +5132,12 @@ main {
   color: #10b981;
 }
 
-/* Columns & Links - Centered */
+/* Columns & Links - Clean Editorial Grid */
 .footer-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   width: 100%;
 }
 
@@ -5134,7 +5148,7 @@ main {
   letter-spacing: 0.06em;
   color: #0f172a !important;
   margin-bottom: 1.15rem;
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 
@@ -5147,8 +5161,8 @@ main {
   list-style: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   gap: 0.65rem;
   font-size: 0.84rem;
   padding: 0;
@@ -5160,7 +5174,7 @@ main {
   color: #475569;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.45rem;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -28475,18 +28489,9 @@ body::-webkit-scrollbar:horizontal,
     width: 30px !important;
     height: 30px !important;
   }
-  .modern-nav-sub {
-    padding: 0.25rem 0.4rem !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    overflow-y: hidden !important;
-  }
-  .nav-pills-row {
-    gap: 0.3rem !important;
-  }
-  .modern-cat-tab {
-    padding: 0.2rem 0.45rem !important;
-    font-size: 0.7rem !important;
+  .modern-nav-sub,
+  .header-subnav-tier {
+    display: none !important;
   }
   
   /* Footer */

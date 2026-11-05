@@ -537,7 +537,9 @@
               "readTime": "4 min read min read",
               "slug": "social-side-3",
               "link": "/stories/social-side-3",
-              "isCustom": true
+              "isCustom": true,
+              "views": 8768,
+              "claps": 132
             },
             {
               "_id": "6ae1f555d132e2796bff4f6c",
@@ -1364,7 +1366,9 @@
               "readTime": "4 min read min read",
               "slug": "just-in-13",
               "link": "/stories/just-in-13",
-              "isCustom": true
+              "isCustom": true,
+              "views": 6287,
+              "claps": 375
             }
           ],
           "limit": 4,

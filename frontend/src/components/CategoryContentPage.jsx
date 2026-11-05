@@ -811,7 +811,7 @@ export default function CategoryContentPage({
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', padding: 0, color: isCardLiked ? '#dc2626' : '#64748b', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', lineHeight: 1.2 }}
                           >
                             <Heart size={12} fill={isCardLiked ? "#dc2626" : "none"} color={isCardLiked ? "#dc2626" : "#64748b"} />
-                            {storyLikes > 0 && <span>{storyLikes.toLocaleString()}</span>}
+                            <span>{storyLikes.toLocaleString()}</span>
                           </button>
                         </div>
                       </div>

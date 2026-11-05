@@ -132,6 +132,7 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 .tp-hero-read-btn {
@@ -368,6 +369,7 @@
     align-items: center;
     gap: 10px;
     width: auto;
+    flex-wrap: nowrap;
   }
   .tp-hero-read-btn {
     height: 40px;
@@ -436,6 +438,12 @@
     align-items: center;
     gap: 8px;
     width: auto;
+    flex-wrap: nowrap;
+  }
+  .tp-hero-author-meta-line {
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    font-size: 0.76rem;
   }
   .tp-hero-read-btn {
     height: 38px;
