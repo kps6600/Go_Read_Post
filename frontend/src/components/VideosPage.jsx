@@ -362,7 +362,8 @@ export default function VideosPage({ onBackToHome, onSelectVideo, isSaved, onTog
             >
               <SlidersHorizontal size={17} className="vpage-filter-btn-icon" />
               <span className="vpage-filter-btn-label">
-                {activeCategory === 'all' ? 'Filter by Series' : activeCategoryObj.label}
+                <span className="vpage-filter-label-full">{activeCategory === 'all' ? 'Filter by Series' : activeCategoryObj.label}</span>
+                <span className="vpage-filter-label-short">{activeCategory === 'all' ? 'Series' : activeCategoryObj.label}</span>
               </span>
               <span className="vpage-filter-btn-badge">
                 {categoryCounts[activeCategory] || 0}

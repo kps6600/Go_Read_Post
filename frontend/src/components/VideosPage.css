@@ -678,6 +678,10 @@
   white-space: nowrap;
 }
 
+.vpage-filter-label-short {
+  display: none;
+}
+
 .vpage-filter-btn-badge {
   font-size: 0.75rem;
   font-weight: 800;
@@ -932,41 +936,97 @@
 
 @media (max-width: 640px) {
   .vpage-filter-section {
-    padding: 0.85rem 1rem !important;
-    border-radius: 16px !important;
-    margin-bottom: 1.75rem !important;
+    padding: 0.65rem 0.75rem !important;
+    border-radius: 14px !important;
+    margin-bottom: 1.5rem !important;
   }
   .vpage-omnibar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+  .vpage-search-box {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
   }
   .vpage-search-input {
-    height: 44px !important;
-    font-size: 0.92rem !important;
-    padding-left: 2.85rem !important;
-    border-radius: 12px !important;
+    height: 38px !important;
+    font-size: 0.82rem !important;
+    padding-left: 2.15rem !important;
+    padding-right: 1.8rem !important;
+    border-radius: 10px !important;
   }
   .vpage-search-icon {
-    left: 1rem !important;
-    width: 17px !important;
-    height: 17px !important;
+    left: 0.65rem !important;
+    width: 15px !important;
+    height: 15px !important;
+  }
+  .vpage-search-clear {
+    right: 0.45rem !important;
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .vpage-search-clear svg {
+    width: 13px !important;
+    height: 13px !important;
   }
   .vpage-filter-dropdown-container {
-    width: 100%;
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    margin-left: 0 !important;
   }
   .vpage-filter-btn {
-    width: 100%;
-    height: 44px !important;
-    font-size: 0.9rem !important;
-    border-radius: 12px !important;
-    padding: 0 1rem !important;
-    justify-content: space-between;
+    width: auto !important;
+    height: 38px !important;
+    font-size: 0.78rem !important;
+    border-radius: 10px !important;
+    padding: 0 8px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+    display: inline-flex !important;
+  }
+  .vpage-filter-btn-icon {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+  .vpage-filter-btn-label {
+    font-size: 0.76rem !important;
+    max-width: 85px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .vpage-filter-btn-badge {
+    padding: 1px 5px !important;
+    font-size: 0.68rem !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    line-height: 14px !important;
+  }
+  .vpage-filter-btn-chevron {
+    width: 12px !important;
+    height: 12px !important;
+    flex-shrink: 0 !important;
+  }
+  .vpage-filter-label-full {
+    display: none !important;
+  }
+  .vpage-filter-label-short {
+    display: inline !important;
   }
   .vpage-filter-dropdown-menu {
-    width: 100%;
-    right: 0;
-    left: 0;
+    left: auto !important;
+    right: 0 !important;
+    width: 250px !important;
+    max-width: calc(100vw - 24px) !important;
+    border-radius: 12px !important;
+    padding: 0.5rem !important;
   }
 }
 
@@ -1484,6 +1544,36 @@
   .vpage-stage-title {
     font-size: 0.92rem !important;
     line-height: 1.22 !important;
+  }
+  .vpage-filter-section {
+    padding: 0.5rem 0.55rem !important;
+  }
+  .vpage-omnibar {
+    gap: 4px !important;
+  }
+  .vpage-search-input {
+    height: 35px !important;
+    font-size: 0.75rem !important;
+    padding-left: 1.85rem !important;
+    padding-right: 1.4rem !important;
+  }
+  .vpage-search-icon {
+    left: 0.55rem !important;
+    width: 13px !important;
+    height: 13px !important;
+  }
+  .vpage-filter-btn {
+    height: 35px !important;
+    padding: 0 6px !important;
+    gap: 3px !important;
+  }
+  .vpage-filter-btn-label {
+    font-size: 0.72rem !important;
+    max-width: 65px !important;
+  }
+  .vpage-filter-dropdown-menu {
+    width: 240px !important;
+    max-width: calc(100vw - 16px) !important;
   }
   .vpage-card {
     border-radius: 12px !important;
