@@ -3826,8 +3826,16 @@ export default function AdminPostsView({ onShowToast, currentPath = '/admin/post
           tabIndex={0}
           title="Sort by: Most Viewed Posts"
         >
+          <div className="abv-kpi-views-info">
+            <div className="abv-kpi-views-icon-box">
+              <Eye size={16} />
+            </div>
+            <div>
+              <div className="abv-kpi-label">Total Views</div>
+              <div className="abv-kpi-sublabel">All-time readership</div>
+            </div>
+          </div>
           <div className="abv-kpi-num" style={{ color: '#0284c7' }}>{(totalViews || 0).toLocaleString()}</div>
-          <div className="abv-kpi-label">Total Views</div>
         </div>
       </div>
 

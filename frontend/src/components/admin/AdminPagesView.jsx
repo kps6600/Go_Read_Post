@@ -550,6 +550,16 @@ export default function AdminPagesView({ onNavigate, onShowToast, filterCategory
               </div>
             )}
           </div>
+
+          {/* + Create Page Button */}
+          <button
+            type="button"
+            className="apv-create-page-btn"
+            onClick={() => onNavigate?.('/admin/pages/create')}
+          >
+            <Plus size={16} />
+            <span>Create Page</span>
+          </button>
         </div>
       </div>
 

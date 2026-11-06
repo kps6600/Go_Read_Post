@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Send, Mail, Building, Link, DollarSign, CheckCircle, 
   Trash2, Search, Filter, RefreshCw, BookOpen, 
-  ArrowUpRight, AlertCircle, Phone, User, X
+  ArrowUpRight, AlertCircle, Phone, User, X,
+  ChevronDown, Check, Clock
 } from 'lucide-react';
 import { SubmissionService } from '../../services/submissionService';
 import './AdminSubmissionsView.css';
@@ -126,6 +127,45 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
 
   const [submissionToDelete, setSubmissionToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setFilterDropdownOpen(false);
+      }
+    }
+    if (filterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [filterDropdownOpen]);
+
+  const currentFilterLabel = () => {
+    if (statusFilter === 'pending') return 'Pending Review';
+    if (typeFilter === 'pitch') return 'Startup Pitches';
+    if (typeFilter === 'contact') return 'Contact Leads';
+    return 'All Submissions';
+  };
+
+  const filterOptions = [
+    { key: 'all', label: 'All Submissions', count: totalCount, type: 'all', status: 'all' },
+    { key: 'pitch', label: 'Startup Pitches', count: pitchesCount, type: 'pitch', status: 'all' },
+    { key: 'contact', label: 'Contact Leads', count: contactsCount, type: 'contact', status: 'all' },
+    { key: 'pending', label: 'Pending Review', count: pendingCount, type: 'all', status: 'pending' }
+  ];
+
+  const isFilterSelected = (opt) => {
+    if (opt.key === 'pending') return statusFilter === 'pending';
+    if (opt.key === 'pitch') return typeFilter === 'pitch' && statusFilter !== 'pending';
+    if (opt.key === 'contact') return typeFilter === 'contact' && statusFilter !== 'pending';
+    return typeFilter === 'all' && statusFilter === 'all';
+  };
 
   const handleConfirmDelete = async () => {
     if (!submissionToDelete) return;
@@ -163,79 +203,60 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
       {/* KPI Stats */}
       <div className="asv-stats-row">
         <div 
-          className={`asv-stat-card ${typeFilter === 'pitch' ? 'is-active' : ''}`}
+          className={`asv-stat-card asv-stat-pitch ${typeFilter === 'pitch' ? 'is-active' : ''}`}
           onClick={() => { setTypeFilter(typeFilter === 'pitch' ? 'all' : 'pitch'); setStatusFilter('all'); }}
           role="button"
           tabIndex={0}
           title="Click to filter Story & Startup Pitches"
         >
-          <span className="asv-stat-label">Story &amp; Startup Pitches</span>
+          <div className="asv-stat-head">
+            <span className="asv-stat-label">Story &amp; Pitches</span>
+            <div className="asv-stat-icon-badge pitch">
+              <Send size={13} />
+            </div>
+          </div>
           <div className="asv-stat-number">{metrics.totalPitches}</div>
         </div>
 
         <div 
-          className={`asv-stat-card ${typeFilter === 'contact' ? 'is-active' : ''}`}
+          className={`asv-stat-card asv-stat-contact ${typeFilter === 'contact' ? 'is-active' : ''}`}
           onClick={() => { setTypeFilter(typeFilter === 'contact' ? 'all' : 'contact'); setStatusFilter('all'); }}
           role="button"
           tabIndex={0}
           title="Click to filter Contact Inquiries"
         >
-          <span className="asv-stat-label">Contact Inquiries</span>
+          <div className="asv-stat-head">
+            <span className="asv-stat-label">Contact Leads</span>
+            <div className="asv-stat-icon-badge contact">
+              <Mail size={13} />
+            </div>
+          </div>
           <div className="asv-stat-number">{metrics.totalContacts}</div>
         </div>
 
         <div 
-          className={`asv-stat-card ${statusFilter === 'pending' ? 'is-active' : ''}`}
+          className={`asv-stat-card asv-stat-pending ${statusFilter === 'pending' ? 'is-active' : ''}`}
           onClick={() => { setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending'); }}
           role="button"
           tabIndex={0}
           title="Click to filter Pending Action"
         >
-          <span className="asv-stat-label">Pending Action</span>
-          <div className="asv-stat-number">{metrics.pendingCount}</div>
+          <div className="asv-stat-pending-info">
+            <div className="asv-stat-icon-badge pending">
+              <Clock size={15} />
+            </div>
+            <div>
+              <span className="asv-stat-label">Pending Action</span>
+              <span className="asv-stat-sublabel">Awaiting editorial review</span>
+            </div>
+          </div>
+          <div className="asv-stat-number pending">{metrics.pendingCount}</div>
         </div>
       </div>
 
       {/* Modern Controls Omnibar */}
       <div className="asv-controls-bar">
-        <div className="asv-filter-pills">
-          <button
-            type="button"
-            className={`asv-pill-btn ${typeFilter === 'all' && statusFilter === 'all' ? 'is-active' : ''}`}
-            onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
-          >
-            <span>All</span>
-            <span className="asv-pill-count">{totalCount}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`asv-pill-btn ${typeFilter === 'pitch' && statusFilter !== 'pending' ? 'is-active' : ''}`}
-            onClick={() => { setTypeFilter('pitch'); setStatusFilter('all'); }}
-          >
-            <span>Startup Pitches</span>
-            <span className="asv-pill-count">{pitchesCount}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`asv-pill-btn ${typeFilter === 'contact' ? 'is-active' : ''}`}
-            onClick={() => { setTypeFilter('contact'); setStatusFilter('all'); }}
-          >
-            <span>Contact Leads</span>
-            <span className="asv-pill-count">{contactsCount}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`asv-pill-btn ${statusFilter === 'pending' ? 'is-active' : ''}`}
-            onClick={() => { setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending'); }}
-          >
-            <span>Pending</span>
-            <span className="asv-pill-count">{pendingCount}</span>
-          </button>
-        </div>
-
+        {/* 1. Search Box (First) */}
         <form onSubmit={handleSearch} className="asv-search-box">
           <Search size={15} className="asv-search-icon" />
           <input 
@@ -256,6 +277,54 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
             </button>
           )}
         </form>
+
+        {/* 2. Filter Button (After Search) */}
+        <div className="asv-filter-dropdown-wrap" ref={filterRef}>
+          <button
+            type="button"
+            className={`asv-filter-dropdown-btn ${typeFilter !== 'all' || statusFilter !== 'all' ? 'is-active' : ''}`}
+            onClick={() => setFilterDropdownOpen(prev => !prev)}
+            aria-expanded={filterDropdownOpen}
+          >
+            <Filter size={14} className="asv-filter-btn-icon" />
+            <span className="asv-filter-btn-label">{currentFilterLabel()}</span>
+            <span className="asv-filter-count-chip">{filteredSubmissions.length}</span>
+            <ChevronDown 
+              size={13} 
+              className="asv-filter-chevron"
+              style={{ transform: filterDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} 
+            />
+          </button>
+
+          {filterDropdownOpen && (
+            <div className="asv-filter-popover-menu">
+              <div className="asv-filter-popover-header">
+                Filter Submissions
+              </div>
+              {filterOptions.map(opt => {
+                const active = isFilterSelected(opt);
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={`asv-filter-popover-item ${active ? 'selected' : ''}`}
+                    onClick={() => {
+                      setTypeFilter(opt.type);
+                      setStatusFilter(opt.status);
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    <span className="asv-filter-popover-item-label">{opt.label}</span>
+                    <div className="asv-filter-popover-item-meta">
+                      <span className="asv-filter-popover-badge">{opt.count}</span>
+                      {active && <Check size={14} className="asv-filter-check-icon" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Submissions Feed */}

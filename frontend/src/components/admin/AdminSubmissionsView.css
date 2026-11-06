@@ -475,19 +475,231 @@
   line-height: 1.1;
 }
 
+.asv-stat-number.pending {
+  color: #d97706;
+}
+
+.asv-stat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.asv-stat-icon-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.asv-stat-icon-badge.pitch {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+
+.asv-stat-icon-badge.contact {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+}
+
+.asv-stat-icon-badge.pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.asv-stat-pending-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asv-stat-sublabel {
+  display: block;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 1px;
+}
+
+@media (min-width: 769px) {
+  .asv-stat-sublabel {
+    display: none;
+  }
+}
+
 /* Modern Controls Omnibar */
 .asv-controls-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.85rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 0.65rem 0.85rem;
   margin-bottom: 1.35rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  flex-wrap: wrap;
+}
+
+/* Filter Dropdown (Placed After Search Box) */
+.asv-filter-dropdown-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.asv-filter-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #1e293b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.asv-filter-dropdown-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.asv-filter-dropdown-btn.is-active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.asv-filter-btn-icon {
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.asv-filter-btn-label {
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.asv-filter-count-chip {
+  font-size: 0.72rem;
+  font-weight: 750;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.asv-filter-dropdown-btn.is-active .asv-filter-count-chip {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.asv-filter-chevron {
+  color: inherit;
+  flex-shrink: 0;
+}
+
+/* Popover Menu */
+.asv-filter-popover-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  padding: 6px;
+  z-index: 60;
+  animation: asvPopoverFadeIn 0.15s ease-out;
+}
+
+@keyframes asvPopoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.asv-filter-popover-header {
+  padding: 6px 10px 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+
+.asv-filter-popover-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-align: left;
+}
+
+.asv-filter-popover-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.asv-filter-popover-item.selected {
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.asv-filter-popover-item-label {
+  flex: 1;
+}
+
+.asv-filter-popover-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.asv-filter-popover-badge {
+  font-size: 0.7rem;
+  font-weight: 750;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.asv-filter-popover-item.selected .asv-filter-popover-badge {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.asv-filter-check-icon {
+  color: #dc2626;
 }
 
 .asv-filter-pills {
@@ -601,18 +813,35 @@
 
 @media (max-width: 768px) {
   .asv-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 0.85rem !important;
   }
 
   .asv-stat-card {
-    padding: 12px 14px;
-    border-radius: 10px;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .asv-stat-card:last-child {
+    grid-column: span 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+  }
+
+  .asv-stat-card:last-child .asv-stat-label {
+    margin-bottom: 0 !important;
+  }
+
+  .asv-stat-card:last-child .asv-stat-number {
+    font-size: 1.35rem !important;
+    margin: 0 !important;
   }
 
   .asv-stat-number {
-    font-size: 1.45rem;
+    font-size: 1.35rem;
   }
 
   .asv-stat-label {
@@ -623,26 +852,29 @@
   .asv-controls-bar {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    padding: 0.75rem;
-  }
-
-  .asv-filter-pills {
-    width: 100%;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-  }
-
-  .asv-pill-btn {
-    white-space: nowrap;
-    flex-shrink: 0;
+    gap: 8px;
+    padding: 8px 10px;
   }
 
   .asv-search-box {
     min-width: 0;
     width: 100%;
-    flex: 1 1 100%;
+    flex: 1 1 auto;
+  }
+
+  .asv-filter-dropdown-wrap {
+    width: 100%;
+  }
+
+  .asv-filter-dropdown-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .asv-filter-popover-menu {
+    left: 0;
+    right: 0;
+    width: 100%;
   }
 
   .asv-cards-grid {
@@ -679,19 +911,24 @@
 
 @media (max-width: 420px) {
   .asv-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
   }
 
   .asv-stat-card {
-    padding: 10px 10px;
+    padding: 9px 10px !important;
+  }
+
+  .asv-stat-card:last-child {
+    grid-column: span 2 !important;
+    padding: 9px 12px !important;
   }
 
   .asv-stat-number {
-    font-size: 1.25rem;
+    font-size: 1.2rem !important;
   }
 
   .asv-stat-label {
-    font-size: 0.62rem;
+    font-size: 0.62rem !important;
   }
 }
