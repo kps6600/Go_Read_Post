@@ -354,7 +354,7 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
 
         {/* ── 3. Main Two-Column Hub: Direct Channels & Interactive Form ── */}
         <section className="contact-main-hub-section" aria-label="Contact Information and Submission Form">
-          <div className="contact-hub-grid">
+          <div className="contact-hub-grid single-card">
 
             {/* Left Column: Direct Info Card */}
             <div className="contact-direct-card">
@@ -466,198 +466,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
               </a>
             </div>
 
-            {/* Right Column: Interactive Form Card */}
-            <div className="contact-form-card" ref={formRef}>
-              {submitted ? (
-                <div className="contact-success-card">
-                  <div className="contact-success-icon-circle">
-                    <CheckCircle2 size={44} />
-                  </div>
-                  <h3 className="contact-success-title">Message Delivered!</h3>
-                  <p className="contact-success-msg">
-                    Thank you, <strong>{formData.name}</strong>. Your inquiry has been routed to our <strong>{formData.department}</strong> desk. Our correspondents review submissions continuously and will respond shortly.
-                  </p>
-                  <button 
-                    type="button" 
-                    className="contact-reset-btn"
-                    onClick={handleResetForm}
-                  >
-                    Send Another Message
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="contact-form-header">
-                    <h3>Send a Direct Message</h3>
-                    <p>
-                      Fill out the form below. For confidential scoops or embargoed news, check the embargo flag.
-                    </p>
-                  </div>
-
-                  {formError && (
-                    <div style={{
-                      backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                      border: '1px solid rgba(220, 38, 38, 0.3)',
-                      color: 'var(--brand-primary, #dc2626)',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      fontSize: '0.88rem',
-                      fontWeight: '600',
-                      marginBottom: '1.25rem'
-                    }}>
-                      {formError}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="contact-interactive-form">
-                    
-                    {/* Row 1: Name & Email */}
-                    <div className="contact-form-grid-2">
-                      <div className="contact-form-field">
-                        <label htmlFor="contact-name">
-                          Full Name <span className="contact-required">*</span>
-                        </label>
-                        <input 
-                          type="text" 
-                          id="contact-name"
-                          name="name" 
-                          value={formData.name} 
-                          onChange={handleInputChange} 
-                          placeholder="e.g. Priyanshu Sharma"
-                          className="contact-input"
-                          required
-                        />
-                      </div>
-
-                      <div className="contact-form-field">
-                        <label htmlFor="contact-email">
-                          Email Address <span className="contact-required">*</span>
-                        </label>
-                        <input 
-                          type="email" 
-                          id="contact-email"
-                          name="email" 
-                          value={formData.email} 
-                          onChange={handleInputChange} 
-                          placeholder="priyanshu@company.com"
-                          className="contact-input"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row 2: Phone & Department */}
-                    <div className="contact-form-grid-2">
-                      <div className="contact-form-field">
-                        <label htmlFor="contact-phone">
-                          Phone / WhatsApp (Optional)
-                        </label>
-                        <input 
-                          type="tel" 
-                          id="contact-phone"
-                          name="phone" 
-                          value={formData.phone} 
-                          onChange={handleInputChange} 
-                          placeholder="+91 98765 43210"
-                          className="contact-input"
-                        />
-                      </div>
-
-                      <div className="contact-form-field">
-                        <label htmlFor="contact-department">
-                          Department / Beat Desk
-                        </label>
-                        <select 
-                          id="contact-department"
-                          name="department" 
-                          value={formData.department} 
-                          onChange={handleInputChange}
-                          className="contact-select"
-                        >
-                          <option value="Editorial & Story Pitches">Editorial & Story Pitches</option>
-                          <option value="Brand Solutions & Ads">Brand Solutions & Ads</option>
-                          <option value="Press & Media Relations">Press & Media Relations</option>
-                          <option value="Editorial Correction">Editorial Correction</option>
-                          <option value="Syndication & Licensing">Syndication & Licensing</option>
-                          <option value="Reader Support & Feedback">Reader Support & Feedback</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Row 3: Subject */}
-                    <div className="contact-form-field">
-                      <label htmlFor="contact-subject">
-                        Subject Line <span className="contact-required">*</span>
-                      </label>
-                      <input 
-                        type="text" 
-                        id="contact-subject"
-                        name="subject" 
-                        value={formData.subject} 
-                        onChange={handleInputChange} 
-                        placeholder="e.g. Series A Funding Announcement / Partnership Query"
-                        className="contact-input"
-                        required
-                      />
-                    </div>
-
-                    {/* Row 4: Message */}
-                    <div className="contact-form-field">
-                      <label htmlFor="contact-message">
-                        Detailed Message <span className="contact-required">*</span>
-                      </label>
-                      <textarea 
-                        id="contact-message"
-                        name="message" 
-                        value={formData.message} 
-                        onChange={handleInputChange} 
-                        placeholder="Provide relevant context, metrics, key milestones, or links..."
-                        className="contact-textarea"
-                        required
-                      />
-                    </div>
-
-                    {/* Embargo Checkbox */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <input 
-                        type="checkbox" 
-                        id="contact-embargo"
-                        name="isEmbargoed" 
-                        checked={formData.isEmbargoed} 
-                        onChange={handleInputChange} 
-                        style={{ accentColor: 'var(--brand-primary, #dc2626)', width: '16px', height: '16px', cursor: 'pointer' }}
-                      />
-                      <label htmlFor="contact-embargo" style={{ fontSize: '0.86rem', color: 'var(--text-secondary, #64748b)', cursor: 'pointer', margin: 0, fontWeight: 500 }}>
-                        This submission is under strict <strong>editorial embargo</strong> (Specify date/time in message)
-                      </label>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button 
-                      type="submit" 
-                      className="contact-submit-btn"
-                      disabled={submitting}
-                    >
-                      {submitting ? (
-                        <>
-                          <span>Transmitting to Newsroom...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send size={18} />
-                          <span>Send Message to GoReadPost</span>
-                        </>
-                      )}
-                    </button>
-
-                    <p className="contact-form-notice">
-                      🔒 Your submission is encrypted. We respect journalist source confidentiality and NDAs.
-                    </p>
-                  </form>
-                </>
-              )}
-            </div>
-
           </div>
         </section>
 
@@ -734,6 +542,39 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* ── 6. Bottom Community / Realtime CTA (100% Breadth) ── */}
+        <section className="contact-bottom-cta">
+          <h3>Prefer Direct Messaging?</h3>
+          <p>
+            Connect directly with our bureau operations on WhatsApp for quick assistance, event registrations, or story follow-ups.
+          </p>
+
+          <div className="contact-bottom-cta-buttons">
+            <a 
+              href={`https://wa.me/${channels.rawWhatsApp}?text=${encodeURIComponent("Hi GoReadPost Team! I'd like to connect directly.")}`}
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="contact-btn-red"
+            >
+              <MessageCircle size={18} />
+              <span>Connect on WhatsApp</span>
+            </a>
+
+            <button 
+              type="button" 
+              className="contact-btn-outline"
+              onClick={() => {
+                if (formRef.current) {
+                  formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }}
+            >
+              <Mail size={18} />
+              <span>Jump to Online Form</span>
+            </button>
           </div>
         </section>
 

@@ -399,6 +399,14 @@
   }
 }
 
+.contact-hub-grid.single-card {
+  display: flex;
+  justify-content: center;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 /* Left Column: Direct Info Card */
 .contact-direct-card {
   background: var(--bg-card, #ffffff);
