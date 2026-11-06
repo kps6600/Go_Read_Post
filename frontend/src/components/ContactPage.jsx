@@ -737,39 +737,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
           </div>
         </section>
 
-        {/* ── 6. Bottom Community / Realtime CTA (100% Breadth) ── */}
-        <section className="contact-bottom-cta">
-          <h3>Prefer Direct Messaging?</h3>
-          <p>
-            Connect directly with our bureau operations on WhatsApp for quick assistance, event registrations, or story follow-ups.
-          </p>
-
-          <div className="contact-bottom-cta-buttons">
-            <a 
-              href={`https://wa.me/${channels.rawWhatsApp}?text=${encodeURIComponent("Hi GoReadPost Team! I'd like to connect directly.")}`}
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="contact-btn-red"
-            >
-              <MessageCircle size={18} />
-              <span>Connect on WhatsApp</span>
-            </a>
-
-            <button 
-              type="button" 
-              className="contact-btn-outline"
-              onClick={() => {
-                if (formRef.current) {
-                  formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }}
-            >
-              <Mail size={18} />
-              <span>Jump to Online Form</span>
-            </button>
-          </div>
-        </section>
-
       </div>
     </div>
   );
