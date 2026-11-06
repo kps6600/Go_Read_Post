@@ -63,7 +63,7 @@ import { ALL_ENTERPRISE_STORIES } from './data/enterpriseStoryData';
 import { ALL_SMB_STORIES, SMB_STORY_PROFILES } from './data/smbStoryData';
 import { ALL_HER_STORIES, HER_STORY_PROFILES } from './data/herStoryData';
 
-import { Home, Compass, TrendingUp, Tv, Bookmark, CheckCircle, Flame, Target, Cpu, Clock, Send, X, LayoutDashboard } from 'lucide-react';
+import { Home, Compass, TrendingUp, Tv, Video, Bookmark, CheckCircle, Flame, Target, Cpu, Clock, Send, X, LayoutDashboard } from 'lucide-react';
 
 const findStoryById = (id, dynamicStories = []) => {
   if (!id) return null;
@@ -1704,8 +1704,14 @@ useEffect(() => {
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
         <button 
-          className={`mobile-nav-item ${activeCategory === 'all' ? 'active' : ''}`}
-          onClick={() => { setActiveCategory('all'); setSearchQuery(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`mobile-nav-item ${(activeCategory === 'all' || activeCategory === 'home') && currentRoute?.route !== 'videos' ? 'active' : ''}`}
+          onClick={() => { 
+            window.history.pushState(null, '', '/');
+            setCurrentRoute({ route: 'home' });
+            setActiveCategory('all'); 
+            setSearchQuery(''); 
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+          }}
         >
           <Home size={19} />
           <span>Home</span>
@@ -1720,14 +1726,17 @@ useEffect(() => {
         </button>
 
         <button 
-          className="mobile-nav-item"
+          className={`mobile-nav-item ${activeCategory === 'videos' || currentRoute?.route === 'videos' ? 'active' : ''}`}
           onClick={() => {
-            const el = document.getElementById('ystv');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            window.history.pushState(null, '', '/videos');
+            setCurrentRoute({ route: 'videos' });
+            setActiveCategory('videos');
+            setSearchQuery('');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          <Tv size={19} />
-          <span>YSTV</span>
+          <Video size={19} />
+          <span>Video</span>
         </button>
 
         <button 
