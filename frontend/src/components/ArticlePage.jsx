@@ -1050,7 +1050,7 @@ export default function ArticlePage({
                     const imgPos = block.imagePosition || (idx === 1 ? 'left' : 'top');
 
                     const renderSecImages = () => secImages.map((img, sIdx) => (
-                      <figure key={sIdx} className={`map-inline-figure standard ${imgPos === 'left' ? 'left' : ''}`} style={{ margin: imgPos === 'left' ? '0.4rem 2.25rem 1.5rem 0' : '1.25rem 0' }}>
+                      <figure key={sIdx} className={`map-inline-figure standard ${imgPos === 'left' ? 'left' : ''}`}>
                         <img src={img.url || img} alt={img.caption || img.alt || 'Section illustration'} className="map-inline-img" />
                         {(img.caption || img.credit) && (
                           <figcaption className="map-inline-caption">
