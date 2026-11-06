@@ -1267,7 +1267,7 @@ useEffect(() => {
 
       <ErrorBoundary onReset={handleBackToHome}>
         <main id="top">
-        {(currentRoute.route === 'article' || activeArticleSlug || selectedStory) ? (
+        {(currentRoute.route === 'article' && (activeArticleSlug || selectedStory || currentRoute.slug)) ? (
           <ArticlePage 
             story={selectedStory}
             slug={currentRoute.slug || activeArticleSlug || selectedStory?.slug || selectedStory?.id || selectedStory?._id}
@@ -1709,6 +1709,8 @@ useEffect(() => {
             window.history.pushState(null, '', '/');
             setCurrentRoute({ route: 'home' });
             setActiveCategory('all'); 
+            setSelectedStory(null);
+            setActiveArticleSlug(null);
             setSearchQuery(''); 
             window.scrollTo({ top: 0, behavior: 'smooth' }); 
           }}
@@ -1731,8 +1733,10 @@ useEffect(() => {
             window.history.pushState(null, '', '/videos');
             setCurrentRoute({ route: 'videos' });
             setActiveCategory('videos');
-            setSearchQuery('');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setSelectedStory(null);
+            setActiveArticleSlug(null);
+            setSearchQuery(''); 
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
           }}
         >
           <Video size={19} />
