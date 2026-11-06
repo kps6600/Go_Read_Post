@@ -211,11 +211,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
 
         {/* ── 1. Hero Section ── */}
         <header className="contact-hero-section">
-          <div className="contact-hero-badge">
-            <span className="contact-pulse-dot" />
-            <span>{hero.badge || 'CONNECT & COLLABORATE'}</span>
-          </div>
-
           <h1 className="contact-hero-title">
             <span
               contentEditable={isStudioView}
@@ -690,7 +685,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
         {/* ── 4. Bureau Locations (100% Breadth) ── */}
         <section className="contact-bureaus-section" aria-label="Our Bureau Locations">
           <div className="contact-section-title-wrap">
-            <span className="contact-section-badge">ON-THE-GROUND REPORTERS</span>
             <h2 className="contact-section-h2">Bureau Headquarters</h2>
             <p className="contact-section-sub">
               Visit or mail our regional desks across India's key business and technology hubs.
@@ -732,7 +726,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
         {/* ── 5. Frequently Asked Questions (FAQ) ── */}
         <section className="contact-faq-section" aria-label="Frequently Asked Questions">
           <div className="contact-section-title-wrap">
-            <span className="contact-section-badge">HELP & GUIDELINES</span>
             <h2 className="contact-section-h2">Frequently Asked Questions</h2>
             <p className="contact-section-sub">
               Quick answers about our editorial standards, pitches, and partnership workflows.
@@ -767,11 +760,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
 
         {/* ── 6. Bottom Community / Realtime CTA (100% Breadth) ── */}
         <section className="contact-bottom-cta">
-          <div className="contact-hero-badge" style={{ marginBottom: 0 }}>
-            <Sparkles size={13} />
-            <span>REAL-TIME CONNECTIVITY</span>
-          </div>
-
           <h3>Prefer Direct Messaging?</h3>
           <p>
             Connect directly with our bureau operations on WhatsApp for quick assistance, event registrations, or story follow-ups.
