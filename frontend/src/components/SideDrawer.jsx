@@ -221,8 +221,8 @@ export default function SideDrawer({
           top: 0,
           left: 0,
           bottom: 0,
-          width: '88vw',
-          maxWidth: '380px',
+          width: '74vw',
+          maxWidth: '270px',
           background: 'var(--bg-primary, #ffffff)',
           color: 'var(--text-primary, #111827)',
           zIndex: 99995,
@@ -239,7 +239,7 @@ export default function SideDrawer({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.15rem 1.25rem',
+          padding: '1rem 1rem',
           borderBottom: '1px solid var(--border-light, #e5e7eb)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -299,7 +299,7 @@ export default function SideDrawer({
         </div>
 
         {/* Search Omnibar */}
-        <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-light, #e5e7eb)', background: 'var(--bg-secondary, #f9fafb)' }}>
+        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light, #e5e7eb)', background: 'var(--bg-secondary, #f9fafb)' }}>
           <div style={{ position: 'relative' }}>
             <Search size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted, #9ca3af)' }} />
             <input 
@@ -337,7 +337,7 @@ export default function SideDrawer({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0.75rem 1.25rem',
+            padding: '0.65rem 1rem',
             background: 'rgba(220, 38, 38, 0.08)',
             borderBottom: '1px solid rgba(220, 38, 38, 0.15)'
           }}>
@@ -366,7 +366,7 @@ export default function SideDrawer({
         )}
 
         {/* Dynamic Navigation Body with Nested Drilldown */}
-        <div style={{ padding: '1rem 1.25rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        <div style={{ padding: '0.85rem 1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
           {currentItems.map((item) => {
             const hasChildren = Boolean(item.children && item.children.length > 0);
             const isRoot = navStack.length === 0;
