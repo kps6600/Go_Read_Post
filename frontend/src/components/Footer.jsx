@@ -442,18 +442,6 @@ export default function Footer({ onCategoryClick, onOpenPitchModal, siteSettings
         </div>
 
       </div>
-      
-      {/* Floating Back To Top Button */}
-      <button 
-        type="button" 
-        className={`floating-back-to-top-btn ${showFloatingTop ? 'visible' : ''}`} 
-        onClick={scrollToTop}
-        title="Back to top"
-        aria-label="Back to top"
-      >
-        <span>Back to Top</span>
-        <ArrowUp size={15} className="top-arrow-icon" />
-      </button>
     </footer>
   );
 }

@@ -584,27 +584,6 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
                       </div>
                     </div>
 
-                    {/* Quick Topic Helper Pills */}
-                    <div className="contact-quick-pills">
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary, #94a3b8)', fontWeight: 600 }}>
-                        Quick Select:
-                      </span>
-                      {[
-                        'Editorial & Story Pitches',
-                        'Brand Solutions & Ads',
-                        'Editorial Correction'
-                      ].map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className={`contact-quick-pill ${formData.department === tag ? 'active' : ''}`}
-                          onClick={() => setFormData(prev => ({ ...prev, department: tag }))}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-
                     {/* Row 3: Subject */}
                     <div className="contact-form-field">
                       <label htmlFor="contact-subject">
