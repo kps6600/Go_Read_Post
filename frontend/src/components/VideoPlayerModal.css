@@ -76,6 +76,8 @@
   position: sticky;
   top: 0;
   z-index: 20;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .cvp-header-left {
@@ -196,7 +198,8 @@
   background: #000000;
   padding: 0.75rem 1.25rem 0.25rem 1.25rem;
   box-sizing: border-box !important;
-  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  min-height: fit-content !important;
 }
 
 .cvp-ambient-glow-layer {
@@ -269,6 +272,8 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   background: rgba(10, 14, 24, 0.95);
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .cvp-action-left {
@@ -467,7 +472,8 @@
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    min-height: fit-content !important;
     box-sizing: border-box !important;
   }
 
@@ -478,6 +484,7 @@
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: 16 / 9 !important;
+    min-height: 170px !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
   }
