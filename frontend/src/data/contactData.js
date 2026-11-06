@@ -62,22 +62,6 @@ export const DEFAULT_CONTACT_DATA = {
       phone: '+91 928 933 8990',
       email: 'bengaluru@goreadpost.com',
       hours: '09:00 - 18:30 IST'
-    },
-    {
-      city: 'Mumbai',
-      tag: 'Financial Desk',
-      address: 'The Capital, G Block, Bandra-Kurla Complex (BKC), Mumbai, Maharashtra 400051',
-      phone: '+91 928 933 8990',
-      email: 'mumbai@goreadpost.com',
-      hours: '09:30 - 18:30 IST'
-    },
-    {
-      city: 'Delhi-NCR',
-      tag: 'Policy & Enterprise',
-      address: 'DLF CyberCity, Building 10, Tower B, Gurugram, Haryana 122002',
-      phone: '+91 928 933 8990',
-      email: 'delhi@goreadpost.com',
-      hours: '09:00 - 18:30 IST'
     }
   ],
   faqs: [
@@ -104,7 +88,7 @@ export const DEFAULT_CONTACT_DATA = {
   ],
   seo: {
     title: 'Contact Us | GoReadPost — Editorial Newsroom & Support',
-    description: 'Get in touch with GoReadPost. Pitch a startup story, explore advertising partnerships, report editorial corrections, or reach out to our Bengaluru, Mumbai, and Delhi bureaus.'
+    description: 'Get in touch with GoReadPost. Pitch a startup story, explore advertising partnerships, report editorial corrections, or reach out to our Bengaluru headquarters.'
   }
 };
 
@@ -113,7 +97,12 @@ export const getStoredContactData = () => {
     const raw = localStorage.getItem(CONTACT_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...DEFAULT_CONTACT_DATA, ...parsed };
+      const data = { ...DEFAULT_CONTACT_DATA, ...parsed };
+      if (Array.isArray(data.bureaus) && data.bureaus.length > 1) {
+        data.bureaus = data.bureaus.filter(b => (b.city || '').includes('HQ') || (b.city || '').includes('Bengaluru')).slice(0, 1);
+        if (data.bureaus.length === 0) data.bureaus = DEFAULT_CONTACT_DATA.bureaus;
+      }
+      return data;
     }
   } catch (e) {
     console.warn('Failed to parse contact page local data:', e);

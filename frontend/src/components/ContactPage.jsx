@@ -685,15 +685,15 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
         {/* ── 4. Bureau Locations (100% Breadth) ── */}
         <section className="contact-bureaus-section" aria-label="Our Bureau Locations">
           <div className="contact-section-title-wrap">
-            <h2 className="contact-section-h2">Bureau Headquarters</h2>
+            <h2 className="contact-section-h2">Global Headquarters</h2>
             <p className="contact-section-sub">
-              Visit or mail our regional desks across India's key business and technology hubs.
+              Visit or mail our primary newsroom and headquarters in Bengaluru.
             </p>
           </div>
 
-          <div className="contact-bureaus-grid">
-            {bureaus.map((bureau, idx) => (
-              <div key={idx} className="contact-bureau-card">
+          <div className={`contact-bureaus-grid ${(bureaus && bureaus.length > 0 ? bureaus.slice(0, 1) : DEFAULT_CONTACT_DATA.bureaus).length <= 1 ? 'single-bureau' : ''}`}>
+            {(bureaus && bureaus.length > 0 ? bureaus.slice(0, 1) : DEFAULT_CONTACT_DATA.bureaus).map((bureau, idx) => (
+              <div key={idx} className="contact-bureau-card contact-bureau-card-single">
                 <div className="contact-bureau-header">
                   <h3 className="contact-bureau-city">{bureau.city}</h3>
                   <span className="contact-bureau-tag">{bureau.tag}</span>

@@ -899,6 +899,13 @@ a.contact-channel-val:hover {
   box-sizing: border-box;
 }
 
+.contact-bureaus-grid.single-bureau {
+  display: flex;
+  justify-content: center;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
 .contact-bureau-card {
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-light, #e2e8f0);
@@ -913,6 +920,10 @@ a.contact-channel-val:hover {
   max-width: 100%;
   box-sizing: border-box;
   min-width: 0;
+}
+
+.contact-bureau-card-single {
+  max-width: 620px;
 }
 
 .contact-bureau-card:hover {
