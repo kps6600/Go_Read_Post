@@ -119,10 +119,14 @@
 
 .vpage-stage-card {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   border-radius: 20px;
   overflow: hidden;
   aspect-ratio: 21 / 9;
-  min-height: 440px;
+  min-height: 380px;
+  max-height: 480px;
   cursor: pointer;
   box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.32);
   background: #090d16;
@@ -132,16 +136,22 @@
 
 @media (max-width: 900px) {
   .vpage-stage-card {
-    aspect-ratio: auto;
-    min-height: 420px;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 320px;
+    max-height: 400px;
   }
 }
 
 @media (max-width: 640px) {
   .vpage-stage-card {
-    aspect-ratio: auto;
-    min-height: 490px;
-    border-radius: 18px;
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 16 / 10;
+    min-height: 240px !important;
+    max-height: 300px !important;
+    border-radius: 14px;
   }
 }
 
@@ -150,7 +160,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
-  filter: brightness(0.85);
+  filter: brightness(0.96);
   animation: vpageSlideFade 0.6s ease-out;
 }
 
@@ -167,22 +177,20 @@
 
 .vpage-stage-card:hover .vpage-stage-bg {
   transform: scale(1.03);
-  filter: brightness(0.92);
+  filter: brightness(1);
 }
 
 .vpage-stage-overlay {
   position: absolute;
   inset: 0;
-  background: 
-    linear-gradient(180deg, rgba(8, 12, 22, 0.15) 0%, rgba(8, 12, 22, 0.58) 45%, rgba(8, 12, 22, 0.98) 100%),
-    linear-gradient(90deg, rgba(8, 12, 22, 0.92) 0%, rgba(8, 12, 22, 0.65) 55%, rgba(8, 12, 22, 0.25) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.16) 40%, rgba(8, 12, 22, 0.76) 75%, rgba(8, 12, 22, 0.96) 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 2.75rem 3rem 2.25rem;
+  padding: 1.75rem 2rem 1.35rem;
   color: #ffffff;
   box-sizing: border-box;
-  gap: 0.9rem;
+  gap: 0.5rem;
 }
 
 @media (max-width: 900px) {
@@ -194,8 +202,8 @@
 
 @media (max-width: 640px) {
   .vpage-stage-overlay {
-    padding: 1.5rem 1.15rem 1.25rem;
-    gap: 0.75rem;
+    padding: 0.75rem 0.85rem 0.65rem !important;
+    gap: 0.35rem !important;
   }
 }
 
@@ -449,47 +457,75 @@
   width: 22px;
   border-radius: 6px;
 }
-
 @media (max-width: 640px) {
+  .vpage-stage-arrow-btn {
+    display: none !important;
+  }
   .vpage-stage-overlay {
-    padding: 1.25rem 1rem 1rem !important;
-    gap: 0.55rem !important;
+    padding: 0.75rem 0.85rem 0.65rem !important;
+    gap: 0.35rem !important;
+  }
+  .vpage-stage-badge {
+    font-size: 0.62rem !important;
+    padding: 2px 7px !important;
+    letter-spacing: 0.05em !important;
   }
   .vpage-stage-title {
-    font-size: 1.25rem !important;
-    line-height: 1.28 !important;
+    font-size: 0.98rem !important;
+    line-height: 1.25 !important;
     -webkit-line-clamp: 2 !important;
     line-clamp: 2 !important;
-  }
-  .vpage-stage-btn-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    margin-top: 0.2rem;
-  }
-  .vpage-stage-cta-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    flex-wrap: nowrap;
-  }
-  .vpage-play-hero-btn {
-    height: 38px;
-    padding: 0 16px;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-  }
-  .vpage-save-hero-btn {
-    height: 38px;
-    padding: 0 14px;
-    font-size: 0.85rem;
-    flex-shrink: 0;
+    margin: 0 !important;
   }
   .vpage-stage-meta {
-    font-size: 0.78rem;
-    gap: 4px;
-    flex-wrap: wrap;
+    font-size: 0.7rem !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+  .vpage-stage-btn-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    margin-top: 0.15rem !important;
+  }
+  .vpage-stage-cta-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+  .vpage-play-hero-btn {
+    height: 30px !important;
+    padding: 0 11px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+  .vpage-play-hero-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .vpage-save-hero-btn {
+    height: 30px !important;
+    padding: 0 9px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+  .vpage-save-hero-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .vpage-spotlight-dot {
+    height: 4px !important;
+    width: 4px !important;
+  }
+  .vpage-spotlight-dot.active {
+    width: 14px !important;
   }
 }
 
@@ -1436,15 +1472,18 @@
     padding-right: 0.5rem !important;
   }
   .vpage-stage-card {
-    min-height: 250px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 230px !important;
+    max-height: 280px !important;
     border-radius: 14px !important;
   }
   .vpage-stage-overlay {
-    padding: 1rem 0.75rem !important;
+    padding: 0.65rem 0.75rem 0.55rem !important;
   }
   .vpage-stage-title {
-    font-size: 1.15rem !important;
-    line-height: 1.25 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.22 !important;
   }
   .vpage-card {
     border-radius: 12px !important;
