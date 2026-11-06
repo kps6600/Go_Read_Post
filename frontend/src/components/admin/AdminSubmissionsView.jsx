@@ -147,10 +147,10 @@ export default function AdminSubmissionsView({ onShowToast, onNavigate }) {
   }, [filterDropdownOpen]);
 
   const currentFilterLabel = () => {
-    if (statusFilter === 'pending') return 'Pending Review';
-    if (typeFilter === 'pitch') return 'Startup Pitches';
-    if (typeFilter === 'contact') return 'Contact Leads';
-    return 'All Submissions';
+    if (statusFilter === 'pending') return 'Pending';
+    if (typeFilter === 'pitch') return 'Pitches';
+    if (typeFilter === 'contact') return 'Leads';
+    return 'All';
   };
 
   const filterOptions = [

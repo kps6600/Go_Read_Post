@@ -850,31 +850,61 @@
   }
 
   .asv-controls-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    padding: 8px 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 0.75rem !important;
   }
 
   .asv-search-box {
-    min-width: 0;
-    width: 100%;
-    flex: 1 1 auto;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+  }
+
+  .asv-search-input {
+    height: 36px !important;
+    font-size: 0.78rem !important;
+    padding: 0 24px 0 28px !important;
+    border-radius: 8px !important;
+  }
+
+  .asv-search-icon {
+    left: 8px !important;
+    width: 14px !important;
+    height: 14px !important;
   }
 
   .asv-filter-dropdown-wrap {
-    width: 100%;
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
   }
 
   .asv-filter-dropdown-btn {
-    width: 100%;
-    justify-content: space-between;
+    width: auto !important;
+    height: 36px !important;
+    padding: 0 8px !important;
+    font-size: 0.75rem !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  .asv-filter-count-chip {
+    padding: 1px 5px !important;
+    font-size: 0.68rem !important;
   }
 
   .asv-filter-popover-menu {
-    left: 0;
-    right: 0;
-    width: 100%;
+    left: auto !important;
+    right: 0 !important;
+    min-width: 210px !important;
+    max-width: calc(100vw - 20px) !important;
+    width: auto !important;
   }
 
   .asv-cards-grid {
@@ -930,5 +960,23 @@
 
   .asv-stat-label {
     font-size: 0.62rem !important;
+  }
+
+  .asv-controls-bar {
+    gap: 5px !important;
+    padding: 5px 6px !important;
+  }
+
+  .asv-search-input {
+    height: 35px !important;
+    font-size: 0.74rem !important;
+    padding: 0 20px 0 26px !important;
+  }
+
+  .asv-filter-dropdown-btn {
+    height: 35px !important;
+    padding: 0 7px !important;
+    font-size: 0.72rem !important;
+    gap: 4px !important;
   }
 }
