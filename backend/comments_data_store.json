@@ -3283,5 +3283,59 @@
     "createdAt": "2026-11-06T02:28:18.695Z",
     "__v": 0,
     "updatedAt": "2026-11-06T06:28:18.695Z"
+  },
+  {
+    "storySlug": "just-in-1",
+    "contentType": "article",
+    "contentTitle": "Freshworks Co-Founder Girish Mathrubootham turns film producer for Tamil sports drama 'Sarpatta Parambarai 2'",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": true,
+    "adminReply": {
+      "text": "Spot on analysis, Vikramaditya. Our follow-up piece on Q4 capital allocation will dive deeper into Series B valuations.",
+      "author": "Editorial Desk",
+      "repliedAt": "2026-11-06T05:54:28.013Z"
+    },
+    "rejection_reason": "",
+    "author": "Vikramaditya Shah",
+    "role": "Principal, Peak Capital",
+    "text": "Crucial analysis on this ecosystem shift. The capital discipline we are seeing across the current cohort will set a much stronger foundation for the next decade.",
+    "likes": 18,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6aed79a4de78bf17cf2a8fb9",
+    "createdAt": "2026-11-06T04:54:28.013Z",
+    "__v": 0,
+    "updatedAt": "2026-11-06T06:54:28.014Z"
+  },
+  {
+    "storySlug": "just-in-1",
+    "contentType": "article",
+    "contentTitle": "Freshworks Co-Founder Girish Mathrubootham turns film producer for Tamil sports drama 'Sarpatta Parambarai 2'",
+    "videoId": null,
+    "articleId": null,
+    "userId": null,
+    "userEmail": "",
+    "isEdited": false,
+    "isPinned": false,
+    "adminReply": {
+      "text": "",
+      "author": "Editorial Desk",
+      "repliedAt": null
+    },
+    "rejection_reason": "",
+    "author": "Ananya Deshmukh",
+    "role": "VP Product, SaaS Scale",
+    "text": "Particularly agree with the observations on operational efficiency. Real value creation is finally getting the spotlight over pure GMV chasing.",
+    "likes": 12,
+    "likedBy": [],
+    "status": "approved",
+    "_id": "6aed79a4de78bf17cf2a8fba",
+    "createdAt": "2026-11-06T02:54:28.013Z",
+    "__v": 0,
+    "updatedAt": "2026-11-06T06:54:28.014Z"
   }
 ]

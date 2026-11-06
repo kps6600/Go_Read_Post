@@ -247,12 +247,23 @@ export default function VideoPlayerModal({ video, onClose, onSelectVideo }) {
                 );
               }
 
+              const getEmbedUrl = (rawUrl) => {
+                const base = rawUrl || "https://www.youtube.com/embed/cKxRvEZd3Mw";
+                const sep = base.includes('?') ? '&' : '?';
+                let res = base;
+                if (!res.includes('autoplay=')) res += `${sep}autoplay=1`;
+                if (!res.includes('rel=')) res += `&rel=0`;
+                if (!res.includes('playsinline=')) res += `&playsinline=1`;
+                if (!res.includes('enablejsapi=')) res += `&enablejsapi=1`;
+                return res;
+              };
+
               return (
                 <iframe
-                  src={currentVideo.youtubeEmbedUrl || currentVideo.embedUrl || "https://www.youtube.com/embed/cKxRvEZd3Mw?autoplay=1&rel=0"}
+                  src={getEmbedUrl(currentVideo.youtubeEmbedUrl || currentVideo.embedUrl)}
                   title={currentVideo.title}
                   className="cvp-video-iframe"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen
                 />
               );
