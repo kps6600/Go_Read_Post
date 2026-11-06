@@ -19,6 +19,10 @@
   margin-bottom: 2rem;
   align-items: stretch;
   min-height: 520px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .mhp-hero-popular-grid.full-width {
@@ -29,15 +33,18 @@
   .mhp-hero-popular-grid {
     grid-template-columns: 1fr;
     gap: 1.35rem;
+    min-height: auto;
   }
-  .mhp-hero-popular-grid { min-height: auto; }
-  .mhp-hero-card { min-height: 400px; }
   .mhp-popular-card { min-height: auto; }
 }
 
 /* ── Featured Hero Card (Left Column) ── */
 .mhp-hero-card {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border-radius: 18px;
   overflow: hidden;
   min-height: 520px;
@@ -56,11 +63,11 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    90deg, 
-    rgba(10, 15, 25, 0.94) 0%, 
-    rgba(10, 15, 25, 0.85) 45%, 
-    rgba(10, 15, 25, 0.4) 75%, 
-    rgba(10, 15, 25, 0.15) 100%
+    180deg, 
+    rgba(0, 0, 0, 0.04) 0%, 
+    rgba(8, 12, 22, 0.22) 35%, 
+    rgba(8, 12, 22, 0.78) 72%, 
+    rgba(8, 12, 22, 0.96) 100%
   );
   z-index: 1;
 }
@@ -73,12 +80,76 @@
   color: #ffffff;
 }
 
+/* Hero Category Badge (Video Section Spotlight Style) */
+.mhp-hero-badge-wrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.65rem;
+}
+
+.mhp-hero-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 38, 38, 0.92);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 11px;
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+
+.mhp-hero-badge-pill:hover {
+  transform: translateY(-1px);
+  background: #ef4444;
+}
+
+.mhp-hero-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+
 .mhp-hero-bottom-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding-right: 140px;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding-right: 0 !important;
+  margin-top: 0.35rem;
+}
+
+.mhp-hero-cta-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+.mhp-hero-slider-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.mhp-slider-btns-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .mhp-category-tag {
@@ -115,20 +186,21 @@
 .mhp-hero-like-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 6px 13px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+  font-weight: 650;
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   user-select: none;
   transition: all 0.2s ease;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .mhp-hero-like-pill {
@@ -209,23 +281,26 @@
 .mhp-hero-read-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: #ffffff;
-  color: #0f172a;
-  font-size: 0.88rem;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  font-size: 0.82rem;
   font-weight: 700;
-  padding: 8px 18px;
-  border-radius: 30px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9999px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .mhp-hero-read-btn:hover {
-  background: #f8fafc;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.55);
 }
 
 /* Slider Controls (Bottom Right of Hero) */
@@ -261,12 +336,12 @@
 }
 
 .mhp-slider-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0f172a;
-  border: none;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,31 +350,19 @@
 }
 
 .mhp-slider-btn:hover {
-  background: #ffffff;
+  background: #dc2626;
+  border-color: #ef4444;
   transform: scale(1.08);
 }
 
 @media (max-width: 860px) {
   .mhp-hero-card {
-    min-height: 440px;
-    padding: 1.5rem 1.15rem 1.25rem;
+    min-height: 380px;
+    padding: 1.35rem 1.15rem 1.15rem;
   }
   .mhp-hero-bottom-actions {
     padding-right: 0 !important;
     gap: 8px !important;
-    margin-bottom: 0.65rem !important;
-  }
-  .mhp-slider-nav {
-    position: static !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
-    padding-top: 0.75rem !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    right: auto !important;
-    bottom: auto !important;
   }
 }
 
@@ -1529,12 +1592,91 @@ main:has(.mhp-container) ~ .site-footer {
 
 @media (max-width: 640px) {
   .mhp-hero-card {
-    padding: 1.75rem 1.25rem 1.5rem;
-    min-height: 380px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    aspect-ratio: 16 / 10;
+    min-height: 240px !important;
+    max-height: 310px !important;
+    padding: 0.75rem 0.85rem 0.65rem !important;
+    border-radius: 14px !important;
+  }
+  .mhp-hero-badge-wrap {
+    margin-bottom: 0.35rem !important;
+  }
+  .mhp-hero-badge-pill {
+    font-size: 0.62rem !important;
+    padding: 2px 7px !important;
+    letter-spacing: 0.05em !important;
   }
   .mhp-hero-title {
-    font-size: 1.28rem;
-    line-height: 1.35;
+    font-size: 0.98rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.3rem !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+  }
+  .mhp-author-meta {
+    font-size: 0.7rem !important;
+    gap: 4px !important;
+    margin-bottom: 0.45rem !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+  .mhp-author-avatar {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .mhp-hero-bottom-actions {
+    gap: 6px !important;
+    margin-top: 0.15rem !important;
+  }
+  .mhp-hero-cta-cluster {
+    gap: 5px !important;
+  }
+  .mhp-hero-read-btn {
+    height: 30px !important;
+    padding: 0 11px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+  }
+  .mhp-hero-read-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .mhp-hero-save-btn {
+    height: 30px !important;
+    padding: 0 9px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+  }
+  .mhp-hero-save-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .mhp-hero-like-pill {
+    height: 30px !important;
+    padding: 0 8px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+  }
+  .mhp-hero-like-pill svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .mhp-slider-btn {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .mhp-slider-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .mhp-slider-dot {
+    width: 4px !important;
+    height: 4px !important;
+  }
+  .mhp-slider-dot.active {
+    width: 14px !important;
   }
 }
 
@@ -1628,9 +1770,18 @@ main:has(.mhp-container) ~ .site-footer {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }
+  .mhp-hero-popular-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
   .mhp-hero-card {
-    padding: 1.25rem 0.75rem 1rem !important;
-    min-height: 300px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0.75rem 0.65rem 0.6rem !important;
+    min-height: 230px !important;
+    max-height: 280px !important;
     border-radius: 12px !important;
   }
   .mhp-hero-title {

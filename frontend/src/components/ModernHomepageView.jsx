@@ -920,21 +920,23 @@ export default function ModernHomepageView({
         >
           <div className="mhp-hero-overlay" />
           <div className="mhp-hero-content">
-            {data.badge && data.badge !== currentHeroCategory && (
+            {/* Category Spotlight Badge (Top Aligned - Video Section Style) */}
+            <div className="mhp-hero-badge-wrap">
               <span 
-                style={{ 
-                  display: 'inline-block', 
-                  fontSize: '0.75rem', 
-                  fontWeight: 800, 
-                  letterSpacing: '0.08em', 
-                  textTransform: 'uppercase', 
-                  color: '#fbbf24', 
-                  marginBottom: '0.5rem' 
+                className="mhp-hero-badge-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const catSlug = (currentHeroCategory || 'technology').toLowerCase().replace(/\s+/g, '-');
+                  window.history.pushState(null, '', `/category/${catSlug}`);
+                  window.dispatchEvent(new Event('popstate'));
+                  if (onCategoryClick) onCategoryClick(catSlug);
                 }}
               >
-                {data.badge}
+                <span className="mhp-hero-live-dot" />
+                {currentHeroCategory || data.badge || 'FEATURED STORY'}
               </span>
-            )}
+            </div>
+
             <h1 
               className="mhp-hero-title"
               onClick={handleHeroAction}
@@ -957,67 +959,57 @@ export default function ModernHomepageView({
               <span>{currentHeroDate}</span>
               <span className="mhp-meta-sep">•</span>
               <span>{currentHeroReadTime}</span>
+              {heroViewsCount && (
+                <>
+                  <span className="mhp-meta-sep">•</span>
+                  <span className="mhp-meta-views-inline">
+                    <Eye size={13} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 3 }} />
+                    {heroViewsCount} views
+                  </span>
+                </>
+              )}
             </div>
             <div className="mhp-hero-bottom-actions">
-              <button 
-                type="button"
-                className="mhp-hero-read-btn"
-                onClick={handleHeroAction}
-              >
-                <span>{currentHeroBtnText}</span>
-                <ArrowRight size={15} />
-              </button>
-              {data.secondaryBtnText && (
+              <div className="mhp-hero-cta-cluster">
                 <button 
                   type="button"
                   className="mhp-hero-read-btn"
-                  style={{ background: 'rgba(255,255,255,0.18)', color: '#ffffff', backdropFilter: 'blur(8px)' }}
-                  onClick={() => {
-                    const url = data.secondaryBtnUrl || '/about';
-                    if (url.startsWith('http')) window.open(url, '_blank');
-                    else {
-                      window.history.pushState(null, '', url);
-                      window.dispatchEvent(new Event('popstate'));
-                    }
-                  }}
+                  onClick={handleHeroAction}
                 >
-                  <span>{data.secondaryBtnText}</span>
+                  <span>{currentHeroBtnText}</span>
+                  <ArrowRight size={14} />
                 </button>
-              )}
-              {activeSlide && !activeSlide.isCustom && (
-                <button 
-                  type="button"
-                  className={`mhp-hero-save-btn ${isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? 'active' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onToggleSave) onToggleSave(activeSlide);
-                  }}
-                  title={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Remove from reading list" : "Save to read later"}
-                  aria-label="Save story"
-                >
-                  <Bookmark size={15} fill={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "currentColor" : "none"} />
-                  <span>{isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Saved" : "Save"}</span>
-                </button>
-              )}
-              <span 
-                className="mhp-category-tag"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const catSlug = (currentHeroCategory || 'technology').toLowerCase().replace(/\s+/g, '-');
-                  window.history.pushState(null, '', `/category/${catSlug}`);
-                  window.dispatchEvent(new Event('popstate'));
-                  if (onCategoryClick) onCategoryClick(catSlug);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                {currentHeroCategory}
-              </span>
-
-              <div className="mhp-hero-stats-cluster">
-                <span className="mhp-hero-views-pill" title={`${heroViewsCount} views`}>
-                  <Eye size={14} className="mhp-views-icon" />
-                  <span>{heroViewsCount}</span>
-                </span>
+                {data.secondaryBtnText && (
+                  <button 
+                    type="button"
+                    className="mhp-hero-read-btn secondary"
+                    onClick={() => {
+                      const url = data.secondaryBtnUrl || '/about';
+                      if (url.startsWith('http')) window.open(url, '_blank');
+                      else {
+                        window.history.pushState(null, '', url);
+                        window.dispatchEvent(new Event('popstate'));
+                      }
+                    }}
+                  >
+                    <span>{data.secondaryBtnText}</span>
+                  </button>
+                )}
+                {activeSlide && !activeSlide.isCustom && (
+                  <button 
+                    type="button"
+                    className={`mhp-hero-save-btn ${isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onToggleSave) onToggleSave(activeSlide);
+                    }}
+                    title={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Remove from reading list" : "Save to read later"}
+                    aria-label="Save story"
+                  >
+                    <Bookmark size={14} fill={isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "currentColor" : "none"} />
+                    <span>{isSaved && isSaved(activeSlide?.id || activeSlide?._id || activeSlide?.slug) ? "Saved" : "Save"}</span>
+                  </button>
+                )}
                 <button 
                   type="button" 
                   className={`mhp-hero-like-pill ${isHeroLiked ? 'active' : ''}`}
@@ -1026,7 +1018,7 @@ export default function ModernHomepageView({
                   aria-label="Like story"
                 >
                   <Heart 
-                    size={14} 
+                    size={13} 
                     className="mhp-like-icon"
                     fill={isHeroLiked ? "#ef4444" : "none"} 
                     color={isHeroLiked ? "#ef4444" : "#ffffff"} 
@@ -1034,37 +1026,41 @@ export default function ModernHomepageView({
                   <span className="mhp-like-count">{heroLikesCount}</span>
                 </button>
               </div>
-            </div>
-          </div>
 
-          <div className="mhp-slider-nav">
-            {slides.length > 1 && (
-              <div className="mhp-slider-dots">
-                {slides.map((_, idx) => (
-                  <span 
-                    key={idx}
-                    className={`mhp-slider-dot ${idx === currentSlide ? 'active' : ''}`}
-                    onClick={() => setCurrentSlide(idx)}
-                  />
-                ))}
-              </div>
-            )}
-            <button 
-              className="mhp-slider-btn" 
-              onClick={handlePrevSlide}
-              aria-label="Previous slide"
-              title="Previous slide"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button 
-              className="mhp-slider-btn" 
-              onClick={handleNextSlide}
-              aria-label="Next slide"
-              title="Next slide"
-            >
-              <ChevronRight size={16} />
-            </button>
+              {slides.length > 1 && (
+                <div className="mhp-hero-slider-cluster">
+                  <div className="mhp-slider-dots">
+                    {slides.map((_, idx) => (
+                      <span 
+                        key={idx}
+                        className={`mhp-slider-dot ${idx === currentSlide ? 'active' : ''}`}
+                        onClick={() => setCurrentSlide(idx)}
+                      />
+                    ))}
+                  </div>
+                  <div className="mhp-slider-btns-wrap">
+                    <button 
+                      type="button"
+                      className="mhp-slider-btn" 
+                      onClick={handlePrevSlide}
+                      aria-label="Previous slide"
+                      title="Previous slide"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button 
+                      type="button"
+                      className="mhp-slider-btn" 
+                      onClick={handleNextSlide}
+                      aria-label="Next slide"
+                      title="Next slide"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
