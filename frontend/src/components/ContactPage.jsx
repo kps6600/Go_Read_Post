@@ -193,7 +193,7 @@ export default function ContactPage({ onBackToHome, onShowToast, isStudioView = 
   };
 
   return (
-    <div className="contact-page-root">
+    <div className={`contact-page-root ${isStudioView ? 'contact-page-studio-mode' : ''}`}>
       <div className="contact-page-container">
 
         {/* ── Breadcrumb Navigation ── */}

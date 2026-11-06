@@ -216,6 +216,8 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .contact-dept-card {
@@ -230,6 +232,10 @@
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .contact-dept-card::before {
@@ -403,6 +409,10 @@
   flex-direction: column;
   gap: 2rem;
   box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 [data-theme='dark'] .contact-direct-card {
@@ -437,6 +447,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .contact-channel-item {
@@ -448,6 +461,9 @@
   background: var(--bg-secondary, #f8fafc);
   border: 1px solid var(--border-light, #e2e8f0);
   transition: all 0.2s ease;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 [data-theme='dark'] .contact-channel-item {
@@ -477,6 +493,9 @@
   flex-direction: column;
   gap: 0.2rem;
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .contact-channel-label {
@@ -493,6 +512,10 @@
   color: var(--text-primary, #0f172a);
   text-decoration: none;
   transition: color 0.15s ease;
+  min-width: 0;
+  max-width: 100%;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 [data-theme='dark'] .contact-channel-val {
@@ -506,6 +529,10 @@ a.contact-channel-val:hover {
 .contact-channel-sub {
   font-size: 0.8rem;
   color: var(--text-tertiary, #64748b);
+  min-width: 0;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* WhatsApp Quick Button */
@@ -523,6 +550,10 @@ a.contact-channel-val:hover {
   text-decoration: none;
   box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .contact-wa-action-btn:hover {
@@ -540,6 +571,10 @@ a.contact-channel-val:hover {
   border-radius: 20px;
   padding: 2.5rem;
   box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 [data-theme='dark'] .contact-form-card {
@@ -857,9 +892,11 @@ a.contact-channel-val:hover {
 
 .contact-bureaus-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .contact-bureau-card {
@@ -872,6 +909,10 @@ a.contact-channel-val:hover {
   gap: 1.15rem;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   transition: all 0.25s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .contact-bureau-card:hover {
@@ -1152,4 +1193,229 @@ a.contact-channel-val:hover {
   border-color: var(--brand-primary, #dc2626);
   color: var(--brand-primary, #dc2626);
   transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   STUDIO MODE & MOBILE RESPONSIVENESS OVERRIDES
+   Ensures 0 horizontal overflow and clean padding across all screens
+   ========================================================================== */
+
+/* Studio Mode inside Admin Editor */
+.contact-page-root.contact-page-studio-mode {
+  min-height: auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-page-container {
+  padding: 1.5rem 0.5rem 3.5rem !important;
+  gap: 2.25rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-hub-grid {
+  grid-template-columns: 1fr !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-direct-card,
+.contact-page-root.contact-page-studio-mode .contact-form-card {
+  padding: 1.25rem 0.85rem !important;
+  border-radius: 14px !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-channel-item {
+  padding: 0.75rem 0.65rem !important;
+  gap: 0.65rem !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-channel-icon {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-channel-val {
+  font-size: 0.88rem !important;
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-channel-sub {
+  font-size: 0.76rem !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.contact-page-root.contact-page-studio-mode .contact-wa-action-btn {
+  padding: 0.75rem 0.85rem !important;
+  font-size: 0.88rem !important;
+}
+
+@media (max-width: 860px) {
+  .contact-hub-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-page-container {
+    padding: 1.75rem 0.85rem 4rem !important;
+    gap: 2.5rem !important;
+  }
+
+  .contact-direct-card {
+    padding: 1.35rem 1rem !important;
+    gap: 1.25rem !important;
+    border-radius: 14px !important;
+  }
+
+  .contact-channel-item {
+    padding: 0.85rem 0.75rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .contact-channel-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .contact-channel-val {
+    font-size: 0.9rem !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .contact-channel-sub {
+    font-size: 0.78rem !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .contact-form-card {
+    padding: 1.5rem 1.15rem !important;
+    border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .contact-hero-title {
+    font-size: 1.85rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .contact-hero-subtitle {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .contact-dept-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .contact-dept-card {
+    padding: 1.25rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .contact-bureaus-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .contact-bureau-card {
+    padding: 1.25rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .contact-bottom-cta {
+    padding: 2rem 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .contact-bottom-cta-buttons {
+    width: 100% !important;
+    flex-direction: column !important;
+  }
+
+  .contact-btn-red,
+  .contact-btn-outline {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-page-container {
+    padding: 1.25rem 0.5rem 3.5rem !important;
+    gap: 1.85rem !important;
+  }
+
+  .contact-direct-card {
+    padding: 1.1rem 0.7rem !important;
+    gap: 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .contact-channel-item {
+    padding: 0.7rem 0.55rem !important;
+    gap: 0.55rem !important;
+    border-radius: 10px !important;
+  }
+
+  .contact-channel-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .contact-channel-val {
+    font-size: 0.84rem !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .contact-channel-sub {
+    font-size: 0.74rem !important;
+  }
+
+  .contact-wa-action-btn {
+    padding: 0.7rem 0.75rem !important;
+    font-size: 0.84rem !important;
+    border-radius: 10px !important;
+  }
+
+  .contact-form-card {
+    padding: 1.15rem 0.75rem !important;
+    border-radius: 12px !important;
+  }
+
+  .contact-form-header h3 {
+    font-size: 1.25rem !important;
+  }
+
+  .contact-form-header p {
+    font-size: 0.86rem !important;
+  }
+
+  .contact-input,
+  .contact-select,
+  .contact-textarea {
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.86rem !important;
+  }
+
+  .contact-submit-btn {
+    padding: 0.8rem 1.2rem !important;
+    font-size: 0.92rem !important;
+  }
 }
