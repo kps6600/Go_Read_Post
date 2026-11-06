@@ -1229,43 +1229,93 @@
   color: #dc2626;
 }
 
-/* ── Discussion Section Font Overrides for Article Page ── */
-.modern-article-wrapper .fs-discussion-header h3 {
-  font-size: 1.65rem !important;
-  font-weight: 850 !important;
+/* ── Discussion Section Font Overrides for Article Page (Desktop) ── */
+@media (min-width: 769px) {
+  .modern-article-wrapper .fs-discussion-header h3 {
+    font-size: 1.65rem !important;
+    font-weight: 850 !important;
+  }
+
+  .modern-article-wrapper .fs-rules-tag {
+    font-size: 0.92rem !important;
+  }
+
+  .modern-article-wrapper .fs-form-card-title {
+    font-size: 1.32rem !important;
+    font-weight: 800 !important;
+  }
+
+  .modern-article-wrapper .fs-comment-input,
+  .modern-article-wrapper .fs-comment-textarea {
+    font-size: 1.05rem !important;
+  }
+
+  .modern-article-wrapper .fs-submit-btn {
+    font-size: 1rem !important;
+    padding: 10px 20px !important;
+  }
+
+  .modern-article-wrapper .fs-bubble-name {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+  }
+
+  .modern-article-wrapper .fs-bubble-role {
+    font-size: 0.92rem !important;
+  }
+
+  .modern-article-wrapper .fs-bubble-text {
+    font-size: 1.12rem !important;
+    line-height: 1.65 !important;
+  }
 }
 
-.modern-article-wrapper .fs-rules-tag {
-  font-size: 0.92rem !important;
-}
+/* ── Discussion Section Font & Spacing Overrides for Mobile ── */
+@media (max-width: 768px) {
+  .modern-article-wrapper .fs-discussion-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
 
-.modern-article-wrapper .fs-form-card-title {
-  font-size: 1.32rem !important;
-  font-weight: 800 !important;
-}
+  .modern-article-wrapper .fs-discussion-header h3 {
+    font-size: 1.15rem !important;
+  }
 
-.modern-article-wrapper .fs-comment-input,
-.modern-article-wrapper .fs-comment-textarea {
-  font-size: 1.05rem !important;
-}
+  .modern-article-wrapper .fs-rules-tag {
+    font-size: 0.7rem !important;
+    padding: 2px 7px !important;
+  }
 
-.modern-article-wrapper .fs-submit-btn {
-  font-size: 1rem !important;
-  padding: 10px 20px !important;
-}
+  .modern-article-wrapper .fs-form-card-title {
+    font-size: 1.05rem !important;
+  }
 
-.modern-article-wrapper .fs-bubble-name {
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-}
+  .modern-article-wrapper .fs-comment-input,
+  .modern-article-wrapper .fs-comment-textarea {
+    font-size: 0.88rem !important;
+    padding: 0.75rem 0.85rem !important;
+  }
 
-.modern-article-wrapper .fs-bubble-role {
-  font-size: 0.92rem !important;
-}
+  .modern-article-wrapper .fs-submit-btn {
+    font-size: 0.82rem !important;
+    padding: 7px 14px !important;
+    white-space: nowrap !important;
+  }
 
-.modern-article-wrapper .fs-bubble-text {
-  font-size: 1.12rem !important;
-  line-height: 1.65 !important;
+  .modern-article-wrapper .fs-bubble-name {
+    font-size: 0.92rem !important;
+  }
+
+  .modern-article-wrapper .fs-bubble-role {
+    font-size: 0.74rem !important;
+  }
+
+  .modern-article-wrapper .fs-bubble-text {
+    font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+  }
 }
 
 /* ── Discussion Authentication Prompt & Logged In Bar ── */
